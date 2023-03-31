@@ -8,9 +8,15 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'name'=>'Siac Planificacion',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
+    'modules' => [
+        'Planificacion' => [
+            'class' => 'app\modules\Planificacion\PlanificacionModule',
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',

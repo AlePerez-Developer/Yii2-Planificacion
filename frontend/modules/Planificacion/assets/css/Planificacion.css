@@ -1,0 +1,68 @@
+.closed .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(-90deg);
+}
+.closed .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(-90deg);
+    opacity: 1;
+}
+
+.opened {
+    opacity: 1;
+}
+.opened .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(90deg);
+}
+.opened .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(90deg);
+    opacity: 0;
+}
+
+.circle {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon .circle {
+    position: relative;
+    width: 1.55em;
+    height: 1.5em;
+    border-radius: 100%;
+    border: solid .1em whitesmoke;
+}
+.icon .circle .horizontal {
+    position: absolute;
+    background-color: whitesmoke;
+    width: 20px;
+    height: 2px;
+    left: 50%;
+    margin-left: -10px;
+    top: 50%;
+    margin-top: -1.2px;
+}
+.icon .circle .vertical {
+    position: absolute;
+    background-color: whitesmoke;
+    width: 2px;
+    height: 20px;
+    left: 50%;
+    margin-left: -1.5px;
+    top: 50%;
+    margin-top: -10px;
+}
+
+th.dt-center, td.dt-center { text-align: center; }
+
+.highlight-node > .jqtree-element > .jqtree-title {
+    font-weight: bold;
+}
+
+.searchArea button {
+    float: right;
+}
+.searchArea .inputDiv {
+    overflow: hidden;
+}
