@@ -5,6 +5,9 @@ namespace app\modules\Planificacion\models;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
+use common\models\Estado;
+use common\models\Usuario;
+
 /**
  * This is the model class for table "PEIs".
  *
