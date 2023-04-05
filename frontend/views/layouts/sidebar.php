@@ -45,6 +45,15 @@
                             ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
                         ]
                     ],
+                    [
+                        'label' => 'Soa',
+                        'icon' => 'th',
+                        'badge' => '<span class="right badge badge-info"></span>',
+                        'items' => [
+                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidades/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Cargos', 'url' => ['/Planificacion/cargos/index'], 'iconStyle' => 'far'],
+                        ]
+                    ]
                 ],
             ]);
             ?>

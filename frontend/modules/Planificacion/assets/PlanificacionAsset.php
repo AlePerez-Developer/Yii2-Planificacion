@@ -27,4 +27,6 @@ class PlanificacionAsset extends AssetBundle
     public $depends = [
         'yii\web\YiiAsset',
     ];
+
+
 }

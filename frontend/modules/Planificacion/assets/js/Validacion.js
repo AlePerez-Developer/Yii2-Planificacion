@@ -157,7 +157,7 @@ $(document).ready(function() {
             },
             nombreCorto:{
                 required: true,
-                minlength: 5,
+                minlength: 2,
                 maxlength: 150
             },
         },
@@ -172,7 +172,7 @@ $(document).ready(function() {
             },
             nombreCorto: {
                 required: "Debe ingresar un nombre corto para la unidades",
-                minlength: "El nombre corto debe tener almenos 5 letras",
+                minlength: "El nombre corto debe tener almenos 2 letras",
                 maxlength: "El nombre corto debe tener maximo 150 letras"
             }
         },
