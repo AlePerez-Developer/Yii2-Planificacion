@@ -16,6 +16,9 @@ use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
 
+use common\models\Usuario;
+
+
 /**
  * Site controller
  */
@@ -52,6 +55,7 @@ class SiteController extends Controller
         ];
     }
 
+
     /**
      * {@inheritdoc}
      */
@@ -75,7 +79,14 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        //return $this->render('index');
+        if(Yii::$app->user->isGuest)
+        {
+            $this->actionLogin();
+        }
+        else{
+            return $this->render('index');
+        }
     }
 
     /**
@@ -85,6 +96,18 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
+        if( isset($_GET['cu']) && (trim($_GET['cu'])!='') ){
+            $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one();
+            if($usuario != null){
+                Yii::$app->user->login($usuario);
+                $this->redirect('index.php');
+            }else{
+                return $this->render('unauthorized');
+            }
+        } else {
+            return $this->render('unauthorized');
+        }
+        /*
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
@@ -98,7 +121,7 @@ class SiteController extends Controller
 
         return $this->render('login', [
             'model' => $model,
-        ]);
+        ]);*/
     }
 
     /**
