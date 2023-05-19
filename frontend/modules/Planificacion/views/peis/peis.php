@@ -4,7 +4,7 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/peis/peis.js", [
+$this->registerJsFile("@web/js/peis/Peis.js", [
     'depends' => [
         JqueryAsset::className()
     ]

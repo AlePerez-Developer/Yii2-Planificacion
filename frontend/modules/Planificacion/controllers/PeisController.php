@@ -54,7 +54,7 @@ class PeisController extends Controller
     public function actionListarPeis()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $peis = Pei::find()->all();
+            $peis = Pei::find()->where(['!=','CodigoEstado','E'])->all();
             $datosJson = '{"data": [';
             $i = 0;
             foreach ($peis as $index => $pei) {
@@ -67,8 +67,8 @@ class PeisController extends Controller
                     $textoEstado = "NO VIGENTE";
                     $estado = "C";
                 }
-                $acciones = "<button class='btn btn-warning btn-sm  btnEditar' codigo-pei='" . $pei->CodigoPei . "'><i class='fa fa-pen'> Editar </i></button> ";
-                $acciones .= "<button class='btn btn-danger btn-sm  btnEliminar' codigo-pei='" . $pei->CodigoPei . "' ><i class='fa fa-times'> Eliminar </i></button>";
+                $acciones = "<button class='btn btn-warning btn-xs  btnEditar' codigo-pei='" . $pei->CodigoPei . "'><i class='fa fa-pencil-alt'></i> EDITAR </button> ";
+                $acciones .= "<button class='btn btn-danger btn-xs  btnEliminar' codigo-pei='" . $pei->CodigoPei . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
                 $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigo='" . $pei->CodigoPei . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
                 $datosJson .= '[
 					 	"' . ($i) . '",
@@ -156,7 +156,8 @@ class PeisController extends Controller
                 $pei = Pei::findOne($_POST["codigopei"]);
                 if ($pei) {
                     if (!$pei->enUso()) {
-                        if ($pei->delete()) {
+                        $pei->CodigoEstado = 'E';
+                        if ($pei->update()) {
                             return "ok";
                         } else {
                             return "errorSql";

@@ -59,7 +59,24 @@ class CargosController extends Controller
     public function actionListarCargos()
     {
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $cargos = Cargo::find()->orderBy('CodigoCargo')->all();
+
+            $r = array();
+            $cargos = Cargo::find()->select(['CodigoCargo','NombreCargo','DescripcionCargo','ArchivoManualFunciones','CodigoSectorTrabajo','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoCargo')->asArray()->all();
+
+
+            $result = array();
+
+            foreach($cargos as  $cargo) {
+                array_push($result, $cargo);
+            }
+
+            return json_encode($result);
+
+            //return json_encode($cargos, JSON_FORCE_OBJECT);
+
+            //return json_encode($cargos);
+
+            /*
             $datosJson = '{"data": [';
             $i=0;
             foreach($cargos as $index => $cargo) {
@@ -91,12 +108,16 @@ class CargosController extends Controller
                     $datosJson .= ',';
             }
             $datosJson .= ']}';
-            return $datosJson;
+            return $datosJson;*/
+
+
+            return $cargos;
+            //return json_encode($result);
         } else {
             $datosJson = '{"data": [';
         }
         $datosJson .= ']}';
-        return $datosJson;
+        //return json_encode($cargos);
     }
 
     public function actionGuardarCargo()
@@ -170,7 +191,8 @@ class CargosController extends Controller
                 $cargo = Cargo::findOne($_POST["codigocargo"]);
                 if ($cargo){
                     if (!$cargo->isUsed()) {
-                        if ($cargo->delete()) {
+                        $cargo->CodigoEstado = 'E';
+                        if ($cargo->update()) {
                             return "ok";
                         } else {
                             return "errorsql";

@@ -2,7 +2,7 @@ $(document).ready(function(){
     let table = $(".tablaListaObjEstrategicos").DataTable({
         columnDefs: [
             {
-                targets: [4,5],
+                targets: [1, 4,5],
                 className: 'dt-center'
             },
             {
@@ -38,8 +38,8 @@ $(document).ready(function(){
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
+                "sNext": "<i class='fa fa-arrow-right'></i>",
+                "sPrevious": "<i class='fa fa-arrow-left'></i>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",

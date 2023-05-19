@@ -1,20 +1,82 @@
 $(document).ready(function(){
     let table = $(".tablaListaCargos").DataTable({
+        initComplete: function () {
+            this.api()
+                .columns([4])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
         columnDefs: [
             {
-                targets: 0,
+                targets: [0,5,6],
+                className: 'dt-center'
+            },
+            {
+                targets: [0,5,6],
                 searchable: false,
+                orderable: false
+            },
+            {
+                targets: [4],
                 orderable: false
             }
         ],
-        order: [[1, 'asc']],
         ajax: {
             method: "POST",
             dataType: 'json',
             cache: false,
             url: 'index.php?r=Planificacion/cargos/listar-cargos',
-            data:{ }
+            dataSrc: '',
         },
+        columns: [
+            { data: 'CodigoUsuario' },
+            { data: 'NombreCargo' },
+            { data: 'DescripcionCargo' },
+            {
+                data: 'ArchivoManualFunciones',
+                render: function (data, type, row, meta) {
+                    return (type === 'display')
+                        ? '<a href="#" class="enlace" data="'+data+'" >Ver Manual</a>'
+                        : data
+                }
+            },
+            { data: 'CodigoSectorTrabajo' },
+            {
+                data: 'CodigoCargo',
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
+                        ? '<button type="button" class="btn btn-success btn-xs  btnEstado" codigo="' + data + '" estado = "V" >VIGENTE</button>'
+                        : '<button type="button" class="btn btn-danger btn-xs  btnEstado" codigo="' + data + '" estado = "C" >CADUCO</button>' ;
+                },
+            },
+            {
+                data: 'CodigoCargo',
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                          '<button type="button" class="btn btn-warning btn-xs  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> EDITAR </button>' +
+                          '<button type="button" class="btn btn-danger btn-xs  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> ELIMINAR </button>' +
+                          '</div>'
+                        : data;
+                },
+            },
+        ],
         "deferRender": true,
         "retrieve": true,
         "processing": true,
@@ -46,10 +108,11 @@ $(document).ready(function(){
 
     table.on('order.dt search.dt', function () {
         let i = 1;
-        table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
+        table.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
             this.data(i++);
         });
     }).draw();
+
 
     $("#IngresoDatos").hide();
 
@@ -176,7 +239,7 @@ $(document).ready(function(){
                 if (respuesta === "ok") {
                     if (estadocargo === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('NO VIGENTE');
+                        objectBtn.html('CADUCO');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
@@ -394,4 +457,11 @@ $(document).ready(function(){
             }
         });
     }
+
+    $(".tablaListaCargos tbody").on("click", ".enlace", function () {
+        let file = $(this).attr("data");
+        $('#pdfFrame').attr('src','pdf/'+file);
+        $('#pdfModal').modal('show');
+    });
+
 });

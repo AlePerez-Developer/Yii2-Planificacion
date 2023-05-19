@@ -12,6 +12,8 @@ $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => 'Cargos']];
 ?>
 
+
+
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrearCargo" class="btn btn-primary bg-gradient-primary" >
@@ -76,13 +78,43 @@ $this->params['breadcrumbs'] = [['label' => 'Cargos']];
         <table class="table table-bordered table-striped dt-responsive tablaListaCargos" style="width: 100%" >
             <thead>
             <th style="text-align: center; font-weight: bold;">#</th>
-            <th style="text-align: center; font-weight: bold;">Codigo</th>
-            <th style="text-align: center; font-weight: bold;">Nombre</th>
-            <th style="text-align: center; font-weight: bold;">Descripción</th>
+            <th style="text-align: center; font-weight: bold;">Cargo</th>
+            <th style="text-align: center; font-weight: bold;">Descripcion</th>
+            <th style="text-align: center; font-weight: bold;">Manual de Funciones</th>
             <th style="text-align: center; font-weight: bold;">Sector</th>
             <th style="text-align: center; font-weight: bold;">Estado</th>
-            <th style="text-align: center; font-weight: bold;">Acciones</th>
+            <th style="text-align: center; font-weight: bold; width: 140px ">Acciones</th>
             </thead>
         </table>
     </div>
 </div>
+
+
+<div class="modal-dialog modal-xl" id="pdfModal" data-bs-backdrop="static" >
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pdfFrame" src="" frameborder="0" width="100%"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+

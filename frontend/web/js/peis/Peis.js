@@ -2,11 +2,11 @@ $(document).ready(function () {
     let table = $("#tablaListaPeis").DataTable({
         columnDefs: [
             {
-                targets: [5, 6],
+                targets: [2, 3, 4, 5, 6],
                 className: 'dt-center'
             },
             {
-                targets: 0,
+                targets: [0, 5, 6],
                 searchable: false,
                 orderable: false
             }
@@ -38,8 +38,8 @@ $(document).ready(function () {
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
+                "sNext": "<i class='fa fa-arrow-right'></i>",
+                "sPrevious": "<i class='fa fa-arrow-left'></i>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",

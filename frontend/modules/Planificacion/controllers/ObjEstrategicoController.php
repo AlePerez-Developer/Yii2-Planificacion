@@ -59,7 +59,7 @@ class ObjEstrategicoController extends Controller
     public function actionListarObjs()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $objs = ObjetivoEstrategico::find()->all();
+            $objs = ObjetivoEstrategico::find()->where(['!=','CodigoEstado','E'])->all();
             $datosJson = '{"data": [';
             $i=0;
             foreach($objs as $index => $obj) {
@@ -73,8 +73,8 @@ class ObjEstrategicoController extends Controller
                     $estado = "C";
                 }
 
-                $acciones = "<button class='btn btn-warning btn-sm  btnEditar' codigo='" . $obj->CodigoObjEstrategico . "'><i class='fa fa-pen'> Editar </i></button> ";
-                $acciones .= "<button class='btn btn-danger btn-sm  btnEliminar' codigo='" . $obj->CodigoObjEstrategico . "' ><i class='fa fa-times'> Eliminar </i></button>";
+                $acciones = "<button class='btn btn-warning btn-xs  btnEditar' codigo='" . $obj->CodigoObjEstrategico . "'><i class='fa fa-pen'></i> EDITAR </button> ";
+                $acciones .= "<button class='btn btn-danger btn-xs  btnEliminar' codigo='" . $obj->CodigoObjEstrategico . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
 
                 $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigoobjestrategico='" . $obj->CodigoObjEstrategico . "' estadoobjestrategico='" . $estado . "' >" . $textoEstado . "</button>";
 
@@ -173,7 +173,8 @@ class ObjEstrategicoController extends Controller
                 $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
                 if ($obj){
                     if (!$obj->enUso()) {
-                        if ($obj->delete()) {
+                        $obj->CodigoEstado = 'E';
+                        if ($obj->update()) {
                             return "ok";
                         } else {
                             return "errorsql";
