@@ -65,6 +65,12 @@ $this->params['breadcrumbs'] = [['label' => 'Cargos']];
                                       placeholder="Ingresar requisitos opcionales del cargo"
                                       class="form-control input-lg txt"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label for="manualFunciones" class="control-label">Manual de funciones</label>
+                            <input type="file" class="form-control input-sm file" id="manualFunciones" accept="application/pdf" placeholder="Archivo manual de funciones">
+                            <button type="button" class="test" id="test">prueba</button>
+                            <iframe id="upload_target" name="upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe>
+                        </div>
                     </form>
                 </div>
                 <div class="card-footer text-center">
@@ -90,7 +96,7 @@ $this->params['breadcrumbs'] = [['label' => 'Cargos']];
 </div>
 
 
-<div class="modal-dialog modal-xl" id="pdfModal" data-bs-backdrop="static" >
+<div class="modal modal-xl" id="pdfModal" data-bs-backdrop="static" >
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

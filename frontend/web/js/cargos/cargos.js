@@ -464,4 +464,9 @@ $(document).ready(function(){
         $('#pdfModal').modal('show');
     });
 
+    $("#test").click(function () {
+        var myFile = $('#manualFunciones').prop('files')[0];
+        alert(myFile)
+    });
+
 });

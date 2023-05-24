@@ -161,6 +161,7 @@ class CargosController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigocargo"])) {
+                $cargo = new Cargo();
                 $cargo = Cargo::findOne($_POST["codigocargo"]);
                 if ($cargo){
                     if ($cargo->CodigoEstado == "V") {
