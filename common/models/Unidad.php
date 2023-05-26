@@ -9,8 +9,7 @@ use Yii;
  *
  * @property string $CodigoUnidad
  * @property string $NombreUnidad
- * @property string $NombreCortoUnidad
- * @property string $CodigoTipoUnidad
+ * @property string $NombreCorto
  * @property string|null $CodigoUnidadPadre
  * @property string $CodigoEstado
  * @property string|null $FechaHoraRegistro
@@ -32,17 +31,16 @@ class Unidad extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoUnidad', 'NombreUnidad', 'NombreCortoUnidad', 'CodigoTipoUnidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoUnidad', 'NombreUnidad', 'NombreCorto', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['FechaHoraRegistro'], 'safe'],
-            [['CodigoUnidad', 'CodigoTipoUnidad', 'CodigoUnidadPadre'], 'string', 'max' => 6],
+            [['CodigoUnidad', 'CodigoUnidadPadre'], 'string', 'max' => 6],
             [['NombreUnidad'], 'string', 'max' => 150],
-            [['NombreCortoUnidad'], 'string', 'max' => 100],
+            [['NombreCorto'], 'string', 'max' => 100],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['CodigoUnidad'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['CodigoTipoUnidad'], 'exist', 'skipOnError' => true, 'targetClass' => TipoUnidad::className(), 'targetAttribute' => ['CodigoTipoUnidad' => 'CodigoTipoUnidad']],
             [['CodigoUnidadPadre'], 'exist', 'skipOnError' => true, 'targetClass' => Unidad::className(), 'targetAttribute' => ['CodigoUnidadPadre' => 'CodigoUnidad']],
         ];
     }
@@ -55,8 +53,7 @@ class Unidad extends \yii\db\ActiveRecord
         return [
             'CodigoUnidad' => 'Codigo Unidad',
             'NombreUnidad' => 'Nombre Unidad',
-            'NombreCortoUnidad' => 'Nombre Corto Unidad',
-            'CodigoTipoUnidad' => 'Codigo Tipo Unidad',
+            'NombreCorto' => 'Nombre Corto Unidad',
             'CodigoUnidadPadre' => 'Codigo Unidad Padre',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
@@ -84,11 +81,6 @@ class Unidad extends \yii\db\ActiveRecord
         }
     }
 
-    public function getTipoUnidad()
-    {
-        return $this->hasOne(TipoUnidad::className(), ['CodigoTipoUnidad' => 'CodigoTipoUnidad']);
-    }
-
     public function getUnidadPadre()
     {
         $value = $this->hasOne(Unidad::className(), ['CodigoUnidad' => 'CodigoUnidadPadre']);
@@ -96,5 +88,15 @@ class Unidad extends \yii\db\ActiveRecord
             return   $value;
         else
             return $this;
+    }
+
+    public function getEstado()
+    {
+        return $this->hasOne(Estado::className(), ['CodigoEstado' => 'CodigoEstado']);
+    }
+
+    public function getUsuario()
+    {
+        return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
     }
 }

@@ -93,7 +93,6 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
             <th style="text-align: center; vertical-align: middle;">Codigo unidad</th>
             <th style="text-align: center; vertical-align: middle;">Nombre de la unidad</th>
             <th style="text-align: center; vertical-align: middle;">Nombre corto</th>
-            <th style="text-align: center; vertical-align: middle;">Tipo de unidad</th>
             <th style="text-align: center; vertical-align: middle;">Unidad padre</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>
             <th style="text-align: center; vertical-align: middle;">Acciones</th>

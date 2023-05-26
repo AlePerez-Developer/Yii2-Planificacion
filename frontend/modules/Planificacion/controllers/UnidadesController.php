@@ -83,8 +83,7 @@ class UnidadesController extends Controller
 					 	"' . ($i) . '",
 					 	"' . $unidad->CodigoUnidad . '",
 					 	"' . $unidad->NombreUnidad . '",
-					 	"' . $unidad->NombreCortoUnidad . '",
-					 	"' . $unidad->tipoUnidad->NombreTipoUnidad . '",
+					 	"' . $unidad->NombreCorto . '",
 					 	"' . $padre . '",
 					 	"' . $estado . '",
 				      	"' . $acciones . '"
@@ -141,9 +140,8 @@ class UnidadesController extends Controller
             if (isset($_POST["tipounidad"]) && isset($_POST["nombreunidad"]) && isset($_POST["nombrecorto"]) && isset($_POST["unidadpadre"])){
                 $unidad = new Unidad();
                 $unidad->CodigoUnidad =  UnidadesDao::GenerarCodigoUnidad();
-                $unidad->CodigoTipoUnidad = $_POST["tipounidad"];
                 $unidad->NombreUnidad = strtoupper(trim($_POST["nombreunidad"]));
-                $unidad->NombreCortoUnidad = strtoupper(trim($_POST["nombrecorto"]));
+                $unidad->NombreCorto = strtoupper(trim($_POST["nombrecorto"]));
                 $unidad->CodigoUnidadPadre = strtoupper(trim($_POST["unidadpadre"]));
                 $unidad->CodigoEstado = 'V';
                 $unidad->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
@@ -229,7 +227,7 @@ class UnidadesController extends Controller
             if (isset($_POST["codigounidad"]) && $_POST["codigounidad"] != "") {
                 $unidad = Unidad::findOne($_POST["codigounidad"]);
                 if ($unidad){
-                    return json_encode($unidad->getAttributes(array('CodigoUnidad','NombreUnidad','NombreCortoUnidad','CodigoTipoUnidad','CodigoUnidadPadre')));
+                    return json_encode($unidad->getAttributes(array('CodigoUnidad','NombreUnidad','NombreCorto','CodigoUnidadPadre')));
                 } else {
                     return 'errorval';
                 }
@@ -247,9 +245,8 @@ class UnidadesController extends Controller
             if (isset($_POST["codigounidad"]) && isset($_POST["tipounidad"]) && isset($_POST["nombreunidad"]) && isset($_POST["nombrecorto"])){
                 $unidad = Unidad::findOne($_POST["codigounidad"]);
                 if ($unidad){
-                    $unidad->CodigoTipoUnidad = $_POST["tipounidad"];
                     $unidad->NombreUnidad = strtoupper(trim($_POST["nombreunidad"]));
-                    $unidad->NombreCortoUnidad = strtoupper(trim($_POST["nombrecorto"]));
+                    $unidad->NombreCorto = strtoupper(trim($_POST["nombrecorto"]));
                     if ($unidad->validate()){
                         if (!$unidad->exist()){
                             if ($unidad->update() !== false) {

@@ -8,7 +8,6 @@ use common\models\SectorTrabajo;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
 use Yii;
 
 class CargosController extends Controller
@@ -58,66 +57,14 @@ class CargosController extends Controller
 
     public function actionListarCargos()
     {
+        $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-
-            $r = array();
             $cargos = Cargo::find()->select(['CodigoCargo','NombreCargo','DescripcionCargo','ArchivoManualFunciones','CodigoSectorTrabajo','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoCargo')->asArray()->all();
-
-
-            $result = array();
-
             foreach($cargos as  $cargo) {
-                array_push($result, $cargo);
+                array_push($Data, $cargo);
             }
-
-            return json_encode($result);
-
-            //return json_encode($cargos, JSON_FORCE_OBJECT);
-
-            //return json_encode($cargos);
-
-            /*
-            $datosJson = '{"data": [';
-            $i=0;
-            foreach($cargos as $index => $cargo) {
-                if ($cargo->CodigoEstado == 'V') {
-                    $colorEstado = "btn-success";
-                    $textoEstado = "VIGENTE";
-                    $estado = 'V';
-                } else {
-                    $colorEstado = "btn-danger";
-                    $textoEstado = "NO VIGENTE";
-                    $estado = "C";
-                }
-
-                $acciones = "<button class='btn btn-warning btn-sm  btnEditar' codigo='" . $cargo->CodigoCargo . "'><i class='fa fa-pen'> Editar </i></button> ";
-                $acciones .= "<button class='btn btn-danger btn-sm  btnEliminar' codigo='" . $cargo->CodigoCargo . "' ><i class='fa fa-times'> Eliminar </i></button>";
-
-                $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigo='" . $cargo->CodigoCargo . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
-
-                $datosJson .= '[
-					 	"' . ($i) . '",				 	
-					 	"' . $cargo->CodigoCargo . '",
-					 	"' . $cargo->NombreCargo . '",
-					 	"' . $cargo->DescripcionCargo . '",
-					 	"' . $cargo->sectorTrabajo->NombreSectorTrabajo . '",
-					 	"' . $estado . '",
-				      	"' . $acciones . '"
-  			    ]';
-                if ($index !== array_key_last($cargos))
-                    $datosJson .= ',';
-            }
-            $datosJson .= ']}';
-            return $datosJson;*/
-
-
-            return $cargos;
-            //return json_encode($result);
-        } else {
-            $datosJson = '{"data": [';
-        }
-        $datosJson .= ']}';
-        //return json_encode($cargos);
+        } 
+        return json_encode($Data);
     }
 
     public function actionGuardarCargo()

@@ -373,9 +373,8 @@ $(document).ready(function(){
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoUnidad);
-                $("#tipoUnidad").val(data.CodigoTipoUnidad);
                 $("#nombreUnidad").val(data.NombreUnidad);
-                $("#nombreCorto").val(data.NombreCortoUnidad);
+                $("#nombreCorto").val(data.NombreCorto);
                 var node = $arbol.tree('getNodeById', data.CodigoUnidadPadre);
                 $arbol.tree('selectNode', node);
                 $("#btnMostrarCrearUnidad").trigger('click');
