@@ -147,9 +147,6 @@ $(document).ready(function() {
 
     $( "#formunidad" ).validate({
         rules: {
-            tipoUnidad: {
-                required: true
-            },
             nombreUnidad:{
                 required: true,
                 minlength: 5,
@@ -162,9 +159,6 @@ $(document).ready(function() {
             },
         },
         messages: {
-            tipoUnidad: {
-                required: "Debe seleccionar un tipo de unidades"
-            },
             nombreUnidad: {
                 required: "Debe ingresar un nombre para la unidades",
                 minlength: "El nombre debe tener almenos 5 letras",

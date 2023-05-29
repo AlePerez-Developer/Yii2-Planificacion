@@ -2,7 +2,11 @@ $(document).ready(function(){
     let table = $(".tablaListaUnidades").DataTable({
         columnDefs: [
             {
-                targets: 0,
+                targets: [0,5,6],
+                className: 'dt-center'
+            },
+            {
+                targets: [0,5,6],
                 searchable: false,
                 orderable: false
             }
@@ -173,12 +177,10 @@ $(document).ready(function(){
     ===============================================================*/
     function GuardarUnidad(){
         let node = $arbol.tree('getSelectedNode');
-        let tipounidad = $("#tipoUnidad").val();
         let nombreunidad = $("#nombreUnidad").val();
         let nombrecorto = $("#nombreCorto").val();
         let unidadpadre = node.id
         let datos = new FormData();
-        datos.append("tipounidad", tipounidad);
         datos.append("nombreunidad", nombreunidad);
         datos.append("nombrecorto", nombrecorto);
         datos.append("unidadpadre", unidadpadre);
@@ -407,13 +409,14 @@ $(document).ready(function(){
         ACTUALIZA LA UNIDAD SELECCIONADO EN LA BD
     =============================================*/
     function ActualizarUnidad () {
+        let node = $arbol.tree('getSelectedNode');
         let codigounidad = $("#codigo").val();
-        let tipounidad = $("#tipoUnidad").val();
         let nombreunidad = $("#nombreUnidad").val();
         let nombrecorto = $("#nombreCorto").val();
+        let unidadpadre = node.id
         let datos = new FormData();
         datos.append("codigounidad", codigounidad);
-        datos.append("tipounidad", tipounidad);
+        datos.append("unidadpadre", unidadpadre);
         datos.append("nombreunidad", nombreunidad);
         datos.append("nombrecorto", nombrecorto);
         $.ajax({
@@ -466,5 +469,3 @@ $(document).ready(function(){
         });
     }
 });
-
-

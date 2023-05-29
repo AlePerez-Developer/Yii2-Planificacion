@@ -52,15 +52,6 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="tipoUnidad">Seleccione el tipo de unidad</label>
-                                            <select class="form-control" id="tipoUnidad" name="tipoUnidad" >
-                                                <option value="0" disabled selected>Seleccione el tipo de unidad</option>
-                                                <?php foreach ($tiposUnidades as $tipoUnidad){  ?>
-                                                    <option value="<?= $tipoUnidad->CodigoTipoUnidad ?>"><?=$tipoUnidad->NombreTipoUnidad?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
                                             <label for="nombreUnidad" class="control-label">Nombre Unidad</label>
                                             <input type="text" class="form-control input-sm txt" id="nombreUnidad"
                                                    name="nombreUnidad" placeholder="nombre de unidad">
@@ -70,13 +61,10 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
                                             <input type="text" class="form-control input-sm txt" id="nombreCorto"
                                                    name="nombreCorto"  placeholder="nombre de unidad">
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
                     </form>
                 </div>
                 <div class="card-footer text-center">
@@ -95,7 +83,7 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
             <th style="text-align: center; vertical-align: middle;">Nombre corto</th>
             <th style="text-align: center; vertical-align: middle;">Unidad padre</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>
-            <th style="text-align: center; vertical-align: middle;">Acciones</th>
+            <th style="text-align: center; vertical-align: middle; width: 140px">Acciones</th>
             </thead>
         </table>
     </div>
