@@ -11,7 +11,7 @@ class PlanificacionAsset extends AssetBundle
         '../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css',
         '../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css',
         '../../plugins/jquerytreeview/jqtree.css',
-        'css/Planificacion.css',
+       'css/Planificacion.css',
     ];
     public $js = [
         '../../plugins/sweetalert2/sweetalert2.all.js',

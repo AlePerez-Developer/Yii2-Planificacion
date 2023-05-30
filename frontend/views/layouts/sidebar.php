@@ -52,6 +52,7 @@
                         'items' => [
                             ['label' => 'Unidades', 'url' => ['/Planificacion/unidades/index'], 'iconStyle' => 'far'],
                             ['label' => 'Cargos', 'url' => ['/Planificacion/cargos/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades - Cargos', 'url' => ['/Planificacion/unidades-cargos/index'], 'iconStyle' => 'far'],
                         ]
                     ]
                 ],

@@ -8,7 +8,7 @@ $this->registerJsFile("@web/js/unidades/unidades.js",[
         JqueryAsset::className()
     ]
 ]);
-$this->title = 'Planificacion';
+$this->title = 'SOA';
 $this->params['breadcrumbs'] = [['label' => 'Unidades']];
 ?>
 

@@ -56,6 +56,8 @@
 
 th.dt-center, td.dt-center { text-align: center; }
 
+th.dt-small, td.dt-small { font-size: 10px; }
+
 .highlight-node > .jqtree-element > .jqtree-title {
     font-weight: bold;
 }
@@ -66,3 +68,6 @@ th.dt-center, td.dt-center { text-align: center; }
 .searchArea .inputDiv {
     overflow: hidden;
 }
+
+
+

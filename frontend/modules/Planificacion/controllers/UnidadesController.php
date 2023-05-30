@@ -1,15 +1,11 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\PeiDao ;
 use app\modules\Planificacion\models\UnidadesDao;
-use common\models\TipoUnidad;
 use common\models\Unidad;
-use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
-use Throwable;
 use Yii;
 
 class UnidadesController extends Controller

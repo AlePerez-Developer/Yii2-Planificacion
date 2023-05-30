@@ -8,7 +8,7 @@ $this->registerJsFile("@web/js/cargos/cargos.js",[
         JqueryAsset::className()
     ]
 ]);
-$this->title = 'Planificacion';
+$this->title = 'SOA';
 $this->params['breadcrumbs'] = [['label' => 'Cargos']];
 ?>
 
