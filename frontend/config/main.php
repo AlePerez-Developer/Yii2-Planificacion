@@ -8,7 +8,6 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
-    'name'=>'Siac Planificacion',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
@@ -20,6 +19,13 @@ return [
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+        ],
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@app/views' => '@vendor/hail812/yii2-adminlte3/src/views'
+                ],
+            ],
         ],
         'user' => [
             'identityClass' => 'common\models\Usuario',

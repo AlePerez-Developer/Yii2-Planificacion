@@ -43,6 +43,9 @@
                         'items' => [
                             ['label' => 'Pei', 'url' => ['/Planificacion/peis/index'], 'iconStyle' => 'far'],
                             ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Institucional', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Especifico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Aperturas PRogramaticas', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
                         ]
                     ],
                     [

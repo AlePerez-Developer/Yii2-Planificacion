@@ -1,5 +1,36 @@
 $(document).ready(function () {
     let table = $("#tablaListaPeis").DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                text: 'Exportar PDF',
+                exportOptions: {
+                    columns: [ 0, 1, 2, 3,4 ]
+                },
+                customize: function ( doc ) {
+                    var cols = [];
+                    cols[0] = {text: 'Left part', alignment: 'left', margin:[20] };
+                    cols[1] = {text: 'Right part', alignment: 'right', margin:[0,0,20] };
+                    var objFooter = {};
+                    objFooter['columns'] = cols;
+                    doc['footer']=objFooter;
+
+                    doc.content.splice(1, 0,
+                        {
+                            margin: [0, 0, 0, 12],
+                            alignment: 'center',
+                            text: 'paso 1' +
+                                'paso 2' +
+                                'paso 3'
+                        }
+                    );
+                }
+
+            }
+        ],
+
+
         columnDefs: [
             {
                 targets: [2, 3, 4, 5, 6],

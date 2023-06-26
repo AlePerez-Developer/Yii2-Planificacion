@@ -1,4 +1,88 @@
 $(document).ready(function(){
+    let tabledata = $(".tablaListaUnidadesCargos").DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        columnDefs: [
+            {
+                targets: [0,3,4,5],
+                className: 'dt-center'
+            },
+            {
+                targets: [0,4,5],
+                searchable: false,
+                orderable: false
+            }
+        ],
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            cache: false,
+            url: 'index.php?r=Planificacion/unidades-cargos/listar-unidades-cargos',
+            dataSrc: '',
+        },
+        columns: [
+            { data: 'Unidad' },
+            { data: 'NombreUnidad' },
+            { data: 'NombreCargo' },
+            { data: 'CodigoSectorTrabajo' },
+            {
+                data: 'CodigoEstado',
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
+                        ? '<button type="button" class="btn btn-success btn-xs  btnEstado" codigo="' + data + '" estado = "V" >VIGENTE</button>'
+                        : '<button type="button" class="btn btn-danger btn-xs  btnEstado" codigo="' + data + '" estado = "C" >CADUCO</button>' ;
+                },
+            },
+            {
+                data: 'CodigoUsuario',
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                        '<button type="button" class="btn btn-danger btn-xs  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> ELIMINAR </button>' +
+                        '</div>'
+                        : data;
+                },
+            },
+            //{ data: 'CodigoUsuario' }
+        ],
+        "deferRender": true,
+        "retrieve": true,
+        "processing": true,
+        "language": {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "<i class='fa fa-arrow-right'></i>",
+                "sPrevious": "<i class='fa fa-arrow-left'></i>"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        }
+    });
+    tabledata.on('order.dt search.dt', function () {
+        let i = 1;
+        tabledata.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
+            this.data(i++);
+        });
+    }).draw();
+
+
     let table = $(".tablaListaCargos").DataTable({
         columnDefs: [
             {
@@ -6,7 +90,7 @@ $(document).ready(function(){
                 className: 'dt-center'
             },
             {
-                targets: [1],
+                targets: [0,1],
                 className: 'dt-small'
             },
             {
@@ -29,7 +113,7 @@ $(document).ready(function(){
                 data: 'CodigoCargo',
                 render: function (data, type, row, meta) {
                     return type === 'display'
-                        ? '<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">' 
+                        ? '<input class="form-check-input" type="radio" name="radiocargo" codigo="' + data + '">'
                         : data;
                 },
             },
@@ -98,7 +182,6 @@ $(document).ready(function(){
     var $arbol = $('#unidadPadre');
     LoadArbol()
 
-
     $("#search").on("click", () => {
         const searchTerm = $("#search-term").val().toLowerCase();
         const tree = $arbol.tree("getTree");
@@ -136,13 +219,6 @@ $(document).ready(function(){
 
     $("#IngresoDatos").hide();
 
-    function ReiniciarCampos(){
-        $('#formunidad *').filter(':input').each(function () {
-            $(this).removeClass('is-invalid is-valid');
-        });
-        $("#codigo").val('');
-        $("#formunidad").trigger("reset");
-    }
 
     $("#btnMostrarCrearUnidad").click(function () {
         let icono = $('.icon');
@@ -158,33 +234,144 @@ $(document).ready(function(){
 
     $(".btnCancel").click(function () {
         $('.icon').toggleClass('opened');
-        ReiniciarCampos();
         $arbol.tree('selectNode', null);
-        $('#search').click();
+        let radioValue = $("input[name='radiocargo']:checked");
+        radioValue.prop('checked', false);
+        LoadArbol();
         $("#IngresoDatos").hide(500);
         $("#Divtabla").show(500);
     });
 
     $(".btnGuardar").click(function () {
         let node = $arbol.tree('getSelectedNode');
-        if ($("#formunidad").valid()){
-            if ($("#codigo").val() === ''){
-                if (node ){
-                    GuardarUnidad();
-                } else {
+        let radioValue = $("input[name='radiocargo']:checked").attr("codigo")
+        if ( node && radioValue ){
+            GuardarUnidadCargo();
+        } else {
+            Swal.fire({
+                icon: "warning",
+                title: "Advertencia...",
+                text: 'Debe seleccionar una unidad y un cargo para crear la ralacion',
+                showCancelButton: false,
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Cerrar"
+            });
+        }
+    });
+
+    /*=============================================================
+       INSERTA EN LA BD UN NUEVO REGISTRO DE UNIDAD
+    ===============================================================*/
+    function GuardarUnidadCargo(){
+        let node = $arbol.tree('getSelectedNode');
+        let codigocargo = $("input[name='radiocargo']:checked").attr("codigo")
+        let unidadpadre = node.id
+        let datos = new FormData();
+        datos.append("unidad", unidadpadre);
+        datos.append("cargo", codigocargo);
+        $.ajax({
+            url: "index.php?r=Planificacion/unidades-cargos/guardar-unidad-cargo",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (respuesta) {
+                if (respuesta === "ok") {
+                    $(".btnCancel").click();
                     Swal.fire({
-                        icon: "warning",
+                        icon: "success",
+                        title: "Exito...",
+                        text: "Los datos se guardaron correctamente",
+                        showCancelButton: false,
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "Cerrar"
+                    }).then(function () {
+                        $(".tablaListaUnidadesCargos").DataTable().ajax.reload();
+                        LoadArbol()
+                    });
+                }
+                else {
+                    let mensaje;
+                    if (respuesta === "existe") {
+                        mensaje = "Los datos ingresados ya corresponden a un registro existente";
+                    } else if (respuesta === "errorval") {
+                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
+                    } else if (respuesta === "errorenvio") {
+                        mensaje = "Error: No se enviaron los datos de forma correcta.";
+                    } else if (respuesta === "errorcabezera") {
+                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
+                    } else if (respuesta === "errorsql") {
+                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
+                    } else {
+                        mensaje = respuesta;
+                    }
+                    Swal.fire({
+                        icon: "error",
                         title: "Advertencia...",
-                        text: 'Debe seleccionar una unidades padre para la nueva unidades',
+                        text: mensaje,
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
                     });
                 }
-
-            } else {
-                ActualizarUnidad();
             }
-        }
+        });
+    }
+
+    /*=============================================
+        CAMBIA EL ESTADO DEL REGISTRO
+    =============================================*/
+    $(".tablaListaUnidadesCargos tbody").on("click", ".btnEstado", function () {
+        let objectBtn = $(this);
+        let codigocargo = objectBtn.attr("codigo");
+        let estadocargo = objectBtn.attr("estado");
+        let datos = new FormData();
+        datos.append("codigocargo", codigocargo);
+        $.ajax({
+            url: "index.php?r=Planificacion/cargos/cambiar-estado-cargo",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (respuesta) {
+                if (respuesta === "ok") {
+                    if (estadocargo === "V") {
+                        objectBtn.removeClass('btn-success').addClass('btn-danger')
+                        objectBtn.html('CADUCO');
+                        objectBtn.attr('estado', 'C');
+                    } else {
+                        objectBtn.addClass('btn-success').removeClass('btn-danger');
+                        objectBtn.html('VIGENTE');
+                        objectBtn.attr('estado', 'V');
+                    }
+                }
+                else {
+                    let mensaje;
+                    if (respuesta === "errorval") {
+                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
+                    } else if (respuesta === "errorenvio") {
+                        mensaje = "Error: No se enviaron los datos de forma correcta.";
+                    } else if (respuesta === "errorcabezera") {
+                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
+                    } else if (respuesta === "errorsql") {
+                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
+                    } else {
+                        mensaje = respuesta;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Alerta...',
+                        text: mensaje,
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Cerrar'
+                    });
+                }
+            }
+        });
     });
+
+
 });

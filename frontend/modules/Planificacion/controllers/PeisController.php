@@ -67,9 +67,9 @@ class PeisController extends Controller
                     $textoEstado = "NO VIGENTE";
                     $estado = "C";
                 }
-                $acciones = "<button class='btn btn-warning btn-xs  btnEditar' codigo-pei='" . $pei->CodigoPei . "'><i class='fa fa-pencil-alt'></i> EDITAR </button> ";
-                $acciones .= "<button class='btn btn-danger btn-xs  btnEliminar' codigo-pei='" . $pei->CodigoPei . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
-                $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigo='" . $pei->CodigoPei . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
+                $acciones = "<button class='btn btn-warning btn-sm  btnEditar'  codigo-pei='" . $pei->CodigoPei . "'><i class='fa fa-pencil-alt'></i> EDITAR </button> ";
+                $acciones .= "<button class='btn btn-danger btn-sm  btnEliminar' codigo-pei='" . $pei->CodigoPei . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
+                $estado = "<button class='btn " . $colorEstado . " btn-sm btnEstado' style='--bs-btn-padding-y: .20rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .70rem;' codigo='" . $pei->CodigoPei . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
                 $datosJson .= '[
 					 	"' . ($i) . '",
 					 	"' . $pei->DescripcionPei . '",

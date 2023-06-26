@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Usuario;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -15,9 +16,6 @@ use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
-
-use common\models\Usuario;
-
 
 /**
  * Site controller
@@ -54,7 +52,6 @@ class SiteController extends Controller
             ],
         ];
     }
-
 
     /**
      * {@inheritdoc}
@@ -96,19 +93,15 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
-        if( isset($_GET['cu']) && (trim($_GET['cu'])!='') ){
-            $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one();
-            if($usuario != null){
-                Yii::$app->user->login($usuario);
-                $this->redirect('index.php');
-            }else{
-                return $this->render('unauthorized');
-            }
-        } else {
+        $cu = '3596b69d068cc15535018bb257b3e1ff';
+        $usuario = Usuario::find()->where(['Llave' => $cu /*$_GET['cu']*/])->one();
+        if($usuario != null){
+            Yii::$app->user->login($usuario);
+            $this->redirect('index.php');
+        }else{
             return $this->render('unauthorized');
         }
-        /*
-        if (!Yii::$app->user->isGuest) {
+        /*if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
 

@@ -56,7 +56,7 @@
 
 th.dt-center, td.dt-center { text-align: center; }
 
-th.dt-small, td.dt-small { font-size: 10px; }
+th.dt-small, td.dt-small { font-size: 15px; }
 
 .highlight-node > .jqtree-element > .jqtree-title {
     font-weight: bold;
