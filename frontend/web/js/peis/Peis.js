@@ -10,8 +10,10 @@ $(document).ready(function () {
                 },
                 customize: function ( doc ) {
                     var cols = [];
-                    cols[0] = {text: 'Left part', alignment: 'left', margin:[20] };
-                    cols[1] = {text: 'Right part', alignment: 'right', margin:[0,0,20] };
+                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
+                    cols[1] = {text:'pie de pagina', alignment: 'center' };
+                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
+
                     var objFooter = {};
                     objFooter['columns'] = cols;
                     doc['footer']=objFooter;
@@ -20,36 +22,55 @@ $(document).ready(function () {
                         {
                             margin: [0, 0, 0, 12],
                             alignment: 'center',
-                            text: 'paso 1' +
-                                'paso 2' +
-                                'paso 3'
+                            text: 'Listado de PEI',
+
                         }
                     );
                 }
 
             }
         ],
-
-
-        columnDefs: [
-            {
-                targets: [2, 3, 4, 5, 6],
-                className: 'dt-center'
-            },
-            {
-                targets: [0, 5, 6],
-                searchable: false,
-                orderable: false
-            }
-        ],
-        order: [[1, 'asc']],
         ajax: {
             method: "POST",
             dataType: 'json',
             cache: false,
             url: 'index.php?r=Planificacion/peis/listar-peis',
-            data: {}
+            dataSrc: '',
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,2,3,4,5,6] },
+            { orderable: false, targets: [0,5,6] },
+            { searchable: false, targets: [0,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
+        ],
+        columns: [
+            { data: 'CodigoUsuario' },
+            { data: 'DescripcionPei' },
+            { data: 'FechaAprobacion' },
+            { data: 'GestionInicio' },
+            { data: 'GestionFin' },
+            {
+                data: 'CodigoEstado',
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "C" >No vigente</button>' ;
+                },
+            },
+            {
+                data: 'CodigoPei',
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
+                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '</div>'
+                        : data;
+                },
+            },
+        ],
         "deferRender": true,
         "retrieve": true,
         "processing": true,
@@ -96,7 +117,7 @@ $(document).ready(function () {
         $("form").trigger("reset");
     }
 
-    $("#btnMostrarCrearPei").click(function () {
+    $("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
         icono.toggleClass('opened');
         if (icono.hasClass("opened")) {
@@ -207,11 +228,11 @@ $(document).ready(function () {
                 if (respuesta === "ok") {
                     if (estadoPei === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('NO VIGENTE');
+                        objectBtn.html('No vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('VIGENTE');
+                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }
@@ -245,7 +266,7 @@ $(document).ready(function () {
     ELIMINA DE LA BD UN REGISTRO DE PEI
     =============================================*/
     $("#tablaListaPeis tbody").on("click", ".btnEliminar", function () {
-        let codigopei = $(this).attr("codigo-pei");
+        let codigopei = $(this).attr("codigo");
         let datos = new FormData();
         datos.append("codigopei", codigopei);
         Swal.fire({
@@ -287,8 +308,8 @@ $(document).ready(function () {
                                 mensaje = "Error: Ocurrio un error en el envio de los datos.";
                             } else if (respuesta === "errorValidacion") {
                                 mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                            } else if (respuesta === "errorExiste") {
-                                mensaje = "Error: Los datos ingresados ya corresponden a un PEI existente.";
+                            } else if (respuesta === "errorNoEncontrado") {
+                                mensaje = "Error: No se pudo recuperar el PEI para su eliminacion.";
                             } else if (respuesta === "errorSql") {
                                 mensaje = "Error: Ocurrio un error en la base de datos al eliminar el PEI.";
                             } else if (respuesta === "errorEnUso") {
@@ -315,7 +336,7 @@ $(document).ready(function () {
     BUSCA EL PEI SELECCIONADO EN LA BD
     =============================================*/
     $("#tablaListaPeis tbody").on("click", ".btnEditar", function () {
-        let codigoPei = $(this).attr("codigo-pei");
+        let codigoPei = $(this).attr("codigo");
         let datos = new FormData();
         datos.append("codigopei", codigoPei);
         $.ajax({
@@ -333,7 +354,7 @@ $(document).ready(function () {
                 $("#fechaAprobacion").val(data.FechaAprobacion);
                 $("#gestionInicio").val(data.GestionInicio);
                 $("#gestionFin").val(data.GestionFin);
-                $("#btnMostrarCrearPei").trigger('click');
+                $("#btnMostrarCrear").trigger('click');
             },
             error: function (respuesta) {
                 let mensajeRespuesta = respuesta['responseText'];

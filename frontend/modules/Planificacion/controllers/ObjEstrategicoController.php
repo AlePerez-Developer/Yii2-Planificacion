@@ -2,14 +2,14 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\ObjEstrategicoDao;
 use app\modules\Planificacion\models\ObjetivoEstrategico;
-use Throwable;
+use app\modules\Planificacion\dao\ObjEstrategicoDao;
+use app\modules\Planificacion\models\Pei;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
-use app\modules\Planificacion\models\Pei;
+use Throwable;
 use Yii;
 
 class ObjEstrategicoController extends Controller
@@ -58,42 +58,17 @@ class ObjEstrategicoController extends Controller
 
     public function actionListarObjs()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $objs = ObjetivoEstrategico::find()->where(['!=','CodigoEstado','E'])->all();
-            $datosJson = '{"data": [';
-            $i=0;
-            foreach($objs as $index => $obj) {
-                if ($obj->CodigoEstado == 'V') {
-                    $colorEstado = "btn-success";
-                    $textoEstado = "VIGENTE";
-                    $estado = 'V';
-                } else {
-                    $colorEstado = "btn-danger";
-                    $textoEstado = "NO VIGENTE";
-                    $estado = "C";
-                }
-
-                $acciones = "<button class='btn btn-warning btn-xs  btnEditar' codigo='" . $obj->CodigoObjEstrategico . "'><i class='fa fa-pen'></i> EDITAR </button> ";
-                $acciones .= "<button class='btn btn-danger btn-xs  btnEliminar' codigo='" . $obj->CodigoObjEstrategico . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
-
-                $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigoobjestrategico='" . $obj->CodigoObjEstrategico . "' estadoobjestrategico='" . $estado . "' >" . $textoEstado . "</button>";
-
-                $datosJson .= '[
-					 	"' . ($i) . '",
-					 	"' . $obj->CodigoCOGE . '",
-					 	"' . $obj->Objetivo . '",
-					 	"' . $obj->Producto . '",
-					 	"' . $estado . '",
-				      	"' . $acciones . '"
-  			    ]';
-                if ($index !== array_key_last($objs))
-                    $datosJson .= ',';
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
+            $objs = ObjetivoEstrategico::find()->select(['CodigoObjEstrategico','PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','CodigoCOGE','Objetivo','Producto','ObjetivosEstrategicos.CodigoEstado','ObjetivosEstrategicos.CodigoUsuario','PEIs.FechaAprobacion'])
+                ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')
+                ->where(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
+                ->orderBy('CodigoObjEstrategico')->asArray()->all();
+            foreach($objs as  $obj) {
+                array_push($Data, $obj);
             }
-        } else {
-            $datosJson = '{"data": [';
         }
-        $datosJson .= ']}';
-        return $datosJson;
+        return json_encode($Data);
     }
 
     public function actionGuardarObjs()
@@ -113,21 +88,20 @@ class ObjEstrategicoController extends Controller
                         if ($obj->save())
                         {
                             return "ok";
-                        } else
-                        {
-                            return "errorsql";
+                        } else {
+                            return "errorSql";
                         }
                     } else {
-                        return "existe";
+                        return "errorExiste";
                     }
                 } else {
-                    return "errorval";
+                    return "errorValidacion";
                 }
             } else {
-                return 'errorenvio';
+                return 'errorEnvio';
             }
         } else {
-            return "errorcabezera";
+            return "errorCabecera";
         }
     }
 
@@ -149,16 +123,16 @@ class ObjEstrategicoController extends Controller
                     if ($obj->update()){
                         return "ok";
                     } else {
-                        return "errorsql";
+                        return "errorSql";
                     }
                 } else {
-                    return 'errorval';
+                    return 'errorNoEncontrado';
                 }
             } else {
-                return "errorenvio";
+                return "errorEnvio";
             }
         } else {
-            return "errorcabezera";
+            return "errorCabecera";
         }
     }
 
@@ -177,19 +151,19 @@ class ObjEstrategicoController extends Controller
                         if ($obj->update()) {
                             return "ok";
                         } else {
-                            return "errorsql";
+                            return "errorSql";
                         }
                     } else {
-                        return "enUso";
+                        return "errorEnUso";
                     }
                 } else {
-                    return 'errorval';
+                    return 'errorNoEncontrado';
                 }
             } else {
-                return "errorenvio";
+                return "errorEnvio";
             }
         } else {
-            return "errorcabezera";
+            return "errorCabecera";
         }
     }
 
@@ -201,13 +175,13 @@ class ObjEstrategicoController extends Controller
                 if ($obj){
                     return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoCOGE','Objetivo','Producto')));
                 } else {
-                    return 'errorval';
+                    return 'errorNoEncontrado';
                 }
             } else {
-                return "errorenvio";
+                return "errorEnvio";
             }
         } else {
-            return "errorcabezera";
+            return "errorCabecera";
         }
     }
 
@@ -226,22 +200,22 @@ class ObjEstrategicoController extends Controller
                             if ($obj->update() !== false) {
                                 return "ok";
                             } else {
-                                return "errorsql";
+                                return "errorSql";
                             }
                         } else {
-                            return "existe";
+                            return "errorExiste";
                         }
                     } else {
-                        return "errorval";
+                        return "errorValidacion";
                     }
                 } else {
-                    return "errorval";
+                    return "errorNoEncontrado";
                 }
             } else {
-                return 'errorenvio';
+                return 'errorEnvio';
             }
         } else {
-            return "errorcabezera";
+            return "errorCabecera";
         }
     }
 }

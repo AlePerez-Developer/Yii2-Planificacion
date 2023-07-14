@@ -2,11 +2,11 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\PeiDao;
+use app\modules\Planificacion\dao\PeiDao;
+use app\modules\Planificacion\models\Pei;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
-use app\modules\Planificacion\models\Pei;
 use Yii;
 
 class PeisController extends Controller
@@ -53,40 +53,14 @@ class PeisController extends Controller
 
     public function actionListarPeis()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $peis = Pei::find()->where(['!=','CodigoEstado','E'])->all();
-            $datosJson = '{"data": [';
-            $i = 0;
-            foreach ($peis as $index => $pei) {
-                if ($pei->CodigoEstado == 'V') {
-                    $colorEstado = "btn-success";
-                    $textoEstado = "VIGENTE";
-                    $estado = 'V';
-                } else {
-                    $colorEstado = "btn-danger";
-                    $textoEstado = "NO VIGENTE";
-                    $estado = "C";
-                }
-                $acciones = "<button class='btn btn-warning btn-sm  btnEditar'  codigo-pei='" . $pei->CodigoPei . "'><i class='fa fa-pencil-alt'></i> EDITAR </button> ";
-                $acciones .= "<button class='btn btn-danger btn-sm  btnEliminar' codigo-pei='" . $pei->CodigoPei . "' ><i class='fa fa-times'></i> ELIMINAR </button>";
-                $estado = "<button class='btn " . $colorEstado . " btn-sm btnEstado' style='--bs-btn-padding-y: .20rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .70rem;' codigo='" . $pei->CodigoPei . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
-                $datosJson .= '[
-					 	"' . ($i) . '",
-					 	"' . $pei->DescripcionPei . '",
-					 	"' . $pei->FechaAprobacion . '",
-					 	"' . $pei->GestionInicio . '",
-					 	"' . $pei->GestionFin . '",
-					 	"' . $estado . '",
-				      	"' . $acciones . '"
-  			    ]';
-                if ($index !== array_key_last($peis))
-                    $datosJson .= ',';
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
+            $peis = Pei::find()->select(['CodigoPei','DescripcionPei','FechaAprobacion','GestionInicio','GestionFin','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoPei')->asArray()->all();
+            foreach($peis as  $pei) {
+                array_push($Data, $pei);
             }
-        } else {
-            $datosJson = '{"data": [';
         }
-        $datosJson .= ']}';
-        return $datosJson;
+        return json_encode($Data);
     }
 
     public function actionGuardarPei()
@@ -209,7 +183,7 @@ class PeisController extends Controller
                             if ($pei->update() !== false) {
                                 return "ok";
                             } else {
-                                return "errorsql";
+                                return "errorSql";
                             }
                         } else {
                             return "errorExiste";

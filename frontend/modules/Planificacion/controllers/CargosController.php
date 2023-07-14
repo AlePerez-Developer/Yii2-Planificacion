@@ -3,11 +3,11 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\models\CargosDao;
-use common\models\Cargo;
 use common\models\SectorTrabajo;
 use yii\filters\AccessControl;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
+use common\models\Cargo;
+use yii\web\Controller;
 use Yii;
 
 class CargosController extends Controller

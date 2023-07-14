@@ -1,5 +1,35 @@
 $(document).ready(function(){
     let table = $(".tablaListaUnidades").DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                text: 'Exportar PDF',
+                exportOptions: {
+                    columns: [ 0, 1, 2, 3,4 ]
+                },
+                customize: function ( doc ) {
+                    var cols = [];
+                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
+                    cols[1] = {text:'pie de pagina', alignment: 'center' };
+                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
+
+                    var objFooter = {};
+                    objFooter['columns'] = cols;
+                    doc['footer']=objFooter;
+
+                    doc.content.splice(1, 0,
+                        {
+                            margin: [0, 0, 0, 12],
+                            alignment: 'center',
+                            text: 'Listado de Unidades',
+
+                        }
+                    );
+                }
+
+            }
+        ],
         columnDefs: [
             {
                 targets: [0,5,6],

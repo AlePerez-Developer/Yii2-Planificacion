@@ -1,24 +1,133 @@
 $(document).ready(function(){
+    function format(d) {
+        return (
+            '<div class="container">' +
+            '  <div class="row">' +
+            '    <div class="col-sm-3">' +
+            '      <p class="mb-1 titulosmall">Descripcion Pei</p>\n' +
+            '      <small >' + d.DescripcionPEI + '</small>' +
+            '    </div>' +
+            '    <div class="col-sm-2">' +
+            '      <p class="mb-1 titulosmall" >Fecha Aprobacion</p>' +
+            '      <small>' + d.FechaAprobacion + '</small>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div class="row">' +
+            '    <div class="col-sm-4 mt-3">' +
+            '      <p class="mb-1 titulosmall">Vigencia:</p>' +
+            '      <small>De: ' + d.GestionInicio +  ' Hasta: ' + d.GestionFin + '</small>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>'
+        );
+    }
     let table = $(".tablaListaObjEstrategicos").DataTable({
-        columnDefs: [
+        dom: 'Bfrtip',
+        buttons: [
             {
-                targets: [1, 4,5],
-                className: 'dt-center'
-            },
-            {
-                targets: 0,
-                searchable: false,
-                orderable: false
+                extend: 'pdfHtml5',
+                text: 'Exportar PDF',
+                exportOptions: {
+                    columns: [ 0, 1, 2, 3 ]
+                },
+                customize: function ( doc ) {
+                    var cols = [];
+                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
+                    cols[1] = {text:'pie de pagina', alignment: 'center' };
+                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
+
+                    var objFooter = {};
+                    objFooter['columns'] = cols;
+                    doc['footer']=objFooter;
+
+                    doc.content.splice(1, 0,
+                        {
+                            margin: [0, 0, 0, 12],
+                            alignment: 'center',
+                            text: 'Listado de Objetivos Estrategicos',
+
+                        }
+                    );
+                }
+
             }
         ],
-        order: [[1, 'asc']],
+        initComplete: function () {
+            this.api()
+                .columns([2])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value="">Buscar pei...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
             cache: false,
             url: 'index.php?r=Planificacion/obj-estrategico/listar-objs',
-            data:{ }
+            dataSrc: '',
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,1,3,6,7] },
+            { orderable: false, targets: [0,1,2,6,7] },
+            { searchable: false, targets: [0,1,6,7] },
+            { className: "dt-acciones", targets: 7 },
+            { className: "dt-estado", targets: 6 },
+        ],
+        columns: [
+            { data: 'CodigoUsuario' },
+            {
+                className: 'dt-control',
+                data: null,
+                defaultContent: '',
+            },
+            {
+                data: 'DescripcionPEI',
+                render: function (data, type, row, meta){
+                    return (type === 'display')
+                        ? data + '<br>' + ' (' + row.GestionInicio + ' - ' + row.GestionFin + ')'
+                        :data;
+                }
+            },
+            { data: 'CodigoCOGE'},
+            { data: 'Objetivo' },
+            { data: 'Producto' },
+            {
+                data: 'CodigoEstado',
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "C" >No vigente</button>' ;
+                },
+            },
+            {
+                data: 'CodigoObjEstrategico',
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
+                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '</div>'
+                        : data;
+                },
+            },
+        ],
+
         "deferRender": true,
         "retrieve": true,
         "processing": true,
@@ -54,6 +163,18 @@ $(document).ready(function(){
             this.data(i++);
         });
     }).draw();
+
+    $('.tablaListaObjEstrategicos tbody').on('click', 'td.dt-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+        }
+        else {
+            row.child(format(row.data())).show();
+        }
+    });
 
     $("#IngresoDatos").hide();
 
@@ -131,15 +252,15 @@ $(document).ready(function(){
                 }
                 else {
                     let mensaje;
-                    if (respuesta === "existe") {
+                    if (respuesta === "errorExiste") {
                         mensaje = "Los datos ingresados ya corresponden a un objetivo estrategico existente";
-                    } else if (respuesta === "errorval") {
+                    } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorenvio") {
+                    } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorcabezera") {
+                    } else if (respuesta === "errorCabecera") {
                         mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorsql") {
+                    } else if (respuesta === "errorSql") {
                         mensaje = "Error: Ocurrio un error en la sentencia SQL";
                     } else {
                         mensaje = respuesta;
@@ -162,10 +283,10 @@ $(document).ready(function(){
     =============================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEstado", function () {
         let objectBtn = $(this);
-        let codigoobjestrategico = objectBtn.attr("codigoobjestrategico");
-        let estadoobjestrategico = objectBtn.attr("estadoobjestrategico");
+        let codigo = objectBtn.attr("codigo");
+        let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigoobjestrategico", codigoobjestrategico);
+        datos.append("codigoobjestrategico", codigo);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado-obj",
             method: "POST",
@@ -175,25 +296,25 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estadoobjestrategico === "V") {
+                    if (estado === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('NO VIGENTE');
-                        objectBtn.attr('estadoobjestrategico', 'C');
+                        objectBtn.html('No vigente');
+                        objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('VIGENTE');
-                        objectBtn.attr('estadoobjestrategico', 'V');
+                        objectBtn.html('Vigente');
+                        objectBtn.attr('estado', 'V');
                     }
                 }
                 else {
                     let mensaje;
-                    if (respuesta === "errorval") {
-                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorenvio") {
+                    if (respuesta === "errorNoEncontrado") {
+                        mensaje = "Error: No se pudo recuperar el Objetivo para su cambio de estado.";
+                    } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorcabezera") {
+                    } else if (respuesta === "errorCabecera") {
                         mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorsql") {
+                    } else if (respuesta === "errorSql") {
                         mensaje = "Error: Ocurrio un error en la sentencia SQL";
                     } else {
                         mensaje = respuesta;
@@ -251,15 +372,15 @@ $(document).ready(function(){
                         }
                         else {
                             let mensaje;
-                            if (respuesta === "enUso") {
+                            if (respuesta === "errorEnUso") {
                                 mensaje = "Error: el objetivo estrategico se encuentra en uso y no puede ser eliminado";
-                            } else if (respuesta === "errorval") {
-                                mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                            } else if (respuesta === "errorenvio") {
+                            } else if (respuesta === "errorNoEncontrado") {
+                                mensaje = "Error: No se pudo recuperar el Objetivo para su eliminacion";
+                            } else if (respuesta === "errorEnvio") {
                                 mensaje = "Error: No se enviaron los datos de forma correcta.";
-                            } else if (respuesta === "errorcabezera") {
+                            } else if (respuesta === "errorCabecera") {
                                 mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                            } else if (respuesta === "errorsql") {
+                            } else if (respuesta === "errorSql") {
                                 mensaje = "Error: Ocurrio un error en la sentencia SQL";
                             } else {
                                 mensaje = respuesta;
@@ -306,11 +427,11 @@ $(document).ready(function(){
             error: function (respuesta) {
                 let rta = respuesta['responseText'];
                 let mensaje;
-                if (rta === "errorval") {
-                    mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                } else if (rta === "errorenvio") {
+                if (rta === "errorNoEncontrado") {
+                    mensaje = "Error: No se encontro el Objetivo seleccionado.";
+                } else if (rta === "errorEnvio") {
                     mensaje = "Error: No se enviaron los datos de forma correcta.";
-                } else if (rta === "errorcabezera") {
+                } else if (rta === "errorCabecera") {
                     mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
                 } else {
                     mensaje = rta;
@@ -365,15 +486,17 @@ $(document).ready(function(){
                 }
                 else {
                     let mensaje;
-                    if (respuesta === "existe") {
+                    if (respuesta === "errorExiste") {
                         mensaje = "Los datos ingresados ya corresponden a un objetivo estrategico existente";
-                    } else if (respuesta === "errorval") {
+                    } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorenvio") {
+                    } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorcabezera") {
+                    } else if (respuesta === "errorCabecera") {
                         mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorsql") {
+                    } else if (respuesta === "errorNoEncontrado") {
+                        mensaje = "Error: No se encontro el Objetivo seleccionado.";
+                    } else if (respuesta === "errorSql") {
                         mensaje = "Error: Ocurrio un error en la sentencia SQL";
                     } else {
                         mensaje = respuesta;

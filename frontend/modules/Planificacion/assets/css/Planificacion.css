@@ -54,9 +54,21 @@
     margin-top: -10px;
 }
 
+.titulosmall{
+    font-size: 13px;
+    font-weight: bold;
+}
+
 th.dt-center, td.dt-center { text-align: center; }
 
-th.dt-small, td.dt-small { font-size: 15px; }
+th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; }
+
+th.dt-acciones, td.dt-acciones  {
+    min-width: 150px;
+}
+th.dt-estado, td.dt-estado  {
+    min-width: 90px;
+}
 
 .highlight-node > .jqtree-element > .jqtree-title {
     font-weight: bold;

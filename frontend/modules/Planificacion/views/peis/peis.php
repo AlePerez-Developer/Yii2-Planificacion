@@ -15,7 +15,7 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
 
 <div class="card ">
     <div class="card-header">
-        <button id="btnMostrarCrearPei" class="btn btn-primary bg-gradient-primary">
+        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
             <div class="icon closed">
                 <div class="circle">
                     <div class="horizontal"></div>
@@ -63,16 +63,15 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
         </div>
     </div>
     <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaPeis" name="tablaListaPeis" class="table table-bordered table-striped dt-responsive"
-               style="width: 100%">
+        <table id="tablaListaPeis" name="tablaListaPeis" class="table table-bordered table-striped dt-responsive">
             <thead>
-            <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Descripcion</th>
-            <th style="text-align: center; vertical-align: middle;">Fecha de Aprobacion</th>
-            <th style="text-align: center; vertical-align: middle;">Gestion Inicio</th>
-            <th style="text-align: center; vertical-align: middle;">Gestion Fin</th>
-            <th style="text-align: center; vertical-align: middle;">Estado</th>
-            <th style="text-align: center; vertical-align: middle;">Acciones</th>
+            <th>#</th>
+            <th>Descripcion</th>
+            <th>Fecha de Aprobacion</th>
+            <th>Gestion Inicio</th>
+            <th>Gestion Fin</th>
+            <th>Estado</th>
+            <th>Acciones</th>
             </thead>
         </table>
     </div>

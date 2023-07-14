@@ -60,7 +60,7 @@ class UnidadesCargosController extends Controller
     {
         $Data = array();
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $cargos = UnidadCargo::find()->select(['Unidad','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario'])
+            $cargos = UnidadCargo::find()->select(['Unidad','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario','Unidades.CodigoUnidad','Cargos.CodigoCargo'])
                 ->join('INNER JOIN','Unidades', 'UnidadesCargos.Unidad = Unidades.CodigoUnidad')
                 ->join('INNER JOIN','Cargos', 'UnidadesCargos.Cargo = Cargos.CodigoCargo')
                 ->where(['!=','UnidadesCargos.CodigoEstado','E'])
@@ -151,6 +151,60 @@ class UnidadesCargosController extends Controller
             }
         } else {
             return "errorcabezera";
+        }
+    }
+
+    public function actionCambiarEstadoUnidadCargo()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
+                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                if ($data){
+                    if ($data->CodigoEstado == "V") {
+                        $data->CodigoEstado = "C";
+                    } else {
+                        $data->CodigoEstado = "V";
+                    }
+                    if ($data->update()){
+                        return "ok";
+                    } else {
+                        return "errorSql";
+                    }
+                } else {
+                    return 'errorNoEncontrado';
+                }
+            } else {
+                return "errorEnvio";
+            }
+        } else {
+            return "errorCabecera";
+        }
+    }
+
+    public function actionEliminarUnidadCargo()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
+                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                if ($data){
+                    if (!$data->isUsed()) {
+                        $data->CodigoEstado = 'E';
+                        if ($data->update()) {
+                            return "ok";
+                        } else {
+                            return "errorSql";
+                        }
+                    } else {
+                        return "errorEnUso";
+                    }
+                } else {
+                    return 'errorNoEncontrado';
+                }
+            } else {
+                return "errorEnvio";
+            }
+        } else {
+            return "errorCabecera";
         }
     }
 

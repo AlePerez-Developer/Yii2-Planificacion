@@ -27,7 +27,97 @@ create table PEIs(
     GestionFin int not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+create table ObjetivosEstrategicos(
+    CodigoObjEstrategico int primary key not null,
+    CodigoCOGE char(3) not null,
+    Objetivo varchar(200) not null,
+    Producto varchar(200) not null,
+    CodigoPei int not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoPei) references Peis(CodigoPei),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+
+create table ObjetivosInstitucionales(
+    CodigoObjInstitucional int primary key not null,
+    CodigoCOGE char(2) not null,
+    Objetivo varchar(200) not null,
+    CodigoObjEstrategico int not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoObjEstrategico) references ObjetivosEstrategicos(CodigoObjEstrategico),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+create table ObjetivosEspecificos(
+    CodigoObjEspecifico int primary key not null,
+    CodigoCOGE char(2) not null,
+    Objetivo varchar(200) not null,
+    CodigoObjInstitucional int not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoObjInstitucional) references ObjetivosInstitucionales(CodigoObjInstitucional),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+
+create table AperturasProgramaticas
+(
+    CodigoAperturaProgramatica int primary key identity(1,1) not null,
+    Da char(2) not null,
+    Ue char(3) not null,
+    Prg char(3) not null,
+    Descripcion varchar(250) not null,
+    FechaInicio date not null,
+    FechaFin date not null,
+    Organizacional bit not null,
+    Operaciones bit not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+create table Proyectos
+(
+    CodigoProyecto int primary key identity(1,1) not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+create table Actividades
+(
+    CodigoActividad int primary key identity(1,1) not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
 
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
