@@ -60,7 +60,7 @@ class ObjEstrategicoController extends Controller
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $objs = ObjetivoEstrategico::find()->select(['CodigoObjEstrategico','PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','CodigoCOGE','Objetivo','Producto','ObjetivosEstrategicos.CodigoEstado','ObjetivosEstrategicos.CodigoUsuario','PEIs.FechaAprobacion'])
+            $objs = ObjetivoEstrategico::find()->select(['CodigoObjEstrategico','PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','CodigoCOGE','Objetivo','ObjetivosEstrategicos.CodigoEstado','ObjetivosEstrategicos.CodigoUsuario','PEIs.FechaAprobacion'])
                 ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')
                 ->where(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
                 ->orderBy('CodigoObjEstrategico')->asArray()->all();
@@ -74,13 +74,12 @@ class ObjEstrategicoController extends Controller
     public function actionGuardarObjs()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"]) && isset($_POST["producto"])){
+            if (isset($_POST["codigopei"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
                 $obj = new ObjetivoEstrategico();
                 $obj->CodigoObjEstrategico = ObjEstrategicoDao::GenerarCodigoObjEstrategico();
                 $obj->CodigoPei = $_POST["codigopei"];
                 $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
                 $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
-                $obj->Producto = strtoupper(trim($_POST["producto"]));
                 $obj->CodigoEstado = 'V';
                 $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
                 if ($obj->validate()){
@@ -95,6 +94,7 @@ class ObjEstrategicoController extends Controller
                         return "errorExiste";
                     }
                 } else {
+                    var_dump($obj->errors);
                     return "errorValidacion";
                 }
             } else {
@@ -173,7 +173,7 @@ class ObjEstrategicoController extends Controller
             if (isset($_POST["codigoobjestrategico"]) && $_POST["codigoobjestrategico"] != "") {
                 $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
                 if ($obj){
-                    return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoCOGE','Objetivo','Producto')));
+                    return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoCOGE','Objetivo')));
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -188,13 +188,12 @@ class ObjEstrategicoController extends Controller
     public function actionActualizarObj()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && isset($_POST["codigoobjestrategico"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"]) && isset($_POST["producto"])){
+            if (isset($_POST["codigopei"]) && isset($_POST["codigoobjestrategico"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
                 $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
                 if ($obj){
                     $obj->CodigoPei = $_POST["codigopei"];
                     $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
                     $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
-                    $obj->Producto = strtoupper(trim($_POST["producto"]));
                     if ($obj->validate()){
                         if (!$obj->exist()){
                             if ($obj->update() !== false) {

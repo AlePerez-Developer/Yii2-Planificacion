@@ -8,6 +8,15 @@ $(document).ready(function() {
         }
     });
 
+    $('textarea.txt').on('keypress', function (event) {
+        let regex = new RegExp("^[\\w ]+$");
+        let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
     $('input.num[type=text]').on('keypress', function (event) {
         let regex = new RegExp("^[0-9,.]*$");
         let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
@@ -132,11 +141,6 @@ $(document).ready(function() {
                 minlength: 2,
                 maxlength: 200
             },
-            Producto:{
-                required: true,
-                minlength: 2,
-                maxlength: 200
-            }
         },
         messages: {
             CodigoPei: {
@@ -154,11 +158,6 @@ $(document).ready(function() {
                 minlength: "El objetivo debe tener por lo menos 2 caracteres",
                 maxlength: "El objetivo debe tener maximo 200 caracteres"
             },
-            Producto: {
-                required: "Debe ingresar un producto esperado del objetivo estrategico",
-                minlength: "El producto debe tener por lo menos 2 caracteres",
-                maxlength: "El producto debe tener maximo 200 caracteres"
-            }
         },
         errorElement: "div",
 

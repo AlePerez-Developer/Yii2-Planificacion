@@ -1,6 +1,56 @@
 $(document).ready(function(){
     function format(d) {
         return (
+            '<div class="row">' +
+            '   <div class="col-5">' +
+            '       <div class="titulosmall">Plan estrategico institucional</div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Aperturas Programadas</div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Indicadores Programados</div>' +
+            '   </div>' +
+            '</div>' +
+            '<div class="row">' +
+            '   <div class="col-5">' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc: </div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' + d.DescripcionPEI + '</div>' +
+            '           </div>' +
+            '       </div>' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Fechas</div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' +
+            '                   Vigencia: ' + d.GestionInicio +  ' - ' + d.GestionFin + '<br>' +
+            '                   Aprobacion: ' + d.FechaAprobacion +
+            '               </div>' +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="cell cell__big">' +
+            '           <ol>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '           </ol>'+
+            '           <select class="oso" style="width: 100%; font-size: 13px"><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option>  </select> '+
+            '       </div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="cell cell__big">asdasdasd</div>' +
+            '   </div>' +
+            '</div>'
+        );
+
+        return (
             '<div class="container">' +
             '  <div class="row">' +
             '    <div class="col-sm-3">' +
@@ -28,7 +78,7 @@ $(document).ready(function(){
                 extend: 'pdfHtml5',
                 text: 'Exportar PDF',
                 exportOptions: {
-                    columns: [ 0, 1, 2, 3 ]
+                    columns: [ 0, 2, 3, 4 ]
                 },
                 customize: function ( doc ) {
                     var cols = [];
@@ -83,11 +133,11 @@ $(document).ready(function(){
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,3,6,7] },
-            { orderable: false, targets: [0,1,2,6,7] },
-            { searchable: false, targets: [0,1,6,7] },
-            { className: "dt-acciones", targets: 7 },
-            { className: "dt-estado", targets: 6 },
+            { className: "dt-center", targets: [0,1,3,5,6] },
+            { orderable: false, targets: [0,1,2,5,6] },
+            { searchable: false, targets: [0,1,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
@@ -106,7 +156,6 @@ $(document).ready(function(){
             },
             { data: 'CodigoCOGE'},
             { data: 'Objetivo' },
-            { data: 'Producto' },
             {
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
@@ -223,12 +272,10 @@ $(document).ready(function(){
         let codigopei = $("#CodigoPei").val();
         let codigocoge = $("#CodigoCOGE").val();
         let objetivo = $("#Objetivo").val();
-        let producto = $("#Producto").val();
         let datos = new FormData();
         datos.append("codigopei", codigopei);
         datos.append("codigocoge", codigocoge);
         datos.append("objetivo", objetivo);
-        datos.append("producto", producto);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/guardar-objs",
             method: "POST",
@@ -421,7 +468,6 @@ $(document).ready(function(){
                 $("#CodigoPei").val(data.CodigoPei);
                 $("#CodigoCOGE").val(data.CodigoCOGE);
                 $("#Objetivo").val(data.Objetivo);
-                $("#Producto").val(data.Producto);
                 $("#btnMostrarCrearObj").trigger('click');
             },
             error: function (respuesta) {
@@ -456,13 +502,11 @@ $(document).ready(function(){
         let codigopei = $("#CodigoPei").val();
         let codigocoge = $("#CodigoCOGE").val();
         let objetivo = $("#Objetivo").val();
-        let producto = $("#Producto").val();
         let datos = new FormData();
         datos.append("codigoobjestrategico", codigoobjestrategico);
         datos.append("codigopei", codigopei);
         datos.append("codigocoge", codigocoge);
         datos.append("objetivo", objetivo);
-        datos.append("producto", producto);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/actualizar-obj",
             method: "POST",

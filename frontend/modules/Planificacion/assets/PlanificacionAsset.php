@@ -9,6 +9,7 @@ class PlanificacionAsset extends AssetBundle
     public $css = [
         '../../plugins/datatables/datatables.css',
         '../../plugins/jquerytreeview/jqtree.css',
+        '../../plugins/select2/dist/css/select2.min.css',
         '../../../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.css',
        'css/Planificacion.css',
     ];
@@ -17,10 +18,13 @@ class PlanificacionAsset extends AssetBundle
         '../../../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.all.js',
         '../../plugins/jquerytreeview/tree.jquery.js',
         '../../plugins/jquery-validation-1.19.5/dist/jquery.validate.min.js',
+        '../../plugins/select2/dist/js/select2.min.js',
         'js/Validacion.js',
         'js/Planificacion.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',
     ];
+
+
 }

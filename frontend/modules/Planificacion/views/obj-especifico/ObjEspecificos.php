@@ -34,22 +34,14 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
 
                         <div class="form-group">
                             <label for="CodigoObjEstrategico">Seleccione el objetivo estrategico</label>
-                            <select class="form-control" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
-                                <option value="0" selected>Seleccione el objetivo estrategico</option>
+                            <select class="form-control objestrategicos" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
+                                <option></option>
                                 <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
-                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= ' Objetivo: ' . $objEstrategico->Objetivo . ' / Producto: ' . $objEstrategico->Producto ?></option>
+                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoCOGE .') - ' . $objEstrategico->Objetivo  ?></option>
                                 <?php } ?>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="CodigoObjInstitucional">Seleccione el objetivo estrategico</label>
-                            <select class="form-control" id="CodigoObjInstitucional" name="CodigoObjInstitucional" >
-                                <option value="0" selected>Seleccione el objetivo institucional</option>
-                                <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
-                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= ' Objetivo: ' . $objEstrategico->Objetivo . ' / Producto: ' . $objEstrategico->Producto ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
+
                         <div class="form-group">
                             <label for="CodigoCOGE">Codigo de objetico institucional (COGE)</label>
                             <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Coge" style="width: 80px" >

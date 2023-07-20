@@ -109,6 +109,16 @@ $(document).ready(function(){
         });
     }).draw();
 
+    $('.objestrategicos').select2({
+        placeholder: "Elija un objetivo estrategico",
+        allowClear: true
+    });
+
+    $("#CodigoObjEstrategico").change(function (){
+        alert($("#CodigoObjEstrategico").val());
+-
+    });
+
     $("#IngresoDatos").hide();
 
     function ReiniciarCampos(){

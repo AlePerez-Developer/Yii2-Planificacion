@@ -62,8 +62,8 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
             </div>
         </div>
     </div>
-    <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaPeis" name="tablaListaPeis" class="table table-bordered table-striped dt-responsive">
+    <div id="divTabla" name="divTabla" class="card-body overflow-auto">
+        <table id="tablaListaPeis" name="tablaListaPeis" class="table table-bordered table-striped">
             <thead>
             <th>#</th>
             <th>Descripcion</th>

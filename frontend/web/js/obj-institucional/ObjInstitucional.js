@@ -1,23 +1,67 @@
 $(document).ready(function(){
     function format(d) {
         return (
-            '<div class="container">' +
-            '  <div class="row">' +
-            '    <div class="col-sm-3">' +
-            '      <p class="mb-1 titulosmall">Descripcion Pei</p>\n' +
-            '      <small >' + d.DescripcionPEI + '</small>' +
-            '    </div>' +
-            '    <div class="col-sm-2">' +
-            '      <p class="mb-1 titulosmall" >Fecha Aprobacion</p>' +
-            '      <small>' + d.FechaAprobacion + '</small>' +
-            '    </div>' +
-            '  </div>' +
-            '  <div class="row">' +
-            '    <div class="col-sm-4 mt-3">' +
-            '      <p class="mb-1 titulosmall">Vigencia:</p>' +
-            '      <small>De: ' + d.GestionInicio +  ' Hasta: ' + d.GestionFin + '</small>' +
-            '    </div>' +
-            '  </div>' +
+            '<div class="row">' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Plan estrategico institucional</div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Objetivo Estrategico</div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Aperturas Programadas</div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="titulosmall">Indicadores Programados</div>' +
+            '   </div>' +
+            '</div>' +
+            '<div class="row">' +
+            '   <div class="col-6">' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc: </div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' + d.DescripcionPEI + '</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Codigo: </div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">'+ d.COGEEstrategico +'</div>' +
+            '           </div>' +
+            '       </div>' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Fechas</div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' +
+            '                   Vigencia: ' + d.GestionInicio +  ' - ' + d.GestionFin + '<br>' +
+            '                   Aprobacion: ' + d.FechaAprobacion +
+            '               </div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc:</div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">'+d.ObjEstrategico+'</div>' +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="cell cell__big">' +
+            '           <ol>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
+            '           </ol>'+
+            '           <select class="oso" style="width: 100%; font-size: 13px"><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option>  </select> '+
+            '       </div>' +
+            '   </div>' +
+            '   <div class="col-3">' +
+            '       <div class="cell cell__big">asdasdasd</div>' +
+            '   </div>' +
             '</div>'
         );
     }
@@ -104,18 +148,7 @@ $(document).ready(function(){
                         :data;
                 }
             },
-            {
-                data: 'COGEEstrategico',
-                visible: false
-            },
-            {
-                data: 'CodigoCOGE',
-                render: function (data, type, row, meta) {
-                    return (type === 'display')
-                        ? row.COGEEstrategico + '-' + data
-                        :data;
-                }
-            },
+            { data: 'Codigo' },
             { data: 'Objetivo' },
             {
                 data: 'CodigoEstado',
@@ -185,12 +218,18 @@ $(document).ready(function(){
         }
     });
 
+    $('.objestrategicos').select2({
+        placeholder: "Elija un objetivo estrategico",
+        allowClear: true
+    });
+
     $("#IngresoDatos").hide();
 
     function ReiniciarCampos(){
         $('#formobjinstitucional *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $(".objestrategicos").val(null).trigger('change');
         $("#codigo").val('');
         $("form").trigger("reset");
     }
@@ -426,6 +465,7 @@ $(document).ready(function(){
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoObjInstitucional);
                 $("#CodigoObjEstrategico").val(data.CodigoObjEstrategico);
+                $(".objestrategicos").val(data.CodigoObjEstrategico).trigger('change')
                 $("#CodigoCOGE").val(data.CodigoCOGE);
                 $("#Objetivo").val(data.Objetivo);
                 $("#btnMostrarCrearObj").trigger('click');

@@ -13,7 +13,6 @@ use common\models\Usuario;
  * @property int $CodigoObjEstrategico
  * @property string $CodigoCOGE
  * @property string $Objetivo
- * @property string $Producto
  * @property int $CodigoPei
  * @property string $CodigoEstado
  * @property string|null $FechaHoraRegistro
@@ -40,17 +39,16 @@ class ObjetivoEstrategico extends ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoObjEstrategico', 'CodigoCOGE', 'Objetivo', 'Producto', 'CodigoPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoObjEstrategico', 'CodigoCOGE', 'Objetivo', 'CodigoPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['CodigoObjEstrategico', 'CodigoPei'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoCOGE', 'CodigoUsuario'], 'string', 'max' => 3],
-            [['Objetivo', 'Producto'], 'string', 'max' => 200],
+            [['Objetivo'], 'string', 'max' => 200],
             [['CodigoEstado'], 'string', 'max' => 1],
-            [['CodigoCOGE'], 'unique'],
             [['CodigoObjEstrategico'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => PEI::className(), 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
+            [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::className(), 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
         ];
     }
 
@@ -63,7 +61,6 @@ class ObjetivoEstrategico extends ActiveRecord
             'CodigoObjEstrategico' => 'Codigo Obj Estrategico',
             'CodigoCOGE' => 'Codigo Coge',
             'Objetivo' => 'Objetivo',
-            'Producto' => 'Producto',
             'CodigoPei' => 'Codigo pei',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
@@ -98,28 +95,28 @@ class ObjetivoEstrategico extends ActiveRecord
      */
     public function getCodigoPei()
     {
-        return $this->hasOne(PEI::className(), ['CodigoPei' => 'CodigoPei']);
+        return $this->hasOne(\app\modules\Planificacion\models\Pei::className(), ['CodigoPei' => 'CodigoPei']);
     }
 
     public function exist()
     {
-        $obj = ObjetivoEstrategico::find()->where(["CodigoCOGE" => $this->CodigoCOGE, "Objetivo"=>$this->Objetivo, "Producto"=>$this->Producto])->andWhere(["CodigoEstado"=>"V"])->all();
+        /*$obj = ObjetivoEstrategico::find()->where(["CodigoCOGE" => $this->CodigoCOGE, "Objetivo"=>$this->Objetivo, "Producto"=>$this->Producto])->andWhere(["CodigoEstado"=>"V"])->all();
         if(!empty($obj)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function enUso()
-    {
-        /*$Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
-        if(!empty($Obj)){
             return true;
         }else{
             return false;
         }*/
         return false;
+    }
+
+    public function enUso()
+    {
+        $Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
+        if(!empty($Obj)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

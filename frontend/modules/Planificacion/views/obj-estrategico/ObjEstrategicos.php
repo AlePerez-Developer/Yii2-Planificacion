@@ -47,11 +47,7 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Estrategicos']];
                         </div>
                         <div class="form-group">
                             <label for="Objetivo" class="control-label">Descripcion del objetivo estrategico</label>
-                            <input type="text" class="form-control input-sm txt" id="Objetivo" name="Objetivo" placeholder="Descripcion del objetivo estrategico">
-                        </div>
-                        <div class="form-group">
-                            <label for="Producto" class="control-label">Producto esperado</label>
-                            <input type="text" class="form-control input-sm txt" id="Producto" name="Producto" placeholder="Producto esperado">
+                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo estrategico"></textarea>
                         </div>
                     </form>
                 </div>
@@ -68,9 +64,8 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Estrategicos']];
             <th style="text-align: center; vertical-align: middle;">#</th>
             <th style="text-align: center; vertical-align: middle;">#</th>
             <th style="text-align: center; vertical-align: middle;">PEI</th>
-            <th style="text-align: center; vertical-align: middle;">Codigo COGE</th>
+            <th style="text-align: center; vertical-align: middle;">Codigo</th>
             <th style="text-align: center; vertical-align: middle;">Objetivo</th>
-            <th style="text-align: center; vertical-align: middle;">Producto</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>
             <th style="text-align: center; vertical-align: middle;">Acciones</th>
             </thead>

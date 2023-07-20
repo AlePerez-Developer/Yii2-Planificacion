@@ -31,13 +31,12 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Institucionales']];
                 <div class="card-body">
                     <input type="text" id="codigo" name="codigo" disabled hidden >
                     <form id="formobjinstitucional" action="" method="post">
-
                         <div class="form-group">
                             <label for="CodigoObjEstrategico">Seleccione el objetivo estrategico</label>
-                            <select class="form-control" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
-                                <option value="0" selected>Seleccione el objetivo estrategico</option>
+                            <select class="form-control objestrategicos" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
+                                <option></option>
                                 <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
-                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= ' Objetivo: ' . $objEstrategico->Objetivo . ' / Producto: ' . $objEstrategico->Producto ?></option>
+                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoCOGE .') - ' . $objEstrategico->Objetivo  ?></option>
                                 <?php } ?>
                             </select>
                         </div>
@@ -47,7 +46,7 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Institucionales']];
                         </div>
                         <div class="form-group">
                             <label for="Objetivo" class="control-label">Descripcion del objetivo institucional</label>
-                            <input type="text" class="form-control input-sm txt" id="Objetivo" name="Objetivo" placeholder="Descripcion del objetivo estrategico">
+                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo estrategico"></textarea>
                         </div>
                     </form>
                 </div>
@@ -64,7 +63,6 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Institucionales']];
             <th style="text-align: center; vertical-align: middle;">#</th>
             <th style="text-align: center; vertical-align: middle;">#</th>
             <th style="text-align: center; vertical-align: middle;">PEI</th>
-            <th style="text-align: center; vertical-align: middle;"></th>
             <th style="text-align: center; vertical-align: middle;">Codigo</th>
             <th style="text-align: center; vertical-align: middle;">Objetivo</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>

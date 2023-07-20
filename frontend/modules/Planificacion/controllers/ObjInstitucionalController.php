@@ -56,14 +56,26 @@ class ObjInstitucionalController extends Controller
         return $this->render('ObjInstitucionales',['objsEstrategicos'=>$objsEstrategicos]);
     }
 
+    public function actionOsito()
+    {
+        $Data = array();
+        if (\Yii::$app->request->isAjax) {
+            $objs = ObjetivoEstrategico::find()->where(['CodigoEstado'=>'V'])->asArray()->all();
+            foreach($objs as  $obj) {
+                array_push($Data, $obj);
+            }
+        }
+        return json_encode($Data);
+    }
+
     public function actionListarObjs()
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $objs = ObjetivoInstitucional::find()->select([
                 'ObjetivosInstitucionales.CodigoObjInstitucional','ObjetivosInstitucionales.CodigoCOGE','ObjetivosInstitucionales.Objetivo','ObjetivosInstitucionales.CodigoEstado','ObjetivosInstitucionales.CodigoUsuario',
-                'ObjetivosEstrategicos.CodigoCOGE as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico','ObjetivosEstrategicos.Producto as ProdEstrategico',
-                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion'
+                'ObjetivosEstrategicos.CodigoCOGE as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
+                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoCOGE, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
                 ])
                 ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')
                 ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')

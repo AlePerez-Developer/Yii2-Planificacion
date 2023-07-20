@@ -99,17 +99,18 @@ class Pei extends ActiveRecord
         return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    public function exist()
+    public function exist(): bool
     {
-        $pei = Pei::find()->where(["FechaAprobacion" => $this->FechaAprobacion, "GestionInicio"=>$this->GestionInicio, "GestionFin"=>$this->GestionFin])->andWhere(["CodigoEstado"=>"V"])->all();
+        /*$pei = Pei::find()->where(["FechaAprobacion" => $this->FechaAprobacion, "GestionInicio"=>$this->GestionInicio, "GestionFin"=>$this->GestionFin])->andWhere(["CodigoEstado"=>"V"])->all();
         if(!empty($pei)){
             return true;
         }else{
             return false;
-        }
+        }*/
+        return false;
     }
 
-    public function enUso()
+    public function enUso(): bool
     {
         $Obj = ObjetivoEstrategico::find()->where(["CodigoPei" => $this->CodigoPei])->all();
         if(!empty($Obj)){
