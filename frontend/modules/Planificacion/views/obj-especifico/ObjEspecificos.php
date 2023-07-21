@@ -42,6 +42,14 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
                             </select>
                         </div>
 
+
+                        <div class="form-group">
+                            <label for="CodigoObjInstitucional">Seleccione el objetivo institucional</label>
+                            <select class="form-control objinstitucional" id="CodigoObjInstitucional" name="CodigoObjInstitucional" disabled >
+                                <option></option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="CodigoCOGE">Codigo de objetico institucional (COGE)</label>
                             <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Coge" style="width: 80px" >
@@ -60,7 +68,7 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
         </div>
     </div>
     <div id="Divtabla" class="card-body">
-        <table class="table table-bordered table-striped dt-responsive tablaListaObjEspecificos" style="width: 100%" >
+        <table class="table table-bordered table-striped dt-responsive tablaListaObjEspecificoss" style="width: 100%" >
             <thead>
             <th style="text-align: center; vertical-align: middle;">#</th>
             <th style="text-align: center; vertical-align: middle;">Codigo COGE</th>

@@ -114,9 +114,53 @@ $(document).ready(function(){
         allowClear: true
     });
 
+    $('.objinstitucional').select2({
+        placeholder: "Elija un objetivo institucional",
+        allowClear: true
+    });
+
     $("#CodigoObjEstrategico").change(function (){
-        alert($("#CodigoObjEstrategico").val());
--
+        let codigo = $("#CodigoObjEstrategico").val();
+        if (codigo !== ''){
+            let datos = new FormData();
+            datos.append("codigo", codigo);
+            $.ajax({
+                url: "index.php?r=Planificacion/obj-especifico/listar-objsinstitucionales",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (respuesta) {
+                    let data = JSON.parse(JSON.stringify(respuesta));
+                    alert(data)
+                    var sel = $("#CodigoObjInstitucional");
+                    sel.empty();
+                    sel.append('<option></option>');
+                    for (var i=0; i<data.length; i++) {
+                        sel.append('<option value="' + data[i].CodigoObjInstitucional + '">' + data[i].Objetivo + '</option>');
+                    }
+                    $('#CodigoObjInstitucional').prop('disabled', false);
+                    /*$('#CodigoObjInstitucional').prop('disabled', false);
+                    //let data = JSON.parse(JSON.stringify(respuesta));
+                    $("#codigo").val(data.CodigoObjInstitucional);
+                    $("#CodigoObjEstrategico").val(data.CodigoObjEstrategico);
+                    $(".objestrategicos").val(data.CodigoObjEstrategico).trigger('change')
+                    $("#CodigoCOGE").val(data.CodigoCOGE);
+                    $("#Objetivo").val(data.Objetivo);
+                    $("#btnMostrarCrearObj").trigger('click');*/
+                },
+            });
+        }
+
+
+
+
+        else {
+            $("#CodigoObjInstitucional").val(null).trigger('change');
+            $('#CodigoObjInstitucional').prop('disabled', true);
+        }
+
     });
 
     $("#IngresoDatos").hide();

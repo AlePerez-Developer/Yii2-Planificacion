@@ -71,6 +71,21 @@ class ObjEspecificoController extends Controller
         return json_encode($Data);
     }
 
+    public function actionListarObjsinstitucionales()
+    {
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost && isset($_POST["codigo"])) {
+            $objs = ObjetivoInstitucional::find()->select(['CodigoObjInstitucional','Objetivo'])
+                ->where(['CodigoObjEstrategico'=>$_POST["codigo"]])
+                ->andWhere(['!=','CodigoEstado','E'])->orderBy('CodigoObjInstitucional')->asArray()->all();
+            foreach($objs as  $obj) {
+                array_push($Data, $obj);
+            }
+        }
+        return json_encode($Data);
+
+    }
+
     public function actionGuardarObjs()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
