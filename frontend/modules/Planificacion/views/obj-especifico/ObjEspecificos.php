@@ -55,8 +55,8 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
                             <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Coge" style="width: 80px" >
                         </div>
                         <div class="form-group">
-                            <label for="Objetivo" class="control-label">Descripcion del objetivo institucional</label>
-                            <input type="text" class="form-control input-sm txt" id="Objetivo" name="Objetivo" placeholder="Descripcion del objetivo especifico">
+                            <label for="Objetivo" class="control-label">Descripcion del objetivo especifico</label>
+                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo especifico"></textarea>
                         </div>
                     </form>
                 </div>
@@ -68,10 +68,12 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
         </div>
     </div>
     <div id="Divtabla" class="card-body">
-        <table class="table table-bordered table-striped dt-responsive tablaListaObjEspecificoss" style="width: 100%" >
+        <table class="table table-bordered table-striped dt-responsive tablaListaObjEspecificos" style="width: 100%" >
             <thead>
             <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Codigo COGE</th>
+            <th style="text-align: center; vertical-align: middle;">#</th>
+            <th style="text-align: center; vertical-align: middle;">PEI</th>
+            <th style="text-align: center; vertical-align: middle;">Codigo</th>
             <th style="text-align: center; vertical-align: middle;">Objetivo</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>
             <th style="text-align: center; vertical-align: middle;">Acciones</th>

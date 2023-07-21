@@ -222,6 +222,63 @@ $(document).ready(function() {
         }
     } );
 
+    $( "#formobjespecifico" ).validate( {
+        rules: {
+            CodigoObjEstrategico:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoObjInstitucional:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoCOGE: {
+                required: true,
+                digits: true,
+                max: 99,
+                largominimo: '1'
+            },
+            Objetivo:{
+                required: true,
+                minlength: 2,
+                maxlength: 200
+            },
+        },
+        messages: {
+            CodigoObjEstrategico: {
+                required: "Debe seleccionar un codigo de Obj. Estrategico",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Estrategico"
+            },
+            CodigoObjInstitucional: {
+                required: "Debe seleccionar un codigo de Obj. Institucional",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Institucional"
+            },
+            CodigoCOGE: {
+                required: "Debe ingresar un codigo de objetivo especifico (COGE)",
+                digits: "Solo se permite numeros enteros",
+                max: "Debe ingresar un numero de 2 digitos como maximo",
+                largominimo: "Debe ingresar un numero de 2 digitos"
+            },
+            Objetivo: {
+                required: "Debe ingresar la descripcion del objetivo especifico",
+                minlength: "El objetivo debe tener por lo menos 2 caracteres",
+                maxlength: "El objetivo debe tener maximo 200 caracteres"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    } );
+
     $( "#formunidad" ).validate({
         rules: {
             nombreUnidad:{

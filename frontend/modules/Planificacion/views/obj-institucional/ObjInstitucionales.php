@@ -41,12 +41,12 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Institucionales']];
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="CodigoCOGE">Codigo de objetico institucional (COGE)</label>
+                            <label for="CodigoCOGE">Codigo de objetico especifico (COGE)</label>
                             <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Coge" style="width: 80px" >
                         </div>
                         <div class="form-group">
                             <label for="Objetivo" class="control-label">Descripcion del objetivo institucional</label>
-                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo estrategico"></textarea>
+                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo especifico"></textarea>
                         </div>
                     </form>
                 </div>

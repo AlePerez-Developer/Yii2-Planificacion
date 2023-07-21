@@ -1,4 +1,67 @@
 $(document).ready(function(){
+    function format(d) {
+        return (
+            '<div class="row">' +
+            '   <div class="col-4">' +
+            '       <div class="titulosmall">Plan estrategico institucional</div>' +
+            '   </div>' +
+            '   <div class="col-4">' +
+            '       <div class="titulosmall">Objetivo Estrategico</div>' +
+            '   </div>' +
+            '   <div class="col-4">' +
+            '       <div class="titulosmall">Objetivo Institucional</div>' +
+            '   </div>' +
+            '</div>' +
+            '<div class="row">' +
+            '   <div class="col-12">' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc: </div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' + d.DescripcionPEI + '</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Codigo: </div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' + d.COGEEstrategico + '</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Codigo: </div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' + d.COGEInstitucional + '</div>' +
+            '           </div>' +
+            '       </div>' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Fechas</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' +
+            '                   Vigencia: ' + d.GestionInicio + ' - ' + d.GestionFin + '<br>' +
+            '                   Aprobacion: ' + d.FechaAprobacion +
+            '               </div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc:</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' + d.ObjEstrategico + '</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc:</div>' +
+            '           </div>' +
+            '           <div class="col-2">' +
+            '               <div class="little">' + d.ObjInstitucional + '</div>' +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '</div>'
+        )
+    };
+
     let table = $(".tablaListaObjEspecificos").DataTable({
         dom: 'Bfrtip',
         buttons: [
@@ -30,6 +93,28 @@ $(document).ready(function(){
 
             }
         ],
+        initComplete: function () {
+            this.api()
+                .columns([2])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value="">Buscar pei...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -37,9 +122,30 @@ $(document).ready(function(){
             url: 'index.php?r=Planificacion/obj-especifico/listar-objs',
             dataSrc: '',
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,1,3,5,6] },
+            { orderable: false, targets: [0,1,2,5,6] },
+            { searchable: false, targets: [0,1,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
+        ],
         columns: [
             { data: 'CodigoUsuario' },
-            { data: 'CodigoCOGE' },
+            {
+                className: 'dt-control',
+                data: null,
+                defaultContent: '',
+            },
+            {
+                data: 'DescripcionPEI',
+                render: function (data, type, row, meta){
+                    return (type === 'display')
+                        ? data + '<br>' + ' (' + row.GestionInicio + ' - ' + row.GestionFin + ')'
+                        :data;
+                }
+            },
+            { data: 'Codigo' },
             { data: 'Objetivo' },
             {
                 data: 'CodigoEstado',
@@ -60,18 +166,6 @@ $(document).ready(function(){
                         : data;
                 },
             },
-        ],
-        columnDefs: [
-            { className: "dt-small", targets: "_all" },
-            {
-                targets: [0, 1, 3, 4],
-                className: 'dt-center'
-            },
-            {
-                targets: [0, 3, 4],
-                searchable: false,
-                orderable: false
-            }
         ],
         "deferRender": true,
         "retrieve": true,
@@ -108,6 +202,18 @@ $(document).ready(function(){
             this.data(i++);
         });
     }).draw();
+
+    $('.tablaListaObjEspecificos tbody').on('click', 'td.dt-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+        }
+        else {
+            row.child(format(row.data())).show();
+        }
+    });
 
     $('.objestrategicos').select2({
         placeholder: "Elija un objetivo estrategico",
@@ -146,7 +252,6 @@ $(document).ready(function(){
             $("#CodigoObjInstitucional").val(null).trigger('change');
             $('#CodigoObjInstitucional').prop('disabled', true);
         }
-
     });
 
     $("#IngresoDatos").hide();
@@ -155,6 +260,7 @@ $(document).ready(function(){
         $('#formobjespecifico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $(".objestrategicos").val(null).trigger('change');
         $("#codigo").val('');
         $("form").trigger("reset");
     }
@@ -257,7 +363,7 @@ $(document).ready(function(){
         let codigo = objectBtn.attr("codigo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigoobjinstitucional", codigo);
+        datos.append("codigoobjespecifico", codigo);
         $.ajax({
             url: "index.php?r=Planificacion/obj-especifico/cambiar-estado-obj",
             method: "POST",
@@ -389,7 +495,8 @@ $(document).ready(function(){
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoObjEspecifico);
-                $("#CodigoObjInstitucional").val(data.CodigoObjInstitucional);
+                $(".objestrategicos").val(data.CodigoEstrategico).trigger('change')
+                $(".objinstitucional").val(data.CodigoInstitucional).trigger('change')
                 $("#CodigoCOGE").val(data.CodigoCOGE);
                 $("#Objetivo").val(data.Objetivo);
                 $("#btnMostrarCrearObj").trigger('click');

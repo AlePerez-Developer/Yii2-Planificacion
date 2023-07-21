@@ -63,7 +63,17 @@ class ObjEspecificoController extends Controller
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $objs = ObjetivoEspecifico::find()->select(['CodigoObjEspecifico','CodigoCOGE','Objetivo','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoObjEspecifico')->asArray()->all();
+            $objs = ObjetivoEspecifico::find()->select([
+                'ObjetivosEspecificos.*',
+                'ObjetivosInstitucionales.CodigoCOGE as COGEInstitucional','ObjetivosInstitucionales.Objetivo as ObjInstitucional',
+                'ObjetivosEstrategicos.CodigoCOGE as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
+                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoCOGE, char(45) , ObjetivosInstitucionales.CodigoCOGE, char(45), ObjetivosEspecificos.CodigoCOGE) as Codigo  '
+            ])
+                ->join('INNER JOIN','ObjetivosInstitucionales','ObjetivosEspecificos.CodigoObjInstitucional = ObjetivosInstitucionales.CodigoObjInstitucional')
+                ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')
+                ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')
+                ->where(['!=','ObjetivosEspecificos.CodigoEstado','E'])->andwhere(['!=','ObjetivosInstitucionales.CodigoEstado','E'])->andwhere(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
+                ->orderBy('ObjetivosEspecificos.CodigoObjEspecifico')->asArray()->all();
             foreach($objs as  $obj) {
                 array_push($Data, $obj);
             }
@@ -83,7 +93,6 @@ class ObjEspecificoController extends Controller
             }
         }
         return json_encode($Data);
-
     }
 
     public function actionGuardarObjs()
@@ -183,11 +192,20 @@ class ObjEspecificoController extends Controller
 
     public function actionBuscarObj()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             if (isset($_POST["codigoobjespecifico"]) && $_POST["codigoobjespecifico"] != "") {
-                $obj = ObjetivoEspecifico::findOne($_POST["codigoobjespecifico"]);
+                $obj = ObjetivoEspecifico::find()->select([
+                    'ObjetivosEspecificos.*',
+                    'ObjetivosInstitucionales.CodigoObjInstitucional as CodigoInstitucional',
+                    'ObjetivosEstrategicos.CodigoObjEstrategico as CodigoEstrategico'
+                ])
+                    ->join('INNER JOIN','ObjetivosInstitucionales','ObjetivosEspecificos.CodigoObjInstitucional = ObjetivosInstitucionales.CodigoObjInstitucional')
+                    ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')
+                    ->where(['CodigoObjEspecifico' => $_POST["codigoobjespecifico"] ])
+                    ->orderBy('ObjetivosEspecificos.CodigoObjEspecifico')->asArray()->one();
+
                 if ($obj){
-                    return json_encode($obj->getAttributes(array('CodigoObjEspecifico','CodigoObjInstitucional','CodigoCOGE','Objetivo')));
+                    return json_encode($obj);
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -205,7 +223,7 @@ class ObjEspecificoController extends Controller
             if (isset($_POST["codigoobjinstitucional"]) && isset($_POST["codigoobjespecifico"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
                 $obj = ObjetivoEspecifico::findOne($_POST["codigoobjespecifico"]);
                 if ($obj){
-                    $obj->CodigoObjInstitucional = $_POST["codigoobjespecifico"];
+                    $obj->CodigoObjInstitucional = $_POST["codigoobjinstitucional"];
                     $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
                     $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
                     if ($obj->validate()){
