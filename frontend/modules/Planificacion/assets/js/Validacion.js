@@ -9,7 +9,7 @@ $(document).ready(function() {
     });
 
     $('textarea.txt').on('keypress', function (event) {
-        let regex = new RegExp("^[\\w ]+$");
+        let regex = new RegExp("^[\\w áéíóúÁÉÍÓÚñÑ.]+$");
         let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
         if (!regex.test(key)) {
             event.preventDefault();

@@ -69,12 +69,12 @@ class PeisController extends Controller
             if (isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"])) {
                 $pei = new Pei();
                 $pei->CodigoPei = PeiDao::generarCodigoPei();
-                $pei->DescripcionPei = strtoupper(trim($_POST["descripcionPei"]));
+                $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
                 $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
-                $pei->GestionInicio = $_POST["gestionInicio"];
-                $pei->GestionFin = $_POST["gestionFin"];
+                $pei->GestionInicio = trim($_POST["gestionInicio"]);
+                $pei->GestionFin = trim($_POST["gestionFin"]);
                 $pei->CodigoEstado = 'V';
-                $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+                $pei->CodigoUsuario = 'BGC';//\Yii::$app->user->identity->CodigoUsuario;
                 if ($pei->validate()) {
                     if (!$pei->exist()) {
                         if ($pei->save()) {
@@ -174,10 +174,10 @@ class PeisController extends Controller
             if (isset($_POST["codigoPei"]) && isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"])) {
                 $pei = Pei::findOne($_POST["codigoPei"]);
                 if ($pei) {
-                    $pei->DescripcionPei = strtoupper(trim($_POST["descripcionPei"]));
+                    $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
                     $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
-                    $pei->GestionInicio = $_POST["gestionInicio"];
-                    $pei->GestionFin = $_POST["gestionFin"];
+                    $pei->GestionInicio = trim($_POST["gestionInicio"]);
+                    $pei->GestionFin = trim($_POST["gestionFin"]);
                     if ($pei->validate()) {
                         if (!$pei->exist()) {
                             if ($pei->update() !== false) {

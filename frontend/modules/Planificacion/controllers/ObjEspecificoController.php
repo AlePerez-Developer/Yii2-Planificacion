@@ -102,10 +102,10 @@ class ObjEspecificoController extends Controller
                 $obj = new ObjetivoEspecifico();
                 $obj->CodigoObjEspecifico = ObjEspecificoDao::GenerarCodigoObjEspecifico();
                 $obj->CodigoObjInstitucional = $_POST["codigoobjinstitucional"];
-                $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
-                $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
+                $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
                 $obj->CodigoEstado = 'V';
-                $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+                $obj->CodigoUsuario = 'BGC';//Yii::$app->user->identity->CodigoUsuario;
                 if ($obj->validate()){
                     if (!$obj->exist()){
                         if ($obj->save())
@@ -224,8 +224,8 @@ class ObjEspecificoController extends Controller
                 $obj = ObjetivoEspecifico::findOne($_POST["codigoobjespecifico"]);
                 if ($obj){
                     $obj->CodigoObjInstitucional = $_POST["codigoobjinstitucional"];
-                    $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
-                    $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
+                    $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                    $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
                     if ($obj->validate()){
                         if (!$obj->exist()){
                             if ($obj->update() !== false) {

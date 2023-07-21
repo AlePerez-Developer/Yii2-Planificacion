@@ -50,17 +50,14 @@ $(document).ready(function(){
             '       </div>' +
             '   </div>' +
             '   <div class="col-3">' +
-            '       <div class="cell cell__big">' +
-            '           <ol>'+
-            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
-            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
-            '               <li class="little">27-258-256-0000-235 direccion superior de la usfx</li>'+
-            '           </ol>'+
-            '           <select class="oso" style="width: 100%; font-size: 13px"><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option><option>27-258-256-0000-235 direccion superior de la usfx</option>  </select> '+
+            '       <div class="cell cell__big" style="vertical-align: middle; text-align: center">' +
+            '        <button class="btn btn-info btn-sm">Ver Aperturas</button>       '+
             '       </div>' +
             '   </div>' +
             '   <div class="col-3">' +
-            '       <div class="cell cell__big">asdasdasd</div>' +
+            '       <div class="cell cell__big" style="vertical-align: middle; text-align: center">' +
+            '        <button class="btn btn-info btn-sm">Ver Indicadores</button>       '+
+            '       </div>' +
             '   </div>' +
             '</div>'
         );

@@ -34,8 +34,8 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
                     <form id="formPei" action="" method="post">
                         <div class="form-group">
                             <label for="descripcionPei" class="control-label">Descripcion del pei</label>
-                            <input type="text" class="form-control input-sm txt" id="descripcionPei"
-                                   name="descripcionPei" placeholder="descripcion del pei">
+                            <textarea class="form-control input-sm txt" id="descripcionPei"
+                                      name="descripcionPei" rows="3" placeholder="descripcion del pei"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="fechaAprobacion" class="control-label">Fecha de aprobacion</label>
@@ -45,12 +45,12 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
                         <div class="form-group">
                             <label for="gestionInicio">Gestion de inicio</label>
                             <input type="text" class="form-control input-sm num" id="gestionInicio" name="gestionInicio"
-                                   placeholder="Gestion de inicio">
+                                   placeholder="Gestion Inicio" style="width: 130px">
                         </div>
                         <div class="form-group">
                             <label for="gestionFin">Gestion Final</label>
                             <input type="text" class="form-control input-sm num" id="gestionFin" name="gestionFin"
-                                   placeholder="Gestion final">
+                                   placeholder="Gestion final" style="width: 130px">
                         </div>
                     </form>
                 </div>

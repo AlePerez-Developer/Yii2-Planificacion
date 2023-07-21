@@ -78,10 +78,10 @@ class ObjEstrategicoController extends Controller
                 $obj = new ObjetivoEstrategico();
                 $obj->CodigoObjEstrategico = ObjEstrategicoDao::GenerarCodigoObjEstrategico();
                 $obj->CodigoPei = $_POST["codigopei"];
-                $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
-                $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
+                $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
                 $obj->CodigoEstado = 'V';
-                $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+                $obj->CodigoUsuario = 'BGC';//Yii::$app->user->identity->CodigoUsuario;
                 if ($obj->validate()){
                     if (!$obj->exist()){
                         if ($obj->save())
@@ -94,7 +94,6 @@ class ObjEstrategicoController extends Controller
                         return "errorExiste";
                     }
                 } else {
-                    var_dump($obj->errors);
                     return "errorValidacion";
                 }
             } else {
@@ -192,8 +191,8 @@ class ObjEstrategicoController extends Controller
                 $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
                 if ($obj){
                     $obj->CodigoPei = $_POST["codigopei"];
-                    $obj->CodigoCOGE = strtoupper(trim($_POST["codigocoge"]));
-                    $obj->Objetivo = strtoupper(trim($_POST["objetivo"]));
+                    $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                    $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
                     if ($obj->validate()){
                         if (!$obj->exist()){
                             if ($obj->update() !== false) {

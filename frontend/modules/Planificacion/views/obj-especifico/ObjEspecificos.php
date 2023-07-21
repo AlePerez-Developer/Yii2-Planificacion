@@ -51,8 +51,8 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
                         </div>
 
                         <div class="form-group">
-                            <label for="CodigoCOGE">Codigo de objetico institucional (COGE)</label>
-                            <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Coge" style="width: 80px" >
+                            <label for="CodigoCOGE">Codigo de Objetivo de Gestion Especifico (OGE)</label>
+                            <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Codigo" style="width: 80px" >
                         </div>
                         <div class="form-group">
                             <label for="Objetivo" class="control-label">Descripcion del objetivo especifico</label>
