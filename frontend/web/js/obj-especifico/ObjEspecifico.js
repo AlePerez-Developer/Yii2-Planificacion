@@ -132,31 +132,17 @@ $(document).ready(function(){
                 contentType: false,
                 processData: false,
                 success: function (respuesta) {
-                    let data = JSON.parse(JSON.stringify(respuesta));
-                    alert(data)
+                    var data = jQuery.parseJSON(respuesta);
                     var sel = $("#CodigoObjInstitucional");
                     sel.empty();
                     sel.append('<option></option>');
-                    for (var i=0; i<data.length; i++) {
-                        sel.append('<option value="' + data[i].CodigoObjInstitucional + '">' + data[i].Objetivo + '</option>');
-                    }
+                    $.each(data, function(index, value) {
+                        sel.append('<option value="' + value['CodigoObjInstitucional'] + '">' + value['Objetivo'] + '</option>');
+                    });
                     $('#CodigoObjInstitucional').prop('disabled', false);
-                    /*$('#CodigoObjInstitucional').prop('disabled', false);
-                    //let data = JSON.parse(JSON.stringify(respuesta));
-                    $("#codigo").val(data.CodigoObjInstitucional);
-                    $("#CodigoObjEstrategico").val(data.CodigoObjEstrategico);
-                    $(".objestrategicos").val(data.CodigoObjEstrategico).trigger('change')
-                    $("#CodigoCOGE").val(data.CodigoCOGE);
-                    $("#Objetivo").val(data.Objetivo);
-                    $("#btnMostrarCrearObj").trigger('click');*/
                 },
             });
-        }
-
-
-
-
-        else {
+        } else {
             $("#CodigoObjInstitucional").val(null).trigger('change');
             $('#CodigoObjInstitucional').prop('disabled', true);
         }
