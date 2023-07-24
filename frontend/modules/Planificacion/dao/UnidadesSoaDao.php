@@ -7,7 +7,7 @@ namespace app\modules\Planificacion\models;
 use yii\base\BaseObject;
 use yii\db\Query;
 
-class UnidadesDao
+class UnidadesSoaDao
 {
     /*=====================================================
          Genera un nuevo codigo de Objetivo Estrategico

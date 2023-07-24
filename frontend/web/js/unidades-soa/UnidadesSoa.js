@@ -30,25 +30,48 @@ $(document).ready(function(){
 
             }
         ],
-        columnDefs: [
-            {
-                targets: [0,5,6],
-                className: 'dt-center'
-            },
-            {
-                targets: [0,5,6],
-                searchable: false,
-                orderable: false
-            }
-        ],
-        order: [[1, 'asc']],
         ajax: {
             method: "POST",
             dataType: 'json',
             cache: false,
-            url: 'index.php?r=Planificacion/unidades/listar-unidades',
+            url: 'index.php?r=Planificacion/unidades-soa/listar-unidades',
             data:{ }
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,1,5,6] },
+            { orderable: false, targets: [0,5,6] },
+            { searchable: false, targets: [0,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
+        ],
+        columns: [
+            { data: 'CodigoUsuario' },
+            { data: 'CodigoUnidad'},
+            { data: 'NombreUnidad' },
+            { data: 'NombreCorto' },
+            { data: 'CodigoUnidadPadre' },
+            {
+                data: 'CodigoEstado',
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "C" >No vigente</button>' ;
+                },
+            },
+            {
+                data: 'null',
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + row.CodigoUnidad + '" ><i class="fa fa-pen"></i> Editar </button>' +
+                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + row.CodigoUnidad + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '</div>'
+                        : data;
+                },
+            },
+        ],
+
         "deferRender": true,
         "retrieve": true,
         "processing": true,
@@ -88,7 +111,7 @@ $(document).ready(function(){
     function LoadArbol(){
         $arbol.tree('destroy')
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/listar-unidades-padre",
+            url: "index.php?r=Planificacion/unidades-soa/listar-unidades-padre",
             method: "POST",
             cache: false,
             contentType: false,
@@ -189,7 +212,7 @@ $(document).ready(function(){
                     Swal.fire({
                         icon: "warning",
                         title: "Advertencia...",
-                        text: 'Debe seleccionar una unidades padre para la nueva unidades',
+                        text: 'Debe seleccionar una unidades-soa padre para la nueva unidades-soa',
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
@@ -215,7 +238,7 @@ $(document).ready(function(){
         datos.append("nombrecorto", nombrecorto);
         datos.append("unidadpadre", unidadpadre);
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/guardar-unidad",
+            url: "index.php?r=Planificacion/unidades-soa/guardar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -227,7 +250,7 @@ $(document).ready(function(){
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "Los datos de la nueva unidades se guardaron correctamente",
+                        text: "Los datos de la nueva unidades-soa se guardaron correctamente",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
@@ -239,7 +262,7 @@ $(document).ready(function(){
                 else {
                     let mensaje;
                     if (respuesta === "existe") {
-                        mensaje = "Los datos ingresados ya corresponden a una unidades existente";
+                        mensaje = "Los datos ingresados ya corresponden a una unidades-soa existente";
                     } else if (respuesta === "errorval") {
                         mensaje = "Error: Ocurrio un error al validar los datos enviados";
                     } else if (respuesta === "errorenvio") {
@@ -274,7 +297,7 @@ $(document).ready(function(){
         let datos = new FormData();
         datos.append("codigounidad", codigounidad);
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/cambiar-estado-unidad",
+            url: "index.php?r=Planificacion/unidades-soa/cambiar-estado-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -328,7 +351,7 @@ $(document).ready(function(){
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de borrar la unidades seleccionada?",
+            text: "¿Está seguro de borrar la unidades-soa seleccionada?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -337,7 +360,7 @@ $(document).ready(function(){
         }).then(function (resultado) {
             if (resultado.value) {
                 $.ajax({
-                    url: "index.php?r=Planificacion/unidades/eliminar-unidad",
+                    url: "index.php?r=Planificacion/unidades-soa/eliminar-unidad",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -348,7 +371,7 @@ $(document).ready(function(){
                             Swal.fire({
                                 icon: "success",
                                 title: "Exito...",
-                                text: "La unidades ha sido borrada correctamente.",
+                                text: "La unidades-soa ha sido borrada correctamente.",
                                 showCancelButton: false,
                                 confirmButtonColor: "#3085d6",
                                 confirmButtonText: "Cerrar"
@@ -360,7 +383,7 @@ $(document).ready(function(){
                         else {
                             let mensaje;
                             if (respuesta === "enUso") {
-                                mensaje = "Error: la unidades se encuentra en uso y no puede ser eliminada";
+                                mensaje = "Error: la unidades-soa se encuentra en uso y no puede ser eliminada";
                             } else if (respuesta === "errorval") {
                                 mensaje = "Error: Ocurrio un error al validar los datos enviados";
                             } else if (respuesta === "errorenvio") {
@@ -395,7 +418,7 @@ $(document).ready(function(){
         let datos = new FormData();
         datos.append("codigounidad", codigounidad);
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/buscar-unidad",
+            url: "index.php?r=Planificacion/unidades-soa/buscar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -450,7 +473,7 @@ $(document).ready(function(){
         datos.append("nombreunidad", nombreunidad);
         datos.append("nombrecorto", nombrecorto);
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/actualizar-unidad",
+            url: "index.php?r=Planificacion/unidades-soa/actualizar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -462,7 +485,7 @@ $(document).ready(function(){
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "La unidades seleccionada se actualizo correctamente.",
+                        text: "La unidades-soa seleccionada se actualizo correctamente.",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
@@ -474,7 +497,7 @@ $(document).ready(function(){
                 else {
                     let mensaje;
                     if (respuesta === "existe") {
-                        mensaje = "Los datos ingresados ya corresponden a una unidades existente";
+                        mensaje = "Los datos ingresados ya corresponden a una unidades-soa existente";
                     } else if (respuesta === "errorval") {
                         mensaje = "Error: Ocurrio un error al validar los datos enviados";
                     } else if (respuesta === "errorenvio") {

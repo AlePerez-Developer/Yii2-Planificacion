@@ -294,12 +294,12 @@ $(document).ready(function() {
         },
         messages: {
             nombreUnidad: {
-                required: "Debe ingresar un nombre para la unidades",
+                required: "Debe ingresar un nombre para la unidades-soa",
                 minlength: "El nombre debe tener almenos 5 letras",
                 maxlength: "El nombre debe tener maximo 150 letras"
             },
             nombreCorto: {
-                required: "Debe ingresar un nombre corto para la unidades",
+                required: "Debe ingresar un nombre corto para la unidades-soa",
                 minlength: "El nombre corto debe tener almenos 2 letras",
                 maxlength: "El nombre corto debe tener maximo 150 letras"
             }

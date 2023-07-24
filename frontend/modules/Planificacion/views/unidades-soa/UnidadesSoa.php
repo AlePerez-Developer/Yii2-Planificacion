@@ -3,7 +3,7 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/unidades/unidades.js",[
+$this->registerJsFile("@web/js/unidades-soa/UnidadesSoa.js",[
     'depends' => [
         JqueryAsset::className()
     ]

@@ -49,7 +49,7 @@ $(document).ready(function(){
             dataSrc: '',
         },
         columns: [
-            { data: 'Unidad' },
+            { data: 'UnidadSoa' },
             { data: 'NombreUnidad' },
             { data: 'NombreCargo' },
             { data: 'CodigoSectorTrabajo' },

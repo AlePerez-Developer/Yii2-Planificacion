@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace app\modules\Planificacion\models;
 
 use Yii;
 
@@ -15,7 +15,7 @@ use Yii;
  * @property string|null $FechaHoraRegistro
  * @property string $CodigoUsuario
  */
-class Unidad extends \yii\db\ActiveRecord
+class UnidadSoa extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -41,7 +41,7 @@ class Unidad extends \yii\db\ActiveRecord
             [['CodigoUnidad'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['CodigoUnidadPadre'], 'exist', 'skipOnError' => true, 'targetClass' => Unidad::className(), 'targetAttribute' => ['CodigoUnidadPadre' => 'CodigoUnidad']],
+            [['CodigoUnidadPadre'], 'exist', 'skipOnError' => true, 'targetClass' => UnidadSoa::className(), 'targetAttribute' => ['CodigoUnidadPadre' => 'CodigoUnidad']],
         ];
     }
 
@@ -51,10 +51,10 @@ class Unidad extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'CodigoUnidad' => 'Codigo Unidad',
-            'NombreUnidad' => 'Nombre Unidad',
-            'NombreCorto' => 'Nombre Corto Unidad',
-            'CodigoUnidadPadre' => 'Codigo Unidad Padre',
+            'CodigoUnidad' => 'Codigo UnidadSoa',
+            'NombreUnidad' => 'Nombre UnidadSoa',
+            'NombreCorto' => 'Nombre Corto UnidadSoa',
+            'CodigoUnidadPadre' => 'Codigo UnidadSoa Padre',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
@@ -63,7 +63,7 @@ class Unidad extends \yii\db\ActiveRecord
 
     public function exist()
     {
-        $unidad = Unidad::find()->where(["NombreUnidad" => $this->NombreUnidad])->andWhere(['!=', 'CodigoUnidad', $this->CodigoUnidad])->andWhere(["CodigoEstado"=>"V"])->all();
+        $unidad = UnidadSoa::find()->where(["NombreUnidad" => $this->NombreUnidad])->andWhere(['!=', 'CodigoUnidad', $this->CodigoUnidad])->andWhere(["CodigoEstado"=>"V"])->all();
         if(!empty($unidad)){
             return true;
         }else{
@@ -73,7 +73,7 @@ class Unidad extends \yii\db\ActiveRecord
 
     public function enUso()
     {
-        $unidad = Unidad::find()->where(['CodigoUnidadPadre' => $this->CodigoUnidad])->all();
+        $unidad = UnidadSoa::find()->where(['CodigoUnidadPadre' => $this->CodigoUnidad])->all();
         if( !empty($unidad) || ($this->CodigoUnidadPadre == null) ){
             return true;
         }else{
@@ -83,7 +83,7 @@ class Unidad extends \yii\db\ActiveRecord
 
     public function getUnidadPadre()
     {
-        $value = $this->hasOne(Unidad::className(), ['CodigoUnidad' => 'CodigoUnidadPadre']);
+        $value = $this->hasOne(UnidadSoa::className(), ['CodigoUnidad' => 'CodigoUnidadPadre']);
         if ($value)
             return   $value;
         else

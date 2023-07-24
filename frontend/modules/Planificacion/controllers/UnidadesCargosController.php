@@ -3,10 +3,10 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\models\CargosDao;
-use app\modules\Planificacion\models\UnidadesDao;
+use app\modules\Planificacion\models\UnidadesSoaDao;
 use common\models\Cargo;
 use common\models\SectorTrabajo;
-use common\models\Unidad;
+use common\models\UnidadSoa;
 use common\models\UnidadCargo;
 use yii\base\BaseObject;
 use yii\filters\AccessControl;
@@ -60,11 +60,11 @@ class UnidadesCargosController extends Controller
     {
         $Data = array();
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $cargos = UnidadCargo::find()->select(['Unidad','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario','Unidades.CodigoUnidad','Cargos.CodigoCargo'])
-                ->join('INNER JOIN','Unidades', 'UnidadesCargos.Unidad = Unidades.CodigoUnidad')
+            $cargos = UnidadCargo::find()->select(['UnidadSoa','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario','Unidades.CodigoUnidad','Cargos.CodigoCargo'])
+                ->join('INNER JOIN','Unidades', 'UnidadesCargos.UnidadSoa = Unidades.CodigoUnidad')
                 ->join('INNER JOIN','Cargos', 'UnidadesCargos.Cargo = Cargos.CodigoCargo')
                 ->where(['!=','UnidadesCargos.CodigoEstado','E'])
-                ->orderBy('Unidad')
+                ->orderBy('UnidadSoa')
                 ->asArray()->all();
 
             foreach($cargos as  $cargo) {
@@ -77,7 +77,7 @@ class UnidadesCargosController extends Controller
     public function actionListarUnidadesPadre()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $unidades = Unidad::find()->where(['CodigoUnidadPadre' => null])->all();
+            $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => null])->all();
             $datosJson = '[';
             foreach ($unidades as $index => $unidad) {
                 $datosJson .= '{"name": "'.$unidad->NombreUnidad.'", "id": "'.$unidad->CodigoUnidad.'"';
@@ -95,7 +95,7 @@ class UnidadesCargosController extends Controller
 
     public function getData($padre){
         $data = '';
-        $unidades = Unidad::find()->where(['CodigoUnidadPadre' => $padre])->all();
+        $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => $padre])->all();
         if ($unidades){
             $data .= ',"children":[';
             foreach ($unidades as $index => $unidad){
@@ -158,7 +158,7 @@ class UnidadesCargosController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
-                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                $data = UnidadCargo::find()->where(['UnidadSoa' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
                 if ($data){
                     if ($data->CodigoEstado == "V") {
                         $data->CodigoEstado = "C";
@@ -185,7 +185,7 @@ class UnidadesCargosController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
-                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                $data = UnidadCargo::find()->where(['UnidadSoa' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
                 if ($data){
                     if (!$data->isUsed()) {
                         $data->CodigoEstado = 'E';

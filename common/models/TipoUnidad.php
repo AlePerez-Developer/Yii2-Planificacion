@@ -16,7 +16,7 @@ use Yii;
  *
  * @property Estados $codigoEstado
  * @property Usuarios $codigoUsuario
- * @property Unidades[] $unidades
+ * @property Unidades[] $unidades-soa
  */
 class TipoUnidad extends \yii\db\ActiveRecord
 {
@@ -54,8 +54,8 @@ class TipoUnidad extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'CodigoTipoUnidad' => 'Codigo Tipo Unidad',
-            'NombreTipoUnidad' => 'Nombre Tipo Unidad',
+            'CodigoTipoUnidad' => 'Codigo Tipo UnidadSoa',
+            'NombreTipoUnidad' => 'Nombre Tipo UnidadSoa',
             'Organigrama' => 'Organigrama',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',

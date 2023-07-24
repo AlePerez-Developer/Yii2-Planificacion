@@ -53,9 +53,9 @@
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',
                         'items' => [
-                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidades/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidades-soa/index'], 'iconStyle' => 'far'],
                             ['label' => 'Cargos', 'url' => ['/Planificacion/cargos/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Unidades - Cargos', 'url' => ['/Planificacion/unidades-cargos/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades - Cargos', 'url' => ['/Planificacion/unidades-soa-cargos/index'], 'iconStyle' => 'far'],
                         ]
                     ]
                 ],

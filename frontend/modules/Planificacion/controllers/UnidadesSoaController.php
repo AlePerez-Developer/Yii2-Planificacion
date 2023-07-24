@@ -1,14 +1,14 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\UnidadesDao;
-use common\models\Unidad;
+use app\modules\Planificacion\models\UnidadesSoaDao;
+use app\modules\Planificacion\models\UnidadSoa;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use Yii;
 
-class UnidadesController extends Controller
+class UnidadesSoaController extends Controller
 {
     public function behaviors()
     {
@@ -38,67 +38,28 @@ class UnidadesController extends Controller
         ];
     }
 
-    public function beforeAction($action)
-    {
-        if ( ($action->id == "listar-unidades") || ($action->id == "listar-unidades-padre") )
-            $this->enableCsrfValidation = false;
-        return parent::beforeAction($action);
-    }
 
     public function actionIndex()
     {
-        return $this->render('Unidades');
+        return $this->render('UnidadesSoa');
     }
 
     public function actionListarUnidades()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $unidades = Unidad::find()->where(['!=','CodigoEstado','E'])->all();
-            $datosJson = '{"data": [';
-            $i=0;
-            foreach($unidades as $index => $unidad) {
-                if ($unidad->CodigoEstado == 'V') {
-                    $colorEstado = "btn-success";
-                    $textoEstado = "VIGENTE";
-                    $estado = 'V';
-                } else {
-                    $colorEstado = "btn-danger";
-                    $textoEstado = "NO VIGENTE";
-                    $estado = "C";
-                }
-                
-                $acciones = "<div class='btn-group' role='group'>";
-                $acciones .= "<button class='btn btn-warning btn-xs  btnEditar' codigo='" . $unidad->CodigoUnidad . "'><i class='fa fa-pen'></i> Editar </button> ";
-                $acciones .= "<button class='btn btn-danger btn-xs  btnEliminar' codigo='" . $unidad->CodigoUnidad . "' ><i class='fa fa-times'></i> Eliminar </button>";
-                $acciones .= '</div>';
-
-                $estado = "<button class='btn " . $colorEstado . " btn-xs btnEstado' codigo='" . $unidad->CodigoUnidad . "' estado='" . $estado . "' >" . $textoEstado . "</button>";
-
-                $padre = ($unidad->CodigoUnidadPadre)?$unidad->unidadPadre->NombreUnidad:'';
-
-                $datosJson .= '[
-					 	"' . ($i) . '",
-					 	"' . $unidad->CodigoUnidad . '",
-					 	"' . $unidad->NombreUnidad . '",
-					 	"' . $unidad->NombreCorto . '",
-					 	"' . $padre . '",
-					 	"' . $estado . '",
-				      	"' . $acciones . '"
-  			    ]';
-                if ($index !== array_key_last($unidades))
-                    $datosJson .= ',';
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
+            $unidades = UnidadSoa::find()->select(['CodigoUnidad','NombreUnidad','NombreCorto','CodigoUnidadPadre','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoUnidad')->asArray()->all();
+            foreach($unidades as  $unidad) {
+                array_push($Data, $unidad);
             }
-        } else {
-            $datosJson = '{"data": [';
         }
-        $datosJson .= ']}';
-        return $datosJson;
+        return json_encode($Data);
     }
 
     public function actionListarUnidadesPadre()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $unidades = Unidad::find()->where(['CodigoUnidadPadre' => null])->all();
+            $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => null])->all();
             $datosJson = '[';
             foreach ($unidades as $index => $unidad) {
                 $datosJson .= '{"name": "'.$unidad->NombreUnidad.'", "id": "'.$unidad->CodigoUnidad.'"';
@@ -116,7 +77,7 @@ class UnidadesController extends Controller
 
     public function getData($padre){
         $data = '';
-        $unidades = Unidad::find()->where(['CodigoUnidadPadre' => $padre])->all();
+        $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => $padre])->all();
         if ($unidades){
             $data .= ',"children":[';
             foreach ($unidades as $index => $unidad){
@@ -135,8 +96,8 @@ class UnidadesController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["nombreunidad"]) && isset($_POST["nombrecorto"]) && isset($_POST["unidadpadre"])){
-                $unidad = new Unidad();
-                $unidad->CodigoUnidad =  UnidadesDao::GenerarCodigoUnidad();
+                $unidad = new UnidadSoa();
+                $unidad->CodigoUnidad =  UnidadesSoaDao::GenerarCodigoUnidad();
                 $unidad->NombreUnidad = strtoupper(trim($_POST["nombreunidad"]));
                 $unidad->NombreCorto = strtoupper(trim($_POST["nombrecorto"]));
                 $unidad->CodigoUnidadPadre = strtoupper(trim($_POST["unidadpadre"]));
@@ -169,7 +130,7 @@ class UnidadesController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigounidad"])) {
-                $unidad = Unidad::findOne($_POST["codigounidad"]);
+                $unidad = UnidadSoa::findOne($_POST["codigounidad"]);
                 if ($unidad){
                     if ($unidad->CodigoEstado == "V") {
                         $unidad->CodigoEstado = "C";
@@ -196,7 +157,7 @@ class UnidadesController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigounidad"]) && $_POST["codigounidad"] != "") {
-                $unidad = Unidad::findOne($_POST["codigounidad"]);
+                $unidad = UnidadSoa::findOne($_POST["codigounidad"]);
                 if ($unidad){
                     if (!$unidad->enUso()) {
                         $unidad->CodigoEstado = 'E';
@@ -223,7 +184,7 @@ class UnidadesController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigounidad"]) && $_POST["codigounidad"] != "") {
-                $unidad = Unidad::findOne($_POST["codigounidad"]);
+                $unidad = UnidadSoa::findOne($_POST["codigounidad"]);
                 if ($unidad){
                     return json_encode($unidad->getAttributes(array('CodigoUnidad','NombreUnidad','NombreCorto','CodigoUnidadPadre')));
                 } else {
@@ -241,7 +202,7 @@ class UnidadesController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigounidad"]) && isset($_POST["unidadpadre"]) && isset($_POST["nombreunidad"]) && isset($_POST["nombrecorto"])){
-                $unidad = Unidad::findOne($_POST["codigounidad"]);
+                $unidad = UnidadSoa::findOne($_POST["codigounidad"]);
                 if ($unidad){
                     $unidad->NombreUnidad = strtoupper(trim($_POST["nombreunidad"]));
                     $unidad->NombreCorto = strtoupper(trim($_POST["nombrecorto"]));
@@ -269,7 +230,4 @@ class UnidadesController extends Controller
             return "errorcabezera";
         }
     }
-
-
-
 }

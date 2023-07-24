@@ -6,7 +6,7 @@ namespace app\modules\Planificacion\controllers;
 use app\modules\Planificacion\models\ItemsDao;
 use common\models\Item;
 use common\models\Cargo;
-use common\models\Unidad;
+use common\models\UnidadSoa;
 use common\models\SectorTrabajo;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -90,7 +90,7 @@ class ItemsController extends Controller
     public function actionListarUnidades()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $unidades = Unidad::find()->where(['CodigoUnidadPadre' => null])->all();
+            $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => null])->all();
             $datosJson = '[';
             foreach ($unidades as $index => $unidad) {
                 $datosJson .= '{"name": "'.$unidad->NombreUnidad.'", "id": "'.$unidad->CodigoUnidad.'"';
@@ -108,7 +108,7 @@ class ItemsController extends Controller
 
     public function getData($padre){
         $data = '';
-        $unidades = Unidad::find()->where(['CodigoUnidadPadre' => $padre])->all();
+        $unidades = UnidadSoa::find()->where(['CodigoUnidadPadre' => $padre])->all();
         if ($unidades){
             $data .= ',"children":[';
             foreach ($unidades as $index => $unidad){

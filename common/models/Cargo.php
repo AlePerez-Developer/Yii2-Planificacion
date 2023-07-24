@@ -3,7 +3,7 @@
 namespace common\models;
 
 /**
- * This is the model class for table "unidades".
+ * This is the model class for table "unidades-soa".
  *
  * @property string $CodigoCargo
  * @property string $NombreCargo
