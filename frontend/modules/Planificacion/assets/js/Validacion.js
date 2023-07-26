@@ -279,6 +279,90 @@ $(document).ready(function() {
         }
     } );
 
+    $( "#formindicador" ).validate( {
+        rules: {
+            Codigo: {
+                required: true,
+                digits: true,
+                max: 9999,
+                DiferenteQue: '0'
+            },
+            Descripcion:{
+                required: true,
+                minlength: 2,
+                maxlength: 200
+            },
+            Articulacion:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            Resultado:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            Tipo:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            Categoria:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            Unidad:{
+                required: true,
+                DiferenteQue: '0'
+            },
+        },
+        messages: {
+            Codigo: {
+                required: "Debe ingresar un codigo de indicador",
+                digits: "Solo se permite numeros enteros",
+                max: "Debe ingresar un numero entero",
+                DiferenteQue: "Debe ingresar un mayor que 0"
+            },
+            Descripcion: {
+                required: "Debe ingresar la descripcion del indicador",
+                minlength: "La descripcion debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion debe tener maximo 200 caracteres"
+            },
+            Articulacion: {
+                required: "Debe seleccionar un tipo de articulacion",
+                DiferenteQue:"Debe seleccionar un tipo de articulacion"
+            },
+            Resultado: {
+                required: "Debe seleccionar un tipo de resultado",
+                DiferenteQue:"Debe seleccionar un tipo de resultado"
+            },
+            Tipo: {
+                required: "Debe seleccionar un tipo de indicador",
+                DiferenteQue:"Debe seleccionar un tipo de indicador"
+            },
+            Categoria: {
+                required: "Debe seleccionar una categoria",
+                DiferenteQue:"Debe seleccionar una categoria"
+            },
+            Unidad: {
+                required: "Debe seleccionar un tipo de unidad",
+                DiferenteQue:"Debe seleccionar un tipo de unidad"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    } );
+
+
+
+
     $( "#formunidad" ).validate({
         rules: {
             nombreUnidad:{
