@@ -1,7 +1,7 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\UnidadesSoaDao;
+use app\modules\Planificacion\dao\UnidadesSoaDao;
 use app\modules\Planificacion\models\UnidadSoa;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -48,7 +48,7 @@ class UnidadesSoaController extends Controller
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $unidades = UnidadSoa::find()->select(['CodigoUnidad','NombreUnidad','NombreCorto','CodigoUnidadPadre','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoUnidad')->asArray()->all();
+            $unidades = UnidadSoa::find()->select(['CodigoUnidad','NombreUnidad','NombreCorto','CodigoUnidadPadre','CodigoEstado','CodigoUsuario', 'CodigoUsuario as Cod'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoUnidad')->asArray()->all();
             foreach($unidades as  $unidad) {
                 array_push($Data, $unidad);
             }
@@ -140,6 +140,7 @@ class UnidadesSoaController extends Controller
                     if ($unidad->update()){
                         return "ok";
                     } else {
+                        var_dump($unidad->errors);
                         return "errorsql";
                     }
                 } else {

@@ -30,17 +30,6 @@ $(document).ready(function(){
 
             }
         ],
-        columnDefs: [
-            {
-                targets: [0,3,4,5],
-                className: 'dt-center'
-            },
-            {
-                targets: [0,4,5],
-                searchable: false,
-                orderable: false
-            }
-        ],
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -48,8 +37,16 @@ $(document).ready(function(){
             url: 'index.php?r=Planificacion/unidades-cargos/listar-unidades-cargos',
             dataSrc: '',
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,,3,4,5] },
+            { orderable: false, targets: [0,4,5] },
+            { searchable: false, targets: [0,4,5] },
+            { className: "dt-acciones", targets: 5 },
+            { className: "dt-estado", targets: 4 },
+        ],
         columns: [
-            { data: 'UnidadSoa' },
+            { data: 'Unidad' },
             { data: 'NombreUnidad' },
             { data: 'NombreCargo' },
             { data: 'CodigoSectorTrabajo' },
@@ -57,8 +54,8 @@ $(document).ready(function(){
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigoc="'+row.CodigoCargo+'" codigou="' + row.CodigoUnidad + '" estado = "V" >VIGENTE</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigoc="'+row.CodigoCargo+'" codigou="' + row.CodigoUnidad + '" estado = "C" >CADUCO</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigoc="'+row.CodigoCargo+'" codigou="' + row.CodigoUnidad + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigoc="'+row.CodigoCargo+'" codigou="' + row.CodigoUnidad + '" estado = "C" >No Vigente</button>' ;
                 },
             },
             {
@@ -184,7 +181,7 @@ $(document).ready(function(){
     function LoadArbol(){
         $arbol.tree('destroy')
         $.ajax({
-            url: "index.php?r=Planificacion/unidades/listar-unidades-padre",
+            url: "index.php?r=Planificacion/unidades-soa/listar-unidades-padre",
             method: "POST",
             cache: false,
             contentType: false,
@@ -367,11 +364,11 @@ $(document).ready(function(){
                 if (respuesta === "ok") {
                     if (estado === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('CADUCO');
+                        objectBtn.html('No vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('VIGENTE');
+                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }

@@ -2,11 +2,11 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\CargosDao;
+use app\modules\Planificacion\dao\CargosDao;
+use app\modules\Planificacion\models\Cargo;
 use common\models\SectorTrabajo;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\models\Cargo;
 use yii\web\Controller;
 use Yii;
 

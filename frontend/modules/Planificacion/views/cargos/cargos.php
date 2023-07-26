@@ -87,7 +87,7 @@ $this->params['breadcrumbs'] = [['label' => 'Cargos']];
             <th style="text-align: center; font-weight: bold;">Manual de Funciones</th>
             <th style="text-align: center; font-weight: bold;">Sector</th>
             <th style="text-align: center; font-weight: bold;">Estado</th>
-            <th style="text-align: center; font-weight: bold; width: 140px ">Acciones</th>
+            <th >Acciones</th>
             </thead>
         </table>
     </div>

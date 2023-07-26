@@ -35,7 +35,7 @@ $(document).ready(function(){
             dataType: 'json',
             cache: false,
             url: 'index.php?r=Planificacion/unidades-soa/listar-unidades',
-            data:{ }
+            dataSrc: '',
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
@@ -46,7 +46,7 @@ $(document).ready(function(){
             { className: "dt-estado", targets: 5 },
         ],
         columns: [
-            { data: 'CodigoUsuario' },
+            { data: 'Cod' },
             { data: 'CodigoUnidad'},
             { data: 'NombreUnidad' },
             { data: 'NombreCorto' },
@@ -60,7 +60,7 @@ $(document).ready(function(){
                 },
             },
             {
-                data: 'null',
+                data: 'CodigoUsuario',
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -307,11 +307,11 @@ $(document).ready(function(){
                 if (respuesta === "ok") {
                     if (estadounidad === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('NO VIGENTE');
+                        objectBtn.html('No Vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('VIGENTE');
+                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }

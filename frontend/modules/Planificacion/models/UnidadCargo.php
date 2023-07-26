@@ -1,11 +1,14 @@
 <?php
 
-namespace common\models;
+namespace app\modules\Planificacion\models;
+
+use common\models\Estado;
+use common\models\Usuario;
 
 /**
  * This is the model class for table "unidades-soa".
  *
- * @property string $UnidadSoa
+ * @property string $Unidad
  * @property string $Cargo
  * @property string $CodigoEstado
  * @property string|null $FechaHoraRegistro
@@ -27,19 +30,19 @@ class UnidadCargo extends \yii\db\ActiveRecord
      */
     public static function primaryKey()
     {
-        return ['UnidadSoa','Cargo'];
+        return ['Unidad','Cargo'];
     }
 
 
     public function rules()
     {
         return [
-            [['UnidadSoa', 'Cargo', 'CodigoEstado', 'CodigoUsuario',], 'required'],
+            [['Unidad', 'Cargo', 'CodigoEstado', 'CodigoUsuario',], 'required'],
             [['FechaHoraRegistro'], 'safe'],
-            [['UnidadSoa', 'Cargo'], 'string', 'max' => 6],
+            [['Unidad', 'Cargo'], 'string', 'max' => 6],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['UnidadSoa'], 'exist', 'skipOnError' => true, 'targetClass' => UnidadSoa::className(), 'targetAttribute' => ['UnidadSoa' => 'CodigoUnidad']],
+            [['Unidad'], 'exist', 'skipOnError' => true, 'targetClass' => UnidadSoa::className(), 'targetAttribute' => ['Unidad' => 'CodigoUnidad']],
             [['Cargo'], 'exist', 'skipOnError' => true, 'targetClass' => Cargo::className(), 'targetAttribute' => ['Cargo' => 'CodigoCargo']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']]
@@ -52,7 +55,7 @@ class UnidadCargo extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'UnidadSoa' => 'UnidadSoa',
+            'Unidad' => 'UnidadSoa',
             'Cargo' => 'Cargo',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
@@ -67,7 +70,7 @@ class UnidadCargo extends \yii\db\ActiveRecord
 
     public function exist()
     {
-        $UnidadCargo = UnidadCargo::find()->where(["UnidadSoa" => $this->Unidad])->andWhere(["Cargo" => $this->Cargo])->all();
+        $UnidadCargo = UnidadCargo::find()->where(["Unidad" => $this->Unidad])->andWhere(["Cargo" => $this->Cargo])->all();
         if(!empty($UnidadCargo)){
             return true;
         }else{
@@ -77,7 +80,7 @@ class UnidadCargo extends \yii\db\ActiveRecord
 
     public function getUnidad()
     {
-        return $this->hasOne(UnidadSoa::className(), ['UnidadSoa' => 'CodigoUnidad']);
+        return $this->hasOne(UnidadSoa::className(), ['Unidad' => 'CodigoUnidad']);
     }
 
     public function getCargo()

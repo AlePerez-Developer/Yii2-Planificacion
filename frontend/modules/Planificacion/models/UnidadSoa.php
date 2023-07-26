@@ -2,6 +2,8 @@
 
 namespace app\modules\Planificacion\models;
 
+use common\models\Estado;
+use common\models\Usuario;
 use Yii;
 
 /**
@@ -31,7 +33,7 @@ class UnidadSoa extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoUnidad', 'NombreUnidad', 'NombreCorto', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoUnidad', 'NombreUnidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoUnidad', 'CodigoUnidadPadre'], 'string', 'max' => 6],
             [['NombreUnidad'], 'string', 'max' => 150],

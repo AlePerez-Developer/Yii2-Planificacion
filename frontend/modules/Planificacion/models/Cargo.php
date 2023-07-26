@@ -1,6 +1,10 @@
 <?php
 
-namespace common\models;
+namespace app\modules\Planificacion\models;
+
+use common\models\Estado;
+use common\models\SectorTrabajo;
+use common\models\Usuario;
 
 /**
  * This is the model class for table "unidades-soa".

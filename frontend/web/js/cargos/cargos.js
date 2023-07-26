@@ -52,21 +52,6 @@ $(document).ready(function(){
 
             }
         ],
-        columnDefs: [
-            {
-                targets: [0,5,6],
-                className: 'dt-center'
-            },
-            {
-                targets: [0,5,6],
-                searchable: false,
-                orderable: false
-            },
-            {
-                targets: [4],
-                orderable: false
-            }
-        ],
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -74,6 +59,14 @@ $(document).ready(function(){
             url: 'index.php?r=Planificacion/cargos/listar-cargos',
             dataSrc: '',
         },
+        columnDefs: [
+            { className: "dt-small", targets: "_all" },
+            { className: "dt-center", targets: [0,4,5,6] },
+            { orderable: false, targets: [0,4,5,6] },
+            { searchable: false, targets: [0,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
+        ],
         columns: [
             { data: 'CodigoUsuario' },
             { data: 'NombreCargo' },
@@ -91,8 +84,8 @@ $(document).ready(function(){
                 data: 'CodigoCargo',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-xs  btnEstado" codigo="' + data + '" estado = "V" >VIGENTE</button>'
-                        : '<button type="button" class="btn btn-danger btn-xs  btnEstado" codigo="' + data + '" estado = "C" >CADUCO</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + data + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + data + '" estado = "C" >No Vigente</button>' ;
                 },
             },
             {
@@ -100,9 +93,9 @@ $(document).ready(function(){
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                          '<button type="button" class="btn btn-warning btn-xs  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> EDITAR </button>' +
-                          '<button type="button" class="btn btn-danger btn-xs  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> ELIMINAR </button>' +
-                          '</div>'
+                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
+                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '</div>'
                         : data;
                 },
             },
@@ -269,11 +262,11 @@ $(document).ready(function(){
                 if (respuesta === "ok") {
                     if (estadocargo === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('CADUCO');
+                        objectBtn.html('No Vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('VIGENTE');
+                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }

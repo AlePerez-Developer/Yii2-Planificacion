@@ -2,12 +2,13 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\CargosDao;
-use app\modules\Planificacion\models\UnidadesSoaDao;
-use common\models\Cargo;
+use app\modules\Planificacion\dao\CargosDao;
+use app\modules\Planificacion\dao\UnidadesSoaDao;
+use app\modules\Planificacion\models\Cargo;
 use common\models\SectorTrabajo;
-use common\models\UnidadSoa;
-use common\models\UnidadCargo;
+use app\modules\Planificacion\models\UnidadSoa;
+use app\modules\Planificacion\models\UnidadCargo;
+
 use yii\base\BaseObject;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -60,11 +61,11 @@ class UnidadesCargosController extends Controller
     {
         $Data = array();
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $cargos = UnidadCargo::find()->select(['UnidadSoa','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario','Unidades.CodigoUnidad','Cargos.CodigoCargo'])
-                ->join('INNER JOIN','Unidades', 'UnidadesCargos.UnidadSoa = Unidades.CodigoUnidad')
+            $cargos = UnidadCargo::find()->select(['Unidad','Unidades.NombreUnidad','Cargos.NombreCargo','Cargos.CodigoSectorTrabajo','UnidadesCargos.CodigoEstado','UnidadesCargos.CodigoUsuario','Unidades.CodigoUnidad','Cargos.CodigoCargo'])
+                ->join('INNER JOIN','Unidades', 'UnidadesCargos.Unidad = Unidades.CodigoUnidad')
                 ->join('INNER JOIN','Cargos', 'UnidadesCargos.Cargo = Cargos.CodigoCargo')
                 ->where(['!=','UnidadesCargos.CodigoEstado','E'])
-                ->orderBy('UnidadSoa')
+                ->orderBy('Unidad')
                 ->asArray()->all();
 
             foreach($cargos as  $cargo) {
@@ -158,7 +159,7 @@ class UnidadesCargosController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
-                $data = UnidadCargo::find()->where(['UnidadSoa' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
                 if ($data){
                     if ($data->CodigoEstado == "V") {
                         $data->CodigoEstado = "C";
@@ -185,7 +186,7 @@ class UnidadesCargosController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigocargo"]) && isset($_POST["codigounidad"])) {
-                $data = UnidadCargo::find()->where(['UnidadSoa' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
+                $data = UnidadCargo::find()->where(['Unidad' => $_POST["codigounidad"], 'Cargo' => $_POST["codigocargo"] ])->one();
                 if ($data){
                     if (!$data->isUsed()) {
                         $data->CodigoEstado = 'E';

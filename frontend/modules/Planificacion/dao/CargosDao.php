@@ -1,7 +1,7 @@
 <?php
 
 
-namespace app\modules\Planificacion\models;
+namespace app\modules\Planificacion\dao;
 
 
 use yii\base\BaseObject;
