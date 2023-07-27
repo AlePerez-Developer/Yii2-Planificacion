@@ -16,7 +16,7 @@ class UnidadesSoaDao
     {
         $consulta = new Query();
         $arrayMaximo = $consulta->select('max(cast(substring(CodigoUnidad, len(CodigoUnidad)-2,len(CodigoUnidad)) AS int)) AS Maximo')
-            ->from('Unidades')
+            ->from('UnidadesSoa')
             ->one();
         if (!$arrayMaximo) {
             $maximo = 0;

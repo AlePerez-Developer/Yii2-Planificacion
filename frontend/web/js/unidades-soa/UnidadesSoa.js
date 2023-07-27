@@ -174,11 +174,11 @@ $(document).ready(function(){
     $("#IngresoDatos").hide();
 
     function ReiniciarCampos(){
-        $('#formunidad *').filter(':input').each(function () {
+        $('#formunidadsoa *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $("#codigo").val('');
-        $("#formunidad").trigger("reset");
+        $("#formunidadsoa").trigger("reset");
     }
 
     $("#btnMostrarCrearUnidad").click(function () {
@@ -204,7 +204,7 @@ $(document).ready(function(){
 
     $(".btnGuardar").click(function () {
         let node = $arbol.tree('getSelectedNode');
-        if ($("#formunidad").valid()){
+        if ($("#formunidadsoa").valid()){
             if ($("#codigo").val() === ''){
                 if (node ){
                     GuardarUnidad();

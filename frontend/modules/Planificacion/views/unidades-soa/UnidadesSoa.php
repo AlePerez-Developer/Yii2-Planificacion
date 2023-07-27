@@ -30,7 +30,7 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
                     <input type="text" id="codigo" name="codigo" disabled hidden >
-                    <form id="formunidad" action="" method="post">
+                    <form id="formunidadsoa" action="" method="post">
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="card">
