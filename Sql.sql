@@ -222,6 +222,18 @@ create table Proyectos
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+create table Programas
+(
+    CodigoPrograma int primary key not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
 
 
 

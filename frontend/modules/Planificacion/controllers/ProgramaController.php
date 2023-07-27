@@ -1,14 +1,14 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\dao\ActividadDao;
-use app\modules\Planificacion\models\Actividad;
+use app\modules\Planificacion\dao\ProgramaDao;
+use app\modules\Planificacion\models\Programa;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
 use Yii;
 
-class ActividadController extends Controller
+class ProgramaController extends Controller
 {
     public function behaviors()
     {
@@ -40,42 +40,42 @@ class ActividadController extends Controller
 
     public function beforeAction($action)
     {
-        if ($action->id == "listar-actividades")
+        if ($action->id == "listar-programas")
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
 
     public function actionIndex()
     {
-        return $this->render('Actividades');
+        return $this->render('Programas');
     }
 
-    public function actionListarActividades()
+    public function actionListarProgramas()
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $actividades = Actividad::find()->select(['CodigoActividad','Codigo','Descripcion','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('Codigo')->asArray()->all();
-            foreach($actividades as  $actividad) {
-                array_push($Data, $actividad);
+            $programas = Programa::find()->select(['CodigoPrograma','Codigo','Descripcion','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('Codigo')->asArray()->all();
+            foreach($programas as  $programa) {
+                array_push($Data, $programa);
             }
         }
         return json_encode($Data);
     }
 
-    public function actionGuardarActividad()
+    public function actionGuardarPrograma()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if ( isset($_POST["codigo"]) && isset($_POST["descripcion"]))
             {
-                $actividad = new Actividad();
-                $actividad->CodigoActividad = ActividadDao::GenerarCodigoActividad();
-                $actividad->Codigo = $_POST["codigo"];
-                $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                $actividad->CodigoEstado = 'V';
-                $actividad->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
-                if ($actividad->validate()){
-                    if (!$actividad->exist()){
-                        if ($actividad->save())
+                $programa = new Programa();
+                $programa->CodigoPrograma = ProgramaDao::GenerarCodigoPrograma();
+                $programa->Codigo = $_POST["codigo"];
+                $programa->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
+                $programa->CodigoEstado = 'V';
+                $programa->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
+                if ($programa->validate()){
+                    if (!$programa->exist()){
+                        if ($programa->save())
                         {
                             return "ok";
                         } else
@@ -96,18 +96,18 @@ class ActividadController extends Controller
         }
     }
 
-    public function actionCambiarEstadoActividad()
+    public function actionCambiarEstadoPrograma()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigo"])) {
-                $actividad = Actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    if ($actividad->CodigoEstado == "V") {
-                        $actividad->CodigoEstado = "C";
+                $programa = Programa::findOne($_POST["codigo"]);
+                if ($programa){
+                    if ($programa->CodigoEstado == "V") {
+                        $programa->CodigoEstado = "C";
                     } else {
-                        $actividad->CodigoEstado = "V";
+                        $programa->CodigoEstado = "V";
                     }
-                    if ($actividad->update()){
+                    if ($programa->update()){
                         return "ok";
                     } else {
                         return "errorSql";
@@ -123,15 +123,15 @@ class ActividadController extends Controller
         }
     }
 
-    public function actionEliminarActividad()
+    public function actionEliminarPrograma()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $actividad = Actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    if (!$actividad->isUsed()) {
-                        $actividad->CodigoEstado = 'E';
-                        if ($actividad->update()) {
+                $programa = Programa::findOne($_POST["codigo"]);
+                if ($programa){
+                    if (!$programa->isUsed()) {
+                        $programa->CodigoEstado = 'E';
+                        if ($programa->update()) {
                             return "ok";
                         } else {
                             return "errorSql";
@@ -150,13 +150,13 @@ class ActividadController extends Controller
         }
     }
 
-    public function actionBuscarActividad()
+    public function actionBuscarPrograma()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $actividad = actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    return json_encode($actividad->getAttributes(array('CodigoActividad','Codigo','Descripcion')));
+                $programa = Programa::findOne($_POST["codigo"]);
+                if ($programa){
+                    return json_encode($programa->getAttributes(array('CodigoPrograma','Codigo','Descripcion')));
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -168,17 +168,17 @@ class ActividadController extends Controller
         }
     }
 
-    public function actionActualizarActividad()
+    public function actionActualizarPrograma()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoactividad"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
-                $actividad = Actividad::findOne($_POST["codigoactividad"]);
-                if ($actividad){
-                    $actividad->Codigo = $_POST["codigo"];
-                    $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                    if ($actividad->validate()){
-                        if (!$actividad->exist()){
-                            if ($actividad->update() !== false) {
+            if (isset($_POST["codigoprograma"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
+                $programa = Programa::findOne($_POST["codigoprograma"]);
+                if ($programa){
+                    $programa->Codigo = $_POST["codigo"];
+                    $programa->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
+                    if ($programa->validate()){
+                        if (!$programa->exist()){
+                            if ($programa->update() !== false) {
                                 return "ok";
                             } else {
                                 return "errorSql";
