@@ -4,7 +4,7 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/actividades/Actividades.js", [
+$this->registerJsFile("@web/js/actividad/Actividad.js", [
     'depends' => [
         JqueryAsset::className()
     ]
@@ -34,12 +34,12 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
                     <form id="formActividades" action="" method="post">
 
                         <div class="form-group">
-                            <label for="Codigo" class="control-label">Codigo proyecto</label>
-                            <input id="Codigo" name="Codigo" placeholder="Ingresar codigo de la actividad" class="form-control input-lg num">
+                            <label for="Codigo" class="control-label">Codigo de actividad</label>
+                            <input id="Codigo" name="Codigo"  placeholder="Codigo" style="width: 80px" class="form-control input-lg num">
                         </div>
 
                         <div class="form-group">
-                            <label for="Descripcion">Descripcion</label>
+                            <label for="Descripcion">Descripcion de la actividad</label>
                             <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="Descripcion" placeholder="Descripcion"></textarea>
                         </div>
 

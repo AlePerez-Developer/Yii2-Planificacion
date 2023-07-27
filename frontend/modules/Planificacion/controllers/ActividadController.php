@@ -2,13 +2,12 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\models\Actividad;
-use yii\base\BaseObject;
-use yii\web\Controller;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\web\Controller;
 use Yii;
 
-class ActividadesController extends Controller
+class ActividadController extends Controller
 {
     public function behaviors()
     {
@@ -40,14 +39,14 @@ class ActividadesController extends Controller
 
     public function beforeAction($action)
     {
-        if ($action->id == "listar-actividades")
+        if ($action->id == "listar-actividad")
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
 
     public function actionIndex()
     {
-        return $this->render('actividades');
+        return $this->render('Actividades');
     }
 
     public function actionListarActividades()
@@ -69,9 +68,9 @@ class ActividadesController extends Controller
             {
                 $actividad = new Actividad();
                 $actividad->Codigo = $_POST["codigo"];
-                $actividad->Descripcion = strtoupper(trim($_POST["descripcion"]));
+                $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $actividad->CodigoEstado = 'V';
-                $actividad->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+                $actividad->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
                 if ($actividad->validate()){
                     if (!$actividad->exist()){
                         if ($actividad->save())
@@ -170,11 +169,11 @@ class ActividadesController extends Controller
     public function actionActualizarActividad()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoActividad"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
-                $actividad = Actividad::findOne($_POST["codigoActividad"]);
+            if (isset($_POST["codigoactividad"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
+                $actividad = Actividad::findOne($_POST["codigoactividad"]);
                 if ($actividad){
                     $actividad->Codigo = $_POST["codigo"];
-                    $actividad->Descripcion = strtoupper(trim($_POST["descripcion"]));
+                    $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                     if ($actividad->validate()){
                         if (!$actividad->exist()){
                             if ($actividad->update() !== false) {

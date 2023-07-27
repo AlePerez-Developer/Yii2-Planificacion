@@ -76,6 +76,129 @@ create table ObjetivosEspecificos(
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+create table TiposArticulaciones(
+    CodigoTipo int primary key not null,
+    Descripcion Varchar(200) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into TiposArticulaciones values(1,'POA','V',default,'ADM')
+insert into TiposArticulaciones values(2,'PEI','V',default,'ADM')
+
+go
+
+create table TiposResultados(
+    CodigoTipo int primary key not null,
+    Descripcion Varchar(200) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into TiposResultados values(1,'Bien','V',default,'ADM')
+insert into TiposResultados values(2,'Norma','V',default,'ADM')
+insert into TiposResultados values(3,'Servicio','V',default,'ADM')
+
+go
+
+create table TiposIndicadores(
+    CodigoTipo int primary key not null,
+    Descripcion Varchar(200) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into TiposIndicadores values(1,'Gestion','V',default,'ADM')
+insert into TiposIndicadores values(2,'Resultado','V',default,'ADM')
+
+go
+
+create table CategoriasIndicadores(
+    CodigoCategoria int primary key not null,
+    Descripcion Varchar(200) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into CategoriasIndicadores values(1,'Proceso','V',default,'ADM')
+insert into CategoriasIndicadores values(2,'Producto','V',default,'ADM')
+insert into CategoriasIndicadores values(3,'Recursos Financieros','V',default,'ADM')
+insert into CategoriasIndicadores values(4,'Recursos Fisicos','V',default,'ADM')
+insert into CategoriasIndicadores values(5,'Recursos Humanos','V',default,'ADM')
+
+go
+
+create table IndicadoresUnidades(
+    CodigoTipo int primary key not null,
+    Descripcion Varchar(200) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+    go
+
+insert into IndicadoresUnidades values(1,'Numero','V',default,'ADM')
+insert into IndicadoresUnidades values(2,'Porcentaje','V',default,'ADM')
+
+
+go
+
+
+create table Indicadores(
+    CodigoIndicador int primary key not null,
+    Codigo int not null,
+    Descripcion Varchar(200) not null,
+    Articulacion int not null,
+    Resultado int not null,
+    TipoIndicador int not null,
+    Categoria int not null,
+    Unidad int not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    Unique(CodigoIndicador,Codigo,Articulacion),
+
+    foreign key (Articulacion) references TiposArticulaciones(CodigoTipo),
+    foreign key (Resultado) references TiposResultados(CodigoTipo),
+    foreign key (TipoIndicador) references TiposIndicadores(CodigoTipo),
+    foreign key (Categoria) references CategoriasIndicadores(CodigoCategoria),
+    foreign key (Unidad) references IndicadoresUnidades(CodigoTipo),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+
+
+
 
 create table AperturasProgramaticas
 (

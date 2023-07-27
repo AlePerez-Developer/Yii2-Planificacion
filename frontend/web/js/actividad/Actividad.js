@@ -1,12 +1,5 @@
 $(document).ready(function () {
     let table = $("#tablaListaActividades").DataTable({
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            cache: false,
-            url: 'index.php?r=Planificacion/actividades/listar-actividades',
-            dataSrc: '',
-        },
         dom: 'Bfrtip',
         buttons: [
             {
@@ -37,17 +30,20 @@ $(document).ready(function () {
 
             }
         ],
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            cache: false,
+            url: 'index.php?r=Planificacion/actividad/listar-actividades',
+            dataSrc: '',
+        },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            {
-                targets: [0,1,3,4],
-                className: 'dt-center'
-            },
-            {
-                targets: [0,3,4],
-                searchable: false,
-                orderable: false
-            }
+            { className: "dt-center", targets: [0,1,3,4] },
+            { orderable: false, targets: [0,3,4] },
+            { searchable: false, targets: [0,3,4] },
+            { className: "dt-acciones", targets: 4 },
+            { className: "dt-estado", targets: 3 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
@@ -158,7 +154,7 @@ $(document).ready(function () {
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
-            url: "index.php?r=Planificacion/actividades/guardar-actividad",
+            url: "index.php?r=Planificacion/actividad/guardar-actividad",
             method: "POST",
             data: datos,
             cache: false,
@@ -216,7 +212,7 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/actividades/cambiar-estado-actividad",
+            url: "index.php?r=Planificacion/actividad/cambiar-estado-actividad",
             method: "POST",
             data: datos,
             cache: false,
@@ -279,7 +275,7 @@ $(document).ready(function () {
         }).then(function (resultado) {
             if (resultado.value) {
                 $.ajax({
-                    url: "index.php?r=Planificacion/actividades/eliminar-actividad",
+                    url: "index.php?r=Planificacion/actividad/eliminar-actividad",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -304,8 +300,6 @@ $(document).ready(function () {
                                 mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
                             } else if (respuesta === "errorEnvio") {
                                 mensaje = "Error: Ocurrio un error en el envio de los datos.";
-                            } else if (respuesta === "errorValidacion") {
-                                mensaje = "Error: No se llenaron correctamente los datos requeridos.";
                             } else if (respuesta === "errorExiste") {
                                 mensaje = "Error: Los datos ingresados ya corresponden a una actividad existente.";
                             } else if (respuesta === "errorSql") {
@@ -338,7 +332,7 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/actividades/buscar-actividad",
+            url: "index.php?r=Planificacion/actividad/buscar-actividad",
             method: "POST",
             data: datos,
             cache: false,
@@ -381,15 +375,15 @@ $(document).ready(function () {
     ACTUALIZA LA ACTIVIDAD SELECCIONADO EN LA BD
     =============================================*/
     function actualizarActividad() {
-        let codigoActividad = $("#codigo").val();
+        let codigoactividad = $("#codigo").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
-        datos.append("codigoActividad", codigoActividad);
+        datos.append("codigoactividad", codigoactividad);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
-            url: "index.php?r=Planificacion/actividades/actualizar-actividad",
+            url: "index.php?r=Planificacion/actividad/actualizar-actividad",
             method: "POST",
             data: datos,
             cache: false,
