@@ -1,12 +1,5 @@
 $(document).ready(function () {
     let table = $("#tablaListaProyectos").DataTable({
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            cache: false,
-            url: 'index.php?r=Planificacion/proyectos/listar-proyectos',
-            dataSrc: '',
-        },
         dom: 'Bfrtip',
         buttons: [
             {
@@ -37,17 +30,20 @@ $(document).ready(function () {
 
             }
         ],
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            cache: false,
+            url: 'index.php?r=Planificacion/proyecto/listar-proyectos',
+            dataSrc: '',
+        },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            {
-                targets: [0,1,3,4],
-                className: 'dt-center'
-            },
-            {
-                targets: [0,3,4],
-                searchable: false,
-                orderable: false
-            }
+            { className: "dt-center", targets: [0,1,3,4] },
+            { orderable: false, targets: [0,3,4] },
+            { searchable: false, targets: [0,3,4] },
+            { className: "dt-acciones", targets: 4 },
+            { className: "dt-estado", targets: 3 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
@@ -158,7 +154,7 @@ $(document).ready(function () {
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
-            url: "index.php?r=Planificacion/proyectos/guardar-proyecto",
+            url: "index.php?r=Planificacion/proyecto/guardar-proyecto",
             method: "POST",
             data: datos,
             cache: false,
@@ -216,7 +212,7 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/proyectos/cambiar-estado-proyecto",
+            url: "index.php?r=Planificacion/proyecto/cambiar-estado-proyecto",
             method: "POST",
             data: datos,
             cache: false,
@@ -279,7 +275,7 @@ $(document).ready(function () {
         }).then(function (resultado) {
             if (resultado.value) {
                 $.ajax({
-                    url: "index.php?r=Planificacion/proyectos/eliminar-proyecto",
+                    url: "index.php?r=Planificacion/proyecto/eliminar-proyecto",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -305,8 +301,6 @@ $(document).ready(function () {
                             } else if (respuesta === "errorEnvio") {
                                 mensaje = "Error: Ocurrio un error en el envio de los datos.";
                             } else if (respuesta === "errorValidacion") {
-                                mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                            } else if (respuesta === "errorExiste") {
                                 mensaje = "Error: Los datos ingresados ya corresponden a un proyecto existente.";
                             } else if (respuesta === "errorSql") {
                                 mensaje = "Error: Ocurrio un error en la base de datos al eliminar el proyecto.";
@@ -338,7 +332,7 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/proyectos/buscar-proyecto",
+            url: "index.php?r=Planificacion/proyecto/buscar-proyecto",
             method: "POST",
             data: datos,
             cache: false,
@@ -381,15 +375,15 @@ $(document).ready(function () {
     ACTUALIZA EL PROYECTO SELECCIONADO EN LA BD
     =============================================*/
     function actualizarProyecto() {
-        let codigoProyecto = $("#codigo").val();
+        let codigoproyecto = $("#codigo").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
-        datos.append("codigoProyecto", codigoProyecto);
+        datos.append("codigoproyecto", codigoproyecto);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
-            url: "index.php?r=Planificacion/proyectos/actualizar-proyecto",
+            url: "index.php?r=Planificacion/proyecto/actualizar-proyecto",
             method: "POST",
             data: datos,
             cache: false,

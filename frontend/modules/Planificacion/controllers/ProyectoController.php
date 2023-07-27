@@ -3,15 +3,16 @@
 
 namespace app\modules\Planificacion\controllers;
 
+use app\modules\Planificacion\dao\ProyectoDao;
 use app\modules\Planificacion\models\AperturaProgramatica;
 use app\modules\Planificacion\models\Proyecto;
-use yii\base\BaseObject;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\base\BaseObject;
 use yii\web\Controller;
 use Yii;
 
-class ProyectosController extends Controller
+class ProyectoController extends Controller
 {
     public function behaviors()
     {
@@ -50,7 +51,7 @@ class ProyectosController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('proyectos');
+        return $this->render('Proyectos');
     }
 
     public function actionListarProyectos()
@@ -71,10 +72,11 @@ class ProyectosController extends Controller
             if ( isset($_POST["codigo"]) && isset($_POST["descripcion"]))
             {
                 $proyecto = new Proyecto();
+                $proyecto->CodigoProyecto = ProyectoDao::GenerarCodigoProyecto();
                 $proyecto->Codigo = $_POST["codigo"];
-                $proyecto->Descripcion = strtoupper(trim($_POST["descripcion"]));
+                $proyecto->Descripcion =mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $proyecto->CodigoEstado = 'V';
-                $proyecto->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+                $proyecto->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
                 if ($proyecto->validate()){
                     if (!$proyecto->exist()){
                         if ($proyecto->save())
@@ -173,8 +175,8 @@ class ProyectosController extends Controller
     public function actionActualizarProyecto()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoProyecto"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
-                $proyecto = Proyecto::findOne($_POST["codigoProyecto"]);
+            if (isset($_POST["codigoproyecto"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
+                $proyecto = Proyecto::findOne($_POST["codigoproyecto"]);
                 if ($proyecto){
                     $proyecto->Codigo = $_POST["codigo"];
                     $proyecto->Descripcion = strtoupper(trim($_POST["descripcion"]));

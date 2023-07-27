@@ -1,6 +1,7 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
+use app\modules\Planificacion\dao\ActividadDao;
 use app\modules\Planificacion\models\Actividad;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -67,6 +68,7 @@ class ActividadController extends Controller
             if ( isset($_POST["codigo"]) && isset($_POST["descripcion"]))
             {
                 $actividad = new Actividad();
+                $actividad->CodigoActividad = ActividadDao::GenerarCodigoActividad();
                 $actividad->Codigo = $_POST["codigo"];
                 $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $actividad->CodigoEstado = 'V';

@@ -196,6 +196,31 @@ create table Indicadores(
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+create table Actividades
+(
+    CodigoActividad int primary key not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+create table Proyectos
+(
+    CodigoProyecto int primary key not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
 
 
 
@@ -222,19 +247,6 @@ create table AperturasProgramaticas
 create table Proyectos
 (
     CodigoProyecto int primary key identity(1,1) not null,
-    Codigo varchar(20) not null,
-    Descripcion varchar(250) not null,
-    CodigoEstado char(1) not null,
-    FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null,
-
-    foreign key (CodigoEstado) references Estados(CodigoEstado),
-    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
-)
-
-create table Actividades
-(
-    CodigoActividad int primary key identity(1,1) not null,
     Codigo varchar(20) not null,
     Descripcion varchar(250) not null,
     CodigoEstado char(1) not null,

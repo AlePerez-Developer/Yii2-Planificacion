@@ -35,7 +35,7 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
 
                         <div class="form-group">
                             <label for="Codigo" class="control-label">Codigo de actividad</label>
-                            <input id="Codigo" name="Codigo"  placeholder="Codigo" style="width: 80px" class="form-control input-lg num">
+                            <input id="Codigo" name="Codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
                         </div>
 
                         <div class="form-group">

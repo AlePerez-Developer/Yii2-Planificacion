@@ -401,6 +401,47 @@ $(document).ready(function() {
         }
     });
 
+    $( "#formProyectos" ).validate({
+        rules: {
+            Codigo: {
+                required: true,
+                digits: true,
+                minlength: 4,
+                maxlength: 20
+            },
+            Descripcion:{
+                required: true,
+                minlength: 5,
+                maxlength: 250
+            },
+        },
+        messages: {
+            Codigo: {
+                required: "Debe ingresar un codigo para el proyecto",
+                digits: "Solo debe ingresar numeros",
+                minlength: "El codigo debe tener almenos 4 numeros",
+                maxlength: "El codigo debe tener maximo 20 numeros"
+            },
+            Descripcion: {
+                required: "Debe ingresar una descripcion para el proyecto",
+                minlength: "La descripcion debe tener almenos 5 letras",
+                maxlength: "la descripcion debe tener maximo 250 letras"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    });
+
 
 
     $( "#formunidad" ).validate({
@@ -618,46 +659,7 @@ $(document).ready(function() {
 
     });
 
-    $( "#formProyectos" ).validate({
-        rules: {
-            Codigo: {
-                required: true,
-                digits: true,
-                minlength: 4,
-                maxlength: 20
-            },
-            Descripcion:{
-                required: true,
-                minlength: 5,
-                maxlength: 250
-            },
-        },
-        messages: {
-            Codigo: {
-                required: "Debe ingresar un codigo para el proyecto",
-                digits: "Solo debe ingresar numeros",
-                minlength: "El codigo debe tener almenos 4 numeros",
-                maxlength: "El codigo debe tener maximo 20 numeros"
-            },
-            Descripcion: {
-                required: "Debe ingresar una descripcion para el proyecto",
-                minlength: "La descripcion debe tener almenos 5 letras",
-                maxlength: "la descripcion debe tener maximo 250 letras"
-            },
-        },
-        errorElement: "div",
 
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
-        },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-        },
-        unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-        }
-    });
 
 
 });
