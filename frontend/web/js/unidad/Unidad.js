@@ -1,26 +1,14 @@
 $(document).ready(function () {
     function format(d) {
-        // `d` is the original data object for the row
-        let org = (d.Organizacional==='1')?'Si':'No';
-        let op = (d.Operacional==='1')?'Si':'No';
         return (
             '<dl>' +
-                '<dt class="dt-small">Vigencia</dt>' +
-                    '<dd class="dt-small"> De: ' + d.FechaInicio +  ' Hasta: ' + d.FechaFin + '</dd>' +
-                '<dt class="dt-small">Organizacional: '+ org +'</dt>' +
-                '<dt class="dt-small">Operacional: ' + op + '</dt>' +
+            '<dt class="dt-small">Vigencia</dt>' +
+            '<dd class="dt-small"> De: ' + d.FechaInicio +  ' Hasta: ' + d.FechaFin + '</dd>' +
             '</dl>'
         );
     }
 
-    let table = $("#tablaListaAperturasProgramaticas").DataTable({
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            cache: false,
-            url: 'index.php?r=Planificacion/aperturas-programaticas/listar-aperturas',
-            dataSrc: '',
-        },
+    let table = $("#tablaListaUnidades").DataTable({
         dom: 'Bfrtip',
         buttons: [
             {
@@ -43,7 +31,7 @@ $(document).ready(function () {
                         {
                             margin: [0, 0, 0, 12],
                             alignment: 'center',
-                            text: 'Listado de Aperturas Programaticas',
+                            text: 'Listado de Unidades',
 
                         }
                     );
@@ -51,13 +39,42 @@ $(document).ready(function () {
 
             }
         ],
+        initComplete: function () {
+            this.api()
+                .columns([2,3])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value="">Buscar...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            cache: false,
+            url: 'index.php?r=Planificacion/unidad/listar-unidades',
+            dataSrc: '',
+        },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,2,3,4,6,7] },
-            { orderable: false, targets: [0,1,6,7] },
-            { searchable: false, targets: [0,1,6,7] },
-            { className: "dt-acciones", targets: 7 },
-            { className: "dt-estado", targets: 6 },
+            { className: "dt-center", targets: [0,1,2,3,5,6] },
+            { orderable: false, targets: [0,1,2,3,5,6] },
+            { searchable: false, targets: [0,1,5,6] },
+            { className: "dt-acciones", targets: 6 },
+            { className: "dt-estado", targets: 5 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
@@ -68,18 +85,17 @@ $(document).ready(function () {
             },
             { data: 'Da' },
             { data: 'Ue' },
-            { data: 'Prg' },
             { data: 'Descripcion' },
             {
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoAperturaProgramatica + '" estado = "V" >Vigente</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoAperturaProgramatica + '" estado = "C" >No vigente</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "V" >Vigente</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "C" >No vigente</button>' ;
                 },
             },
             {
-                data: 'CodigoAperturaProgramatica',
+                data: 'CodigoUnidad',
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -126,7 +142,7 @@ $(document).ready(function () {
         });
     }).draw();
 
-    $('#tablaListaAperturasProgramaticas tbody').on('click', 'td.dt-control', function () {
+    $('#tablaListaUnidades tbody').on('click', 'td.dt-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
 
@@ -144,7 +160,7 @@ $(document).ready(function () {
     $("#ingresoDatos").hide();
 
     function reiniciarCampos() {
-        $('#formAperturasProgramaticas *').filter(':input').each(function () {
+        $('#formUnidades *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $("#codigo").val('');
@@ -171,44 +187,32 @@ $(document).ready(function () {
     });
 
     $("#btnGuardar").click(function () {
-        if ($("#formAperturasProgramaticas").valid()) {
+        if ($("#formUnidades").valid()) {
             if ($("#codigo").val() === '') {
-                guardarApertura();
+                guardarUnidad();
             } else {
-                actualizarApertura()
+                actualizarUnidad()
             }
         }
     });
 
-
-    $("#gg").click(function () {
-        let organizacional = $("#organizacional").is(':checked')
-        alert(organizacional)
-
-    });
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-    function guardarApertura() {
+    function guardarUnidad() {
         let da = $("#da").val();
         let ue = $("#ue").val();
-        let prg = $("#prg").val();
-        let descripcion = $("#Descripcion").val();
+        let descripcion = $("#descripcion").val();
         let fechaInicio = $("#fechaInicio").val();
         let FechaFin = $("#fechaFin").val();
-        let organizacional = $("#organizacional").is(':checked')?1:0;
-        let operacional = $("#operacional").is(':checked')?1:0;
         let datos = new FormData();
         datos.append("da", da);
         datos.append("ue", ue);
-        datos.append("prg", prg);
         datos.append("descripcion", descripcion);
         datos.append("fechaInicio", fechaInicio);
         datos.append("fechaFin", FechaFin);
-        datos.append("organizacional", organizacional);
-        datos.append("operacional", operacional);
         $.ajax({
-            url: "index.php?r=Planificacion/aperturas-programaticas/guardar-apertura",
+            url: "index.php?r=Planificacion/unidad/guardar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -220,12 +224,12 @@ $(document).ready(function () {
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "Los datos de la nueva apertura programatica se guardaron correctamente.",
+                        text: "Los datos de la nueva unidad se guardaron correctamente.",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
                     }).then(function () {
-                        $("#tablaListaAperturasProgramaticas").DataTable().ajax.reload();
+                        $("#tablaListaUnidades").DataTable().ajax.reload();
                     });
                 }
                 else {
@@ -237,9 +241,9 @@ $(document).ready(function () {
                     } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: No se llenaron correctamente los datos requeridos.";
                     } else if (respuesta === "errorExiste") {
-                        mensaje = "Error: Los datos ingresados ya corresponden a una apertura programatica existente.";
+                        mensaje = "Error: Los datos ingresados ya corresponden a una unidad existente.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al guardar la apertura programatica.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al guardar la unidad.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -259,14 +263,14 @@ $(document).ready(function () {
     /*=============================================
     CAMBIA EL ESTADO DEL REGISTRO
     =============================================*/
-    $("#tablaListaAperturasProgramaticas tbody").on("click", ".btnEstado", function () {
+    $("#tablaListaUnidades tbody").on("click", ".btnEstado", function () {
         let objectBtn = $(this);
         let codigo = objectBtn.attr("codigo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/aperturas-programaticas/cambiar-estado-apertura",
+            url: "index.php?r=Planificacion/unidad/cambiar-estado-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -291,9 +295,9 @@ $(document).ready(function () {
                     } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: Ocurrio un error en el envio de los datos.";
                     } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se pudo recuperar los adtos de la apertura programatica para su cambio de estado.";
+                        mensaje = "Error: No se pudo recuperar los datos de la unidad para su cambio de estado.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al cambiar el estado del la apertura programatica.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al cambiar el estado del la unidad.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -313,14 +317,14 @@ $(document).ready(function () {
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $("#tablaListaAperturasProgramaticas tbody").on("click", ".btnEliminar", function () {
+    $("#tablaListaUnidades tbody").on("click", ".btnEliminar", function () {
         let codigo = $(this).attr("codigo");
         let datos = new FormData();
         datos.append("codigo", codigo);
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar la apertura programatica seleccionada?",
+            text: "¿Está seguro de eliminar la unidad seleccionada?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -329,7 +333,7 @@ $(document).ready(function () {
         }).then(function (resultado) {
             if (resultado.value) {
                 $.ajax({
-                    url: "index.php?r=Planificacion/aperturas-programaticas/eliminar-apertura",
+                    url: "index.php?r=Planificacion/unidad/eliminar-unidad",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -340,12 +344,12 @@ $(document).ready(function () {
                             Swal.fire({
                                 icon: "success",
                                 title: "Exito...",
-                                text: "La apertura programatica ha sido borrada correctamente.",
+                                text: "La unidad ha sido borrada correctamente.",
                                 showCancelButton: false,
                                 confirmButtonColor: "#3085d6",
                                 confirmButtonText: "Cerrar"
                             }).then(function () {
-                                $("#tablaListaAperturasProgramaticas").DataTable().ajax.reload();
+                                $("#tablaListaUnidades").DataTable().ajax.reload();
                             });
                         }
                         else {
@@ -356,12 +360,10 @@ $(document).ready(function () {
                                 mensaje = "Error: Ocurrio un error en el envio de los datos.";
                             } else if (respuesta === "errorValidacion") {
                                 mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                            } else if (respuesta === "errorExiste") {
-                                mensaje = "Error: Los datos ingresados ya corresponden a una apertura programatica existente.";
                             } else if (respuesta === "errorSql") {
-                                mensaje = "Error: Ocurrio un error en la base de datos al eliminar la apertura programatica.";
+                                mensaje = "Error: Ocurrio un error en la base de datos al eliminar la unidad.";
                             } else if (respuesta === "errorEnUso") {
-                                mensaje = "Error: La apertura programatica se encuentra en uso y no puede ser eliminada.";
+                                mensaje = "Error: La unidad se encuentra en uso y no puede ser eliminada.";
                             } else {
                                 mensaje = respuesta;
                             }
@@ -381,14 +383,14 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    BUSCA LA APERTURA PROGRAMATICA SELECCIONADO EN LA BD
+    BUSCA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
-    $("#tablaListaAperturasProgramaticas tbody").on("click", ".btnEditar", function () {
+    $("#tablaListaUnidades tbody").on("click", ".btnEditar", function () {
         let codigo = $(this).attr("codigo");
         let datos = new FormData();
         datos.append("codigo", codigo);
         $.ajax({
-            url: "index.php?r=Planificacion/aperturas-programaticas/buscar-apertura",
+            url: "index.php?r=Planificacion/unidad/buscar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -397,15 +399,12 @@ $(document).ready(function () {
             dataType: "json",
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigo").val(data.CodigoAperturaProgramatica);
+                $("#codigo").val(data.CodigoUnidad);
                 $("#da").val(data.Da);
                 $("#ue").val(data.Ue);
-                $("#prg").val(data.Prg);
-                $("#Descripcion").val(data.Descripcion);
+                $("#descripcion").val(data.Descripcion);
                 $("#fechaInicio").val(data.FechaInicio);
                 $("#fechaFin").val(data.FechaFin);
-                $("#organizacional").prop( "checked", (data.Organizacional === 1))
-                $("#operacional").prop( "checked", (data.Operacional === 1))
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (respuesta) {
@@ -416,7 +415,7 @@ $(document).ready(function () {
                 } else if (mensajeRespuesta === "errorEnvio") {
                     mensaje = "Error: No se enviaron correctamente de los datos.";
                 } else if (mensajeRespuesta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro la informacion de la apertura programatica seleccionada.";
+                    mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
                 } else {
                     mensaje = mensajeRespuesta;
                 }
@@ -436,28 +435,22 @@ $(document).ready(function () {
     /*=============================================
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-    function actualizarApertura() {
+    function actualizarUnidad() {
         let codigo = $("#codigo").val();
         let da = $("#da").val();
         let ue = $("#ue").val();
-        let prg = $("#prg").val();
-        let descripcion = $("#Descripcion").val();
+        let descripcion = $("#descripcion").val();
         let fechaInicio = $("#fechaInicio").val();
         let FechaFin = $("#fechaFin").val();
-        let organizacional = $("#organizacional").is(':checked')?1:0;
-        let operacional = $("#ejecutora").is(':checked')?1:0;
         let datos = new FormData();
         datos.append("codigo", codigo);
         datos.append("da", da);
         datos.append("ue", ue);
-        datos.append("prg", prg);
         datos.append("descripcion", descripcion);
         datos.append("fechaInicio", fechaInicio);
         datos.append("fechaFin", FechaFin);
-        datos.append("organizacional", organizacional);
-        datos.append("operacional", operacional);
         $.ajax({
-            url: "index.php?r=Planificacion/aperturas-programaticas/actualizar-apertura",
+            url: "index.php?r=Planificacion/unidad/actualizar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -469,12 +462,12 @@ $(document).ready(function () {
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "La apertura programatica se actualizó correctamente.",
+                        text: "La unidad se actualizó correctamente.",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
                     }).then(function () {
-                        $("#tablaListaAperturasProgramaticas").DataTable().ajax.reload(null, false);
+                        $("#tablaListaUnidades").DataTable().ajax.reload(null, false);
                     });
                 }
                 else {
@@ -484,13 +477,13 @@ $(document).ready(function () {
                     } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: No se enviaron correctamente de los datos.";
                     } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se encontro la informacion de la apertura programatica seleccionada.";
+                        mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
                     } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: No se llenaron correctamente los datos requeridos.";
                     } else if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a una apertura programatica existente.";
+                        mensaje = "Los datos ingresados ya corresponden a una unidad existente.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al actualizar los adtos de la apertura programatica seleccionada.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al actualizar los datos de la unidad seleccionada.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -506,6 +499,4 @@ $(document).ready(function () {
             }
         });
     }
-
-
 });

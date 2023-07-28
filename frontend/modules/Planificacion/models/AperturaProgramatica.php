@@ -7,23 +7,25 @@ use common\models\Usuario;
 use Yii;
 
 /**
- * This is the model class for table "AperturaProgramatica".
+ * This is the model class for table "AperturasProgramaticas".
  *
  * @property int $CodigoAperturaProgramatica
- * @property string $Da
- * @property string $Ue
- * @property string $Prg
+ * @property int $Unidad
+ * @property int $Programa
+ * @property int $Proyecto
+ * @property int $Actividad
  * @property string $Descripcion
- * @property string $FechaInicio
- * @property string $FechaFin
- * @property int $Organizacional
- * @property int $Operacional
+ * @property int|null $Organizacional
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
+ * @property Actividad $actividad
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
+ * @property Programa $programa
+ * @property Proyecto $proyecto
+ * @property Unidad $unidad
  */
 class AperturaProgramatica extends \yii\db\ActiveRecord
 {
@@ -41,12 +43,18 @@ class AperturaProgramatica extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['Da', 'Ue', 'Prg', 'Descripcion', 'FechaInicio', 'FechaFin', 'Organizacional', 'Operacional', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
-            [['Organizacional', 'Operacional'], 'integer'],
-            [['Da', 'Ue', 'Prg', 'CodigoUsuario'], 'string', 'max' => 3],
+            [['CodigoAperturaProgramatica', 'Unidad', 'Programa', 'Proyecto', 'Actividad', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoAperturaProgramatica', 'Unidad', 'Programa', 'Proyecto', 'Actividad', 'Organizacional'], 'integer'],
+            [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 250],
             [['CodigoEstado'], 'string', 'max' => 1],
+            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['Actividad', 'Programa', 'Proyecto', 'Unidad'], 'unique', 'targetAttribute' => ['Actividad', 'Programa', 'Proyecto', 'Unidad']],
+            [['CodigoAperturaProgramatica'], 'unique'],
+            [['Unidad'], 'exist', 'skipOnError' => true, 'targetClass' => Unidad::class, 'targetAttribute' => ['Unidad' => 'CodigoUnidad']],
+            [['Programa'], 'exist', 'skipOnError' => true, 'targetClass' => Programa::class, 'targetAttribute' => ['Programa' => 'CodigoPrograma']],
+            [['Proyecto'], 'exist', 'skipOnError' => true, 'targetClass' => Proyecto::class, 'targetAttribute' => ['Proyecto' => 'CodigoProyecto']],
+            [['Actividad'], 'exist', 'skipOnError' => true, 'targetClass' => Actividad::class, 'targetAttribute' => ['Actividad' => 'CodigoActividad']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -59,18 +67,56 @@ class AperturaProgramatica extends \yii\db\ActiveRecord
     {
         return [
             'CodigoAperturaProgramatica' => 'Codigo Apertura Programatica',
-            'Da' => 'Da',
-            'Ue' => 'Ue',
-            'Prg' => 'Prg',
+            'Unidad' => 'Unidad',
+            'Programa' => 'Programa',
+            'Proyecto' => 'Proyecto',
+            'Actividad' => 'Actividad',
             'Descripcion' => 'Descripcion',
-            'FechaInicio' => 'Fecha Inicio',
-            'FechaFin' => 'Fecha Fin',
             'Organizacional' => 'Organizacional',
-            'Operacional' => 'Operacional',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
+    }
+
+    /**
+     * Gets query for [[Unidad]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUnidad()
+    {
+        return $this->hasOne(Unidad::class, ['CodigoUnidad' => 'Unidad']);
+    }
+
+    /**
+     * Gets query for [[Programa]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPrograma()
+    {
+        return $this->hasOne(Programa::class, ['CodigoPrograma' => 'Programa']);
+    }
+
+    /**
+     * Gets query for [[Proyecto]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProyecto()
+    {
+        return $this->hasOne(Proyecto::class, ['CodigoProyecto' => 'Proyecto']);
+    }
+
+    /**
+     * Gets query for [[Actividad]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActividad()
+    {
+        return $this->hasOne(Actividad::class, ['CodigoActividad' => 'Actividad']);
     }
 
     /**
@@ -93,15 +139,9 @@ class AperturaProgramatica extends \yii\db\ActiveRecord
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-
     public function exist()
     {
-        $apertura = AperturaProgramatica::find()->where(["Da" => $this->Da, "Ue"=>$this->Ue, "Prg"=>$this->Prg])->andWhere(["CodigoEstado"=>"V"])->all();
-        if(!empty($apertura)){
-            return true;
-        }else{
-            return false;
-        }
+        return false;
     }
 
     public function isUsed()

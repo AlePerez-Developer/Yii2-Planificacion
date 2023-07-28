@@ -4,13 +4,13 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/aperturas-programaticas/AperturasProgramaticas.js", [
+$this->registerJsFile("@web/js/unidad/Unidad.js", [
     'depends' => [
         JqueryAsset::className()
     ]
 ]);
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
+$this->params['breadcrumbs'] = [['label' => 'Unidades']];
 ?>
 
 <div class="card">
@@ -21,7 +21,7 @@ $this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
                     <div class="horizontal"></div>
                     <div class="vertical"></div>
                 </div>
-                Agregar Apertura Programatica
+                Agregar Unidad
             </div>
         </button>
     </div>
@@ -31,29 +31,25 @@ $this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
                     <input type="text" id="codigo" name="codigo" disabled hidden>
-                    <form id="formAperturasProgramaticas" action="" method="post">
+                    <form id="formUnidades" action="" method="post">
 
                         <div class="form-group">
-                            <label for="Apertura" class="control-label">Apertura Programatica</label>
-                            <div class="container" id="Apertura">
+                            <label for="unidad" class="control-label">Unidad</label>
+                            <div class="container" id="unidad">
                                 <div class="row">
                                     <div class="col-2">
-                                        <input type="text" id="da" name="da" class="form-control num" maxlength="2" placeholder="Da">
+                                        <input type="text" id="da" name="da" class="form-control num" maxlength="2" placeholder="Da" style="width: 90px">
                                     </div>
                                     <div class="col-2">
-                                        <input type="text" id="ue" name="ue" class="form-control num" maxlength="3" placeholder="Ue" >
+                                        <input type="text" id="ue" name="ue" class="form-control num" maxlength="3" placeholder="Ue" style="width: 120px" >
                                     </div>
-                                    <div class="col-2">
-                                        <input type="text" id="prg" name="prg" class="form-control num" maxlength="3" placeholder="Prg">
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="Descripcion">Descripcion</label>
-                            <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="Descripcion" placeholder="Descripcion"></textarea>
+                            <label for="descripcion">Descripcion</label>
+                            <textarea class="form-control input-sm txt" rows="4" id="descripcion" name="descripcion" placeholder="Descripcion"></textarea>
                         </div>
 
                         <div class="form-group">
@@ -74,20 +70,6 @@ $this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-group ml-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="organizacional">
-                                <label class="form-check-label" for="organizacional">Unidad Organizacional</label>
-                            </div>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="operacional">
-                                <label class="form-check-label" for="operacional">Unidad Operacional</label>
-                            </div>
-
-                        </div>
-                        <button type="button" id="gg">averlas</button>
                     </form>
                 </div>
                 <div class="card-footer text-center">
@@ -99,13 +81,12 @@ $this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
         </div>
     </div>
     <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaAperturasProgramaticas"  class="table table-bordered table-striped dt-responsive" >
+        <table id="tablaListaUnidades"  class="table table-bordered table-striped dt-responsive" >
             <thead>
             <th>#</th>
             <th>#</th>
             <th>Da</th>
             <th>Ue</th>
-            <th>Prg</th>
             <th>Descripcion</th>
             <th>Estado</th>
             <th>Acciones</th>

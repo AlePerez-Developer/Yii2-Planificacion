@@ -48,7 +48,7 @@ class UnidadController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('Unidad');
+        return $this->render('Unidades');
     }
 
     public function actionListarUnidades()

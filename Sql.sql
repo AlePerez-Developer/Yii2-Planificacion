@@ -168,9 +168,7 @@ create table IndicadoresUnidades(
 insert into IndicadoresUnidades values(1,'Numero','V',default,'ADM')
 insert into IndicadoresUnidades values(2,'Porcentaje','V',default,'ADM')
 
-
 go
-
 
 create table Indicadores(
     CodigoIndicador int primary key not null,
@@ -235,6 +233,22 @@ create table Programas
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+create table Unidades
+(
+    CodigoUnidad int primary key not null,
+    Da varchar(20) not null,
+    Ue varchar(20) not null,
+    Descripcion varchar(250) not null,
+    FechaInicio date not null,
+    FechaFin date not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
 
 
 create table AperturasProgramaticas
@@ -256,15 +270,4 @@ create table AperturasProgramaticas
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-create table Proyectos
-(
-    CodigoProyecto int primary key identity(1,1) not null,
-    Codigo varchar(20) not null,
-    Descripcion varchar(250) not null,
-    CodigoEstado char(1) not null,
-    FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null,
 
-    foreign key (CodigoEstado) references Estados(CodigoEstado),
-    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
-)

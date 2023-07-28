@@ -495,7 +495,7 @@ $(document).ready(function() {
                 minlength: 3,
                 maxlength: 3
             },
-            Descripcion: {
+            descripcion: {
                 required: true,
                 minlength: 2,
                 maxlength: 250
@@ -513,27 +513,27 @@ $(document).ready(function() {
         },
         messages: {
             da:{
-                required: "Debe ingresar la unidad administrativa de la apertura",
+                required: "Debe ingresar la unidad administrativa de la unidad",
                 minlength: "La DA debe tener 2 digitos",
                 maxlength: "La DA debe tener 2 digitos"
             },
             ue:{
-                required: "Debe ingresar la unidad ejecutora de la apertura",
+                required: "Debe ingresar la unidad ejecutora de la unidad",
                 minlength: "La UE debe tener 3 digitos",
                 maxlength: "La UE debe tener 3 digitos"
             },
-            Descripcion: {
-                required: "Debe ingresar una descripcion para la apertura programatica",
+            descripcion: {
+                required: "Debe ingresar una descripcion para la unidad",
                 minlength: "La descripcion debe tener almenos 2 letras",
                 maxlength: "La descripcion debe tener maximo 250 letras"
             },
             fechaInicio: {
-                required: "Debe ingresar la fecha de inicio de vigencia de la apertura programatica",
+                required: "Debe ingresar la fecha de inicio de vigencia de la unidad",
                 date: "Debe ingresar una fecha valida",
                 FechaMenor:'La fecha inicio debe ser anterior a la fecha de incio'
             },
             fechaFin: {
-                required: "Debe ingresar la fecha final de vigencia de la apertura programatica",
+                required: "Debe ingresar la fecha final de vigencia de la unidad",
                 date: "Debe ingresar una fecha valida",
                 FechaMayor:'La fecha final debe ser posterior a la fecha de incio'
             },
@@ -550,6 +550,74 @@ $(document).ready(function() {
         unhighlight: function (element) {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
+    });
+
+    $( "#formAperturasProgramaticas" ).validate( {
+        rules: {
+            unidad:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            programa: {
+                required: true,
+                DiferenteQue: '0'
+            },
+            proyecto: {
+                required: true,
+                DiferenteQue: '0'
+            },
+            actividad: {
+                required: true,
+                DiferenteQue: '0'
+            },
+            descripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 250
+            },
+            organizacional:{
+                required: true
+            }
+        },
+        messages: {
+            unidad: {
+                required: "Debe seleccionar una unidad para la apertura programatica",
+                DiferenteQue:"Debe seleccionar una unidad valida"
+            },
+            programa: {
+                required: "Debe seleccionar un programa para la apertura programatica",
+                DiferenteQue:"Debe seleccionar un programa valido"
+            },
+            proyecto: {
+                required: "Debe seleccionar un proyecto para la apertura programatica",
+                DiferenteQue:"Debe seleccionar un proyecto valido"
+            },
+            actividad: {
+                required: "Debe seleccionar una actividad para la apertura programatica",
+                DiferenteQue:"Debe seleccionar una actividad valida"
+            },
+            descripcion: {
+                required: "Debe ingresar una descripcion para la apertura programatica",
+                minlength: "La descripcion debe tener almenos 2 letras",
+                maxlength: "La descripcion debe tener maximo 250 letras"
+            },
+            organizacional: {
+                required: "Debe elegir si la apertura programatica es organizacional"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+
     });
 
 
@@ -664,117 +732,7 @@ $(document).ready(function() {
 
     } );
 
-    $( "#formAperturasProgramaticas" ).validate( {
-        rules: {
-            da: {
-                required: true,
-                minlength: 2,
-                maxlength: 2
-            },
-            ue: {
-                required: true,
-                minlength: 3,
-                maxlength: 3
-            },
-            prg: {
-                required: true,
-                minlength: 3,
-                maxlength: 3
-            },
-            pry: {
-                required: true,
-                minlength: 4,
-                maxlength: 200
-            },
-            act: {
-                required: true,
-                minlength: 3,
-                maxlength: 3
-            },
-            Descripcion: {
-                required: true,
-                minlength: 2,
-                maxlength: 250
-            },
-            fechaInicio:{
-                required: true,
-                date: true,
-                FechaMenor: "#fechaFin"
-            },
-            fechaFin:{
-                required: true,
-                date: true,
-                FechaMayor: "#fechaInicio"
-            },
-            organizacional:{
-                required: true
-            },
-            ejecutora:{
-                required: true
-            }
-        },
-        messages: {
-            da:{
-                required: "Debe ingresar la unidad administrativa de la apertura",
-                minlength: "La DA debe tener 2 digitos",
-                maxlength: "La DA debe tener 2 digitos"
-            },
-            ue:{
-                required: "Debe ingresar la unidad ejecutora de la apertura",
-                minlength: "La UE debe tener 3 digitos",
-                maxlength: "La UE debe tener 3 digitos"
-            },
-            prg:{
-                required: "Debe ingresar programa de la apertura",
-                minlength: "El programa debe tener 3 digitos",
-                maxlength: "El programa debe tener 3 digitos"
-            },
-            pry:{
-                required: "Debe ingresar el proyecto de la apertura",
-                minlength: "El proyecto debe tener 4 digitos minimamente (0000)",
-                maxlength: "El proyecto debe tener 200 digitos maximo (SISIN)"
-            },
-            act:{
-                required: "Debe ingresar la actividad de la apertura",
-                minlength: "La actividad debe tener 3 digitos",
-                maxlength: "La actividad debe tener 3 digitos"
-            },
-            Descripcion: {
-                required: "Debe ingresar una descripcion para la apertura programatica",
-                minlength: "La descripcion debe tener almenos 2 letras",
-                maxlength: "La descripcion debe tener maximo 250 letras"
-            },
-            fechaInicio: {
-                required: "Debe ingresar la fecha de inicio de vigencia de la apertura programatica",
-                date: "Debe ingresar una fecha valida",
-                FechaMenor:'La fecha inicio debe ser anterior a la fecha de incio'
-            },
-            fechaFin: {
-                required: "Debe ingresar la fecha final de vigencia de la apertura programatica",
-                date: "Debe ingresar una fecha valida",
-                FechaMayor:'La fecha final debe ser posterior a la fecha de incio'
-            },
-            organizacional: {
-                required: "Debe elegir si la apertura programatica es organizacional"
-            },
-            ejecutora: {
-                required: "Debe elegir si la apertura programatica es ejecutora"
-            }
-        },
-        errorElement: "div",
 
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
-        },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-        },
-        unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-        }
-
-    });
 
 
 
