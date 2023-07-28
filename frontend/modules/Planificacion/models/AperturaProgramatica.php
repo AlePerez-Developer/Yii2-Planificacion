@@ -144,7 +144,7 @@ class AperturaProgramatica extends \yii\db\ActiveRecord
         return false;
     }
 
-    public function isUsed()
+    public function enUso()
     {
         return false;
     }

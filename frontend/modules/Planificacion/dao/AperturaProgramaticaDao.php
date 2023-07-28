@@ -13,7 +13,7 @@ class AperturaProgramaticaDao
     {
         $consulta = new Query();
         $codigo = $consulta->select('max(CodigoAperturaProgramatica) as Codigo')
-            ->from('AperturasProgramticas')
+            ->from('AperturasProgramaticas')
             ->one();
         if ($codigo['Codigo']){
             return  $codigo['Codigo'] + 1;

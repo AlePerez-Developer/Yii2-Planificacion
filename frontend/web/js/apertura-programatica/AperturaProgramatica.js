@@ -107,7 +107,7 @@ $(document).ready(function () {
         ],
         initComplete: function () {
             this.api()
-                .columns([2,3,4,5])
+                .columns([2,3,4,5,6])
                 .every(function () {
                     var column = this;
                     var select = $('<select><option value="">Buscar...</option></select>')
@@ -136,11 +136,11 @@ $(document).ready(function () {
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,2,3,4,5,8,9,10] },
-            { orderable: false, targets: [0,1,2,3,4,5,9,10] },
-            { searchable: false, targets: [0,1,8,9,10] },
-            { className: "dt-acciones", targets: 10 },
-            { className: "dt-estado", targets: 9 },
+            { className: "dt-center", targets: [0,1,2,3,4,5,6,7,9,10,11] },
+            { orderable: false, targets: [0,1,2,3,4,5,6,9,10,11] },
+            { searchable: false, targets: [0,1,9,10,11] },
+            { className: "dt-acciones", targets: 11 },
+            { className: "dt-estado", targets: 10 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
@@ -159,7 +159,7 @@ $(document).ready(function () {
             {
                 data: 'Organizacional',
                 render: function (data, type, row, meta){
-                    return ( (type === 'display') && (row.Organizacional === '1')) ? 'Si' : 'No'
+                    return ( (type === 'display') && (row.Organizacional === '1'))?'Si':'No'
                 }
             },
             {
@@ -538,7 +538,7 @@ $(document).ready(function () {
     /*=============================================
     ACTUALIZA LA APERTURA PROGRAMATICA SELECCIONADA EN LA BD
     =============================================*/
-    function actualizarApertura() {
+    function actualizarAperturaProgramatica() {
         let codigoAperturaProgramatica = $("#codigo").val();
         let unidad = $("#unidad").val();
         let programa = $("#programa").val();

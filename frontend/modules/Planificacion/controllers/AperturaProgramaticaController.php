@@ -74,7 +74,7 @@ class AperturaProgramaticaController extends Controller
                     'Programas.Codigo as CodigoPrograma','Programas.Descripcion as DescripcionPrograma',
                     'Proyectos.Codigo as CodigoProyecto','Proyectos.Descripcion as DescripcionProyecto',
                     'Actividades.Codigo as CodigoActividad','Actividades.Descripcion as DescripcionActividad',
-                    'concat(Unidades.Da, char(45) , Unidades.Ue, char(45), Programas.Codigo) as AperturaProgramatica'
+                    'concat(Unidades.Da, char(45) , Unidades.Ue, char(45), Programas.Codigo, char(45), Proyectos.Codigo, char(45), Actividades.Codigo) as AperturaProgramatica'
                     ])
                 ->join('INNER JOIN','Unidades', 'AperturasProgramaticas.Unidad = Unidades.CodigoUnidad')
                 ->join('INNER JOIN','Programas', 'AperturasProgramaticas.Programa = Programas.CodigoPrograma')
@@ -82,7 +82,7 @@ class AperturaProgramaticaController extends Controller
                 ->join('INNER JOIN','Actividades', 'AperturasProgramaticas.Actividad = Actividades.CodigoActividad')
                 ->where(['!=','AperturasProgramaticas.CodigoEstado','E'])
                 ->andWhere(['!=','Unidades.CodigoEstado','E'])->andWhere(['!=','Programas.CodigoEstado','E'])->andWhere(['!=','Proyectos.CodigoEstado','E'])->andWhere(['!=','Actividades.CodigoEstado','E'])
-                ->orderBy('AperturasProgramaticas.CodigoApertura')->asArray()->all();
+                ->orderBy('AperturasProgramaticas.CodigoAperturaProgramatica')->asArray()->all();
             foreach($aperturas as  $apertura) {
                 array_push($Data, $apertura);
             }
@@ -97,7 +97,7 @@ class AperturaProgramaticaController extends Controller
                 isset($_POST["organizacional"]) && isset($_POST["descripcion"])){
                 $apertura = new AperturaProgramatica();
                 $apertura->CodigoAperturaProgramatica = AperturaProgramaticaDao::GenerarCodigoAperturaProgramatica();
-                $apertura->unidad = $_POST["unidad"];
+                $apertura->Unidad = $_POST["unidad"];
                 $apertura->Programa = $_POST["programa"];
                 $apertura->Proyecto = $_POST["proyecto"];
                 $apertura->Actividad = $_POST["actividad"];
@@ -207,7 +207,7 @@ class AperturaProgramaticaController extends Controller
                 isset($_POST["organizacional"]) && isset($_POST["descripcion"])){
                 $apertura = AperturaProgramatica::findOne($_POST["codigoAperturaProgramatica"]);
                 if ($apertura){
-                    $apertura->unidad = $_POST["unidad"];
+                    $apertura->Unidad = $_POST["unidad"];
                     $apertura->Programa = $_POST["programa"];
                     $apertura->Proyecto = $_POST["proyecto"];
                     $apertura->Actividad = $_POST["actividad"];

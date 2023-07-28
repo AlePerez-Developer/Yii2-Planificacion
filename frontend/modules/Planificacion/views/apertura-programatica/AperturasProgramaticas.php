@@ -102,6 +102,7 @@ $this->params['breadcrumbs'] = [['label' => 'Aperturas Programaticas']];
             <th>Ue</th>
             <th>Prg</th>
             <th>Pry</th>
+            <th>Act</th>
             <th>Apertura Programatica</th>
             <th>Descripcion</th>
             <th>Organizacional</th>
