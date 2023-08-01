@@ -25,22 +25,78 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
         </button>
     </div>
     <div id="IngresoDatos" class="card-body" >
-        <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 40rem;" >
-                <div class="card-header bg-gradient-primary">Ingreso Datos</div>
-                <div class="card-body">
-                    <input type="text" id="codigo" name="codigo" disabled hidden >
-                    <form id="formindicador" action="" method="post">
-                        <div class="form-group">
-                            <label for="Codigo">Codigo indicador</label>
-                            <input type="text" class="form-control input-sm num" id="Codigo" name="Codigo" maxlength="4"  placeholder="Codigo" style="width: 120px" >
-                        </div>
-                        <div class="form-group">
-                            <label for="Descripcion" class="control-label">Descripcion del indicador</label>
-                            <textarea class="form-control input-sm txt" id="Descripcion" name="Descripcion" rows="4" placeholder="Descripcion del indicador"></textarea>
-                        </div>
+        <div class="row justify-content-center">
+            <div class="col-11">
+                <div class="card">
+                    <div class="card-header bg-gradient-primary">Ingreso Datos</div>
+                    <div class="card-body">
+                        <input type="text" id="codigo" name="codigo" disabled hidden >
+                        <form id="formIndicadores" action="" method="post">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="CodigoObjInstitucional">Seleccione el objetivo institucional</label>
+                                        <select class="form-control objinstitucional" id="CodigoObjInstitucional" name="CodigoObjInstitucional" >
+                                            <option></option>
+                                            <?php foreach ($objInsitucionales as $objinstitucional){ ?>
+                                                <option value="<?= $objinstitucional['CodigoObjInstitucional'] ?>"><?= '('.  $objinstitucional['Codigo'] .') - ' . $objinstitucional['Objetivo']  ?></option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="invalid-feedback">Ceci est obligatoire</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="CodigoObjEspecifico">Seleccione el objetivo especifico</label>
+                                        <select class="form-control objespecifico" id="CodigoObjEspecifico" name="CodigoObjEspecifico" disabled >
+                                            <option></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="CodigoPrograma">Seleccione el programa</label>
+                                        <select class="form-control programa" id="CodigoPrograma" name="CodigoPrograma" >
+                                            <option></option>
+                                            <?php foreach ($programas as $programa){ ?>
+                                                <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="CodigoActividad">Seleccione la actividad</label>
+                                        <select class="form-control actividad" id="CodigoActividad" name="CodigoActividad" disabled >
+                                            <option></option>
+                                        </select>
+                                    </div>
 
-                        <div class="container">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="CodigoPei">Codigo indicador PEI</label>
+                                        <input type="text" class="form-control input-sm num" id="CodigoPei" name="CodigoPei" maxlength="3"  placeholder="Codigo Pei" style="width: 120px" >
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="CodigoPoa">Codigo indicador POA</label>
+                                        <input type="text" class="form-control input-sm num" id="CodigoPoa" name="CodigoPoa" maxlength="3"  placeholder="Codigo Poa" style="width: 120px" >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="Descripcion" class="control-label">Descripcion del indicador</label>
+                                    <textarea class="form-control input-sm txt" id="Descripcion" name="Descripcion" rows="4" placeholder="Descripcion del indicador"></textarea>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-4">
                                     <div class="form-group">
@@ -100,12 +156,12 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <button class='btn btn-primary bg-gradient-primary btnGuardar'><i class='fa fa-check-circle-o'>Guardar</i></button>
-                    <button class='btn btn-danger btn- btnCancel'><i class='fa fa-warning'>Cancelar</i></button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class='btn btn-primary bg-gradient-primary btnGuardar'><i class='fa fa-check-circle-o'>Guardar</i></button>
+                        <button class='btn btn-danger btn- btnCancel'><i class='fa fa-warning'>Cancelar</i></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,7 +170,9 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
         <table class="table table-bordered table-striped dt-responsive tablaListaIndicadores" style="width: 100%" >
             <thead>
                 <th>#</th>
-                <th>Codigo</th>
+                <th>#</th>
+                <th>Codigo Pei</th>
+                <th>Codigo Poa</th>
                 <th>Descripcion</th>
                 <th>Articulacion</th>
                 <th>Resultado</th>

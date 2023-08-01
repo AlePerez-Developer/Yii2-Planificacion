@@ -3,6 +3,7 @@ namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\dao\ActividadDao;
 use app\modules\Planificacion\models\Actividad;
+use app\modules\Planificacion\models\Programa;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
@@ -38,23 +39,23 @@ class ActividadController extends Controller
         ];
     }
 
-    public function beforeAction($action)
-    {
-        if ($action->id == "listar-actividades")
-            $this->enableCsrfValidation = false;
-        return parent::beforeAction($action);
-    }
-
     public function actionIndex()
     {
-        return $this->render('Actividades');
+        $programas = Programa::find()->where(['CodigoEstado'=>'V'])->all();
+        return $this->render('Actividades',[
+            'programas' => $programas
+        ]);
     }
 
     public function actionListarActividades()
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $actividades = Actividad::find()->select(['CodigoActividad','Codigo','Descripcion','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('Codigo')->asArray()->all();
+            $actividades = Actividad::find()->alias('a')
+                ->select(['a.CodigoActividad','p.Codigo as Programa','a.Codigo','a.Descripcion','a.CodigoEstado','a.CodigoUsuario'])
+                ->join('Inner Join','Programas p','a.Programa = p.CodigoPrograma')
+                ->where(['!=','a.CodigoEstado','E'])->andWhere(['!=','p.CodigoEstado','E'])
+                ->orderBy('a.Codigo')->asArray()->all();
             foreach($actividades as  $actividad) {
                 array_push($Data, $actividad);
             }
@@ -65,10 +66,11 @@ class ActividadController extends Controller
     public function actionGuardarActividad()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if ( isset($_POST["codigo"]) && isset($_POST["descripcion"]))
+            if ( isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"]))
             {
                 $actividad = new Actividad();
                 $actividad->CodigoActividad = ActividadDao::GenerarCodigoActividad();
+                $actividad->Programa = $_POST["programa"];
                 $actividad->Codigo = $_POST["codigo"];
                 $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $actividad->CodigoEstado = 'V';
@@ -156,7 +158,7 @@ class ActividadController extends Controller
             if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
                 $actividad = actividad::findOne($_POST["codigo"]);
                 if ($actividad){
-                    return json_encode($actividad->getAttributes(array('CodigoActividad','Codigo','Descripcion')));
+                    return json_encode($actividad->getAttributes(array('CodigoActividad','Programa','Codigo','Descripcion')));
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -171,9 +173,10 @@ class ActividadController extends Controller
     public function actionActualizarActividad()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoactividad"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
+            if (isset($_POST["codigoactividad"]) && isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
                 $actividad = Actividad::findOne($_POST["codigoactividad"]);
                 if ($actividad){
+                    $actividad->Programa = $_POST["programa"];
                     $actividad->Codigo = $_POST["codigo"];
                     $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                     if ($actividad->validate()){
@@ -187,6 +190,7 @@ class ActividadController extends Controller
                             return "errorExiste";
                         }
                     } else {
+                        var_dump($ac);
                         return 'errorValidacion';
                     }
                 } else {

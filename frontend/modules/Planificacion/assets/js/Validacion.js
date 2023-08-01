@@ -279,12 +279,34 @@ $(document).ready(function() {
         }
     } );
 
-    $( "#formindicador" ).validate( {
+    $( "#formIndicadores" ).validate( {
         rules: {
-            Codigo: {
+            CodigoObjInstitucional:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoObjEspecifico:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoPrograma:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoActividad:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            CodigoPei: {
                 required: true,
                 digits: true,
-                max: 9999,
+                max: 999,
+                DiferenteQue: '0'
+            },
+            CodigoPoa: {
+                required: true,
+                digits: true,
+                max: 999,
                 DiferenteQue: '0'
             },
             Descripcion:{
@@ -314,8 +336,30 @@ $(document).ready(function() {
             },
         },
         messages: {
-            Codigo: {
-                required: "Debe ingresar un codigo de indicador",
+            CodigoObjInstitucional: {
+                required: "Debe seleccionar un codigo de Obj. Institucional",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Institucional"
+            },
+            CodigoObjEspecifico: {
+                required: "Debe seleccionar un codigo de Obj. Especifico",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Especifico"
+            },
+            CodigoPrograma: {
+                required: "Debe seleccionar un codigo de Obj. Especifico",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Especifico"
+            },
+            CodigoActividad: {
+                required: "Debe seleccionar un codigo de Obj. Especifico",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Especifico"
+            },
+            CodigoPei: {
+                required: "Debe ingresar un codigo de indicador PEI",
+                digits: "Solo se permite numeros enteros",
+                max: "Debe ingresar un numero entero",
+                DiferenteQue: "Debe ingresar un mayor que 0"
+            },
+            CodigoPoa: {
+                required: "Debe ingresar un codigo de indicador POA",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero entero",
                 DiferenteQue: "Debe ingresar un mayor que 0"
@@ -362,6 +406,10 @@ $(document).ready(function() {
 
     $( "#formActividades" ).validate({
         rules: {
+            CodigoPrograma:{
+                required: true,
+                DiferenteQue: ''
+            },
             Codigo: {
                 required: true,
                 digits: true,
@@ -375,6 +423,10 @@ $(document).ready(function() {
             },
         },
         messages: {
+            CodigoPrograma: {
+                required: "Debe seleccionar un programa",
+                DiferenteQue:"Debe seleccionar un programa"
+            },
             Codigo: {
                 required: "Debe ingresar un codigo para la actividad",
                 digits: "Solo debe ingresar numeros",

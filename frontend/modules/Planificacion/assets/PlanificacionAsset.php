@@ -9,7 +9,8 @@ class PlanificacionAsset extends AssetBundle
     public $css = [
         '../../plugins/datatables/datatables.css',
         '../../plugins/jquerytreeview/jqtree.css',
-        '../../plugins/select2/dist/css/select2.min.css',
+        '../../plugins/select2/dist/css/select2.css',
+        '../../plugins/select2/dist/css/select2-bootstrap4.min.css',
         '../../../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.css',
        'css/Planificacion.css',
     ];

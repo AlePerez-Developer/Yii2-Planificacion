@@ -249,23 +249,24 @@ create table Unidades
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-
-
 create table AperturasProgramaticas
 (
-    CodigoAperturaProgramatica int primary key identity(1,1) not null,
-    Da char(2) not null,
-    Ue char(3) not null,
-    Prg char(3) not null,
+    CodigoAperturaProgramatica int primary key  not null,
+    Unidad int not null,
+    Programa int not null,
+    Proyecto int not null,
+    Actividad int not null,
     Descripcion varchar(250) not null,
-    FechaInicio date not null,
-    FechaFin date not null,
     Organizacional bit not null,
-    Operaciones bit not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
+    unique(Unidad, Programa, Proyecto, Actividad),
+    foreign key (Unidad) references Unidades(CodigoUnidad),
+    foreign key (Programa) references Programas(CodigoPrograma),
+    foreign key (Proyecto) references Proyectos(CodigoProyecto),
+    foreign key (Actividad) references Actividades(CodigoActividad),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )

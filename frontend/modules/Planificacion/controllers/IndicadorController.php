@@ -1,7 +1,11 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
+use app\modules\Planificacion\models\Actividad;
 use app\modules\Planificacion\models\CategoriaIndicador;
+use app\modules\Planificacion\models\ObjetivoEspecifico;
+use app\modules\Planificacion\models\ObjetivoInstitucional;
+use app\modules\Planificacion\models\Programa;
 use app\modules\Planificacion\models\TipoArticulacion;
 use app\modules\Planificacion\models\IndicadorUnidad;
 use app\modules\Planificacion\models\TipoResultado;
@@ -44,26 +48,27 @@ class IndicadorController extends Controller
         ];
     }
 
-    public function beforeAction($action)
-    {
-        if ($action->id == "listar-indicadores")
-            $this->enableCsrfValidation = false;
-        return parent::beforeAction($action);
-    }
-
     public function actionIndex()
     {
+        $objInsitucionales = ObjetivoInstitucional::find()->alias('oi')
+            ->select(['oi.CodigoObjInstitucional','concat(oe.CodigoCOGE, char(45) , oi.CodigoCOGE) as Codigo, oi.Objetivo'])
+            ->join('INNER JOIN','ObjetivosEstrategicos oe','oi.CodigoObjEstrategico = oe.CodigoObjEstrategico')
+            ->where(['oi.CodigoEstado' => 'V'])->andWhere(['oe.CodigoEstado' => 'V'])
+            ->asArray()->all();
+        $programas = Programa::find()->where(['CodigoEstado'=>'V'])->all();
         $tiposArticulaciones = TipoArticulacion::find()->where(['CodigoEstado'=>'V'])->all();
         $tiposResultados = TipoResultado::find()->where(['CodigoEstado'=>'V'])->all();
         $tiposIndicadores = TipoIndicador::find()->where(['CodigoEstado'=>'V'])->all();
         $categoriasIndicadores = CategoriaIndicador::find()->where(['CodigoEstado'=>'V'])->all();
         $indicadoresUnidades = IndicadorUnidad::find()->where(['CodigoEstado'=>'V'])->all();
         return $this->render('Indicadores',[
-            'Articulaciones'=>$tiposArticulaciones,
-            'Resultados'=>$tiposResultados,
-            'Tipos'=>$tiposIndicadores,
-            'Categorias'=>$categoriasIndicadores,
-            'Unidades'=>$indicadoresUnidades
+            'objInsitucionales' => $objInsitucionales,
+            'programas' => $programas,
+            'Articulaciones'=> $tiposArticulaciones,
+            'Resultados'=> $tiposResultados,
+            'Tipos'=> $tiposIndicadores,
+            'Categorias'=> $categoriasIndicadores,
+            'Unidades'=> $indicadoresUnidades
         ]);
     }
 
@@ -71,24 +76,62 @@ class IndicadorController extends Controller
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $indicadores = Indicador::find()->select([
-                'Indicadores.*',
-                'TiposArticulaciones.Descripcion as ArticulacionDescripcion',
-                'TiposResultados.Descripcion as ResultadoDescripcion',
-                'TiposIndicadores.Descripcion as TipoDescripcion',
-                'CategoriasIndicadores.Descripcion as CategoriaDescripcion',
-                'IndicadoresUnidades.Descripcion as UnidadDescripcion'
+            $indicadores = Indicador::find()->alias('I')->select([
+                'I.*',
+                'Oi.CodigoCOGE as CodigoInstitucional', 'Oi.Objetivo as ObjetivoInstitucional',
+                'Oe.CodigoCOGE as CodigoEspecifico', 'Oe.Objetivo as ObjetivoEspecifico',
+                'P.Codigo as CodigoPrograma', 'P.Descripcion as DescripcionPrograma',
+                'A.Codigo as CodigoActividad', 'A.Descripcion as DescripcionActividad',
+                'Ta.Descripcion as ArticulacionDescripcion',
+                'Tr.Descripcion as ResultadoDescripcion',
+                'Ti.Descripcion as TipoDescripcion',
+                'Ci.Descripcion as CategoriaDescripcion',
+                'U.Descripcion as UnidadDescripcion'
             ])
-                ->join('INNER JOIN','TiposArticulaciones', 'Indicadores.Articulacion = TiposArticulaciones.CodigoTipo')
-                ->join('INNER JOIN','TiposResultados', 'Indicadores.Resultado = TiposResultados.CodigoTipo')
-                ->join('INNER JOIN','TiposIndicadores', 'Indicadores.TipoIndicador = TiposIndicadores.CodigoTipo')
-                ->join('INNER JOIN','CategoriasIndicadores', 'Indicadores.Categoria = CategoriasIndicadores.CodigoCategoria')
-                ->join('INNER JOIN','IndicadoresUnidades', 'Indicadores.Unidad = IndicadoresUnidades.CodigoTipo')
-                ->where(['!=','Indicadores.CodigoEstado','E'])
-                ->andWhere(['!=','TiposArticulaciones.CodigoEstado','E'])->andWhere(['!=','TiposResultados.CodigoEstado','E'])->andWhere(['!=','TiposIndicadores.CodigoEstado','E'])->andWhere(['!=','CategoriasIndicadores.CodigoEstado','E'])->andWhere(['!=','IndicadoresUnidades.CodigoEstado','E'])
-                ->orderBy('Indicadores.Articulacion','Indicadores.Codigo')->asArray()->all();
+                ->join('INNER JOIN','ObjetivosEspecificos Oe', 'I.ObjetivoEspecifico = Oe.CodigoObjEspecifico')
+                ->join('INNER JOIN','ObjetivosInstitucionales Oi', 'Oi.CodigoObjInstitucional = Oe.CodigoObjInstitucional')
+                ->join('INNER JOIN','Actividades A', 'I.Actividad = A.CodigoActividad')
+                ->join('INNER JOIN','Programas P', 'P.CodigoPrograma = A.Programa')
+                ->join('INNER JOIN','TiposArticulaciones Ta', 'I.Articulacion = Ta.CodigoTipo')
+                ->join('INNER JOIN','TiposResultados Tr', 'I.Resultado = Tr.CodigoTipo')
+                ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
+                ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
+                ->join('INNER JOIN','IndicadoresUnidades U', 'I.Unidad = U.CodigoTipo')
+                ->where(['!=','I.CodigoEstado','E'])
+                ->andWhere(['!=','Oe.CodigoEstado','E'])->andWhere(['!=','Oi.CodigoEstado','E'])
+                ->andWhere(['!=','A.CodigoEstado','E'])->andWhere(['!=','P.CodigoEstado','E'])
+                ->andWhere(['!=','Ta.CodigoEstado','E'])->andWhere(['!=','Tr.CodigoEstado','E'])->andWhere(['!=','Ti.CodigoEstado','E'])->andWhere(['!=','Ci.CodigoEstado','E'])->andWhere(['!=','U.CodigoEstado','E'])
+                ->orderBy('I.CodigoPei, I.CodigoPoa')->asArray()->all();
             foreach($indicadores as  $indicador) {
                 array_push($Data, $indicador);
+            }
+        }
+        return json_encode($Data);
+    }
+
+    public function actionListarObjsespecificos()
+    {
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost && isset($_POST["codigo"])) {
+            $objs = ObjetivoEspecifico::find()->select(['CodigoObjEspecifico','CodigoCOGE','Objetivo'])
+                ->where(['CodigoObjInstitucional'=>$_POST["codigo"]])
+                ->andWhere(['!=','CodigoEstado','E'])->orderBy('CodigoObjEspecifico')->asArray()->all();
+            foreach($objs as  $obj) {
+                array_push($Data, $obj);
+            }
+        }
+        return json_encode($Data);
+    }
+
+    public function actionListarActividades()
+    {
+        $Data = array();
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost && isset($_POST["codigo"])) {
+            $actividades = Actividad::find()->select(['CodigoActividad','Codigo','Descripcion'])
+                ->where(['Programa'=>$_POST["codigo"]])
+                ->andWhere(['!=','CodigoEstado','E'])->orderBy('Codigo')->asArray()->all();
+            foreach($actividades as  $actividad) {
+                array_push($Data, $actividad);
             }
         }
         return json_encode($Data);
@@ -97,13 +140,17 @@ class IndicadorController extends Controller
     public function actionGuardarIndicador()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"]) && isset($_POST["descripcion"])
+            if (isset($_POST["objEspecifico"]) && isset($_POST["actividad"])
+                && isset($_POST["codigoPei"]) && isset($_POST["codigoPoa"]) && isset($_POST["descripcion"])
                 && isset($_POST["articulacion"]) && isset($_POST["resultado"])
                 && isset($_POST["tipoindicador"]) && isset($_POST["categoria"]) && isset($_POST["unidad"])
             ){
                 $indicador = new Indicador();
                 $indicador->CodigoIndicador = IndicadorDao::GenerarCodigoIndicador();
-                $indicador->Codigo = trim($_POST["codigo"]);
+                $indicador->ObjetivoEspecifico = $_POST["objEspecifico"];
+                $indicador->Actividad = $_POST["actividad"];
+                $indicador->CodigoPei = trim($_POST["codigoPei"]);
+                $indicador->CodigoPoa = trim($_POST["codigoPoa"]);
                 $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $indicador->Articulacion = trim($_POST["articulacion"]);
                 $indicador->Resultado = trim($_POST["resultado"]);
@@ -124,6 +171,7 @@ class IndicadorController extends Controller
                         return "errorExiste";
                     }
                 } else {
+                    var_dump($indicador->errors);
                     return "errorValidacion";
                 }
             } else {
@@ -200,9 +248,19 @@ class IndicadorController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoindicador"]) && $_POST["codigoindicador"] != "") {
-                $indicador = Indicador::findOne($_POST["codigoindicador"]);
+                $indicador = Indicador::find()->alias('I')->select([
+                    'I.CodigoIndicador','I.CodigoPei','I.CodigoPoa','I.Descripcion','I.Articulacion','I.Resultado','I.TipoIndicador','I.Categoria','I.Unidad',
+                    'I.ObjetivoEspecifico', 'I.Actividad',
+                    'Oi.CodigoObjInstitucional', 'P.CodigoPrograma'
+                ])
+                    ->join('INNER JOIN','ObjetivosEspecificos Oe', 'I.ObjetivoEspecifico = Oe.CodigoObjEspecifico')
+                    ->join('INNER JOIN','ObjetivosInstitucionales Oi', 'Oi.CodigoObjInstitucional = Oe.CodigoObjInstitucional')
+                    ->join('INNER JOIN','Actividades A', 'I.Actividad = A.CodigoActividad')
+                    ->join('INNER JOIN','Programas P', 'P.CodigoPrograma = A.Programa')
+                    ->where(['I.CodigoIndicador' => $_POST["codigoindicador"] ])
+                    ->asArray()->one();
                 if ($indicador){
-                    return json_encode($indicador->getAttributes(array('CodigoIndicador','Codigo','Descripcion','Articulacion','Resultado','TipoIndicador','Categoria','Unidad')));
+                    return json_encode($indicador);
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -217,13 +275,18 @@ class IndicadorController extends Controller
     public function actionActualizarIndicador()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoindicador"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])
+            if (isset($_POST["codigoindicador"]) && $_POST["codigoindicador"] != ""
+                && isset($_POST["objEspecifico"]) && isset($_POST["actividad"])
+                && isset($_POST["codigoPei"]) && isset($_POST["codigoPoa"]) && isset($_POST["descripcion"])
                 && isset($_POST["articulacion"]) && isset($_POST["resultado"])
                 && isset($_POST["tipoindicador"]) && isset($_POST["categoria"]) && isset($_POST["unidad"])
             ){
                 $indicador = Indicador::findOne($_POST["codigoindicador"]);
                 if ($indicador){
-                    $indicador->Codigo = trim($_POST["codigo"]);
+                    $indicador->ObjetivoEspecifico = $_POST["objEspecifico"];
+                    $indicador->Actividad = $_POST["actividad"];
+                    $indicador->CodigoPei = trim($_POST["codigoPei"]);
+                    $indicador->CodigoPoa = trim($_POST["codigoPoa"]);
                     $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                     $indicador->Articulacion = trim($_POST["articulacion"]);
                     $indicador->Resultado = trim($_POST["resultado"]);

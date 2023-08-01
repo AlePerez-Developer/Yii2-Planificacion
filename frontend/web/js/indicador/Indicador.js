@@ -1,4 +1,50 @@
 $(document).ready(function(){
+
+    function format(d) {
+        return (
+            '    <div class="container">' +
+            '        <div class="row">' +
+            '            <div class="col-12" style="text-align: center; font-weight: bold"> Datos Objetivos </div>' +
+            '        </div>' +
+            '        <div class="row justify-content-between">' +
+            '            <div class="col-3 titulosmall"> Objetivo Institucional </div>' +
+            '            <div class="col-9 titulosmall"> Objetivo Especifico </div>' +
+            '        </div>' +
+            '        <div class="row">' +
+            '            <div class="col-2 subsmall"> Codigo: </div>' +
+            '            <div class="col-4 little">' + d.CodigoInstitucional + '</div>' +
+            '            <div class="col-2 subsmall"> Codigo: </div>' +
+            '            <div class="col-4 little">' + d.CodigoEspecifico + '</div>' +
+            '        </div>' +
+            '        <div class="row">' +
+            '            <div class="col-2 subsmall"> Descripcion: </div>' +
+            '            <div class="col-4 little">' + d.ObjetivoInstitucional + '</div>' +
+            '            <div class="col-2 subsmall"> Descripcion: </div>' +
+            '            <div class="col-4 little">' + d.ObjetivoEspecifico + '</div>' +
+            '        </div>' +
+            '        <div class="row">' +
+            '            <div class="col-12" style="text-align: center; font-weight: bold"> Programa / Actividad </div>' +
+            '        </div>' +
+            '        <div class="row justify-content-between"">' +
+            '            <div class="col-3 titulosmall"> Programa </div>' +
+            '            <div class="col-9 titulosmall"> Actividad </div>' +
+            '        </div>' +
+            '        <div class="row">' +
+            '            <div class="col-2 subsmall"> Codigo: </div>' +
+            '            <div class="col-4 little">' + d.CodigoPrograma + '</div>' +
+            '            <div class="col-2 subsmall"> Codigo: </div>' +
+            '            <div class="col-4 little">' + d.CodigoActividad + '</div>' +
+            '        </div>' +
+            '        <div class="row">' +
+            '            <div class="col-2 subsmall"> Descripcion: </div>' +
+            '            <div class="col-4 little">' + d.DescripcionPrograma + '</div>' +
+            '            <div class="col-2 subsmall"> Descripcion: </div>' +
+            '            <div class="col-4 little">' + d.DescripcionActividad + '</div>' +
+            '        </div>' +
+            '    </div>'
+        )
+    };
+
     let table = $(".tablaListaIndicadores").DataTable({
         dom: 'Bfrtip',
         buttons: [
@@ -32,7 +78,7 @@ $(document).ready(function(){
         ],
         initComplete: function () {
             this.api()
-                .columns([3,4,5,6,7])
+                .columns([5,6,7,8,9])
                 .every(function () {
                     var column = this;
                     var select = $('<select><option value="">Buscar...</option></select>')
@@ -61,15 +107,19 @@ $(document).ready(function(){
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,3,8,9] },
-            { orderable: false, targets: [0,3,4,5,6,7,8,9] },
-            { searchable: false, targets: [0,8,9] },
-            { className: "dt-acciones", targets: 9 },
-            { className: "dt-estado", targets: 8 },
+            { className: "dt-center", targets: [0,1,2,3,5,6,7,8,9,10,11] },
+            { orderable: false, targets: [0,1,5,6,7,8,9,10,11] },
+            { searchable: false, targets: [0,1,10,11] }
         ],
         columns: [
             { data: 'CodigoUsuario' },
-            { data: 'Codigo'},
+            {
+                className: 'dt-control',
+                data: null,
+                defaultContent: '',
+            },
+            { data: 'CodigoPei'},
+            { data: 'CodigoPoa'},
             { data: 'Descripcion' },
             { data: 'ArticulacionDescripcion' },
             { data: 'ResultadoDescripcion' },
@@ -80,8 +130,8 @@ $(document).ready(function(){
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "V" >Vigente</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "C" >No vigente</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "V" >V</button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "C" >C</button>' ;
                 },
             },
             {
@@ -89,8 +139,9 @@ $(document).ready(function(){
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
-                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '<button type="button" class="btn btn-info btn-sm  btnApertura" codigo="' + data + '" ><i class="fa fa-eye"></i></button>' +
+                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i></button>' +
+                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i></button>' +
                         '</div>'
                         : data;
                 },
@@ -132,12 +183,104 @@ $(document).ready(function(){
         });
     }).draw();
 
+    $('.tablaListaIndicadores tbody').on('click', 'td.dt-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+        }
+        else {
+            row.child(format(row.data())).show();
+        }
+    });
+
+    $('.objinstitucional').select2({
+        placeholder: "Elija un objetivo institucional",
+        allowClear: true
+    });
+
+    $('.objespecifico').select2({
+        placeholder: "Elija un objetivo especifico",
+        allowClear: true
+    });
+
+    $('.programa').select2({
+        placeholder: "Elija un programa",
+        allowClear: true
+    });
+
+    $('.actividad').select2({
+        placeholder: "Elija una actividad",
+        allowClear: true
+    });
+
+    $("#CodigoObjInstitucional").change(function (){
+        let codigo = $("#CodigoObjInstitucional").val();
+        if (codigo !== ''){
+            let datos = new FormData();
+            datos.append("codigo", codigo);
+            $.ajax({
+                url: "index.php?r=Planificacion/indicador/listar-objsespecificos",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (respuesta) {
+                    var data = jQuery.parseJSON(respuesta);
+                    var sel = $("#CodigoObjEspecifico");
+                    sel.empty();
+                    sel.append('<option></option>');
+                    $.each(data, function(index, value) {
+                        sel.append('<option value="' + value['CodigoObjEspecifico'] + '">' + '(' + value['CodigoCOGE'] + ') - ' + value['Objetivo'] + '</option>');
+                    });
+                    $('#CodigoObjEspecifico').prop('disabled', false);
+                },
+            });
+        } else {
+            $("#CodigoObjEspecifico").val(null).trigger('change');
+            $('#CodigoObjEspecifico').prop('disabled', true);
+        }
+    });
+
+    $("#CodigoPrograma").change(function (){
+        let codigo = $("#CodigoPrograma").val();
+        if (codigo !== ''){
+            let datos = new FormData();
+            datos.append("codigo", codigo);
+            $.ajax({
+                url: "index.php?r=Planificacion/indicador/listar-actividades",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (respuesta) {
+                    var data = jQuery.parseJSON(respuesta);
+                    var sel = $("#CodigoActividad");
+                    sel.empty();
+                    sel.append('<option></option>');
+                    $.each(data, function(index, value) {
+                        sel.append('<option value="' + value['CodigoActividad'] + '">' + '(' + value['Codigo'] + ') - ' + value['Descripcion'] + '</option>');
+                    });
+                    $('#CodigoActividad').prop('disabled', false);
+                },
+            });
+        } else {
+            $("#CodigoActividad").val(null).trigger('change');
+            $('#CodigoActividad').prop('disabled', true);
+        }
+    });
+
     $("#IngresoDatos").hide();
 
     function ReiniciarCampos(){
         $('#formindicador *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $("#CodigoObjInstitucional").val(null).trigger('change');
+        $("#CodigoPrograma").val(null).trigger('change');
         $("#codigo").val('');
         $("form").trigger("reset");
     }
@@ -163,7 +306,7 @@ $(document).ready(function(){
 
 
     $(".btnGuardar").click(function () {
-        if ($("#formindicador").valid()){
+        if ($("#formIndicadores").valid()){
             if ($("#codigo").val() === ''){
                 GuardarIndicador();
             } else {
@@ -176,7 +319,10 @@ $(document).ready(function(){
        INSERTA EN LA BD UN NUEVO REGISTRO DE OBJETIVO ESTRATEGICO
     ===============================================================*/
     function GuardarIndicador(){
-        let codigo = $("#Codigo").val();
+        let objEspecifico = $("#CodigoObjEspecifico").val();
+        let actividad = $("#CodigoActividad").val();
+        let codigoPei = $("#CodigoPei").val();
+        let codigoPoa = $("#CodigoPoa").val();
         let descripcion = $("#Descripcion").val();
         let articulacion = $("#Articulacion").val();
         let resultado = $("#Resultado").val();
@@ -184,7 +330,10 @@ $(document).ready(function(){
         let categoria = $("#Categoria").val();
         let unidad = $("#Unidad").val();
         let datos = new FormData();
-        datos.append("codigo", codigo);
+        datos.append("objEspecifico", objEspecifico);
+        datos.append("actividad", actividad);
+        datos.append("codigoPei", codigoPei);
+        datos.append("codigoPoa", codigoPoa);
         datos.append("descripcion", descripcion);
         datos.append("articulacion", articulacion);
         datos.append("resultado", resultado);
@@ -260,11 +409,11 @@ $(document).ready(function(){
                 if (respuesta === "ok") {
                     if (estado === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('No vigente');
+                        objectBtn.html('C');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('Vigente');
+                        objectBtn.html('V');
                         objectBtn.attr('estado', 'V');
                     }
                 }
@@ -380,7 +529,12 @@ $(document).ready(function(){
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoIndicador);
-                $("#Codigo").val(data.Codigo);
+                $("#CodigoPei").val(data.CodigoPei);
+                $("#CodigoPoa").val(data.CodigoPoa);
+                $(".objinstitucional").val(data.CodigoObjInstitucional).trigger('change')
+                $(".programa").val(data.CodigoPrograma).trigger('change')
+                $(".objespecifico").val(data.ObjetivoEspecifico).trigger('change')
+                $(".actividad").val(data.Actividad).trigger('change')
                 $("#Descripcion").val(data.Descripcion);
                 $("#Articulacion").val(data.Articulacion);
                 $("#Resultado").val(data.Resultado);
@@ -418,7 +572,10 @@ $(document).ready(function(){
     =============================================*/
     function ActualizarIndicador () {
         let codigoindicador = $("#codigo").val();
-        let codigo = $("#Codigo").val();
+        let objEspecifico = $("#CodigoObjEspecifico").val();
+        let actividad = $("#CodigoActividad").val();
+        let codigoPei = $("#CodigoPei").val();
+        let codigoPoa = $("#CodigoPoa").val();
         let descripcion = $("#Descripcion").val();
         let articulacion = $("#Articulacion").val();
         let resultado = $("#Resultado").val();
@@ -427,7 +584,10 @@ $(document).ready(function(){
         let unidad = $("#Unidad").val();
         let datos = new FormData();
         datos.append("codigoindicador", codigoindicador);
-        datos.append("codigo", codigo);
+        datos.append("objEspecifico", objEspecifico);
+        datos.append("actividad", actividad);
+        datos.append("codigoPei", codigoPei);
+        datos.append("codigoPoa", codigoPoa);
         datos.append("descripcion", descripcion);
         datos.append("articulacion", articulacion);
         datos.append("resultado", resultado);

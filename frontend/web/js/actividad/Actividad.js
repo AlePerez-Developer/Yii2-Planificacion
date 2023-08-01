@@ -30,6 +30,28 @@ $(document).ready(function () {
 
             }
         ],
+        initComplete: function () {
+            this.api()
+                .columns([1])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value="">Programa...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -39,14 +61,15 @@ $(document).ready(function () {
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,3,4] },
-            { orderable: false, targets: [0,3,4] },
-            { searchable: false, targets: [0,3,4] },
-            { className: "dt-acciones", targets: 4 },
-            { className: "dt-estado", targets: 3 },
+            { className: "dt-center", targets: [0,1,2,4,5] },
+            { orderable: false, targets: [0,1,4,5] },
+            { searchable: false, targets: [0,4,5] },
+            { className: "dt-acciones", targets: 5 },
+            { className: "dt-estado", targets: 4 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
+            { data: 'Programa'},
             { data: 'Codigo' },
             { data: 'Descripcion' },
             {
@@ -105,12 +128,18 @@ $(document).ready(function () {
         });
     }).draw();
 
+    $('.programa').select2({
+        placeholder: "Elija un programa",
+        allowClear: true
+    });
+
     $("#ingresoDatos").hide();
 
     function reiniciarCampos() {
         $('#formActividades *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $("#CodigoPrograma").val(null).trigger('change');
         $("#codigo").val('');
         $("form").trigger("reset");
     }
@@ -148,9 +177,11 @@ $(document).ready(function () {
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
     function guardarActividad() {
+        let programa = $("#CodigoPrograma").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
+        datos.append("programa", programa);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
@@ -342,6 +373,7 @@ $(document).ready(function () {
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoActividad);
+                $("#CodigoPrograma").val(data.Programa).trigger('change')
                 $("#Codigo").val(data.Codigo);
                 $("#Descripcion").val(data.Descripcion);
                 $("#btnMostrarCrear").trigger('click');
@@ -375,11 +407,13 @@ $(document).ready(function () {
     ACTUALIZA LA ACTIVIDAD SELECCIONADO EN LA BD
     =============================================*/
     function actualizarActividad() {
+        let programa = $("#CodigoPrograma").val();
         let codigoactividad = $("#codigo").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
         datos.append("codigoactividad", codigoactividad);
+        datos.append("programa", programa);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
