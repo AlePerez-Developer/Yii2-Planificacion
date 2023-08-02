@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    let formReset = false
 
     function format(d) {
         return (
@@ -196,24 +197,44 @@ $(document).ready(function(){
     });
 
     $('.objinstitucional').select2({
+        theme: 'bootstrap4',
         placeholder: "Elija un objetivo institucional",
         allowClear: true
-    });
+    }).change(function(e) {
+        if (!formReset){
+            $("#formIndicadores").validate().element('#CodigoObjInstitucional');
+        }
+    })
 
     $('.objespecifico').select2({
+        theme: 'bootstrap4',
         placeholder: "Elija un objetivo especifico",
         allowClear: true
-    });
+    }).change(function(e) {
+        if (!formReset){
+            $("#formIndicadores").validate().element('#CodigoObjEspecifico');
+        }
+    })
 
     $('.programa').select2({
+        theme: 'bootstrap4',
         placeholder: "Elija un programa",
         allowClear: true
-    });
+    }).change(function(e) {
+        if (!formReset){
+            $("#formIndicadores").validate().element('#CodigoPrograma');
+        }
+    })
 
     $('.actividad').select2({
+        theme: 'bootstrap4',
         placeholder: "Elija una actividad",
         allowClear: true
-    });
+    }).change(function(e) {
+        if (!formReset){
+            $("#formIndicadores").validate().element('#CodigoActividad');
+        }
+    })
 
     $("#CodigoObjInstitucional").change(function (){
         let codigo = $("#CodigoObjInstitucional").val();
@@ -276,9 +297,12 @@ $(document).ready(function(){
     $("#IngresoDatos").hide();
 
     function ReiniciarCampos(){
-        $('#formindicador *').filter(':input').each(function () {
+        $('#formIndicadores *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $('.invalid-feedback').each(function (){
+            $(this).removeAttr('style')
+        })
         $("#CodigoObjInstitucional").val(null).trigger('change');
         $("#CodigoPrograma").val(null).trigger('change');
         $("#codigo").val('');
@@ -298,10 +322,12 @@ $(document).ready(function(){
     });
 
     $(".btnCancel").click(function () {
+        formReset = true;
         $('.icon').toggleClass('opened');
         ReiniciarCampos();
         $("#IngresoDatos").hide(500);
         $("#Divtabla").show(500);
+        formReset = false;
     });
 
 

@@ -42,7 +42,6 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                                                 <option value="<?= $objinstitucional['CodigoObjInstitucional'] ?>"><?= '('.  $objinstitucional['Codigo'] .') - ' . $objinstitucional['Objetivo']  ?></option>
                                             <?php } ?>
                                         </select>
-                                        <div class="invalid-feedback">Ceci est obligatoire</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
