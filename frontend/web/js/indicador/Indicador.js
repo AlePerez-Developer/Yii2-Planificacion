@@ -236,7 +236,7 @@ $(document).ready(function(){
         }
     })
 
-    $("#CodigoObjInstitucional").change(function (){
+    $("#CodigoObjInstitucional").change(function (val, obj){
         let codigo = $("#CodigoObjInstitucional").val();
         if (codigo !== ''){
             let datos = new FormData();
@@ -258,14 +258,17 @@ $(document).ready(function(){
                     });
                     $('#CodigoObjEspecifico').prop('disabled', false);
                 },
-            });
+            }).done(function (){
+                if (obj !== undefined)
+                    $("#CodigoObjEspecifico").val(obj).trigger('change');
+            })
         } else {
             $("#CodigoObjEspecifico").val(null).trigger('change');
             $('#CodigoObjEspecifico').prop('disabled', true);
         }
     });
 
-    $("#CodigoPrograma").change(function (){
+    $("#CodigoPrograma").change(function (val, act){
         let codigo = $("#CodigoPrograma").val();
         if (codigo !== ''){
             let datos = new FormData();
@@ -287,7 +290,10 @@ $(document).ready(function(){
                     });
                     $('#CodigoActividad').prop('disabled', false);
                 },
-            });
+            }).done(function (){
+                if (act !== undefined)
+                    $("#CodigoActividad").val(act).trigger('change');
+            })
         } else {
             $("#CodigoActividad").val(null).trigger('change');
             $('#CodigoActividad').prop('disabled', true);
@@ -557,10 +563,8 @@ $(document).ready(function(){
                 $("#codigo").val(data.CodigoIndicador);
                 $("#CodigoPei").val(data.CodigoPei);
                 $("#CodigoPoa").val(data.CodigoPoa);
-                $(".objinstitucional").val(data.CodigoObjInstitucional).trigger('change')
-                $(".programa").val(data.CodigoPrograma).trigger('change')
-                $(".objespecifico").val(data.ObjetivoEspecifico).trigger('change')
-                $(".actividad").val(data.Actividad).trigger('change')
+                $(".objinstitucional").val(data.CodigoObjInstitucional).trigger('change',data.ObjetivoEspecifico)
+                $(".programa").val(data.CodigoPrograma).trigger('change',data.Actividad)
                 $("#Descripcion").val(data.Descripcion);
                 $("#Articulacion").val(data.Articulacion);
                 $("#Resultado").val(data.Resultado);

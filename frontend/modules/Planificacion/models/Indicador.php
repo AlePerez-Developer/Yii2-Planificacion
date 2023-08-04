@@ -13,6 +13,7 @@ use Yii;
  * @property string|null $CodigoPei
  * @property string|null $CodigoPoa
  * @property string $Descripcion
+ * @property int $Gestion
  * @property int $ObjetivoEspecifico
  * @property int $Actividad
  * @property int $Articulacion
@@ -50,8 +51,8 @@ class Indicador extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoIndicador', 'Descripcion', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoIndicador', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
+            [['CodigoIndicador', 'Descripcion', 'Gestion', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoIndicador', 'Gestion', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoPei', 'CodigoPoa', 'CodigoUsuario'], 'string', 'max' => 3],
             [['Descripcion'], 'string', 'max' => 200],
@@ -79,6 +80,7 @@ class Indicador extends \yii\db\ActiveRecord
             'CodigoPei' => 'Codigo Pei',
             'CodigoPoa' => 'Codigo Poa',
             'Descripcion' => 'Descripcion',
+            'Gestion' => 'Gestion',
             'ObjetivoEspecifico' => 'Objetivo Especifico',
             'Actividad' => 'Actividad',
             'Articulacion' => 'Articulacion',

@@ -1,17 +1,17 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\Actividad;
+use app\modules\Planificacion\models\ObjetivoInstitucional;
 use app\modules\Planificacion\models\CategoriaIndicador;
 use app\modules\Planificacion\models\ObjetivoEspecifico;
-use app\modules\Planificacion\models\ObjetivoInstitucional;
-use app\modules\Planificacion\models\Programa;
 use app\modules\Planificacion\models\TipoArticulacion;
 use app\modules\Planificacion\models\IndicadorUnidad;
 use app\modules\Planificacion\models\TipoResultado;
 use app\modules\Planificacion\models\TipoIndicador;
 use app\modules\Planificacion\dao\IndicadorDao;
 use app\modules\Planificacion\models\Indicador;
+use app\modules\Planificacion\models\Actividad;
+use app\modules\Planificacion\models\Programa;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;

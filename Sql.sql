@@ -172,8 +172,12 @@ go
 
 create table Indicadores(
     CodigoIndicador int primary key not null,
-    Codigo int not null,
+    CodigoPei varchar(3),
+    CodigoPoa varchar(3),
     Descripcion Varchar(200) not null,
+    Gestion int not null,
+    ObjetivoEspecifico int not null,
+    Actividad int not null,
     Articulacion int not null,
     Resultado int not null,
     TipoIndicador int not null,
@@ -183,8 +187,8 @@ create table Indicadores(
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
-    Unique(CodigoIndicador,Codigo,Articulacion),
-
+    foreign key (ObjetivoEspecifico) references ObjetivosEspecificos(CodigoObjEspecifico),
+    foreign key (Actividad) references Actividades(CodigoActividad),
     foreign key (Articulacion) references TiposArticulaciones(CodigoTipo),
     foreign key (Resultado) references TiposResultados(CodigoTipo),
     foreign key (TipoIndicador) references TiposIndicadores(CodigoTipo),
@@ -194,15 +198,19 @@ create table Indicadores(
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+go
+
 create table Actividades
 (
     CodigoActividad int primary key not null,
+    Programa int not null,
     Codigo varchar(20) not null,
     Descripcion varchar(250) not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
+    foreign key (Programa) references Programas(CodigoPrograma),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
