@@ -97,7 +97,7 @@ class IndicadorController extends Controller
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
                 ->join('INNER JOIN','IndicadoresUnidades U', 'I.Unidad = U.CodigoTipo')
-                ->where(['!=','I.CodigoEstado','E'])
+                ->where(['!=','I.CodigoEstado','E'])->andWhere(['Gestion' => 2004])
                 ->andWhere(['!=','Oe.CodigoEstado','E'])->andWhere(['!=','Oi.CodigoEstado','E'])
                 ->andWhere(['!=','A.CodigoEstado','E'])->andWhere(['!=','P.CodigoEstado','E'])
                 ->andWhere(['!=','Ta.CodigoEstado','E'])->andWhere(['!=','Tr.CodigoEstado','E'])->andWhere(['!=','Ti.CodigoEstado','E'])->andWhere(['!=','Ci.CodigoEstado','E'])->andWhere(['!=','U.CodigoEstado','E'])
@@ -152,6 +152,7 @@ class IndicadorController extends Controller
                 $indicador->CodigoPei = trim($_POST["codigoPei"]);
                 $indicador->CodigoPoa = trim($_POST["codigoPoa"]);
                 $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
+                $indicador->Gestion = 2004; //Yii::$app->user->identity->Gestion
                 $indicador->Articulacion = trim($_POST["articulacion"]);
                 $indicador->Resultado = trim($_POST["resultado"]);
                 $indicador->TipoIndicador = trim($_POST["tipoindicador"]);
@@ -171,7 +172,6 @@ class IndicadorController extends Controller
                         return "errorExiste";
                     }
                 } else {
-                    var_dump($indicador->errors);
                     return "errorValidacion";
                 }
             } else {

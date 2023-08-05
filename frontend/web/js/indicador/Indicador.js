@@ -598,6 +598,14 @@ $(document).ready(function(){
     });
 
     /*=============================================
+        VER APERTURAS INDICADORES
+     ==============================================*/
+
+    $('#oso').click(function (){
+        $('#staticBackdrop').modal('show')
+    })
+
+    /*=============================================
         ACTUALIZA EL INDICADOR SELECCIONADO EN LA BD
     =============================================*/
     function ActualizarIndicador () {
