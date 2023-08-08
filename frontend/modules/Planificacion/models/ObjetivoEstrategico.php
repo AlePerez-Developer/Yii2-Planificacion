@@ -43,7 +43,7 @@ class ObjetivoEstrategico extends ActiveRecord
             [['CodigoObjEstrategico', 'CodigoPei'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoCOGE', 'CodigoUsuario'], 'string', 'max' => 3],
-            [['Objetivo'], 'string', 'max' => 200],
+            [['Objetivo'], 'string', 'max' => 450],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoObjEstrategico'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],

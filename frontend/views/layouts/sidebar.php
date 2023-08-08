@@ -1,9 +1,8 @@
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="<?=\yii\helpers\Url::home()?>" class="brand-link">
-        <img src="img/icono.png" alt="UrrhhSoft Logo" class="brand-image img-circle elevation-3"
-             style="opacity: .8">
-        <span class="brand-text font-weight-light"><?=Yii::$app->name?></span>
+    <a href="index3.html" class="brand-link">
+        <img src="<?=$assetDir?>/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">AdminLTE 3</span>
     </a>
 
     <!-- Sidebar -->
@@ -14,7 +13,7 @@
                 <img src="<?=$assetDir?>/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">Usuario Registrado</a>
+                <a href="#" class="d-block">Alexander Pierce</a>
             </div>
         </div>
 
@@ -43,9 +42,14 @@
                         'items' => [
                             ['label' => 'Pei', 'url' => ['/Planificacion/peis/index'], 'iconStyle' => 'far'],
                             ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Objetivo Institucional', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Objetivo Especifico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Aperturas PRogramaticas', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Institucional', 'url' => ['/Planificacion/obj-institucional/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Especifico', 'url' => ['/Planificacion/obj-especifico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'indicadores', 'url' => ['/Planificacion/indicador/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidad/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Programas', 'url' => ['/Planificacion/programa/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Proyectos', 'url' => ['/Planificacion/proyecto/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Actividades', 'url' => ['/Planificacion/actividad/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Aperturas Programaticas', 'url' => ['/Planificacion/apertura-programatica/index'], 'iconStyle' => 'far'],
                         ]
                     ],
                     [
@@ -53,9 +57,9 @@
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',
                         'items' => [
-                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidades-soa/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades Soa', 'url' => ['/Planificacion/unidades-soa/index'], 'iconStyle' => 'far'],
                             ['label' => 'Cargos', 'url' => ['/Planificacion/cargos/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Unidades - Cargos', 'url' => ['/Planificacion/unidades-soa-cargos/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Unidades - Cargos', 'url' => ['/Planificacion/unidades-cargos/index'], 'iconStyle' => 'far'],
                         ]
                     ]
                 ],

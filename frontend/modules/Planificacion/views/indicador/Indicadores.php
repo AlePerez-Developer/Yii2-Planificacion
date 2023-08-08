@@ -1,6 +1,6 @@
 <?php
 use yii\web\JqueryAsset;
-use yii\bootstrap4\Modal;
+use yii\bootstrap5\Modal;
 use yii\helpers\Url;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -186,29 +186,30 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
         </table>
     </div>
 
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-        Launch static backdrop modal
-    </button>
 
-    <!-- Modal -->
-    <div class="modal modal-lg fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
-                </div>
+    <?php
+    Modal::begin([
+        'id' => 'indicadoresUnidades',
+        'title' => '<h4>Registro de unidades</h4>',
+        'footer' => '
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal" > Cerrar </button>
             </div>
+        ',
+        'clientOptions' => ['backdrop' => 'static', 'keyboard' => false],
+        'size' => 'modal-xl',
+        'class' => 'modal-dialog-centered',
+
+    ]);?>
+
+        <div class="card mt-3">
+            <?= $this->render('IndicadoresUnidades',[]) ?>
         </div>
-    </div>
+
+
+    <?php
+    Modal::end();
+    ?>
 
 
 

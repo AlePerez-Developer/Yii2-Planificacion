@@ -139,7 +139,7 @@ $(document).ready(function() {
             Objetivo:{
                 required: true,
                 minlength: 2,
-                maxlength: 200
+                maxlength: 450
             },
         },
         messages: {
@@ -156,7 +156,7 @@ $(document).ready(function() {
             Objetivo: {
                 required: "Debe ingresar la descripcion del objetivo estrategico",
                 minlength: "El objetivo debe tener por lo menos 2 caracteres",
-                maxlength: "El objetivo debe tener maximo 200 caracteres"
+                maxlength: "El objetivo debe tener maximo 450 caracteres"
             },
         },
         errorElement: "div",

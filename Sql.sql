@@ -36,7 +36,7 @@ create table PEIs(
 create table ObjetivosEstrategicos(
     CodigoObjEstrategico int primary key not null,
     CodigoCOGE char(3) not null,
-    Objetivo varchar(200) not null,
+    Objetivo varchar(450) not null,
     CodigoPei int not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),

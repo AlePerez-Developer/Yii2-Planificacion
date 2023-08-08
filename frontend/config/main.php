@@ -20,13 +20,6 @@ return [
         'request' => [
             'csrfParam' => '_csrf-frontend',
         ],
-        'view' => [
-            'theme' => [
-                'pathMap' => [
-                    '@app/views' => '@vendor/hail812/yii2-adminlte3/src/views'
-                ],
-            ],
-        ],
         'user' => [
             'identityClass' => 'common\models\Usuario',
             'enableAutoLogin' => true,
