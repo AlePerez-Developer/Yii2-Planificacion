@@ -544,14 +544,6 @@ $(document).ready(function(){
     });
 
     /*=======================================================
-        REGISTRO DE UNIDADES
-    ========================================================*/
-    $(".tablaListaIndicadores tbody").on("click", ".btnUnidad", function () {
-        let codigo = $(this).attr("codigo");
-        $('#indicadoresUnidades').modal('show')
-    });
-
-    /*=======================================================
         BUSCA EL INDICADOR SELECCIONADO EN LA BD
     ========================================================*/
     $(".tablaListaIndicadores tbody").on("click", ".btnEditar", function () {

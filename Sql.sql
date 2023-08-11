@@ -215,6 +215,8 @@ create table Actividades
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+go
+
 create table Proyectos
 (
     CodigoProyecto int primary key not null,
@@ -228,6 +230,8 @@ create table Proyectos
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+go
+
 create table Programas
 (
     CodigoPrograma int primary key not null,
@@ -240,6 +244,8 @@ create table Programas
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
+
+go
 
 create table Unidades
 (
@@ -256,6 +262,32 @@ create table Unidades
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
+
+go
+
+create table  IndicadoresAperturas
+(
+    CodigoIndicadorApertura int primary key not null,
+    Indicador int not null,
+    Apertura int not null,
+    MetaObligatoria int not null default 0,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (Indicador) references Indicadores(CodigoIndicador),
+    foreign key (Apertura) references Unidades(CodigoUnidad),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+
+
+
+
+
+
+
 
 create table AperturasProgramaticas
 (
