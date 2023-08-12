@@ -29,7 +29,7 @@ $(document).ready(function(){
                 { searchable: false, targets: [0] }
             ],
             columns: [
-                { data: 'CodigoUsuario'},
+                { data: 'CodigoUsuario',  width: '10px' },
                 { data: 'Da'},
                 { data: 'Descripcion'},
                 { data: 'MetaObligatoria' },
