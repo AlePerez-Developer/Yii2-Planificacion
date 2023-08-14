@@ -204,7 +204,7 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                 <div class="modal-body">
                     <div class="card ">
                         <div class="card-body">
-                            <input id="Indicador" value="0">
+                            <input id="codigoIndicador" value="0" disabled hidden>
                             <table class="table table-bordered table-striped  tablaIndicadoresAperturas" style="width: 100%" >
                                 <thead>
                                 <th>#</th>
