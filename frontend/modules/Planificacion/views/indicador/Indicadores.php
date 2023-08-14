@@ -188,6 +188,7 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                 <th>Categoria</th>
                 <th>Unidad</th>
                 <th>Estado</th>
+                <th>Programaciones</th>
                 <th>Acciones</th>
             </thead>
         </table>

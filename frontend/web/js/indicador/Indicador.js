@@ -136,11 +136,21 @@ $(document).ready(function(){
                 },
             },
             {
+                data: null,
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                        '<button type="button" class="btn btn-info btn-sm  btnUnidad" codigo="' + row.CodigoIndicador + '" ><i class="fa fa-eye"></i></button>' +
+                        '<button type="button" class="btn btn-info btn-sm  btnActividad" codigo="' + row.CodigoIndicador + '" ><i class="fa-solid fa-list-check"></i></button>' +
+                        '</div>'
+                        : data;
+                },
+            },
+            {
                 data: 'CodigoIndicador',
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-info btn-sm  btnUnidad" codigo="' + data + '" ><i class="fa fa-eye"></i></button>' +
                         '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i></button>' +
                         '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i></button>' +
                         '</div>'
