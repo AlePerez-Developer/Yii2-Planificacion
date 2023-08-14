@@ -34,7 +34,7 @@ $(document).ready(function(){
                     data: 'MetaObligatoria',
                     render: function (data, type, row, meta){
                         return ((type === 'display') && (row.check !== '0'))
-                        ? '<input type="text" onkeypress="oso()" class="form-control num" id="i' + row.CodigoUnidad + '" codigoUnidad=' + row.CodigoUnidad + ' size="5" inicial = "' + row.MetaObligatoria + '"  value = "' + row.MetaObligatoria + '" >'
+                        ? '<input type="text" class="form-control num" id="i' + row.CodigoUnidad + '" codigoUnidad=' + row.CodigoUnidad + ' size="5" inicial = "' + row.MetaObligatoria + '"  value = "' + row.MetaObligatoria + '" >'
                         : '<input type="text" class="form-control num" id="i' + row.CodigoUnidad + '" codigoUnidad=' + row.CodigoUnidad + ' size="5" inicial = "' + row.MetaObligatoria + '"  value = "' + row.MetaObligatoria + '" disabled>'
                     }
                 },
@@ -146,13 +146,13 @@ $(document).ready(function(){
 
     $('#indicadoresUnidades').on('focusout', '.num', function(e) {
         let input = $(this)
+        let inicial = input.attr('inicial')
         if (isNaN(parseInt($(this).val(), 10))){
-            $(this).val('0')
+            $(this).val(inicial)
         }
         if ( $(this).val() !== $(this).attr('inicial') ) {
-            let inicial = $(this).attr('inicial')
-            let meta = $(this).val()
-            let codigoUnidad = $(this).attr("codigoUnidad");
+            let meta = input.val()
+            let codigoUnidad = input.attr("codigoUnidad");
             let codigoIndicador = $('#codigoIndicador').val();
             let datos = new FormData()
             datos.append("codigoUnidad", codigoUnidad);
@@ -175,7 +175,7 @@ $(document).ready(function(){
                             confirmButtonColor: "#3085d6",
                             confirmButtonText: "Cerrar"
                         })
-                        $(this).val(inicial)
+                        input.val(inicial)
                     } else {
                         input.attr('inicial', meta)
                     }
@@ -183,26 +183,26 @@ $(document).ready(function(){
             }).fail(function (){
                 Swal.fire({
                     icon: "error",
-                    title: "Error en el proceso",
+                    title: "Error general",
                     text: "No se pudo realizar la programacion de la meta a la unidad seleccionada, intente actualizar la pagina y si el problema persiste comuniquese con el adminsitrador del sistema",
                     showCancelButton: false,
                     confirmButtonColor: "#3085d6",
                     confirmButtonText: "Cerrar"
                 })
-                $(this).val(inicial)
+                input.val(inicial)
             })
         }
     })
 
-    function oso() {
-        console.log('s')
-        let regex = new RegExp("^[0-9,.]*$");
-        let key = String.fromCharCode(!this.charCode ? this.which : this.charCode);
+    $('#indicadoresUnidades').on('keypress', '.num', function(event) {
+        console.log('ss')
+        let regex = new RegExp("^[0-9]*$");
+        let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
         if (!regex.test(key)) {
-            this.preventDefault();
+            event.preventDefault();
             return false;
         }
-    }
+    })
 
 });
 
