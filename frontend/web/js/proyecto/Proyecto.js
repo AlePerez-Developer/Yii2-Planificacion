@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    let formReset = false
     let table = $("#tablaListaProyectos").DataTable({
         dom: 'Bfrtip',
         buttons: [
@@ -30,6 +31,28 @@ $(document).ready(function () {
 
             }
         ],
+        initComplete: function () {
+            this.api()
+                .columns([1])
+                .every(function () {
+                    var column = this;
+                    var select = $('<select><option value="">Programa...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -39,14 +62,15 @@ $(document).ready(function () {
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,3,4] },
-            { orderable: false, targets: [0,3,4] },
-            { searchable: false, targets: [0,3,4] },
-            { className: "dt-acciones", targets: 4 },
-            { className: "dt-estado", targets: 3 },
+            { className: "dt-center", targets: [0,1,2,4,5] },
+            { orderable: false, targets: [0,1,4,5] },
+            { searchable: false, targets: [0,4,5] },
+            { className: "dt-acciones", targets: 5 },
+            { className: "dt-estado", targets: 4 },
         ],
         columns: [
             { data: 'CodigoUsuario' },
+            { data: 'Programa'},
             { data: 'Codigo' },
             { data: 'Descripcion' },
             {
@@ -105,12 +129,26 @@ $(document).ready(function () {
         });
     }).draw();
 
+    $('.programa').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un programa",
+        allowClear: true
+    }).change(function(e) {
+        if (!formReset){
+            $("#formProyectos").validate().element('#codigoPrograma');
+        }
+    })
+
     $("#ingresoDatos").hide();
 
     function reiniciarCampos() {
         $('#formProyectos *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $('.invalid-feedback').each(function (){
+            $(this).removeAttr('style')
+        })
+        $("#codigoPrograma").val(null).trigger('change');
         $("#codigo").val('');
         $("form").trigger("reset");
     }
@@ -128,10 +166,12 @@ $(document).ready(function () {
     });
 
     $("#btnCancelar").click(function () {
+        formReset = true;
         $('.icon').toggleClass('opened');
         reiniciarCampos();
         $("#ingresoDatos").hide(500);
         $("#divTabla").show(500);
+        formReset = false;
     });
 
     $("#btnGuardar").click(function () {
@@ -148,9 +188,11 @@ $(document).ready(function () {
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
     function guardarProyecto() {
+        let programa = $("#codigoPrograma").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
+        datos.append("programa", programa);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
@@ -341,6 +383,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
+                $("#codigoPrograma").val(data.Programa).trigger('change')
                 $("#codigo").val(data.CodigoProyecto);
                 $("#Codigo").val(data.Codigo);
                 $("#Descripcion").val(data.Descripcion);
@@ -376,10 +419,12 @@ $(document).ready(function () {
     =============================================*/
     function actualizarProyecto() {
         let codigoproyecto = $("#codigo").val();
+        let programa = $("#codigoPrograma").val();
         let codigo = $("#Codigo").val();
         let descripcion = $("#Descripcion").val();
         let datos = new FormData();
         datos.append("codigoproyecto", codigoproyecto);
+        datos.append("programa", programa);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({

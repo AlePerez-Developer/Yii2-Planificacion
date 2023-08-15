@@ -10,6 +10,7 @@ use Yii;
  * This is the model class for table "Proyectos".
  *
  * @property int $CodigoProyecto
+ * @property int $Programa
  * @property string $Codigo
  * @property string $Descripcion
  * @property string $CodigoEstado
@@ -35,12 +36,14 @@ class Proyecto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoProyecto', 'Programa', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoProyecto', 'Programa'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['Codigo'], 'string', 'max' => 20],
             [['Descripcion'], 'string', 'max' => 250],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
+            [['Programa'], 'exist', 'skipOnError' => true, 'targetClass' => Programa::class, 'targetAttribute' => ['Programa' => 'CodigoPrograma']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -53,12 +56,23 @@ class Proyecto extends \yii\db\ActiveRecord
     {
         return [
             'CodigoProyecto' => 'Codigo Proyecto',
+            'Programa' => 'Programa',
             'Codigo' => 'Codigo',
             'Descripcion' => 'Descripcion',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
+    }
+
+    /**
+     * Gets query for [[Programa]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPrograma()
+    {
+        return $this->hasOne(Programa::class, ['CodigoPrograma' => 'Programa']);
     }
 
     /**

@@ -34,6 +34,16 @@ $this->params['breadcrumbs'] = [['label' => 'Proyectos']];
                     <form id="formProyectos" action="" method="post">
 
                         <div class="form-group">
+                            <label for="codigoPrograma">Seleccione un programa</label>
+                            <select class="form-control programa" id="codigoPrograma" name="codigoPrograma" >
+                                <option></option>
+                                <?php foreach ($programas as $programa){ ?>
+                                    <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="Codigo" class="control-label">Codigo proyecto</label>
                             <input id="Codigo" name="Codigo" placeholder="Codigo" style="width: 240px" class="form-control input-lg num">
                         </div>
@@ -58,6 +68,7 @@ $this->params['breadcrumbs'] = [['label' => 'Proyectos']];
                style="width: 100%">
             <thead>
             <th style="text-align: center; vertical-align: middle;">#</th>
+            <th style="text-align: center; vertical-align: middle;">Programa</th>
             <th style="text-align: center; vertical-align: middle;">Codigo</th>
             <th style="text-align: center; vertical-align: middle;">Descripcion</th>
             <th style="text-align: center; vertical-align: middle;">Estado</th>

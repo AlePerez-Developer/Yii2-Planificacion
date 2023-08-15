@@ -462,6 +462,10 @@ $(document).ready(function() {
 
     $( "#formProyectos" ).validate({
         rules: {
+            codigoPrograma:{
+                required: true,
+                DiferenteQue: ''
+            },
             Codigo: {
                 required: true,
                 digits: true,
@@ -475,6 +479,10 @@ $(document).ready(function() {
             },
         },
         messages: {
+            codigoPrograma: {
+                required: "Debe seleccionar un programa",
+                DiferenteQue:"Debe seleccionar un programa"
+            },
             Codigo: {
                 required: "Debe ingresar un codigo para el proyecto",
                 digits: "Solo debe ingresar numeros",
@@ -490,8 +498,15 @@ $(document).ready(function() {
         errorElement: "div",
 
         errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
+            var elem = $(element);
+            if (elem.hasClass("select2-hidden-accessible")) {
+                element = $("#select2-" + elem.attr("id") + "-container").parent();
+                error.addClass( "invalid-feedback" );
+                error.insertAfter(element);
+            } else {
+                error.addClass( "invalid-feedback" ).removeAttr("style");;
+                error.insertAfter(element);
+            }
         },
         highlight: function ( element  ) {
             $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );

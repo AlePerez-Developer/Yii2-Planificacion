@@ -5,6 +5,7 @@ namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\dao\ProyectoDao;
 use app\modules\Planificacion\models\AperturaProgramatica;
+use app\modules\Planificacion\models\Programa;
 use app\modules\Planificacion\models\Proyecto;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -51,14 +52,21 @@ class ProyectoController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('Proyectos');
+        $programas = Programa::find()->where(['CodigoEstado'=>'V'])->all();
+        return $this->render('Proyectos',[
+            'programas' => $programas
+            ]);
     }
 
     public function actionListarProyectos()
     {
         $Data = array();
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $proyectos = Proyecto::find()->select(['CodigoProyecto','Codigo','Descripcion','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('Codigo')->asArray()->all();
+            $proyectos = Proyecto::find()->alias('proy')
+                ->select(['proy.CodigoProyecto','p.Codigo as Programa', 'proy.Codigo','proy.Descripcion','proy.CodigoEstado','proy.CodigoUsuario'])
+                ->join('Inner Join','Programas p','proy.Programa = p.CodigoPrograma')
+                ->where(['!=','proy.CodigoEstado','E'])->andWhere(['!=','p.CodigoEstado','E'])
+                ->orderBy('proy.Codigo')->asArray()->all();
             foreach($proyectos as  $proyecto) {
                 array_push($Data, $proyecto);
             }
@@ -69,10 +77,11 @@ class ProyectoController extends Controller
     public function actionGuardarProyecto()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if ( isset($_POST["codigo"]) && isset($_POST["descripcion"]))
+            if ( isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"]))
             {
                 $proyecto = new Proyecto();
                 $proyecto->CodigoProyecto = ProyectoDao::GenerarCodigoProyecto();
+                $proyecto->Programa = $_POST["programa"];
                 $proyecto->Codigo = $_POST["codigo"];
                 $proyecto->Descripcion =mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                 $proyecto->CodigoEstado = 'V';
@@ -160,7 +169,7 @@ class ProyectoController extends Controller
             if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
                 $proyecto = Proyecto::findOne($_POST["codigo"]);
                 if ($proyecto){
-                    return json_encode($proyecto->getAttributes(array('CodigoProyecto','Codigo','Descripcion')));
+                    return json_encode($proyecto->getAttributes(array('CodigoProyecto','Programa', 'Codigo','Descripcion')));
                 } else {
                     return 'errorNoEncontrado';
                 }
@@ -175,9 +184,10 @@ class ProyectoController extends Controller
     public function actionActualizarProyecto()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoproyecto"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
+            if (isset($_POST["codigoproyecto"]) && isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
                 $proyecto = Proyecto::findOne($_POST["codigoproyecto"]);
                 if ($proyecto){
+                    $proyecto->Programa = $_POST["programa"];
                     $proyecto->Codigo = $_POST["codigo"];
                     $proyecto->Descripcion = strtoupper(trim($_POST["descripcion"]));
                     if ($proyecto->validate()){
