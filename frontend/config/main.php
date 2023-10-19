@@ -16,6 +16,9 @@ return [
             'class' => 'app\modules\Planificacion\PlanificacionModule',
         ],
     ],
+    'aliases' => [
+        '@oso' =>  '@app/web/img',
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',

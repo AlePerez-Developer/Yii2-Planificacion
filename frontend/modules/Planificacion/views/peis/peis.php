@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -22,6 +23,7 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
                     <div class="vertical"></div>
                 </div>
                 Agregar Pei
+
             </div>
         </button>
     </div>
@@ -63,6 +65,7 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
         </div>
     </div>
     <div id="divTabla" name="divTabla" class="card-body overflow-auto">
+        <?= Html::a('Create Pei', ['reporte'], ['class' => 'btn btn-success', 'target' => '_Blank']) ?>
         <table id="tablaListaPeis" name="tablaListaPeis" class="table table-bordered table-striped">
             <thead>
             <th>#</th>
@@ -75,4 +78,51 @@ $this->params['breadcrumbs'] = [['label' => 'Peis']];
             </thead>
         </table>
     </div>
+
+
+    <style>
+
+        tr {
+            border-top: 1px solid black;
+        }
+        tr:first-child {
+            border-top: none;
+        }
+        td {
+            border: none !important;
+        }
+    </style>
+    <table width="100%" style="border-collapse: collapse; border: none">
+        <thead style="border-bottom: 1px solid yellow">
+            <tr>
+                <th>numero</th>
+                <th>titulo 1</th>
+                <th>titulo 2 o subtitulo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>orale no se</td>
+                <td>ta bueno es els subtitulo</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>orale no se 2</td>
+                <td>ta bueno es els subtitulo 2</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>orale no se 3</td>
+                <td>ta bueno es els subtitulo 3</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>orale no se 4</td>
+                <td>ta bueno es els subtitulo 4</td>
+            </tr>
+        </tbody>
+    </table>
+
 </div>
+
