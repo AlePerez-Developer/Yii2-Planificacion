@@ -69,15 +69,79 @@
     font-size: 11px;
 }
 
+.page-link{
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px!important;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    box-shadow:0 1px 2px #5e5d5b;
+}
+.page-link > span{
+    color: black;
+    font-size:12px
+}
+
+.dataTables_filter {
+    text-align: left!important;
+}
+
+.dataTables_length {
+    text-align: right!important;
+    font-size:12px
+}
+
+.dataTables_info {
+    font-size:12px
+}
+
+
+
+
 th.dt-center, td.dt-center { text-align: center; }
 
 th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; }
 
 th.dt-acciones, td.dt-acciones  {
-    min-width: 150px;
+    width: 130px;
+    text-align: center;
 }
 th.dt-estado, td.dt-estado  {
-    min-width: 90px;
+    width: 50px;
+    text-align: center;
+}
+
+.btnEstado {
+    height: 20px;
+    width: 20px;
+}
+
+.btnEditar {
+    width: 60px;
+    height: 30px;
+}
+
+.btnEditar > span {
+    color:darkslategrey;
+    font-size:15px
+}
+
+.btnEliminar {
+    width: 60px;
+    height: 30px;
+}
+
+.btnEliminar > span {
+    color:darkslategrey;
+    font-size:15px
+}
+
+.btnEliminar:hover > span {
+    color:white;
+    font-size:15px
 }
 
 .highlight-node > .jqtree-element > .jqtree-title {

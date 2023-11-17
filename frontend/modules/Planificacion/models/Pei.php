@@ -101,13 +101,17 @@ class Pei extends ActiveRecord
 
     public function exist(): bool
     {
-        /*$pei = Pei::find()->where(["FechaAprobacion" => $this->FechaAprobacion, "GestionInicio"=>$this->GestionInicio, "GestionFin"=>$this->GestionFin])->andWhere(["CodigoEstado"=>"V"])->all();
+        $pei = Pei::find()
+            ->where('(FechaAprobacion = :FechaAprobacion) or (GestionInicio = :GestionInicio) or (GestionFin = :GestionFin)',
+                [':FechaAprobacion' => $this->FechaAprobacion, ':GestionInicio' => $this->GestionInicio, ':GestionFin' => $this->GestionFin]
+            )
+            ->andWhere(['!=','CodigoPei', $this->CodigoPei])
+            ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
         if(!empty($pei)){
             return true;
         }else{
             return false;
-        }*/
-        return false;
+        }
     }
 
     public function enUso(): bool

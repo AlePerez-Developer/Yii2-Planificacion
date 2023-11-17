@@ -1,35 +1,8 @@
 $(document).ready(function () {
     let table = $("#tablaListaPeis").DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'pdfHtml5',
-                text: 'Exportar PDF',
-                exportOptions: {
-                    columns: [ 0, 1, 2, 3,4 ]
-                },
-                customize: function ( doc ) {
-                    var cols = [];
-                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
-                    cols[1] = {text:'pie de pagina', alignment: 'center' };
-                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
-
-                    var objFooter = {};
-                    objFooter['columns'] = cols;
-                    doc['footer']=objFooter;
-
-                    doc.content.splice(1, 0,
-                        {
-                            margin: [0, 0, 0, 12],
-                            alignment: 'center',
-                            text: 'Listado de PEI',
-
-                        }
-                    );
-                }
-
-            }
-        ],
+        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -44,7 +17,9 @@ $(document).ready(function () {
             { searchable: false, targets: [0,5,6] },
             { className: "dt-acciones", targets: 6 },
             { className: "dt-estado", targets: 5 },
+            { width: 10, targets: 0 }
         ],
+        fixedColumns: true,
         columns: [
             { data: 'CodigoUsuario' },
             { data: 'DescripcionPei' },
@@ -53,19 +28,19 @@ $(document).ready(function () {
             { data: 'GestionFin' },
             {
                 data: 'CodigoEstado',
-                render: function (data, type, row, meta) {
+                render: function (data, type, row) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "V" >Vigente</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "C" >No vigente</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm btnEstado" codigo="' + row.CodigoPei + '" estado = "V" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "C" ></button>' ;
                 },
             },
             {
                 data: 'CodigoPei',
-                render: function (data, type, row, meta) {
+                render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
-                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
                         '</div>'
                         : data;
                 },
@@ -90,8 +65,8 @@ $(document).ready(function () {
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
-                "sNext": "<i class='fa fa-arrow-right'></i>",
-                "sPrevious": "<i class='fa fa-arrow-left'></i>"
+                "sNext": "<span class='fa fa-arrow-right'></span>",
+                "sPrevious": "<span class='fa fa-arrow-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
@@ -107,24 +82,22 @@ $(document).ready(function () {
         });
     }).draw();
 
-    $("#ingresoDatos").hide();
-
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $("#codigoPei").val('');
-        $("form").trigger("reset");
+        $('#codigoPei').val('');
+        $('#formPei').trigger("reset");
     }
 
     $("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
         icono.toggleClass('opened');
         if (icono.hasClass("opened")) {
-            $("#ingresoDatos").show(500);
+            $("#divDatos").show(500);
             $("#divTabla").hide(500);
         } else {
-            $("#ingresoDatos").hide(500);
+            $("#divDatos").hide(500);
             $("#divTabla").show(500);
         }
     });
@@ -132,7 +105,7 @@ $(document).ready(function () {
     $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');
         reiniciarCampos();
-        $("#ingresoDatos").hide(500);
+        $("#divDatos").hide(500);
         $("#divTabla").show(500);
     });
 
@@ -145,6 +118,14 @@ $(document).ready(function () {
             }
         }
     });
+
+    $("#gestionInicio").on( "keypress",function(){
+        $("#formPei").validate().element('#gestionFin');
+    })
+
+    $("#gestionFin").on( "keypress",function(){
+        $("#formPei").validate().element('#gestionInicio');
+    })
 
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO DE PEI
@@ -216,7 +197,7 @@ $(document).ready(function () {
         let codigoPei = objectBtn.attr("codigo");
         let estadoPei = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigopei", codigoPei);
+        datos.append("codigoPei", codigoPei);
         $.ajax({
             url: "index.php?r=Planificacion/peis/cambiar-estado-pei",
             method: "POST",
@@ -228,11 +209,9 @@ $(document).ready(function () {
                 if (respuesta === "ok") {
                     if (estadoPei === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('No vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }
@@ -266,9 +245,9 @@ $(document).ready(function () {
     ELIMINA DE LA BD UN REGISTRO DE PEI
     =============================================*/
     $("#tablaListaPeis tbody").on("click", ".btnEliminar", function () {
-        let codigopei = $(this).attr("codigo");
+        let codigoPei = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigopei", codigopei);
+        datos.append("codigoPei", codigoPei);
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
@@ -338,7 +317,7 @@ $(document).ready(function () {
     $("#tablaListaPeis tbody").on("click", ".btnEditar", function () {
         let codigoPei = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigopei", codigoPei);
+        datos.append("codigoPei", codigoPei);
         $.ajax({
             url: "index.php?r=Planificacion/peis/buscar-pei",
             method: "POST",

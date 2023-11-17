@@ -36,31 +36,22 @@ $(document).ready(function() {
         function (value, element, param){
             let d1 = new Date(value);
             let d2 = new Date($(param).val());
-            if (d1.getTime() > d2.getTime() )
-                return true
-            else
-                return false
+            return d1.getTime() > d2.getTime();
         })
     $.validator.addMethod("FechaMenor",
         function (value, element, param){
             let d1 = new Date(value);
             let d2 = new Date($(param).val());
-            if (d1.getTime() < d2.getTime() )
-                return true
-            else
-                return false
+            return d1.getTime() < d2.getTime();
         })
 
     $.validator.addMethod("largominimo",
         function (value, element, param){
-            if ( value.length > parseInt(param) )
-                return true
-            else
-                return false
+            return value.length > parseInt(param);
         })
 
     $.validator.addMethod("DiferenteQue",
-        function (value, element, param) {
+        function (value) {
             return value !== "0";
         });
 
@@ -148,7 +139,7 @@ $(document).ready(function() {
                 DiferenteQue:"Debe seleccionar un codigo PEI"
             },
             CodigoCOGE: {
-                required: "Debe ingresar un codigo de objetico estrategico (COGE)",
+                required: "Debe ingresar un codigo de objetico estrategico (OE)",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero de 3 digitos como maximo",
                 largominimo: "Debe ingresar un numero de 3 digitos"
@@ -297,13 +288,7 @@ $(document).ready(function() {
                 required: true,
                 DiferenteQue: '0'
             },
-            CodigoPei: {
-                required: true,
-                digits: true,
-                max: 999,
-                DiferenteQue: '0'
-            },
-            CodigoPoa: {
+            Codigo: {
                 required: true,
                 digits: true,
                 max: 999,
@@ -352,14 +337,8 @@ $(document).ready(function() {
                 required: "Debe seleccionar un codigo de Obj. Especifico",
                 DiferenteQue:"Debe seleccionar un codigo de Obj. Especifico"
             },
-            CodigoPei: {
-                required: "Debe ingresar un codigo de indicador PEI",
-                digits: "Solo se permite numeros enteros",
-                max: "Debe ingresar un numero entero",
-                DiferenteQue: "Debe ingresar un mayor que 0"
-            },
-            CodigoPoa: {
-                required: "Debe ingresar un codigo de indicador POA",
+            Codigo: {
+                required: "Debe ingresar un codigo de indicador",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero entero",
                 DiferenteQue: "Debe ingresar un mayor que 0"
@@ -399,7 +378,7 @@ $(document).ready(function() {
                 error.addClass( "invalid-feedback" );
                 error.insertAfter(element);
             } else {
-                error.addClass( "invalid-feedback" ).removeAttr("style");;
+                error.addClass( "invalid-feedback" ).removeAttr("style");
                 error.insertAfter(element);
             }
         },
@@ -504,7 +483,7 @@ $(document).ready(function() {
                 error.addClass( "invalid-feedback" );
                 error.insertAfter(element);
             } else {
-                error.addClass( "invalid-feedback" ).removeAttr("style");;
+                error.addClass( "invalid-feedback" ).removeAttr("style");
                 error.insertAfter(element);
             }
         },

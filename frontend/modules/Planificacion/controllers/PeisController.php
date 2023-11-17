@@ -5,6 +5,8 @@ namespace app\modules\Planificacion\controllers;
 use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
 
+use common\models\Estado;
+use Mpdf\Mpdf;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
@@ -55,14 +57,14 @@ class PeisController extends Controller
 
     public function actionListarPeis()
     {
-        $Data = array();
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $peis = Pei::find()->select(['CodigoPei','DescripcionPei','FechaAprobacion','GestionInicio','GestionFin','CodigoEstado','CodigoUsuario'])->where(['!=','CodigoEstado','E'])->orderBy('CodigoPei')->asArray()->all();
-            foreach($peis as  $pei) {
-                array_push($Data, $pei);
-            }
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $peis = Pei::find()->select(['CodigoPei','DescripcionPei','FechaAprobacion','GestionInicio','GestionFin','CodigoEstado','CodigoUsuario'])
+                ->where(['!=','CodigoEstado',Estado::ESTADO_ELIMINADO])
+                ->orderBy('CodigoPei')
+                ->asArray()
+                ->all();
         }
-        return json_encode($Data);
+        return json_encode($peis);
     }
 
     public function actionGuardarPei()
@@ -75,8 +77,8 @@ class PeisController extends Controller
                 $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
                 $pei->GestionInicio = trim($_POST["gestionInicio"]);
                 $pei->GestionFin = trim($_POST["gestionFin"]);
-                $pei->CodigoEstado = 'V';
-                $pei->CodigoUsuario = 'BGC';//\Yii::$app->user->identity->CodigoUsuario;
+                $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
+                $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
                 if ($pei->validate()) {
                     if (!$pei->exist()) {
                         if ($pei->save()) {
@@ -101,13 +103,13 @@ class PeisController extends Controller
     public function actionCambiarEstadoPei()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"])) {
-                $pei = Pei::findOne($_POST["codigopei"]);
+            if (isset($_POST["codigoPei"])) {
+                $pei = Pei::findOne($_POST["codigoPei"]);
                 if ($pei) {
-                    if ($pei->CodigoEstado == "V") {
-                        $pei->CodigoEstado = "C";
+                    if ($pei->CodigoEstado == Estado::ESTADO_VIGENTE) {
+                        $pei->CodigoEstado = Estado::ESTADO_CADUCO;
                     } else {
-                        $pei->CodigoEstado = "V";
+                        $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
                     }
                     if ($pei->update()) {
                         return "ok";
@@ -128,11 +130,11 @@ class PeisController extends Controller
     public function actionEliminarPei()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && $_POST["codigopei"] != "") {
-                $pei = Pei::findOne($_POST["codigopei"]);
+            if (isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "") {
+                $pei = Pei::findOne($_POST["codigoPei"]);
                 if ($pei) {
                     if (!$pei->enUso()) {
-                        $pei->CodigoEstado = 'E';
+                        $pei->CodigoEstado = Estado::ESTADO_ELIMINADO;
                         if ($pei->update()) {
                             return "ok";
                         } else {
@@ -155,8 +157,8 @@ class PeisController extends Controller
     public function actionBuscarPei()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && $_POST["codigopei"] != "") {
-                $pei = Pei::findOne($_POST["codigopei"]);
+            if (isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "") {
+                $pei = Pei::findOne($_POST["codigoPei"]);
                 if ($pei) {
                     return json_encode($pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin')));
                 } else {
@@ -206,13 +208,13 @@ class PeisController extends Controller
 
     public function actionReporte()
     {
-        $mpdf = new \Mpdf\Mpdf();
+        $mpdf = new Mpdf();
         $mpdf->SetMargins(0, 0,32);
         $mpdf->SetHTMLHeader('
-            <table width="100%" >
+            <table style="width: 100%" >
                 <tr>
                     <td width="7%" style="border-right: 1px solid black" >
-                        <img src="img/escudoPNG.png" width="7%">
+                        <img src="img/EscudoPNG.png" width="7%">
                     </td>
                     <td width="25%" style="font-size: 9px">Universidad Mayor Real y Pontificia de San Francisco Xavier de Chuquisaca</td>
                     <td width="53%" style="text-align: center; vertical-align: bottom; border-style: hidden" >Este Titulo completo del reporte me soprende lo bien que se ve aunque depebdera de muchas cosas</td>
@@ -261,6 +263,3 @@ class PeisController extends Controller
         $mpdf->Output();
     }
 }
-
-
-
