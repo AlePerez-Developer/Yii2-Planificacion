@@ -5,6 +5,7 @@ namespace app\modules\Planificacion\controllers;
 use app\modules\Planificacion\models\ObjetivoEstrategico;
 use app\modules\Planificacion\dao\ObjEstrategicoDao;
 use app\modules\Planificacion\models\Pei;
+use common\models\Estado;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -58,30 +59,28 @@ class ObjEstrategicoController extends Controller
 
     public function actionListarObjs()
     {
-        $Data = array();
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $objs = ObjetivoEstrategico::find()->select(['CodigoObjEstrategico','PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','CodigoCOGE','Objetivo','ObjetivosEstrategicos.CodigoEstado','ObjetivosEstrategicos.CodigoUsuario','PEIs.FechaAprobacion'])
                 ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')
                 ->where(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
-                ->orderBy('CodigoObjEstrategico')->asArray()->all();
-            foreach($objs as  $obj) {
-                array_push($Data, $obj);
-            }
+                ->orderBy('CodigoObjEstrategico')
+                ->asArray()
+                ->all();
         }
-        return json_encode($Data);
+        return json_encode($objs);
     }
 
     public function actionGuardarObjs()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
+            if (isset($_POST["codigoPei"]) && isset($_POST["codigoObj"]) && isset($_POST["objetivo"])){
                 $obj = new ObjetivoEstrategico();
                 $obj->CodigoObjEstrategico = ObjEstrategicoDao::GenerarCodigoObjEstrategico();
-                $obj->CodigoPei = $_POST["codigopei"];
-                $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                $obj->CodigoPei = $_POST["codigoPei"];
+                $obj->CodigoCOGE = trim($_POST["codigoObj"]);
                 $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
-                $obj->CodigoEstado = 'V';
-                $obj->CodigoUsuario = 'BGC';//Yii::$app->user->identity->CodigoUsuario;
+                $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
+                $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
                 if ($obj->validate()){
                     if (!$obj->exist()){
                         if ($obj->save())
@@ -111,13 +110,13 @@ class ObjEstrategicoController extends Controller
     public function actionCambiarEstadoObj()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjestrategico"])) {
-                $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
+            if (isset($_POST["codigoObjEstrategico"])) {
+                $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
                 if ($obj){
-                    if ($obj->CodigoEstado == "V") {
-                        $obj->CodigoEstado = "C";
+                    if ($obj->CodigoEstado == Estado::ESTADO_VIGENTE) {
+                        $obj->CodigoEstado = Estado::ESTADO_CADUCO;
                     } else {
-                        $obj->CodigoEstado = "V";
+                        $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
                     }
                     if ($obj->update()){
                         return "ok";
@@ -142,11 +141,11 @@ class ObjEstrategicoController extends Controller
     public function actionEliminarObj()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjestrategico"]) && $_POST["codigoobjestrategico"] != "") {
-                $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
+            if (isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "") {
+                $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
                 if ($obj){
                     if (!$obj->enUso()) {
-                        $obj->CodigoEstado = 'E';
+                        $obj->CodigoEstado = Estado::ESTADO_ELIMINADO;
                         if ($obj->update()) {
                             return "ok";
                         } else {
@@ -169,8 +168,8 @@ class ObjEstrategicoController extends Controller
     public function actionBuscarObj()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjestrategico"]) && $_POST["codigoobjestrategico"] != "") {
-                $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
+            if (isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "") {
+                $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
                 if ($obj){
                     return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoCOGE','Objetivo')));
                 } else {
@@ -187,11 +186,11 @@ class ObjEstrategicoController extends Controller
     public function actionActualizarObj()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigopei"]) && isset($_POST["codigoobjestrategico"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
-                $obj = ObjetivoEstrategico::findOne($_POST["codigoobjestrategico"]);
+            if (isset($_POST["codigoPei"]) && isset($_POST["codigoObjEstrategico"]) && isset($_POST["codigoObj"]) && isset($_POST["objetivo"])){
+                $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
                 if ($obj){
-                    $obj->CodigoPei = $_POST["codigopei"];
-                    $obj->CodigoCOGE = trim($_POST["codigocoge"]);
+                    $obj->CodigoPei = $_POST["codigoPei"];
+                    $obj->CodigoCOGE = trim($_POST["codigoObj"]);
                     $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
                     if ($obj->validate()){
                         if (!$obj->exist()){

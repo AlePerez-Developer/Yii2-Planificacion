@@ -115,36 +115,36 @@ $(document).ready(function() {
 
     } );
 
-    $( "#formobjestrategico" ).validate( {
+    $( "#formObjEstrategico" ).validate( {
         rules: {
-            CodigoPei:{
+            codigoPei:{
                 required: true,
                 DiferenteQue: '0'
             },
-            CodigoCOGE: {
+            codigoObj: {
                 required: true,
                 digits: true,
                 max: 999,
                 largominimo: '2'
             },
-            Objetivo:{
+            objetivo:{
                 required: true,
                 minlength: 2,
                 maxlength: 450
             },
         },
         messages: {
-            CodigoPei: {
+            codigoPei: {
                 required: "Debe seleccionar un codigo PEI",
                 DiferenteQue:"Debe seleccionar un codigo PEI"
             },
-            CodigoCOGE: {
+            codigoObj: {
                 required: "Debe ingresar un codigo de objetico estrategico (OE)",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero de 3 digitos como maximo",
                 largominimo: "Debe ingresar un numero de 3 digitos"
             },
-            Objetivo: {
+            objetivo: {
                 required: "Debe ingresar la descripcion del objetivo estrategico",
                 minlength: "El objetivo debe tener por lo menos 2 caracteres",
                 maxlength: "El objetivo debe tener maximo 450 caracteres"

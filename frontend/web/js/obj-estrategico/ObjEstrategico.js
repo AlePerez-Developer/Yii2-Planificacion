@@ -46,59 +46,11 @@ $(document).ready(function(){
             '   </div>' +
             '</div>'
         );
-
-        return (
-            '<div class="container">' +
-            '  <div class="row">' +
-            '    <div class="col-sm-3">' +
-            '      <p class="mb-1 titulosmall">Descripcion Pei</p>\n' +
-            '      <small >' + d.DescripcionPEI + '</small>' +
-            '    </div>' +
-            '    <div class="col-sm-2">' +
-            '      <p class="mb-1 titulosmall" >Fecha Aprobacion</p>' +
-            '      <small>' + d.FechaAprobacion + '</small>' +
-            '    </div>' +
-            '  </div>' +
-            '  <div class="row">' +
-            '    <div class="col-sm-4 mt-3">' +
-            '      <p class="mb-1 titulosmall">Vigencia:</p>' +
-            '      <small>De: ' + d.GestionInicio +  ' Hasta: ' + d.GestionFin + '</small>' +
-            '    </div>' +
-            '  </div>' +
-            '</div>'
-        );
     }
     let table = $(".tablaListaObjEstrategicos").DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'pdfHtml5',
-                text: 'Exportar PDF',
-                exportOptions: {
-                    columns: [ 0, 2, 3, 4 ]
-                },
-                customize: function ( doc ) {
-                    var cols = [];
-                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
-                    cols[1] = {text:'pie de pagina', alignment: 'center' };
-                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
-
-                    var objFooter = {};
-                    objFooter['columns'] = cols;
-                    doc['footer']=objFooter;
-
-                    doc.content.splice(1, 0,
-                        {
-                            margin: [0, 0, 0, 12],
-                            alignment: 'center',
-                            text: 'Listado de Objetivos Estrategicos',
-
-                        }
-                    );
-                }
-
-            }
-        ],
+        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         initComplete: function () {
             this.api()
                 .columns([2])
@@ -135,7 +87,9 @@ $(document).ready(function(){
             { searchable: false, targets: [0,1,5,6] },
             { className: "dt-acciones", targets: 6 },
             { className: "dt-estado", targets: 5 },
+            { width: 10, targets: 0 }
         ],
+        fixedColumns: true,
         columns: [
             { data: 'CodigoUsuario' },
             {
@@ -157,8 +111,8 @@ $(document).ready(function(){
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "V" >Vigente</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "C" >No vigente</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "V" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "C" ></button>' ;
                 },
             },
             {
@@ -166,8 +120,8 @@ $(document).ready(function(){
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
-                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
                         '</div>'
                         : data;
                 },
@@ -193,8 +147,8 @@ $(document).ready(function(){
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
-                "sNext": "<i class='fa fa-arrow-right'></i>",
-                "sPrevious": "<i class='fa fa-arrow-left'></i>"
+                "sNext": "<span class='fa fa-arrow-right'></span>",
+                "sPrevious": "<span class='fa fa-arrow-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
@@ -222,42 +176,42 @@ $(document).ready(function(){
         }
     });
 
-    $("#IngresoDatos").hide();
+    $("#divDatos").hide();
 
     function ReiniciarCampos(){
-        $('#formobjestrategico *').filter(':input').each(function () {
+        $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $("#codigo").val('');
-        $("form").trigger("reset");
+        $('#codigoObjEstrategico').val('');
+        $('#formObjEstrategico').trigger("reset");
     }
 
-    $("#btnMostrarCrearObj").click(function () {
+    $("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
         icono.toggleClass('opened');
         if (icono.hasClass("opened")){
-            $("#IngresoDatos").show(500);
-            $("#Divtabla").hide(500);
+            $("#divDatos").show(500);
+            $("#divTabla").hide(500);
         } else {
-            $("#IngresoDatos").hide(500);
-            $("#Divtabla").show(500);
+            $("#divDatos").hide(500);
+            $("#divTabla").show(500);
         }
     });
 
-    $(".btnCancel").click(function () {
+    $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');
         ReiniciarCampos();
-        $("#IngresoDatos").hide(500);
-        $("#Divtabla").show(500);
+        $("#divDatos").hide(500);
+        $("#divTabla").show(500);
     });
 
 
-    $(".btnGuardar").click(function () {
-        if ($("#formobjestrategico").valid()){
-            if ($("#codigo").val() === ''){
-                GuardarObj();
+    $("#btnGuardar").click(function () {
+        if ($("#formObjEstrategico").valid()){
+            if ($("#codigoObjEstrategico").val() === ''){
+                guardarObj();
             } else {
-                ActualizarObj();
+                actualizarObj();
             }
         }
     });
@@ -265,13 +219,13 @@ $(document).ready(function(){
     /*=============================================================
        INSERTA EN LA BD UN NUEVO REGISTRO DE OBJETIVO ESTRATEGICO
     ===============================================================*/
-    function GuardarObj(){
-        let codigopei = $("#CodigoPei").val();
-        let codigocoge = $("#CodigoCOGE").val();
-        let objetivo = $("#Objetivo").val();
+    function guardarObj(){
+        let codigoPei = $("#codigoPei").val();
+        let codigoObj = $("#codigoObj").val();
+        let objetivo = $("#objetivo").val();
         let datos = new FormData();
-        datos.append("codigopei", codigopei);
-        datos.append("codigocoge", codigocoge);
+        datos.append("codigoPei", codigoPei);
+        datos.append("codigoObj", codigoObj);
         datos.append("objetivo", objetivo);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/guardar-objs",
@@ -282,7 +236,7 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $(".btnCancel").click();
+                    $("#btnCancelar").click();
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
@@ -327,10 +281,10 @@ $(document).ready(function(){
     =============================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEstado", function () {
         let objectBtn = $(this);
-        let codigo = objectBtn.attr("codigo");
-        let estado = objectBtn.attr("estado");
+        let codigoObjEstrategico = objectBtn.attr("codigo");
+        let estadoObj = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigoobjestrategico", codigo);
+        datos.append("codigoObjEstrategico", codigoObjEstrategico);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado-obj",
             method: "POST",
@@ -340,13 +294,11 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estado === "V") {
+                    if (estadoObj === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('No vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }
@@ -380,9 +332,9 @@ $(document).ready(function(){
         ELIMINA DE LA BD UN REGISTRO DE OBJETIVO ESTRATEGICO
     ==========================================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEliminar", function () {
-        let codigoobjestrategico = $(this).attr("codigo");
+        let codigoObjEstrategico = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigoobjestrategico", codigoobjestrategico);
+        datos.append("codigoObjEstrategico", codigoObjEstrategico);
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
@@ -448,9 +400,9 @@ $(document).ready(function(){
         BUSCA EL OBJETIVO ESTRATEGICO SELECCIONADO EN LA BD
     ========================================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEditar", function () {
-        let codigoobjestrategico = $(this).attr("codigo");
+        let codigoObjEstrategico = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigoobjestrategico", codigoobjestrategico);
+        datos.append("codigoObjEstrategico", codigoObjEstrategico);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/buscar-obj",
             method: "POST",
@@ -461,11 +413,11 @@ $(document).ready(function(){
             dataType: "json",
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigo").val(data.CodigoObjEstrategico);
-                $("#CodigoPei").val(data.CodigoPei);
-                $("#CodigoCOGE").val(data.CodigoCOGE);
-                $("#Objetivo").val(data.Objetivo);
-                $("#btnMostrarCrearObj").trigger('click');
+                $("#codigoObjEstrategico").val(data.CodigoObjEstrategico);
+                $("#codigoPei").val(data.CodigoPei);
+                $("#codigoObj").val(data.CodigoCOGE);
+                $("#objetivo").val(data.Objetivo);
+                $("#btnMostrarCrear").trigger('click');
             },
             error: function (respuesta) {
                 let rta = respuesta['responseText'];
@@ -494,15 +446,15 @@ $(document).ready(function(){
     /*=============================================
         ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-    function ActualizarObj () {
-        let codigoobjestrategico = $("#codigo").val();
-        let codigopei = $("#CodigoPei").val();
-        let codigocoge = $("#CodigoCOGE").val();
-        let objetivo = $("#Objetivo").val();
+    function actualizarObj () {
+        let codigoObjEstrategico = $("#codigoObjEstrategico").val();
+        let codigoPei = $("#codigoPei").val();
+        let codigoObj = $("#codigoObj").val();
+        let objetivo = $("#objetivo").val();
         let datos = new FormData();
-        datos.append("codigoobjestrategico", codigoobjestrategico);
-        datos.append("codigopei", codigopei);
-        datos.append("codigocoge", codigocoge);
+        datos.append("codigoObjEstrategico", codigoObjEstrategico);
+        datos.append("codigoPei", codigoPei);
+        datos.append("codigoObj", codigoObj);
         datos.append("objetivo", objetivo);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/actualizar-obj",
@@ -513,7 +465,7 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $(".btnCancel").click();
+                    $("#btnCancelar").click();
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",

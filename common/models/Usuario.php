@@ -4,6 +4,13 @@ namespace common\models;
 
 use yii\web\IdentityInterface;
 
+/**
+ * This is the model class for table "PEIs".
+ *
+ * @property string $CodigoUsuario
+ */
+
+
 class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
 {
     public static function tableName()
