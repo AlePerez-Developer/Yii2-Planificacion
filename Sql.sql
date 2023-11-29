@@ -35,7 +35,7 @@ create table PEIs(
 
 create table ObjetivosEstrategicos(
     CodigoObjEstrategico int primary key not null,
-    CodigoCOGE char(3) not null,
+    CodigoObjetivo char(3) not null,
     Objetivo varchar(450) not null,
     CodigoPei int not null,
     CodigoEstado char(1) not null,
@@ -46,6 +46,47 @@ create table ObjetivosEstrategicos(
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
+
+CREATE UNIQUE INDEX [UQ_Codigo_Pei]
+    ON [dbo].ObjetivosEstrategicos(CodigoObjetivo,CodigoPei)
+    WHERE   ([CodigoEstado] = 'V');
+
+
+create table IndicadoresEstrategicos(
+    CodigoIndicador int primary key not null,
+    Codigo int not null,
+    Descripcion Varchar(250) not null,
+    Meta int not null,
+    Pei int not null,
+    ObjetivoEstrategico int not null,
+    Resultado int not null,
+    TipoIndicador int not null,
+    Categoria int not null,
+    Unidad int not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Meta check (Meta > 0),
+
+    foreign key (Pei) references Peis(CodigoPei),
+    foreign key (ObjetivoEstrategico) references ObjetivosEstrategicos(CodigoObjEstrategico),
+    foreign key (Resultado) references TiposResultados(CodigoTipo),
+    foreign key (TipoIndicador) references TiposIndicadores(CodigoTipo),
+    foreign key (Categoria) references CategoriasIndicadores(CodigoCategoria),
+    foreign key (Unidad) references IndicadoresUnidades(CodigoTipo),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Codigo]
+    ON [dbo].IndicadoresEstrategicos(Codigo)
+    WHERE   ([CodigoEstado] = 'V');
+
+
+
+
+
 
 
 create table ObjetivosInstitucionales(

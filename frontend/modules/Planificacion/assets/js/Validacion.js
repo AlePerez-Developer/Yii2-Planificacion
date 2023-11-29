@@ -164,6 +164,111 @@ $(document).ready(function() {
         }
     } );
 
+    $( "#formIndicadorEstrategico" ).validate( {
+        rules: {
+            codigoObjEstrategico:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            codigoIndicador: {
+                required: true,
+                digits: true,
+                max: 999,
+                DiferenteQue: '0'
+            },
+            metaIndicador: {
+                required: true,
+                digits: true,
+                DiferenteQue: '0'
+            },
+            descripcion:{
+                required: true,
+                minlength: 2,
+                maxlength: 250
+            },
+            tipoResultado:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            tipoIndicador:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            categoriaIndicador:{
+                required: true,
+                DiferenteQue: '0'
+            },
+            tipoUnidad:{
+                required: true,
+                DiferenteQue: '0'
+            },
+        },
+        messages: {
+            codigoObjEstrategico: {
+                required: "Debe seleccionar un codigo de Obj. Estrategico",
+                DiferenteQue:"Debe seleccionar un codigo de Obj. Estrategico"
+            },
+            codigoIndicador: {
+                required: "Debe ingresar un codigo de indicador",
+                digits: "Solo se permite numeros enteros",
+                max: "Debe ingresar un numero entero de maximo 3 digitos",
+                DiferenteQue: "Debe ingresar un numero mayor que 0"
+            },
+            metaIndicador: {
+                required: "Debe ingresar una meta para el indicador",
+                digits: "Solo se permite numeros enteros",
+                DiferenteQue: "Debe ingresar un numero mayor que 0"
+            },
+            descripcion: {
+                required: "Debe ingresar la descripcion del indicador",
+                minlength: "La descripcion debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion debe tener maximo 250 caracteres"
+            },
+            tipoResultado: {
+                required: "Debe seleccionar un tipo de resultado",
+                DiferenteQue:"Debe seleccionar un tipo de resultado"
+            },
+            tipoIndicador: {
+                required: "Debe seleccionar un tipo de indicador",
+                DiferenteQue:"Debe seleccionar un tipo de indicador"
+            },
+            categoriaIndicador: {
+                required: "Debe seleccionar una categoria",
+                DiferenteQue:"Debe seleccionar una categoria"
+            },
+            tipoUnidad: {
+                required: "Debe seleccionar un tipo de unidad",
+                DiferenteQue:"Debe seleccionar un tipo de unidad"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            var elem = $(element);
+            if (elem.hasClass("select2-hidden-accessible")) {
+                element = $("#select2-" + elem.attr("id") + "-container").parent();
+                error.addClass( "invalid-feedback" );
+                error.insertAfter(element);
+            } else {
+                error.addClass( "invalid-feedback" ).removeAttr("style");
+                error.insertAfter(element);
+            }
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    } );
+
+
+
+
+
+
+
+
     $( "#formobjinstitucional" ).validate( {
         rules: {
             CodigoObjEstrategico:{

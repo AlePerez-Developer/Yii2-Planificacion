@@ -2,6 +2,7 @@
 
 namespace app\modules\Planificacion\models;
 
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 use common\models\Estado;
@@ -11,7 +12,7 @@ use common\models\Usuario;
  * This is the model class for table "ObjetivosEstrategicos".
  *
  * @property int $CodigoObjEstrategico
- * @property string $CodigoCOGE
+ * @property string $CodigoObjetivo
  * @property string $Objetivo
  * @property int $CodigoPei
  * @property string $CodigoEstado
@@ -39,10 +40,10 @@ class ObjetivoEstrategico extends ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoObjEstrategico', 'CodigoCOGE', 'Objetivo', 'CodigoPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoObjEstrategico', 'CodigoObjetivo', 'Objetivo', 'CodigoPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['CodigoObjEstrategico', 'CodigoPei'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
-            [['CodigoCOGE', 'CodigoUsuario'], 'string', 'max' => 3],
+            [['CodigoObjetivo', 'CodigoUsuario'], 'string', 'max' => 3],
             [['Objetivo'], 'string', 'max' => 450],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoObjEstrategico'], 'unique'],
@@ -59,7 +60,7 @@ class ObjetivoEstrategico extends ActiveRecord
     {
         return [
             'CodigoObjEstrategico' => 'Codigo Obj Estrategico',
-            'CodigoCOGE' => 'Codigo Coge',
+            'CodigoObjetivo' => 'Codigo Objetivo',
             'Objetivo' => 'Objetivo',
             'CodigoPei' => 'Codigo pei',
             'CodigoEstado' => 'Codigo Estado',
@@ -100,23 +101,30 @@ class ObjetivoEstrategico extends ActiveRecord
 
     public function exist()
     {
-        /*$obj = ObjetivoEstrategico::find()->where(["CodigoCOGE" => $this->CodigoCOGE, "Objetivo"=>$this->Objetivo, "Producto"=>$this->Producto])->andWhere(["CodigoEstado"=>"V"])->all();
+        $obj = ObjetivoEstrategico::find()
+            ->where('(CodigoObjetivo = :CodigoObjetivo) or (Objetivo = :Objetivo) ',
+                [':CodigoObjetivo' => $this->CodigoObjetivo, ':Objetivo' => $this->Objetivo]
+            )
+            ->andWhere(['!=','CodigoObjEstrategico', $this->CodigoObjEstrategico])
+            ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
         if(!empty($obj)){
-            return true;
-        }else{
-            return false;
-        }*/
-        return false;
-    }
-
-    public function enUso()
-    {
-        $Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
-        if(!empty($Obj)){
             return true;
         }else{
             return false;
         }
     }
 
+    public function enUso()
+    {
+        $Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
+        if(empty($Obj)){
+            $Obj = IndicadorEstrategico::find()->where(["ObjetivoEstrategico" => $this->CodigoObjEstrategico])->all();
+            if(empty($Obj))
+                return false;
+            else
+                return true;
+        }else{
+            return true;
+        }
+    }
 }

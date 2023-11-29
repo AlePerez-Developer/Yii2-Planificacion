@@ -12,21 +12,33 @@ $(document).ready(function () {
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,2,3,4,5,6] },
-            { orderable: false, targets: [0,5,6] },
-            { searchable: false, targets: [0,5,6] },
-            { className: "dt-acciones", targets: 6 },
-            { className: "dt-estado", targets: 5 },
-            { width: 10, targets: 0 }
         ],
         fixedColumns: true,
         columns: [
-            { data: 'CodigoUsuario' },
-            { data: 'DescripcionPei' },
-            { data: 'FechaAprobacion' },
-            { data: 'GestionInicio' },
-            { data: 'GestionFin' },
             {
+                className: 'dt-center',
+                orderable: false,
+                searchable: false,
+                data: 'CodigoUsuario',
+                width: 30
+            },
+            { data: 'DescripcionPei' },
+            {
+                className: 'dt-center',
+                data: 'FechaAprobacion'
+            },
+            {
+                className: 'dt-center',
+                data: 'GestionInicio'
+            },
+            {
+                className: 'dt-center',
+                data: 'GestionFin'
+            },
+            {
+                className: 'dt-estado dt-center',
+                orderable: false,
+                searchable: false,
                 data: 'CodigoEstado',
                 render: function (data, type, row) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
@@ -35,6 +47,9 @@ $(document).ready(function () {
                 },
             },
             {
+                className: 'dt-acciones dt-center',
+                orderable: false,
+                searchable: false,
                 data: 'CodigoPei',
                 render: function (data, type) {
                     return type === 'display'
