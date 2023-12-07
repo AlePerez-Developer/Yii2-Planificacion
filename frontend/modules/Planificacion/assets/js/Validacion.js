@@ -262,6 +262,75 @@ $(document).ready(function() {
         }
     } );
 
+    $( "#formUnidad" ).validate( {
+        rules: {
+            da: {
+                required: true,
+                minlength: 2,
+                maxlength: 2
+            },
+            ue: {
+                required: true,
+                minlength: 3,
+                maxlength: 3
+            },
+            descripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 250
+            },
+            fechaInicio:{
+                required: true,
+                date: true,
+                FechaMenor: "#fechaFin"
+            },
+            fechaFin:{
+                required: true,
+                date: true,
+                FechaMayor: "#fechaInicio"
+            },
+        },
+        messages: {
+            da:{
+                required: "Debe ingresar la unidad administrativa de la unidad",
+                minlength: "La DA debe tener 2 digitos",
+                maxlength: "La DA debe tener 2 digitos"
+            },
+            ue:{
+                required: "Debe ingresar la unidad ejecutora de la unidad",
+                minlength: "La UE debe tener 3 digitos",
+                maxlength: "La UE debe tener 3 digitos"
+            },
+            descripcion: {
+                required: "Debe ingresar una descripcion para la unidad",
+                minlength: "La descripcion debe tener almenos 2 letras",
+                maxlength: "La descripcion debe tener maximo 250 letras"
+            },
+            fechaInicio: {
+                required: "Debe ingresar la fecha de inicio de vigencia de la unidad",
+                date: "Debe ingresar una fecha valida",
+                FechaMenor:'La fecha inicio debe ser anterior a la fecha de incio'
+            },
+            fechaFin: {
+                required: "Debe ingresar la fecha final de vigencia de la unidad",
+                date: "Debe ingresar una fecha valida",
+                FechaMayor:'La fecha final debe ser posterior a la fecha de incio'
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    });
+
 
 
 
@@ -641,74 +710,7 @@ $(document).ready(function() {
         }
     });
 
-    $( "#formUnidades" ).validate( {
-        rules: {
-            da: {
-                required: true,
-                minlength: 2,
-                maxlength: 2
-            },
-            ue: {
-                required: true,
-                minlength: 3,
-                maxlength: 3
-            },
-            descripcion: {
-                required: true,
-                minlength: 2,
-                maxlength: 250
-            },
-            fechaInicio:{
-                required: true,
-                date: true,
-                FechaMenor: "#fechaFin"
-            },
-            fechaFin:{
-                required: true,
-                date: true,
-                FechaMayor: "#fechaInicio"
-            },
-        },
-        messages: {
-            da:{
-                required: "Debe ingresar la unidad administrativa de la unidad",
-                minlength: "La DA debe tener 2 digitos",
-                maxlength: "La DA debe tener 2 digitos"
-            },
-            ue:{
-                required: "Debe ingresar la unidad ejecutora de la unidad",
-                minlength: "La UE debe tener 3 digitos",
-                maxlength: "La UE debe tener 3 digitos"
-            },
-            descripcion: {
-                required: "Debe ingresar una descripcion para la unidad",
-                minlength: "La descripcion debe tener almenos 2 letras",
-                maxlength: "La descripcion debe tener maximo 250 letras"
-            },
-            fechaInicio: {
-                required: "Debe ingresar la fecha de inicio de vigencia de la unidad",
-                date: "Debe ingresar una fecha valida",
-                FechaMenor:'La fecha inicio debe ser anterior a la fecha de incio'
-            },
-            fechaFin: {
-                required: "Debe ingresar la fecha final de vigencia de la unidad",
-                date: "Debe ingresar una fecha valida",
-                FechaMayor:'La fecha final debe ser posterior a la fecha de incio'
-            },
-        },
-        errorElement: "div",
 
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
-        },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-        },
-        unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-        }
-    });
 
     $( "#formAperturasProgramaticas" ).validate( {
         rules: {

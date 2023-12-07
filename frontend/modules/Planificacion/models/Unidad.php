@@ -3,7 +3,6 @@ namespace app\modules\Planificacion\models;
 
 use common\models\Estado;
 use common\models\Usuario;
-use Yii;
 
 /**
  * This is the model class for table "Unidades".
@@ -12,6 +11,7 @@ use Yii;
  * @property string $Da
  * @property string $Ue
  * @property string $Descripcion
+ * @property string $Organizacional
  * @property string $FechaInicio
  * @property string $FechaFin
  * @property string $CodigoEstado
@@ -37,8 +37,8 @@ class Unidad extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoUnidad', 'Da', 'Ue', 'Descripcion', 'FechaInicio', 'FechaFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoUnidad'], 'integer'],
+            [['CodigoUnidad', 'Da', 'Ue', 'Descripcion', 'Organizacional', 'FechaInicio', 'FechaFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoUnidad','Organizacional'], 'integer'],
             [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
             [['Da', 'Ue'], 'string', 'max' => 20],
             [['Descripcion'], 'string', 'max' => 250],
@@ -60,6 +60,7 @@ class Unidad extends \yii\db\ActiveRecord
             'Da' => 'Da',
             'Ue' => 'Ue',
             'Descripcion' => 'Descripcion',
+            'Organizacional' => 'Organizacional',
             'FechaInicio' => 'Fecha Inicio',
             'FechaFin' => 'Fecha Fin',
             'CodigoEstado' => 'Codigo Estado',
@@ -90,7 +91,17 @@ class Unidad extends \yii\db\ActiveRecord
 
     public function exist()
     {
-        return false;
+        $unidad = Unidad::find()
+            ->where('((Da = :Da) and (Ue = :Ue))',
+                [':Da' => $this->Da, ':Ue' => $this->Ue]
+            )
+            ->andWhere(['!=','CodigoUnidad', $this->CodigoUnidad])
+            ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
+        if(!empty($unidad)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     public function isUsed()

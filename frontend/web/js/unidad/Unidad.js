@@ -9,36 +9,9 @@ $(document).ready(function () {
     }
 
     let table = $("#tablaListaUnidades").DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'pdfHtml5',
-                text: 'Exportar PDF',
-                exportOptions: {
-                    columns: [ 0, 2, 3, 4, 5 ]
-                },
-                customize: function ( doc ) {
-                    var cols = [];
-                    cols[0] = {text: 'Pagina 1', alignment: 'left', margin:[20] };
-                    cols[1] = {text:'pie de pagina', alignment: 'center' };
-                    cols[2] = {text: 'Fecha/Hora', alignment: 'right', margin:[0,0,20] };
-
-                    var objFooter = {};
-                    objFooter['columns'] = cols;
-                    doc['footer']=objFooter;
-
-                    doc.content.splice(1, 0,
-                        {
-                            margin: [0, 0, 0, 12],
-                            alignment: 'center',
-                            text: 'Listado de Unidades',
-
-                        }
-                    );
-                }
-
-            }
-        ],
+        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         initComplete: function () {
             this.api()
                 .columns([2,3])
@@ -48,10 +21,8 @@ $(document).ready(function () {
                         .appendTo($(column.header()))
                         .on('change', function () {
                             var val = $.fn.dataTable.util.escapeRegex($(this).val());
-
                             column.search(val ? '^' + val + '$' : '', true, false).draw();
                         });
-
                     column
                         .data()
                         .unique()
@@ -70,28 +41,59 @@ $(document).ready(function () {
         },
         columnDefs: [
             { className: "dt-small", targets: "_all" },
-            { className: "dt-center", targets: [0,1,2,3,5,6] },
-            { orderable: false, targets: [0,1,2,3,5,6] },
-            { searchable: false, targets: [0,1,5,6] },
-            { className: "dt-acciones", targets: 6 },
-            { className: "dt-estado", targets: 5 },
+            { className: "dt-center", targets: [0,1,2,3,5,6,7] },
+            { orderable: false, targets: [0,1,2,3,6,7] },
+            { searchable: false, targets: [0,1,5,6,7] },
+            { className: "dt-acciones", targets: 7 },
+            { className: "dt-estado", targets: 6 },
         ],
+        fixedColumns: true,
         columns: [
-            { data: 'CodigoUsuario' },
             {
-                className: 'dt-control',
+                className: 'dt-center',
+                orderable: false,
+                searchable: false,
+                data: 'CodigoUsuario',
+                width: 30
+            },
+            {
+                className: 'dt-control dt-center',
+                orderable: false,
+                searchable: false,
                 data: null,
                 defaultContent: '',
             },
-            { data: 'Da' },
-            { data: 'Ue' },
+            {
+                className: 'dt-center',
+                orderable: false,
+                data: 'Da'
+            },
+            {
+                className: 'dt-center',
+                orderable: false,
+                data: 'Ue'
+            },
             { data: 'Descripcion' },
             {
+                className: 'dt-center',
+                orderable: false,
+                searchable: false,
+                data: 'Organizacional' ,
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.Organizacional === '1'))
+                        ? 'SI'
+                        : 'NO' ;
+                },
+            },
+            {
+                className: 'dt-estado dt-center',
+                orderable: false,
+                searchable: false,
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "V" >Vigente</button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "C" >No vigente</button>' ;
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "V" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "C" ></button>' ;
                 },
             },
             {
@@ -99,8 +101,8 @@ $(document).ready(function () {
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-warning btn-sm  btnEditar" codigo="' + data + '" ><i class="fa fa-pen"></i> Editar </button>' +
-                        '<button type="button" class="btn btn-danger btn-sm  btnEliminar" codigo="' + data + '" ><i class="fa fa-times"></i> Eliminar </button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
                         '</div>'
                         : data;
                 },
@@ -125,8 +127,8 @@ $(document).ready(function () {
             "oPaginate": {
                 "sFirst": "Primero",
                 "sLast": "Último",
-                "sNext": "<i class='fa fa-arrow-right'></i>",
-                "sPrevious": "<i class='fa fa-arrow-left'></i>"
+                "sNext": "<span class='fa fa-arrow-right'></span>",
+                "sPrevious": "<span class='fa fa-arrow-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
@@ -147,34 +149,29 @@ $(document).ready(function () {
         var row = table.row(tr);
 
         if (row.child.isShown()) {
-            // This row is already open - close it
             row.child.hide();
         }
         else {
-            // Open this row
             row.child(format(row.data())).show();
         }
     });
 
-
-    $("#ingresoDatos").hide();
-
     function reiniciarCampos() {
-        $('#formUnidades *').filter(':input').each(function () {
+        $('#formUnidad *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $("#codigo").val('');
-        $("form").trigger("reset");
+        $("#codigoUnidad").val('');
+        $('#formUnidad').trigger("reset");
     }
 
     $("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
         icono.toggleClass('opened');
         if (icono.hasClass("opened")) {
-            $("#ingresoDatos").show(500);
+            $("#divDatos").show(500);
             $("#divTabla").hide(500);
         } else {
-            $("#ingresoDatos").hide(500);
+            $("#divDatos").hide(500);
             $("#divTabla").show(500);
         }
     });
@@ -182,19 +179,29 @@ $(document).ready(function () {
     $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');
         reiniciarCampos();
-        $("#ingresoDatos").hide(500);
+        $("#divDatos").hide(500);
         $("#divTabla").show(500);
     });
 
     $("#btnGuardar").click(function () {
-        if ($("#formUnidades").valid()) {
-            if ($("#codigo").val() === '') {
+        if ($("#formUnidad").valid()) {
+            if ($("#codigoUnidad").val() === '') {
                 guardarUnidad();
             } else {
                 actualizarUnidad()
             }
         }
     });
+
+    $('#fechaInicio').change(function (){
+        $("#formUnidad").validate().element('#fechaInicio');
+        $("#formUnidad").validate().element('#fechaFin');
+    })
+
+    $('#fechaFin').change(function (){
+        $("#formUnidad").validate().element('#fechaInicio');
+        $("#formUnidad").validate().element('#fechaFin');
+    })
 
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO
@@ -203,12 +210,14 @@ $(document).ready(function () {
         let da = $("#da").val();
         let ue = $("#ue").val();
         let descripcion = $("#descripcion").val();
+        let organizacional = $("#organizacional").is(':checked')?1:0;
         let fechaInicio = $("#fechaInicio").val();
         let FechaFin = $("#fechaFin").val();
         let datos = new FormData();
         datos.append("da", da);
         datos.append("ue", ue);
         datos.append("descripcion", descripcion);
+        datos.append("organizacional", organizacional);
         datos.append("fechaInicio", fechaInicio);
         datos.append("fechaFin", FechaFin);
         $.ajax({
@@ -265,10 +274,10 @@ $(document).ready(function () {
     =============================================*/
     $("#tablaListaUnidades tbody").on("click", ".btnEstado", function () {
         let objectBtn = $(this);
-        let codigo = objectBtn.attr("codigo");
+        let codigoUnidad = objectBtn.attr("codigo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigo", codigo);
+        datos.append("codigoUnidad", codigoUnidad);
         $.ajax({
             url: "index.php?r=Planificacion/unidad/cambiar-estado-unidad",
             method: "POST",
@@ -280,11 +289,9 @@ $(document).ready(function () {
                 if (respuesta === "ok") {
                     if (estado === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.html('No vigente');
                         objectBtn.attr('estado', 'C');
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.html('Vigente');
                         objectBtn.attr('estado', 'V');
                     }
                 }
@@ -318,9 +325,9 @@ $(document).ready(function () {
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
     $("#tablaListaUnidades tbody").on("click", ".btnEliminar", function () {
-        let codigo = $(this).attr("codigo");
+        let codigoUnidad = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigo", codigo);
+        datos.append("codigoUnidad", codigoUnidad);
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
@@ -386,9 +393,9 @@ $(document).ready(function () {
     BUSCA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
     $("#tablaListaUnidades tbody").on("click", ".btnEditar", function () {
-        let codigo = $(this).attr("codigo");
+        let codigoUnidad = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigo", codigo);
+        datos.append("codigoUnidad", codigoUnidad);
         $.ajax({
             url: "index.php?r=Planificacion/unidad/buscar-unidad",
             method: "POST",
@@ -399,10 +406,11 @@ $(document).ready(function () {
             dataType: "json",
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigo").val(data.CodigoUnidad);
+                $("#codigoUnidad").val(data.CodigoUnidad);
                 $("#da").val(data.Da);
                 $("#ue").val(data.Ue);
                 $("#descripcion").val(data.Descripcion);
+                $("#organizacional").prop( "checked", (data.Organizacional === 1))
                 $("#fechaInicio").val(data.FechaInicio);
                 $("#fechaFin").val(data.FechaFin);
                 $("#btnMostrarCrear").trigger('click');
@@ -433,20 +441,22 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    ACTUALIZA EL PEI SELECCIONADO EN LA BD
+    ACTUALIZA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
     function actualizarUnidad() {
-        let codigo = $("#codigo").val();
+        let codigoUnidad = $("#codigoUnidad").val();
         let da = $("#da").val();
         let ue = $("#ue").val();
         let descripcion = $("#descripcion").val();
+        let organizacional = $("#organizacional").is(':checked')?1:0;
         let fechaInicio = $("#fechaInicio").val();
         let FechaFin = $("#fechaFin").val();
         let datos = new FormData();
-        datos.append("codigo", codigo);
+        datos.append("codigoUnidad", codigoUnidad);
         datos.append("da", da);
         datos.append("ue", ue);
         datos.append("descripcion", descripcion);
+        datos.append("organizacional", organizacional);
         datos.append("fechaInicio", fechaInicio);
         datos.append("fechaFin", FechaFin);
         $.ajax({

@@ -152,4 +152,40 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </thead>
         </table>
     </div>
+
+    <style>
+        .modal-dialog{
+            height:100%
+        }
+        .modal-content{
+            height:90%
+        }
+        .modal-body{
+            height:100%;
+            overflow:auto
+        }
+    </style>
+    <!-- Modal -->
+    <div class="modal fade" id="programarIndicadorEstrategico" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Programacion de indicadores estrategicos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="programacionGestion">
+
+                    </div>
+                    <div id="programacionGestion" style="display: none">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class='btn btn-outline-danger' data-bs-dismiss="modal"><span class='fa fa-times-circle'></span> Cerrar </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

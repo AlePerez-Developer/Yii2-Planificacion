@@ -1,6 +1,7 @@
 <?php
 
 use yii\web\JqueryAsset;
+use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
@@ -10,29 +11,35 @@ $this->registerJsFile("@web/js/unidad/Unidad.js", [
     ]
 ]);
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Unidades']];
+$this->params['breadcrumbs'] = [['label' => '/Unidades']];
 ?>
 
 <div class="card">
     <div class="card-header">
-        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
-                Agregar Unidad
+        <div class="row">
+            <div class="col-6">
+                <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
+                    <div class="icon closed">
+                        <div class="circle">
+                            <div class="horizontal"></div>
+                            <div class="vertical"></div>
+                        </div>
+                        Agregar Unidad
+                    </div>
+                </button>
             </div>
-        </button>
+            <div class="col-6" style="text-align: right;">
+                <?= Html::a('Reporte Unidades', ['reporte'], ['class' => 'btn btn-success', 'target' => '_Blank']) ?>
+            </div>
+        </div>
     </div>
-    <div id="ingresoDatos" class="card-body">
+    <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigo" name="codigo" disabled hidden>
-                    <form id="formUnidades" action="" method="post">
-
+                    <input type="text" id="codigoUnidad" name="codigoUnidad" disabled hidden>
+                    <form id="formUnidad" action="" method="post">
                         <div class="form-group">
                             <label for="unidad" class="control-label">Unidad</label>
                             <div class="container" id="unidad">
@@ -46,10 +53,14 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label for="descripcion">Descripcion</label>
                             <textarea class="form-control input-sm txt" rows="4" id="descripcion" name="descripcion" placeholder="Descripcion"></textarea>
+                        </div>
+
+                        <div class="form-group form-switch">
+                            <input class="form-check-input" type="checkbox" id="organizacional" name="organizacional">
+                            <label class="form-check-label" for="organizacional">Unidad organizacional?</label>
                         </div>
 
                         <div class="form-group">
@@ -73,9 +84,8 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle-o'>Guardar</i>
-                    </button>
-                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><i class='fa fa-warning'>Cancelar</i></button>
+                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><span class='fa fa-check-circle'></span> Guardar </button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
             </div>
         </div>
@@ -87,7 +97,8 @@ $this->params['breadcrumbs'] = [['label' => 'Unidades']];
             <th>#</th>
             <th>Da</th>
             <th>Ue</th>
-            <th>Descripcion</th>
+            <th style="text-align: center">Descripcion</th>
+            <th>Organizacional</th>
             <th>Estado</th>
             <th>Acciones</th>
             </thead>

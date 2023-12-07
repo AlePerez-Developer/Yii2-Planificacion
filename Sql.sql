@@ -19,6 +19,10 @@ create table Estados(
     NombreEstado Varchar(50) not null
 )
 
+insert into Estados values('V','Vigente')
+insert into Estados values('C','Caduco')
+insert into Estados values('E','Eliminado')
+
 create table PEIs(
     CodigoPei int primary key,
     Descripcion Varchar(250) not null,
@@ -28,6 +32,11 @@ create table PEIs(
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
+
+    constraint chk_GInicio check (GestionInicio > 2000),
+    constraint chk_GFin check (GestionFin > 2000),
+    constraint chk_Gestion check (GestionInicio < GestionFin),
+    constraint chk_Descripcion check (Descripcion != ''),
 
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
@@ -42,6 +51,9 @@ create table ObjetivosEstrategicos(
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
+    constraint chk_Codigo check (CodigoObjetivo != ''),
+    constraint chk_Objetivo check (Objetivo != ''),
+
     foreign key (CodigoPei) references Peis(CodigoPei),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
@@ -55,8 +67,8 @@ CREATE UNIQUE INDEX [UQ_Codigo_Pei]
 create table IndicadoresEstrategicos(
     CodigoIndicador int primary key not null,
     Codigo int not null,
-    Descripcion Varchar(250) not null,
     Meta int not null,
+    Descripcion Varchar(250) not null,
     Pei int not null,
     ObjetivoEstrategico int not null,
     Resultado int not null,
@@ -67,7 +79,9 @@ create table IndicadoresEstrategicos(
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
+    constraint chk_CodigoIndicadorEstrategico check (Codigo > 0),
     constraint chk_Meta check (Meta > 0),
+    constraint chk_DescripcionIndicadorEstrategico check (Descripcion != ''),
 
     foreign key (Pei) references Peis(CodigoPei),
     foreign key (ObjetivoEstrategico) references ObjetivosEstrategicos(CodigoObjEstrategico),
@@ -83,6 +97,30 @@ CREATE UNIQUE INDEX [UQ_Codigo]
     ON [dbo].IndicadoresEstrategicos(Codigo)
     WHERE   ([CodigoEstado] = 'V');
 
+
+create table Unidades
+(
+    CodigoUnidad int primary key not null,
+    Da varchar(20) not null,
+    Ue varchar(20) not null,
+    Descripcion varchar(250) not null,
+    FechaInicio date not null,
+    FechaFin date not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Da check (Da != ''),
+    constraint chk_Ue check (Ue != ''),
+    constraint chk_Date check (FechaInicio < FechaFin),
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Apertura]
+    ON [dbo].Unidades(Da,Ue)
+    WHERE   ([CodigoEstado] = 'V');
 
 
 
@@ -288,21 +326,7 @@ create table Programas
 
 go
 
-create table Unidades
-(
-    CodigoUnidad int primary key not null,
-    Da varchar(20) not null,
-    Ue varchar(20) not null,
-    Descripcion varchar(250) not null,
-    FechaInicio date not null,
-    FechaFin date not null,
-    CodigoEstado char(1) not null,
-    FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null,
 
-    foreign key (CodigoEstado) references Estados(CodigoEstado),
-    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
-)
 
 go
 

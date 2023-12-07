@@ -51,7 +51,7 @@ class IndicadorController extends Controller
     public function actionIndex()
     {
         $objInsitucionales = ObjetivoInstitucional::find()->alias('oi')
-            ->select(['oi.CodigoObjInstitucional','concat(oe.CodigoCOGE, char(45) , oi.CodigoCOGE) as Codigo, oi.Objetivo'])
+            ->select(['oi.CodigoObjInstitucional','concat(oe.CodigoObjetivo, char(45) , oi.CodigoCOGE) as Codigo, oi.Objetivo'])
             ->join('INNER JOIN','ObjetivosEstrategicos oe','oi.CodigoObjEstrategico = oe.CodigoObjEstrategico')
             ->where(['oi.CodigoEstado' => 'V'])->andWhere(['oe.CodigoEstado' => 'V'])
             ->asArray()->all();
@@ -97,11 +97,11 @@ class IndicadorController extends Controller
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
                 ->join('INNER JOIN','IndicadoresUnidades U', 'I.Unidad = U.CodigoTipo')
-                ->where(['!=','I.CodigoEstado','E'])->andWhere(['Gestion' => 2004])
+                ->where(['!=','I.CodigoEstado','E'])->andWhere(['Gestion' => 2024])
                 ->andWhere(['!=','Oe.CodigoEstado','E'])->andWhere(['!=','Oi.CodigoEstado','E'])
                 ->andWhere(['!=','A.CodigoEstado','E'])->andWhere(['!=','P.CodigoEstado','E'])
                 ->andWhere(['!=','Ta.CodigoEstado','E'])->andWhere(['!=','Tr.CodigoEstado','E'])->andWhere(['!=','Ti.CodigoEstado','E'])->andWhere(['!=','Ci.CodigoEstado','E'])->andWhere(['!=','U.CodigoEstado','E'])
-                ->orderBy('I.CodigoPei, I.CodigoPoa')->asArray()->all();
+                ->orderBy('I.Codigo,i.Articulacion')->asArray()->all();
             foreach($indicadores as  $indicador) {
                 array_push($Data, $indicador);
             }
@@ -141,7 +141,7 @@ class IndicadorController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["objEspecifico"]) && isset($_POST["actividad"])
-                && isset($_POST["codigoPei"]) && isset($_POST["codigoPoa"]) && isset($_POST["descripcion"])
+                && isset($_POST["codigo"])  && isset($_POST["descripcion"])
                 && isset($_POST["articulacion"]) && isset($_POST["resultado"])
                 && isset($_POST["tipoindicador"]) && isset($_POST["categoria"]) && isset($_POST["unidad"])
             ){
@@ -149,10 +149,9 @@ class IndicadorController extends Controller
                 $indicador->CodigoIndicador = IndicadorDao::GenerarCodigoIndicador();
                 $indicador->ObjetivoEspecifico = $_POST["objEspecifico"];
                 $indicador->Actividad = $_POST["actividad"];
-                $indicador->CodigoPei = trim($_POST["codigoPei"]);
-                $indicador->CodigoPoa = trim($_POST["codigoPoa"]);
+                $indicador->Codigo = trim($_POST["codigo"]);
                 $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                $indicador->Gestion = 2004; //Yii::$app->user->identity->Gestion
+                $indicador->Gestion = 2024; //Yii::$app->user->identity->Gestion
                 $indicador->Articulacion = trim($_POST["articulacion"]);
                 $indicador->Resultado = trim($_POST["resultado"]);
                 $indicador->TipoIndicador = trim($_POST["tipoindicador"]);
@@ -249,7 +248,7 @@ class IndicadorController extends Controller
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoindicador"]) && $_POST["codigoindicador"] != "") {
                 $indicador = Indicador::find()->alias('I')->select([
-                    'I.CodigoIndicador','I.CodigoPei','I.CodigoPoa','I.Descripcion','I.Articulacion','I.Resultado','I.TipoIndicador','I.Categoria','I.Unidad',
+                    'I.CodigoIndicador','I.Codigo','I.Descripcion','I.Articulacion','I.Resultado','I.TipoIndicador','I.Categoria','I.Unidad',
                     'I.ObjetivoEspecifico', 'I.Actividad',
                     'Oi.CodigoObjInstitucional', 'P.CodigoPrograma'
                 ])
@@ -277,7 +276,7 @@ class IndicadorController extends Controller
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoindicador"]) && $_POST["codigoindicador"] != ""
                 && isset($_POST["objEspecifico"]) && isset($_POST["actividad"])
-                && isset($_POST["codigoPei"]) && isset($_POST["codigoPoa"]) && isset($_POST["descripcion"])
+                && isset($_POST["codigo"]) && isset($_POST["descripcion"])
                 && isset($_POST["articulacion"]) && isset($_POST["resultado"])
                 && isset($_POST["tipoindicador"]) && isset($_POST["categoria"]) && isset($_POST["unidad"])
             ){
@@ -285,8 +284,7 @@ class IndicadorController extends Controller
                 if ($indicador){
                     $indicador->ObjetivoEspecifico = $_POST["objEspecifico"];
                     $indicador->Actividad = $_POST["actividad"];
-                    $indicador->CodigoPei = trim($_POST["codigoPei"]);
-                    $indicador->CodigoPoa = trim($_POST["codigoPoa"]);
+                    $indicador->Codigo = trim($_POST["codigo"]);
                     $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
                     $indicador->Articulacion = trim($_POST["articulacion"]);
                     $indicador->Resultado = trim($_POST["resultado"]);
