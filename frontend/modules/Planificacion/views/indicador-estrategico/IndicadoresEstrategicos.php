@@ -9,6 +9,12 @@ $this->registerJsFile("@web/js/indicador-estrategico/IndicadorEstrategico.js",[
         JqueryAsset::className()
     ]
 ]);
+$this->registerJsFile("@web/js/indicador-estrategico/IndicadorEstrategicoGestion.js",[
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);
+
 
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
@@ -175,7 +181,47 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                 </div>
                 <div class="modal-body">
                     <div id="programacionGestion">
+                        <div class="card">
+                            <div class="card-header border-primary">
+                                <div class="container text-center">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <form class="form-floating">
+                                                <input type="text" class="form-control" id="objetivoEstrategico" style="font-size: 12px" placeholder="" value="" disabled>
+                                                <label for="objetivoEstrategico" style="font-size: 14px">Objetivo estrategico</label>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-2">
+                                            <form class="form-floating">
+                                                <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                                <label for="codigoIndicadorModal" style="font-size: 14px">Codigo del indicador</label>
+                                            </form>
+                                        </div>
+                                        <div class="col-2">
+                                            <form class="form-floating">
+                                                <input type="text" class="form-control" id="metaIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                                <label for="metaIndicadorModal" style="font-size: 14px">Meta del indicador</label>
+                                            </form>
+                                        </div>
+                                        <div class="col-8">
+                                            <form class="form-floating">
+                                                <input type="text" class="form-control" id="descripcionIndicador" style="font-size: 12px" placeholder="" value="" disabled>
+                                                <label for="descripcionIndicador" style="font-size: 14px">Descripcion del indicador</label>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
+                            </div>
+                            <div class="card-body">
+
+                            </div>
+                            <div class="card-footer">
+
+                            </div>
+                        </div>
                     </div>
                     <div id="programacionGestion" style="display: none">
 

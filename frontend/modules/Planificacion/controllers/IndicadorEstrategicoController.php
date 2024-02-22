@@ -192,9 +192,18 @@ class IndicadorEstrategicoController extends Controller
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoIndicadorEstrategico"]) && $_POST["codigoIndicadorEstrategico"] != "") {
                 $indicador = IndicadorEstrategico::find()->alias('I')->select([
-                    'I.CodigoIndicador','I.Codigo','I.Meta','I.Descripcion','I.Resultado','I.TipoIndicador','I.Categoria','I.Unidad',
-                    'I.Pei','I.ObjetivoEstrategico'
+                    'I.CodigoIndicador','I.Codigo','I.Meta','I.Descripcion',
+                    'I.Resultado','tr.Descripcion as ResultadoDescripcion',
+                    'I.TipoIndicador', 'ti.Descripcion as TipoIndicadorDescripcion',
+                    'I.Categoria', 'ci.Descripcion as CategoriaDescripcion',
+                    'I.Unidad', 'iu.Descripcion as UnidadDescripcion',
+                    'I.Pei','I.ObjetivoEstrategico', 'o.CodigoObjetivo', 'o.Objetivo'
                 ])
+                    ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+                    ->join('INNER JOIN','TiposResultados tr', 'i.Resultado = tr.CodigoTipo')
+                    ->join('INNER JOIN','TiposIndicadores ti', 'i.TipoIndicador = ti.CodigoTipo')
+                    ->join('INNER JOIN','CategoriasIndicadores ci', 'i.Categoria = ci.CodigoCategoria')
+                    ->join('INNER JOIN','IndicadoresUnidades iu', 'i.Unidad = iu.CodigoTipo')
                     ->where(['I.CodigoIndicador' => $_POST["codigoIndicadorEstrategico"] ])
                     ->asArray()->one();
                 if ($indicador){
