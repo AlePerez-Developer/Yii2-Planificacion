@@ -69,20 +69,18 @@ class IndicadorEstrategicoController extends Controller
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $indicadores = IndicadorEstrategico::find()->alias('I')->select([
                 'I.*',
-                'Pe.DescripcionPEI','Pe.GestionInicio','Pe.GestionFin', 'Pe.FechaAprobacion',
                 'Oe.CodigoObjetivo as CodigoObjetivo', 'Oe.Objetivo as ObjetivoEstrategico',
                 'Tr.Descripcion as ResultadoDescripcion',
                 'Ti.Descripcion as TipoDescripcion',
                 'Ci.Descripcion as CategoriaDescripcion',
                 'U.Descripcion as UnidadDescripcion'
             ])
-                ->join('INNER JOIN', 'Peis Pe', 'I.Pei = Pe.CodigoPei')
                 ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.CodigoObjEstrategico')
                 ->join('INNER JOIN','TiposResultados Tr', 'I.Resultado = Tr.CodigoTipo')
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
                 ->join('INNER JOIN','IndicadoresUnidades U', 'I.Unidad = U.CodigoTipo')
-                ->where(['!=','I.CodigoEstado','E'])->andWhere(['Pei' => 1])
+                ->where(['!=','I.CodigoEstado','E'])
                 ->andWhere(['!=','Oe.CodigoEstado','E'])
                 ->andWhere(['!=','Tr.CodigoEstado','E'])->andWhere(['!=','Ti.CodigoEstado','E'])->andWhere(['!=','Ci.CodigoEstado','E'])->andWhere(['!=','U.CodigoEstado','E'])
                 ->orderBy('I.Codigo')->asArray()->all();
@@ -102,7 +100,6 @@ class IndicadorEstrategicoController extends Controller
                 $indicador->Codigo = intval($_POST["codigoIndicador"]);
                 $indicador->Meta = intval($_POST["metaIndicador"]);
                 $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                $indicador->Pei = 1;  //temporalmente
                 $indicador->ObjetivoEstrategico = intval($_POST["codigoObjetivoEstrategico"]);
                 $indicador->Resultado = intval($_POST["tipoResultado"]);
                 $indicador->TipoIndicador = intval($_POST["tipoIndicador"]);
@@ -197,7 +194,7 @@ class IndicadorEstrategicoController extends Controller
                     'I.TipoIndicador', 'ti.Descripcion as TipoIndicadorDescripcion',
                     'I.Categoria', 'ci.Descripcion as CategoriaDescripcion',
                     'I.Unidad', 'iu.Descripcion as UnidadDescripcion',
-                    'I.Pei','I.ObjetivoEstrategico', 'o.CodigoObjetivo', 'o.Objetivo'
+                    'I.ObjetivoEstrategico', 'o.CodigoObjetivo', 'o.Objetivo'
                 ])
                     ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
                     ->join('INNER JOIN','TiposResultados tr', 'i.Resultado = tr.CodigoTipo')
@@ -258,6 +255,25 @@ class IndicadorEstrategicoController extends Controller
             }
         } else {
             return "errorCabecera";
+        }
+    }
+
+    public function actionVerificarCodigo()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            if (isset($_POST["codigo"])){
+                $codigo = $_POST["codigo"];
+                $ind = IndicadorEstrategico::find()->where(['Codigo'=>$codigo,'CodigoEstado' => Estado::ESTADO_VIGENTE])->one();
+                if (empty($ind)){
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 

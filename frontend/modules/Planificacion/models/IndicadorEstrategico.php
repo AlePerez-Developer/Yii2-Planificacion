@@ -15,7 +15,6 @@ use Yii;
  * @property int $Codigo
  * @property int $Meta
  * @property string $Descripcion
- * @property int $Pei
  * @property int $ObjetivoEstrategico
  * @property int $Resultado
  * @property int $TipoIndicador
@@ -25,7 +24,6 @@ use Yii;
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
- * @property PEI $pei
  * @property ObjetivoEstrategico $objetivoEstrategico
  * @property TipoResultado $resultado
  * @property TipoIndicador $tipoIndicador
@@ -51,14 +49,14 @@ class IndicadorEstrategico extends ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoIndicador', 'Codigo', 'Descripcion', 'Meta', 'Pei', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoIndicador', 'Codigo', 'Meta', 'Pei', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
+            [['CodigoIndicador', 'Codigo', 'Descripcion', 'Meta', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['CodigoIndicador', 'Codigo', 'Meta', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 250],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
+            [['Codigo', 'ObjetivoEstrategico'], 'unique', 'targetAttribute' => ['Codigo', 'ObjetivoEstrategico']],
             [['CodigoIndicador'], 'unique'],
-            [['Pei'], 'exist', 'skipOnError' => true, 'targetClass' => PEI::class, 'targetAttribute' => ['Pei' => 'CodigoPei']],
             [['ObjetivoEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoEstrategico::class, 'targetAttribute' => ['ObjetivoEstrategico' => 'CodigoObjEstrategico']],
             [['Resultado'], 'exist', 'skipOnError' => true, 'targetClass' => TipoResultado::class, 'targetAttribute' => ['Resultado' => 'CodigoTipo']],
             [['TipoIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => TipoIndicador::class, 'targetAttribute' => ['TipoIndicador' => 'CodigoTipo']],
@@ -90,16 +88,6 @@ class IndicadorEstrategico extends ActiveRecord
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
-    }
-
-    /**
-     * Gets query for [[Pei]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getPei()
-    {
-        return $this->hasOne(PEI::class, ['CodigoPei' => 'Pei']);
     }
 
     /**
@@ -188,5 +176,10 @@ class IndicadorEstrategico extends ActiveRecord
         }else{
             return false;
         }
+    }
+
+    public function estaProgramado()
+    {
+        $programacion = IndicadorEstrategicoGestion::find()->where(['Pei'=>$this->Pei,'Indicador'=>$this->CodigoIndicador])->sum('MetaProgramada');
     }
 }

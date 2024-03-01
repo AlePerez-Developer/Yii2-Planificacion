@@ -425,6 +425,10 @@ $(document).ready(function () {
                         mensaje = "Los datos ingresados ya corresponden a un PEI existente.";
                     } else if (respuesta === "errorSql") {
                         mensaje = "Error: Ocurrio un error en la base de datos al actualizar el PEI seleccionado.";
+                    } else if (respuesta === "errorGestionInicio") {
+                        mensaje = "Error: El valor de la gestion de inicio afecta la programacion de los indicadores estrategicos.";
+                    } else if (respuesta === "errorGestionFin") {
+                        mensaje = "Error: El valor de la gestion final afecta la programacion de los indicadores estrategicos.";
                     } else {
                         mensaje = respuesta;
                     }

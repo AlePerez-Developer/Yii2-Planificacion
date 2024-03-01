@@ -55,6 +55,27 @@ $(document).ready(function() {
             return value !== "0";
         });
 
+    $.validator.addMethod("CodigoUnico",
+        function(value, element) {
+            var result = false;
+            let datos = new FormData();
+            datos.append("codigo", value);
+            $.ajax({
+                url: "index.php?r=Planificacion/indicador-estrategico/verificar-codigo",
+                method: "POST",
+                async: false,
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    result = (data) ? true : false;
+                }
+            });
+            return result;
+        }
+    );
+
     $( "#formPei" ).validate( {
         rules: {
             descripcionPei: {
@@ -174,7 +195,8 @@ $(document).ready(function() {
                 required: true,
                 digits: true,
                 max: 999,
-                DiferenteQue: '0'
+                DiferenteQue: '0',
+                CodigoUnico: "#codigoIndicador"
             },
             metaIndicador: {
                 required: true,
@@ -212,7 +234,8 @@ $(document).ready(function() {
                 required: "Debe ingresar un codigo de indicador",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero entero de maximo 3 digitos",
-                DiferenteQue: "Debe ingresar un numero mayor que 0"
+                DiferenteQue: "Debe ingresar un numero mayor que 0",
+                CodigoUnico: "el codigo de indicador estrategico ya se encuentra en uso"
             },
             metaIndicador: {
                 required: "Debe ingresar una meta para el indicador",

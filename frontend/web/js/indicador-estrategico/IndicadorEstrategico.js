@@ -5,34 +5,10 @@ $(document).ready(function(){
         return (
             '<div class="row">' +
             '   <div class="col-5">' +
-            '       <div class="titulosmall">Plan estrategico institucional</div>' +
-            '   </div>' +
-            '   <div class="col-5">' +
             '       <div class="titulosmall">Objetivo Estrategico</div>' +
             '   </div>' +
             '</div>' +
             '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="row">' +
-            '           <div class="col-4">' +
-            '               <div class="subsmall"  style="text-align: right">Descripcion: </div>' +
-            '           </div>' +
-            '           <div class="col-8">' +
-            '               <div class="little" >' + d.DescripcionPEI + '</div>' +
-            '           </div>' +
-            '       </div>' +
-            '       <div class="row">' +
-            '           <div class="col-4">' +
-            '               <div class="subsmall" style="text-align: right">Fechas: </div>' +
-            '           </div>' +
-            '           <div class="col-8">' +
-            '               <div class="little">' +
-            '                   Vigencia: ' + d.GestionInicio +  ' - ' + d.GestionFin + '<br>' +
-            '                   Aprobacion: ' + d.FechaAprobacion +
-            '               </div>' +
-            '           </div>' +
-            '       </div>' +
-            '   </div>' +
             '   <div class="col-5">' +
             '       <div class="row">' +
             '           <div class="col-4">' +

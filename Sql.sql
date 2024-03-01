@@ -69,7 +69,6 @@ create table IndicadoresEstrategicos(
     Codigo int not null,
     Meta int not null,
     Descripcion Varchar(250) not null,
-    Pei int not null,
     ObjetivoEstrategico int not null,
     Resultado int not null,
     TipoIndicador int not null,
@@ -83,7 +82,6 @@ create table IndicadoresEstrategicos(
     constraint chk_Meta check (Meta > 0),
     constraint chk_DescripcionIndicadorEstrategico check (Descripcion != ''),
 
-    foreign key (Pei) references Peis(CodigoPei),
     foreign key (ObjetivoEstrategico) references ObjetivosEstrategicos(CodigoObjEstrategico),
     foreign key (Resultado) references TiposResultados(CodigoTipo),
     foreign key (TipoIndicador) references TiposIndicadores(CodigoTipo),
@@ -96,6 +94,21 @@ create table IndicadoresEstrategicos(
 CREATE UNIQUE INDEX [UQ_Codigo]
     ON [dbo].IndicadoresEstrategicos(Codigo)
     WHERE   ([CodigoEstado] = 'V');
+
+
+create table IndicadoresEstrategicosGestiones(
+     CodigoProgramacion int identity(1,1) primary key,
+     Gestion int not null,
+     IndicadorEstrategico int not null,
+     Meta int not null,
+
+     constraint chk_MetaProgramada check (Meta > 0),
+
+     unique(Gestion,IndicadorEstrategico),
+
+     foreign key (IndicadorEstrategico) references IndicadoresEstrategicos(CodigoIndicador),
+)
+
 
 
 create table Unidades

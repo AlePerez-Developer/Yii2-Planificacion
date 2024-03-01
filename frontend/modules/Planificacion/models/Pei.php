@@ -124,4 +124,33 @@ class Pei extends ActiveRecord
         }
     }
 
+    public function validarGestionInicio($inicioNuevo): bool
+    {
+        $ind = Pei::find()->alias('p')->select(['*'])
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+            ->where('(p.CodigoPei = :pei) and (Gestion < :Gestion)',[':pei'=>$this->CodigoPei,':Gestion'=>$inicioNuevo])
+            ->one();
+        if (empty($ind)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function validarGestionFin($finNuevo): bool
+    {
+        $ind = Pei::find()->alias('p')->select(['*'])
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+            ->where('(p.CodigoPei = :pei) and (Gestion > :Gestion)',[':pei'=>$this->CodigoPei,':Gestion'=>$finNuevo])
+            ->one();
+        if (empty($ind)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

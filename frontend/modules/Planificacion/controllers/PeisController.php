@@ -175,12 +175,34 @@ class PeisController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoPei"]) && isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"])) {
+                $nuevoInicio = intval(trim($_POST["gestionInicio"]),10);
+                $nuevoFin = intval(trim($_POST["gestionFin"]),10);
+
                 $pei = Pei::findOne($_POST["codigoPei"]);
                 if ($pei) {
                     $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
                     $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
-                    $pei->GestionInicio = trim($_POST["gestionInicio"]);
-                    $pei->GestionFin = trim($_POST["gestionFin"]);
+
+                    if ($pei->GestionInicio< $nuevoInicio ){
+                        if ($pei->validarGestionInicio($nuevoInicio)) {
+                            $pei->GestionInicio = $nuevoInicio;
+                        } else {
+                            return 'errorGestionInicio';
+                        }
+                    } else {
+                        $pei->GestionInicio = $nuevoInicio;
+                    }
+
+                    if ($pei->GestionFin > $nuevoFin ){
+                        if ($pei->validarGestionFin($nuevoFin)) {
+                            $pei->GestionFin = $nuevoFin;
+                        } else {
+                            return 'errorGestionFin';
+                        }
+                    } else {
+                        $pei->GestionFin = $nuevoFin;
+                    }
+
                     if ($pei->validate()) {
                         if (!$pei->exist()) {
                             if ($pei->update() !== false) {
