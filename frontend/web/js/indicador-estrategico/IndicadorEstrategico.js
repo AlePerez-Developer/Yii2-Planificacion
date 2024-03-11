@@ -193,6 +193,18 @@ $(document).ready(function(){
         });
     }).draw();
 
+    table.on('init',function (){
+       for (let i = 0; i < table.rows().count(); i++){
+           row = table.row(i);
+           programado = row.data().Programado;
+           if (programado == 0){
+                $(row.nodes()).addClass('completo');
+           } else {
+               $(row.nodes()).addClass('incompleto');
+           }
+       }
+    });
+
     $('.tablaListaIndicadoresEstrategicos tbody').on('click', 'td.dt-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);

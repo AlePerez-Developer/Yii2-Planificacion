@@ -68,21 +68,30 @@ class IndicadorEstrategicoController extends Controller
     {
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $indicadores = IndicadorEstrategico::find()->alias('I')->select([
-                'I.*',
+                'I.CodigoIndicador', 'I.Codigo', 'I.Meta', 'I.Descripcion', 'I.ObjetivoEstrategico', 'I.Resultado', 'I.TipoIndicador', 'I.Categoria', 'I.Unidad', 'I.CodigoEstado',
+                'I.CodigoUsuario',
                 'Oe.CodigoObjetivo as CodigoObjetivo', 'Oe.Objetivo as ObjetivoEstrategico',
                 'Tr.Descripcion as ResultadoDescripcion',
                 'Ti.Descripcion as TipoDescripcion',
                 'Ci.Descripcion as CategoriaDescripcion',
-                'U.Descripcion as UnidadDescripcion'
+                'U.Descripcion as UnidadDescripcion',
+                'I.Meta - (sum(isnull(ig.Meta,0))) as Programado'
             ])
                 ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.CodigoObjEstrategico')
+                ->join('INNER JOIN','PEIs p', 'oe.CodigoPei = p.CodigoPei')
                 ->join('INNER JOIN','TiposResultados Tr', 'I.Resultado = Tr.CodigoTipo')
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
                 ->join('INNER JOIN','IndicadoresUnidades U', 'I.Unidad = U.CodigoTipo')
+
+                ->join('LEFT JOIN', 'IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
                 ->where(['!=','I.CodigoEstado','E'])
                 ->andWhere(['!=','Oe.CodigoEstado','E'])
                 ->andWhere(['!=','Tr.CodigoEstado','E'])->andWhere(['!=','Ti.CodigoEstado','E'])->andWhere(['!=','Ci.CodigoEstado','E'])->andWhere(['!=','U.CodigoEstado','E'])
+                ->andWhere(['p.CodigoPei'=>1/*por ahora!!!*/])
+                ->groupBy('I.CodigoIndicador, I.Codigo, I.Meta, I.Descripcion, I.ObjetivoEstrategico, I.Resultado,I.TipoIndicador, I.Categoria, I.Unidad,I.CodigoEstado,I.FechaHoraRegistro,I.CodigoUsuario,
+                                   Oe.CodigoObjetivo, Oe.Objetivo,
+                                   Tr.Descripcion, Ti.Descripcion, Ci.Descripcion, U.Descripcion')
                 ->orderBy('I.Codigo')->asArray()->all();
         }
         return json_encode($indicadores);
@@ -109,10 +118,28 @@ class IndicadorEstrategicoController extends Controller
                 $indicador->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
                 if ($indicador->validate()){
                     if (!$indicador->exist()){
-                        if ($indicador->save())
-                        {
-                            return "ok";
-                        } else {
+                        $transaction = IndicadorEstrategico::getDb()->beginTransaction();
+                        try {
+                            if ($indicador->save())
+                            {
+                                if ($indicador->generarProgramacion())
+                                {
+                                    $transaction->commit();
+                                    return "ok";
+                                } else {
+                                    $transaction->rollBack();
+                                    return "errorSql";
+                                }
+                            } else {
+                                $transaction->rollBack();
+                                return "errorSql";
+                            }
+
+                        } catch(\Exception $e) {
+                            $transaction->rollBack();
+                            return "errorSql";
+                        } catch(\Throwable $e) {
+                            $transaction->rollBack();
                             return "errorSql";
                         }
                     } else {

@@ -98,6 +98,13 @@
     font-size:12px
 }
 
+tr.incompleto {
+    background-color: #f7d2e0 !important;
+}
+
+tr.completo {
+    background-color: #dcfadc !important;
+}
 
 
 

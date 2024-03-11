@@ -178,6 +178,32 @@ class IndicadorEstrategico extends ActiveRecord
         }
     }
 
+    public function generarProgramacion(): bool
+    {
+        $inicio = $this->objetivoEstrategico->codigoPei->GestionInicio;
+        $fin = $this->objetivoEstrategico->codigoPei->GestionFin;
+        for ($i = $inicio; $i<=$fin; $i++ )
+        {
+            $flag = false;
+            $programacion = new IndicadorEstrategicoGestion();
+            $programacion->Gestion = $i;
+            $programacion->IndicadorEstrategico = $this->CodigoIndicador;
+            $programacion->Meta = 0;
+            if ($programacion->validate())
+            {
+                if ($programacion->save())
+                {
+                    $flag = true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return $flag;
+    }
+
     public function estaProgramado()
     {
         $programacion = IndicadorEstrategicoGestion::find()->where(['Pei'=>$this->Pei,'Indicador'=>$this->CodigoIndicador])->sum('MetaProgramada');
