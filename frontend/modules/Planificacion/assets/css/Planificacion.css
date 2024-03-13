@@ -80,22 +80,21 @@
     border-radius: 5px;
     box-shadow:0 1px 2px #5e5d5b;
 }
-.page-link > span{
-    color: black;
-    font-size:12px
+
+.dt-search label{
+    font-size: 13px;
 }
 
-.dataTables_filter {
-    text-align: left!important;
+.dt-length label{
+    font-size: 13px;
 }
 
-.dataTables_length {
-    text-align: right!important;
-    font-size:12px
+.dt-info {
+    font-size: 13px;
 }
 
-.dataTables_info {
-    font-size:12px
+.dt-paging-button a {
+    font-size: 13px;
 }
 
 tr.incompleto {
@@ -106,11 +105,9 @@ tr.completo {
     background-color: #dcfadc !important;
 }
 
+th.dt-center, td.dt-center { text-align: center !important; }
 
-
-th.dt-center, td.dt-center { text-align: center; }
-
-th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; }
+th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; !important; }
 
 th.dt-acciones, td.dt-acciones  {
     width: 130px;
@@ -162,5 +159,15 @@ th.dt-estado, td.dt-estado  {
     overflow: hidden;
 }
 
+.modal-dialog{
+    height:100%
+}
+.modal-content{
+    height:90%
+}
+.modal-body{
+    height:100%;
+    overflow:auto
+}
 
 

@@ -32,15 +32,18 @@ $(document).ready(function(){
     }
 
     let table = $(".tablaListaIndicadoresEstrategicos").DataTable({
-        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        layout: {
+            topStart: 'pageLength',
+            topEnd: 'search',
+            bottomStart: 'info',
+            bottomEnd: 'paging'
+        },
         initComplete: function () {
             this.api()
                 .columns([5,6,7,8])
                 .every(function () {
                     var column = this;
-                    var select = $('<select><option value="">Buscar...</option></select>')
+                    var select = $('</br><select><option value="">Buscar...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
                             var val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -64,62 +67,60 @@ $(document).ready(function(){
             url: 'index.php?r=Planificacion/indicador-estrategico/listar-indicadores-estrategicos',
             dataSrc: '',
         },
-        columnDefs: [
-            { className: "dt-small", targets: "_all" },
-        ],
         fixedColumns: true,
         columns: [
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoUsuario',
                 width: 30
             },
             {
-                className: 'dt-control dt-center',
+                className: 'dt-small dt-control dt-center',
                 orderable: false,
                 searchable: false,
                 data: null,
                 defaultContent: '',
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'Codigo'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'Meta'
             },
             {
+                className: 'dt-small',
                 data: 'Descripcion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'ResultadoDescripcion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'TipoDescripcion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'CategoriaDescripcion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'UnidadDescripcion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'CodigoObjetivo'
             },
             {
-                className: 'dt-estado dt-center',
+                className: 'dt-small dt-estado dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoEstado',
@@ -130,7 +131,7 @@ $(document).ready(function(){
                 },
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center dt-small',
                 orderable: false,
                 searchable: false,
                 data: null,
@@ -143,7 +144,7 @@ $(document).ready(function(){
                 },
             },
             {
-                className: 'dt-acciones dt-center',
+                className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoIndicador',
@@ -174,10 +175,10 @@ $(document).ready(function(){
             "sInfoThousands": ",",
             "sLoadingRecords": "Cargando...",
             "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "<span class='fa fa-arrow-right'></span>",
-                "sPrevious": "<span class='fa fa-arrow-left'></span>"
+                "sFirst": "<span class='fas fa-angle-double-left'></span>",
+                "sLast": "<span class='fas fa-angle-double-right'></span>",
+                "sNext": "<span class='fas fa-angle-right'></span>",
+                "sPrevious": "<span class='fas fa-angle-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
@@ -193,7 +194,7 @@ $(document).ready(function(){
         });
     }).draw();
 
-    table.on('init',function (){
+    /*table.on('init',function (){
        for (let i = 0; i < table.rows().count(); i++){
            row = table.row(i);
            programado = row.data().Programado;
@@ -203,7 +204,7 @@ $(document).ready(function(){
                $(row.nodes()).addClass('incompleto');
            }
        }
-    });
+    });*/
 
     $('.tablaListaIndicadoresEstrategicos tbody').on('click', 'td.dt-control', function () {
         var tr = $(this).closest('tr');
