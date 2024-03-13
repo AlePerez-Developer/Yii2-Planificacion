@@ -5,12 +5,6 @@ $(document).ready(function(){
             '   <div class="col-5">' +
             '       <div class="titulosmall">Plan estrategico institucional</div>' +
             '   </div>' +
-            '   <div class="col-3">' +
-            '       <div class="titulosmall">Aperturas Programadas</div>' +
-            '   </div>' +
-            '   <div class="col-3">' +
-            '       <div class="titulosmall">Indicadores Programados</div>' +
-            '   </div>' +
             '</div>' +
             '<div class="row">' +
             '   <div class="col-5">' +
@@ -34,23 +28,16 @@ $(document).ready(function(){
             '           </div>' +
             '       </div>' +
             '   </div>' +
-            '   <div class="col-3">' +
-            '       <div class="cell cell__big" style="vertical-align: middle; text-align: center">' +
-            '        <button class="btn btn-info btn-sm">Ver Aperturas</button>       '+
-            '       </div>' +
-            '   </div>' +
-            '   <div class="col-3">' +
-            '       <div class="cell cell__big" style="vertical-align: middle; text-align: center">' +
-            '        <button class="btn btn-info btn-sm">Ver Indicadores</button>       '+
-            '       </div>' +
-            '   </div>' +
             '</div>'
         );
     }
     let table = $(".tablaListaObjEstrategicos").DataTable({
-        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        layout: {
+            topStart: 'pageLength',
+            topEnd: 'search',
+            bottomStart: 'info',
+            bottomEnd: 'paging'
+        },
         initComplete: function () {
             this.api()
                 .columns([2])
@@ -80,26 +67,24 @@ $(document).ready(function(){
             url: 'index.php?r=Planificacion/obj-estrategico/listar-objs',
             dataSrc: '',
         },
-        columnDefs: [
-            { className: "dt-small", targets: "_all" },
-        ],
         fixedColumns: true,
         columns: [
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoUsuario',
                 width: 30
             },
             {
-                className: 'dt-control dt-center',
+                className: 'dt-small dt-control dt-center',
                 orderable: false,
                 searchable: false,
                 data: null,
                 defaultContent: '',
             },
             {
+                className: 'dt-small',
                 orderable: false,
                 data: 'DescripcionPEI',
                 render: function (data, type, row){
@@ -109,12 +94,14 @@ $(document).ready(function(){
                 }
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'CodigoObjetivo'
             },
-            { data: 'Objetivo' },
             {
-                className: 'dt-estado dt-center',
+                className: 'dt-small',
+                data: 'Objetivo' },
+            {
+                className: 'dt-small dt-estado dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoEstado',
@@ -125,7 +112,7 @@ $(document).ready(function(){
                 },
             },
             {
-                className: 'dt-acciones dt-center',
+                className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoObjEstrategico',
@@ -157,10 +144,10 @@ $(document).ready(function(){
             "sInfoThousands": ",",
             "sLoadingRecords": "Cargando...",
             "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "<span class='fa fa-arrow-right'></span>",
-                "sPrevious": "<span class='fa fa-arrow-left'></span>"
+                "sFirst": "<span class='fas fa-angle-double-left'></span>",
+                "sLast": "<span class='fas fa-angle-double-right'></span>",
+                "sNext": "<span class='fas fa-angle-right'></span>",
+                "sPrevious": "<span class='fas fa-angle-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",

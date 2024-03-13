@@ -1,8 +1,11 @@
 $(document).ready(function () {
     let table = $("#tablaListaPeis").DataTable({
-        dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        layout: {
+            topStart: 'pageLength',
+            topEnd: 'search',
+            bottomStart: 'info',
+            bottomEnd: 'paging'
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -10,33 +13,32 @@ $(document).ready(function () {
             url: 'index.php?r=Planificacion/peis/listar-peis',
             dataSrc: '',
         },
-        columnDefs: [
-            { className: "dt-small", targets: "_all" },
-        ],
         fixedColumns: true,
         columns: [
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoUsuario',
                 width: 30
             },
-            { data: 'DescripcionPei' },
             {
-                className: 'dt-center',
+                className: 'dt-small',
+                data: 'DescripcionPei' },
+            {
+                className: 'dt-small dt-center',
                 data: 'FechaAprobacion'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'GestionInicio'
             },
             {
-                className: 'dt-center',
+                className: 'dt-small dt-center',
                 data: 'GestionFin'
             },
             {
-                className: 'dt-estado dt-center',
+                className: 'dt-small dt-estado dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoEstado',
@@ -47,7 +49,7 @@ $(document).ready(function () {
                 },
             },
             {
-                className: 'dt-acciones dt-center',
+                className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoPei',
@@ -78,10 +80,10 @@ $(document).ready(function () {
             "sInfoThousands": ",",
             "sLoadingRecords": "Cargando...",
             "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "<span class='fa fa-arrow-right'></span>",
-                "sPrevious": "<span class='fa fa-arrow-left'></span>"
+                "sFirst": "<span class='fas fa-angle-double-left'></span>",
+                "sLast": "<span class='fas fa-angle-double-right'></span>",
+                "sNext": "<span class='fas fa-angle-right'></span>",
+                "sPrevious": "<span class='fas fa-angle-left'></span>"
             },
             "oAria": {
                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",

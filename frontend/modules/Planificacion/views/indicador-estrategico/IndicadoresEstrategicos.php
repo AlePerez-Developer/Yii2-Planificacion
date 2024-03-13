@@ -214,9 +214,6 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                     </thead>
                                 </table>
                             </div>
-                            <div class="card-footer">
-
-                            </div>
                         </div>
                     </div>
                     <div id="programacionGestion" style="display: none">

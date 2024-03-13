@@ -74,8 +74,8 @@ class ObjInstitucionalController extends Controller
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $objs = ObjetivoInstitucional::find()->select([
                 'ObjetivosInstitucionales.CodigoObjInstitucional','ObjetivosInstitucionales.CodigoCOGE','ObjetivosInstitucionales.Objetivo','ObjetivosInstitucionales.CodigoEstado','ObjetivosInstitucionales.CodigoUsuario',
-                'ObjetivosEstrategicos.CodigoCOGE as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
-                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoCOGE, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
+                'ObjetivosEstrategicos.CodigoObjetivo as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
+                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoObjetivo, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
                 ])
                 ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')
                 ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')

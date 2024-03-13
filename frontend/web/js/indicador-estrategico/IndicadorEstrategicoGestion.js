@@ -52,7 +52,12 @@ $(document).ready(function (){
             }
         }).done(function (){
             let osotablex = $(".osotabla").DataTable({
-                dom: "",
+                layout: {
+                    topStart: null,
+                    topEnd: null,
+                    bottomStart: null,
+                    bottomEnd: null
+                },
                 ajax: {
                     method: "POST",
                     dataType: 'json',
@@ -66,25 +71,27 @@ $(document).ready(function (){
                 fixedColumns: true,
                 columns: [
                     {
-                        className: 'dt-center',
+                        className: 'dt-small dt-center',
                         orderable: false,
                         searchable: false,
                         data: 'CodigoProgramacion',
                         width: 30
                     },
                     {
-                        className: 'dt-center',
+                        className: 'dt-small dt-center',
                         data: 'Gestion'
                     },
                     {
-                        className: 'dt-center',
+                        className: 'dt-small dt-center',
                         data: 'Meta'
                     },
                     {
-                        data: 'IndicadorEstrategico'
+                        className: 'dt-small',
+                        data: 'IndicadorEstrategico',
+                        visible: false
                     },
                     {
-                        className: 'dt-acciones dt-center',
+                        className: 'dt-small dt-acciones dt-center',
                         orderable: false,
                         searchable: false,
                         data: 'CodigoProgramacion',
@@ -92,7 +99,6 @@ $(document).ready(function (){
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
                                 '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
-                                '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
                                 '</div>'
                                 : data;
                         },
