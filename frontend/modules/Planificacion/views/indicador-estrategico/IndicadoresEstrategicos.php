@@ -201,10 +201,9 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                             <div class="card-body">
-                                <table class="table-bordered table-striped dt-responsive table-sm osotabla" style="width: 100%" >
+                                <table id="osolala" class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresGestion" style="width: 100%" >
                                     <thead>
                                     <th>#</th>
                                     <th>Gestion</th>
@@ -221,7 +220,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class='btn btn-outline-danger' data-bs-dismiss="modal"><span class='fa fa-times-circle'></span> Cerrar </button>
+                    <button type="button" id="cerrarModal" class='btn btn-outline-danger' data-bs-dismiss="modal"><span class='fa fa-times-circle'></span> Cerrar </button>
                 </div>
             </div>
         </div>

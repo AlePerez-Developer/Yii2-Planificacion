@@ -1,15 +1,7 @@
 $(document).ready(function (){
+    let input
 
-
-    /*table.on('order.dt search.dt', function () {
-        let i = 1;
-        table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
-            this.data(i++);
-        });
-    }).draw();*/
-
-
-
+    let tabla;
     $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
         let codigo = $(this).attr("codigo");
         let datos = new FormData();
@@ -51,7 +43,7 @@ $(document).ready(function (){
                 })
             }
         }).done(function (){
-            let osotablex = $(".osotabla").DataTable({
+             tabla = $(".tablaIndicadoresGestion").DataTable({
                 layout: {
                     topStart: null,
                     topEnd: null,
@@ -61,6 +53,9 @@ $(document).ready(function (){
                 ajax: {
                     method: "POST",
                     dataType: 'json',
+                    data: function ( d ) {
+                        d.indicador = codigo
+                    },
                     cache: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
@@ -83,7 +78,9 @@ $(document).ready(function (){
                     },
                     {
                         className: 'dt-small dt-center',
-                        data: 'Meta'
+                        //render:prepareEditableOrder,
+                        data: 'Meta',
+                        width: 200
                     },
                     {
                         className: 'dt-small',
@@ -95,10 +92,10 @@ $(document).ready(function (){
                         orderable: false,
                         searchable: false,
                         data: 'CodigoProgramacion',
-                        render: function (data, type) {
+                        render: function (data, type, row) {
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                                '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                                '<button type="button" class="btn btn-outline-warning btn-sm btnP" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
                                 '</div>'
                                 : data;
                         },
@@ -106,7 +103,53 @@ $(document).ready(function (){
                 ],
 
             });
-
         });
     })
+
+
+    $(document).on('click', '.btnP', function(){
+        let objectBtn = $(this);
+        let codigo = objectBtn.attr("codigo");
+        let meta = objectBtn.attr("meta");
+
+        let td = $(this).closest('td');
+        let colIndex = tabla.cell(td).index().column;
+        let rowIndex = tabla.cell(td).index().row;
+
+        let inputbox = "<input type='text' id='metaVal' value='"+meta+"' class='form-control input-sm num' style='width: 150px'>"
+        tabla.cell(rowIndex, colIndex-2).data(inputbox)
+        $('#metaVal').select()
+    })
+
+
+    /*$(document).on('click', '#osolala tbody td', function () {
+        //alert('asdasd')
+
+        var cell = tabla.cell(this);
+        //alert(tabla.cell(this).data());
+        var myString = "<input type='text'>"
+       //tabla.cell( td ).data(myString).draw();
+        cell.data(myString).draw();
+        // note - call draw() to update the table's draw state with the new data
+    });*/
+
+
+
+
+    /*$('#example tbody').on('change', 'td input', function () {
+        var val = $(this).val();
+        var td = $(this).closest('td');
+        var row = table.row( $(td) );
+        var data = row.data();
+
+        var myString = val + ': ' + data.School;
+
+        table.cell( td ).data(myString).draw();
+
+    } );*/
+
+    $('#cerrarModal').click(function (){
+        tabla.destroy()
+    })
+
 })
