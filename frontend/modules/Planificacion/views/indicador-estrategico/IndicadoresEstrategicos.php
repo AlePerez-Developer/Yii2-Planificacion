@@ -158,7 +158,15 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </thead>
         </table>
     </div>
-
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100px;
+        height: 100px;
+    }
+</style>
     <!-- Modal -->
     <div class="modal fade" id="programarIndicadorEstrategico" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">

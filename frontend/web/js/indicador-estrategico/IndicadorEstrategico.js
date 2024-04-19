@@ -199,9 +199,9 @@ $(document).ready(function(){
            row = table.row(i);
            programado = row.data().Programado;
            if (programado == 0){
-                $(row.node()).addClass('completo');
+                //$(row.node()).addClass('completo');
            } else {
-               $(row.node()).addClass('incompleto');
+               //$(row.node()).addClass('incompleto');
            }
        }
     });
@@ -341,6 +341,16 @@ $(document).ready(function(){
                         confirmButtonText: "Cerrar"
                     });
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Advertencia...",
+                    text: thrownError,
+                    showCancelButton: false,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Cerrar"
+                });
             }
         });
     }
@@ -393,6 +403,16 @@ $(document).ready(function(){
                         confirmButtonText: 'Cerrar'
                     });
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Advertencia...",
+                    text: thrownError,
+                    showCancelButton: false,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Cerrar"
+                });
             }
         });
     });
@@ -459,6 +479,16 @@ $(document).ready(function(){
                                 confirmButtonText: "Cerrar"
                             })
                         }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Advertencia...",
+                            text: thrownError,
+                            showCancelButton: false,
+                            confirmButtonColor: "#3085d6",
+                            confirmButtonText: "Cerrar"
+                        });
                     }
                 });
             }
@@ -493,8 +523,8 @@ $(document).ready(function(){
                 $("#tipoUnidad").val(data.Unidad);
                 $("#btnMostrarCrear").trigger('click');
             },
-            error: function (respuesta) {
-                let rta = respuesta['responseText'];
+            error: function (xhr, ajaxOptions, thrownError) {
+                let rta = xhr.responseText;
                 let mensaje;
                 if (rta === "errorNoEncontrado") {
                     mensaje = "Error: No se encontro el indicador estrategico seleccionado.";
@@ -503,7 +533,7 @@ $(document).ready(function(){
                 } else if (rta === "errorCabecera") {
                     mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
                 } else {
-                    mensaje = rta;
+                    mensaje = thrownError + ' >' + xhr.responseText ;
                 }
                 Swal.fire({
                     icon: 'error',
@@ -587,6 +617,16 @@ $(document).ready(function(){
                         confirmButtonText: "Cerrar"
                     });
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Advertencia...",
+                    text: thrownError,
+                    showCancelButton: false,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Cerrar"
+                });
             }
         });
     }

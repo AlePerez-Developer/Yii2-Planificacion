@@ -221,14 +221,17 @@ class IndicadorEstrategicoController extends Controller
                     'I.TipoIndicador', 'ti.Descripcion as TipoIndicadorDescripcion',
                     'I.Categoria', 'ci.Descripcion as CategoriaDescripcion',
                     'I.Unidad', 'iu.Descripcion as UnidadDescripcion',
-                    'I.ObjetivoEstrategico', 'o.CodigoObjetivo', 'o.Objetivo'
+                    'I.ObjetivoEstrategico', 'o.CodigoObjetivo', 'o.Objetivo', 'sum(isnull(ieg.Meta,0)) as metaProgramada'
                 ])
                     ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
                     ->join('INNER JOIN','TiposResultados tr', 'i.Resultado = tr.CodigoTipo')
                     ->join('INNER JOIN','TiposIndicadores ti', 'i.TipoIndicador = ti.CodigoTipo')
                     ->join('INNER JOIN','CategoriasIndicadores ci', 'i.Categoria = ci.CodigoCategoria')
                     ->join('INNER JOIN','IndicadoresUnidades iu', 'i.Unidad = iu.CodigoTipo')
+                    ->join('INNER JOIN','IndicadoresEstrategicosGestiones ieg', 'ieg.IndicadorEstrategico = i.CodigoIndicador')
                     ->where(['I.CodigoIndicador' => $_POST["codigoIndicadorEstrategico"] ])
+                    ->groupBy('I.CodigoIndicador,I.Codigo,I.Meta,I.Descripcion,I.Resultado,tr.Descripcion,I.TipoIndicador,ti.Descripcion,I.Categoria, ci.Descripcion,
+                                       I.Unidad, iu.Descripcion,I.ObjetivoEstrategico, o.CodigoObjetivo, o.Objetivo')
                     ->asArray()->one();
                 if ($indicador){
                     return json_encode($indicador);

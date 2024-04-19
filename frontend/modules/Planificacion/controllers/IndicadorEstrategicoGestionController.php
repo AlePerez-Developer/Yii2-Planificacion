@@ -60,4 +60,33 @@ class IndicadorEstrategicoGestionController extends Controller
         }
     }
 
+    public function actionGuardarMetaProgramada()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            if (isset($_POST["codigo"]) && $_POST["codigo"] != "" &&
+                isset($_POST["metaProgramada"]) && $_POST["metaProgramada"] != "") {
+                $programacion = IndicadorEstrategicoGestion::findOne($_POST["codigo"]);
+                if ($programacion) {
+                    $programacion->Meta = $_POST["metaProgramada"];
+                    if ($programacion->validate()){
+                        if ($programacion->update() !== false) {
+                            return "ok";
+                        } else {
+                            return "errorSql";
+                        }
+                    } else {
+                        return "errorValidacion";
+                    }
+                } else {
+                    return 'errorNoEncontrado';
+                }
+            } else {
+                return "errorEnvio";
+            }
+        } else {
+            return "errorCabecera";
+        }
+
+    }
+
 }
