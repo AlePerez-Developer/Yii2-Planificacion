@@ -211,7 +211,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                 </div>
                             </div>
                             <div class="card-body">
-                                <table id="osolala" class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresGestion" style="width: 100%" >
+                                <table class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresGestion" style="width: 100%" >
                                     <thead>
                                     <th>#</th>
                                     <th>Gestion</th>

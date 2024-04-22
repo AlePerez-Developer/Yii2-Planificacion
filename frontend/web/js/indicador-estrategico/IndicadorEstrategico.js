@@ -68,6 +68,7 @@ $(document).ready(function(){
             dataSrc: '',
         },
         fixedColumns: true,
+        autoWidth: false,
         columns: [
             {
                 className: 'dt-small dt-center',
@@ -138,7 +139,10 @@ $(document).ready(function(){
                 render: function (data, type, row) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" ><i class="fa fa-eye"></i></button>' +
+                        '<button type="button" class="btn btn-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" >' +
+                            '<span id="spiner" class="spinner-grow spinner-grow-sm" style="display: none" aria-hidden="true"></span>' +
+                            '<i id="icono" class="fa fa-eye"></i>' +
+                        '</button>' +
                         '</div>'
                         : data;
                 },
@@ -272,7 +276,8 @@ $(document).ready(function(){
     });
 
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
-        $('#programarIndicadorEstrategico').modal('show')
+        $("#spiner").removeAttr("style")
+        $("#icono").css("display", "none")
     });
 
     /*=============================================================
@@ -318,39 +323,11 @@ $(document).ready(function(){
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a un indicador estrategico existente";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Advertencia...",
-                    text: thrownError,
-                    showCancelButton: false,
-                    confirmButtonColor: "#3085d6",
-                    confirmButtonText: "Cerrar"
-                });
+                MostrarMensaje('error',GenerarMensajeError(thrownError))
             }
         });
     }
@@ -382,37 +359,11 @@ $(document).ready(function(){
                     }
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se pudo recuperar el indicador estrategico para su cambio de estado.";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Alerta...',
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'Cerrar'
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Advertencia...",
-                    text: thrownError,
-                    showCancelButton: false,
-                    confirmButtonColor: "#3085d6",
-                    confirmButtonText: "Cerrar"
-                });
+                MostrarMensaje('error',GenerarMensajeError(thrownError))
             }
         });
     });
@@ -456,39 +407,11 @@ $(document).ready(function(){
                             });
                         }
                         else {
-                            let mensaje;
-                            if (respuesta === "errorEnUso") {
-                                mensaje = "Error: el indicador estrategico se encuentra en uso y no puede ser eliminado";
-                            } else if (respuesta === "errorNoEncontrado") {
-                                mensaje = "Error: No se pudo recuperar el indicador estrategico para su eliminacion";
-                            } else if (respuesta === "errorEnvio") {
-                                mensaje = "Error: No se enviaron los datos de forma correcta.";
-                            } else if (respuesta === "errorCabecera") {
-                                mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                            } else if (respuesta === "errorSql") {
-                                mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                            } else {
-                                mensaje = respuesta;
-                            }
-                            Swal.fire({
-                                icon: "error",
-                                title: 'Alerta...',
-                                text: mensaje,
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            })
+                            MostrarMensaje('error',GenerarMensajeError(respuesta))
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Advertencia...",
-                            text: thrownError,
-                            showCancelButton: false,
-                            confirmButtonColor: "#3085d6",
-                            confirmButtonText: "Cerrar"
-                        });
+                        MostrarMensaje('error',GenerarMensajeError(thrownError))
                     }
                 });
             }
@@ -525,24 +448,7 @@ $(document).ready(function(){
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 let rta = xhr.responseText;
-                let mensaje;
-                if (rta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro el indicador estrategico seleccionado.";
-                } else if (rta === "errorEnvio") {
-                    mensaje = "Error: No se enviaron los datos de forma correcta.";
-                } else if (rta === "errorCabecera") {
-                    mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                } else {
-                    mensaje = thrownError + ' >' + xhr.responseText ;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Alerta...',
-                    text: mensaje,
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                })
+                MostrarMensaje('error',GenerarMensajeError(rta))
             }
         });
     });
@@ -592,41 +498,11 @@ $(document).ready(function(){
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a un indicador estrategico existente";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se encontro el indicador estrategico seleccionado.";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Advertencia...",
-                    text: thrownError,
-                    showCancelButton: false,
-                    confirmButtonColor: "#3085d6",
-                    confirmButtonText: "Cerrar"
-                });
+                MostrarMensaje('error',GenerarMensajeError(thrownError))
             }
         });
     }

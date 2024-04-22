@@ -110,7 +110,7 @@ th.dt-center, td.dt-center { text-align: center !important; }
 th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; !important; }
 
 th.dt-acciones, td.dt-acciones  {
-    width: 130px;
+    width: 130px; !important;
     text-align: center;
 }
 th.dt-estado, td.dt-estado  {

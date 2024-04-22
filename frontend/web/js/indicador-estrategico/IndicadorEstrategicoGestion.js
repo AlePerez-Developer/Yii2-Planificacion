@@ -1,6 +1,6 @@
 $(document).ready(function (){
-    let input, opcionesMeta;
     let tabla;
+    let inputMeta, opcionesMeta;
     let metaTotal, metaProgramada
     $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
         let codigo = $(this).attr("codigo");
@@ -63,11 +63,17 @@ $(document).ready(function (){
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
                 },
+                 initComplete: function () {
+                     $('#programarIndicadorEstrategico').modal('show');
+                     $("#spiner").css("display", "none");
+                     $("#icono").removeAttr("style")
+                 },
                 columnDefs: [
                     { className: "dt-small", targets: "_all" },
                 ],
-                fixedColumns: true,
-                columns: [
+                 fixedColumns: true,
+                 autoWidth: false,
+                 columns: [
                     {
                         className: 'dt-small dt-center',
                         orderable: false,
@@ -117,93 +123,39 @@ $(document).ready(function (){
         rowIndex = tabla.cell(td).index().row;
         tabla.cell(rowIndex, colIndex).data(metaAntigua)
         opcionesMeta.remove()
-        input = ''
+        inputMeta = ''
     }
 
     function atualizarMeta(){
         let metaNueva = $('#metaInput').val()
-        if (metaNueva !== ''){
-            if (metaTotal === 0){
-
-            } else {
-                if ( ( parseInt(metaNueva,10) + metaProgramada ) <= metaTotal ) {
-                    let codigo = $('#metaInput').attr("codigo");
-                    let datos = new FormData();
-                    datos.append('codigo',codigo)
-                    datos.append('metaProgramada',metaNueva)
-                    $.ajax({
-                        url: 'index.php?r=Planificacion/indicador-estrategico-gestion/guardar-meta-programada',
-                        method: "POST",
-                        data: datos,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        success: function (respuesta){
-                            if (respuesta === "ok") {
-                                $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
-                                input = '';
-                            }
-                            else {
-                                let mensaje;
-                                if (respuesta === "errorValidacion") {
-                                    mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                                } else if (respuesta === "errorEnvio") {
-                                    mensaje = "Error: No se enviaron los datos de forma correcta.";
-                                } else if (respuesta === "errorCabecera") {
-                                    mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                                } else if (respuesta === "errorNoEncontrado") {
-                                    mensaje = "Error: No se encontro el indicador estrategico seleccionado.";
-                                } else if (respuesta === "errorSql") {
-                                    mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                                } else {
-                                    mensaje = respuesta;
-                                }
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Advertencia...",
-                                    text: mensaje,
-                                    showCancelButton: false,
-                                    confirmButtonColor: "#3085d6",
-                                    confirmButtonText: "Cerrar"
-                                });
-                            }
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Advertencia...",
-                                text: thrownError + ' >:' + xhr.responseText,
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            });
-                        }
-                    })
-                } else {
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Advertencia...",
-                        text: "La meta programada excede el valor de la meta total del indicador",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+        let codigo = $('#metaInput').attr("codigo");
+        let datos = new FormData();
+        datos.append('codigo',codigo)
+        datos.append('metaProgramada',metaNueva)
+        $.ajax({
+            url: 'index.php?r=Planificacion/indicador-estrategico-gestion/guardar-meta-programada',
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (respuesta){
+                if (respuesta === "ok") {
+                    $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
+                    inputMeta = '';
                 }
+                else {
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',thrownError + ' >:' + xhr.responseText)
             }
-        } else {
-            Swal.fire({
-                icon: "warning",
-                title: "Advertencia...",
-                text: "No puede guardar un valor vacio para la meta",
-                showCancelButton: false,
-                confirmButtonColor: "#3085d6",
-                confirmButtonText: "Cerrar"
-            });
-        }
+        })
     }
 
     $(document).on('click', '.btnP', function(){
-        if (input){
+        if (inputMeta){
             restaurarMeta()
         }
         let objectBtn = $(this);
@@ -214,12 +166,12 @@ $(document).ready(function (){
         let colIndex = tabla.cell(td).index().column;
         let rowIndex = tabla.cell(td).index().row;
 
-        input = "<div id='opcionesMeta' class='input-group'>" +
+        inputMeta = "<div id='opcionesMeta' class='input-group'>" +
                     "<input type='text' id='metaInput' codigo='"+codigo+"' meta='"+meta+"'  value='"+meta+"' class='form-control input-sm num' style='width: 100px; height: 25px'>" +
                     "<button class='btn btn-outline-success center' type='button' id='guardarMeta' style='width: 25px; height: 25px'><span class='fa fa-check-circle'></span></button>" +
                     "<button class='btn btn-outline-danger center' type='button' id='revertirMeta' style='width: 25px; height: 25px'><span class='fa fa-times-circle'></span></button>" +
                 "</div>"
-        tabla.cell(rowIndex, colIndex-2).data(input)
+        tabla.cell(rowIndex, colIndex-2).data(inputMeta)
         opcionesMeta = $('#opcionesMeta')
         $('#metaInput').select()
     })
@@ -245,36 +197,8 @@ $(document).ready(function (){
         restaurarMeta()
     });
 
-    /*$(document).on('click', '#osolala tbody td', function () {
-        //alert('asdasd')
-
-        var cell = tabla.cell(this);
-        //alert(tabla.cell(this).data());
-        var myString = "<input type='text'>"
-       //tabla.cell( td ).data(myString).draw();
-        cell.data(myString).draw();
-        // note - call draw() to update the table's draw state with the new data
-    });*/
-
-
-
-
-    /*$('#example tbody').on('change', 'td input', function () {
-        var val = $(this).val();
-        var td = $(this).closest('td');
-        var row = table.row( $(td) );
-        var data = row.data();
-
-        var myString = val + ': ' + data.School;
-
-        table.cell( td ).data(myString).draw();
-
-    } );*/
-
     $('#cerrarModal').click(function (){
-        //tabla.destroy()
-        //$(".tablaIndicadoresGestion").destroy()
-        input = '';
+        inputMeta = '';
     })
 
 })
