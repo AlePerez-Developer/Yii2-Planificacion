@@ -51,8 +51,8 @@ $(document).ready(function() {
         })
 
     $.validator.addMethod("DiferenteQue",
-        function (value) {
-            return value !== "0";
+        function (value, element, param) {
+            return value !== param;
         });
 
     $.validator.addMethod("CodigoUnico",
@@ -201,7 +201,6 @@ $(document).ready(function() {
             metaIndicador: {
                 required: true,
                 digits: true,
-                DiferenteQue: '0'
             },
             descripcion:{
                 required: true,
@@ -240,7 +239,6 @@ $(document).ready(function() {
             metaIndicador: {
                 required: "Debe ingresar una meta para el indicador",
                 digits: "Solo se permite numeros enteros",
-                DiferenteQue: "Debe ingresar un numero mayor que 0"
             },
             descripcion: {
                 required: "Debe ingresar la descripcion del indicador",

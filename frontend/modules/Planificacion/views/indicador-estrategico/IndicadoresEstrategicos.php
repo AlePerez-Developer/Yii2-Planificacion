@@ -144,8 +144,9 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             <thead>
                 <th>#</th>
                 <th>#</th>
-                <th>Codigo</th>
+                <th>Cod.</th>
                 <th>Meta</th>
+                <th>Prog</th>
                 <th>Descripcion</th>
                 <th>Resultado</th>
                 <th>Tipo</th>

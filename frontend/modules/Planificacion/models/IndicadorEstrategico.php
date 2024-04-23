@@ -185,20 +185,52 @@ class IndicadorEstrategico extends ActiveRecord
         for ($i = $inicio; $i<=$fin; $i++ )
         {
             $flag = false;
-            $programacion = new IndicadorEstrategicoGestion();
-            $programacion->Gestion = $i;
-            $programacion->IndicadorEstrategico = $this->CodigoIndicador;
-            $programacion->Meta = 0;
-            if ($programacion->validate())
-            {
-                if ($programacion->save())
+            $programacion = IndicadorEstrategicoGestion::find()->where(['IndicadorEstrategico'=>$this->CodigoIndicador, 'Gestion' => $i])->one();
+            if (!$programacion){
+                $programacion = new IndicadorEstrategicoGestion();
+                $programacion->Gestion = $i;
+                $programacion->IndicadorEstrategico = $this->CodigoIndicador;
+                $programacion->Meta = 0;
+                if ($programacion->validate())
                 {
-                    $flag = true;
+                    if ($programacion->save())
+                    {
+                        $flag = true;
+                    } else {
+                        return false;
+                    }
                 } else {
                     return false;
                 }
-            } else {
-                return false;
+            }
+        }
+        return $flag;
+    }
+
+    public function verificarProgramacion(): bool
+    {
+        $inicio = $this->objetivoEstrategico->codigoPei->GestionInicio;
+        $fin = $this->objetivoEstrategico->codigoPei->GestionFin;
+        for ($i = $inicio; $i<=$fin; $i++ )
+        {
+            $flag = false;
+            $programacion = IndicadorEstrategicoGestion::find()->where(['IndicadorEstrategico'=>$this->CodigoIndicador, 'Gestion' => $i])->one();
+            if (!$programacion){
+                $programacion = new IndicadorEstrategicoGestion();
+                $programacion->Gestion = $i;
+                $programacion->IndicadorEstrategico = $this->CodigoIndicador;
+                $programacion->Meta = 0;
+                if ($programacion->validate())
+                {
+                    if ($programacion->save())
+                    {
+                        $flag = true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             }
         }
         return $flag;

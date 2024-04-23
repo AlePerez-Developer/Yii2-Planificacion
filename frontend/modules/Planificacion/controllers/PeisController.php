@@ -2,13 +2,16 @@
 
 namespace app\modules\Planificacion\controllers;
 
+use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use common\models\Estado;
 use yii\web\Controller;
 use Mpdf\Mpdf;
+use Throwable;
 use Yii;
 
 
@@ -99,6 +102,10 @@ class PeisController extends Controller
         }
     }
 
+    /**
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public function actionCambiarEstadoPei()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
@@ -171,6 +178,10 @@ class PeisController extends Controller
         }
     }
 
+    /**
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public function actionActualizarPei()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
@@ -205,9 +216,39 @@ class PeisController extends Controller
 
                     if ($pei->validate()) {
                         if (!$pei->exist()) {
+                            $transaction = Pei::getDb()->beginTransaction();
                             if ($pei->update() !== false) {
+                                $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+                                    ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+                                    ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+                                    ->where('(o.CodigoPei = :pei) and (ig.Gestion > :Gestion)',[':pei'=>$pei->CodigoPei,':Gestion'=>$nuevoFin])
+                                    ->all();
+                                if ($programaciones){
+                                    foreach ($programaciones as $programacion){
+                                        if (!$programacion->delete()){
+                                            $transaction->rollBack();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+                                    ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+                                    ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+                                    ->where('(o.CodigoPei = :pei) and (ig.Gestion < :Gestion)',[':pei'=>$pei->CodigoPei,':Gestion'=>$nuevoInicio])
+                                    ->all();
+                                if ($programaciones){
+                                    foreach ($programaciones as $programacion){
+                                        if (!$programacion->delete()){
+                                            $transaction->rollBack();
+                                            break;
+                                        }
+                                    }
+                                }
+                                $transaction->commit();
                                 return "ok";
                             } else {
+                                $transaction->rollBack();
                                 return "errorSql";
                             }
                         } else {

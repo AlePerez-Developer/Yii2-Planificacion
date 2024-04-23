@@ -79,7 +79,6 @@ create table IndicadoresEstrategicos(
     CodigoUsuario char(3) not null,
 
     constraint chk_CodigoIndicadorEstrategico check (Codigo > 0),
-    constraint chk_Meta check (Meta > 0),
     constraint chk_DescripcionIndicadorEstrategico check (Descripcion != ''),
 
     foreign key (ObjetivoEstrategico) references ObjetivosEstrategicos(CodigoObjEstrategico),

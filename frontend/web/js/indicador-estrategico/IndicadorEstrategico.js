@@ -40,7 +40,7 @@ $(document).ready(function(){
         },
         initComplete: function () {
             this.api()
-                .columns([5,6,7,8])
+                .columns([6,7,8,9])
                 .every(function () {
                     var column = this;
                     var select = $('</br><select><option value="">Buscar...</option></select>')
@@ -86,11 +86,18 @@ $(document).ready(function(){
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Codigo'
+                data: 'Codigo',
+                width: 60
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Meta'
+                data: 'Meta',
+                width: 60
+            },
+            {
+                className: 'dt-small dt-center',
+                data: 'Programado',
+                width: 60
             },
             {
                 className: 'dt-small',
@@ -140,8 +147,8 @@ $(document).ready(function(){
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
                         '<button type="button" class="btn btn-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" >' +
-                            '<span id="spiner" class="spinner-grow spinner-grow-sm" style="display: none" aria-hidden="true"></span>' +
-                            '<i id="icono" class="fa fa-eye"></i>' +
+                            '<span class="spinner-grow spinner-grow-sm" style="display: none" aria-hidden="true"></span>' +
+                            '<i class="fa fa-eye"></i>' +
                         '</button>' +
                         '</div>'
                         : data;
@@ -201,9 +208,9 @@ $(document).ready(function(){
     table.on('init',function (){
        for (let i = 0; i < table.rows().count(); i++){
            row = table.row(i);
-           programado = row.data().Programado;
+           programado = row.data().Diff;
            if (programado == 0){
-                //$(row.node()).addClass('completo');
+                $(row.node()).addClass('completo');
            } else {
                //$(row.node()).addClass('incompleto');
            }
@@ -241,6 +248,7 @@ $(document).ready(function(){
         })
         $("#codigoObjEstrategico").val(null).trigger('change');
         $("#codigoIndicadorEstrategico").val('');
+        $('#metaIndicador').prop('readonly',false);
         $('#formIndicadorEstrategico').trigger('reset');
     }
 
@@ -275,9 +283,13 @@ $(document).ready(function(){
         }
     });
 
+    $('#tipoUnidad').change(function (){
+        ($(this).val() === '2')? $('#metaIndicador').val('100').prop('readonly',true): $('#metaIndicador').prop('readonly',false)
+    })
+
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
-        $("#spiner").removeAttr("style")
-        $("#icono").css("display", "none")
+        $(this).find('span').removeAttr("style") // $("#spiner").removeAttr("style")
+        $(this).find('i').css("display", "none")   //("#icono").css("display", "none")
     });
 
     /*=============================================================

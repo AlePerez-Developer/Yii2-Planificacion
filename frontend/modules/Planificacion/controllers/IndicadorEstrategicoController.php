@@ -75,7 +75,8 @@ class IndicadorEstrategicoController extends Controller
                 'Ti.Descripcion as TipoDescripcion',
                 'Ci.Descripcion as CategoriaDescripcion',
                 'U.Descripcion as UnidadDescripcion',
-                'I.Meta - (sum(isnull(ig.Meta,0))) as Programado'
+                '(sum(isnull(ig.Meta,0))) as Programado',
+                'I.Meta - (sum(isnull(ig.Meta,0))) as Diff'
             ])
                 ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.CodigoObjEstrategico')
                 ->join('INNER JOIN','PEIs p', 'oe.CodigoPei = p.CodigoPei')
@@ -215,6 +216,7 @@ class IndicadorEstrategicoController extends Controller
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoIndicadorEstrategico"]) && $_POST["codigoIndicadorEstrategico"] != "") {
+                $codigo = $_POST["codigoIndicadorEstrategico"];
                 $indicador = IndicadorEstrategico::find()->alias('I')->select([
                     'I.CodigoIndicador','I.Codigo','I.Meta','I.Descripcion',
                     'I.Resultado','tr.Descripcion as ResultadoDescripcion',
@@ -228,12 +230,13 @@ class IndicadorEstrategicoController extends Controller
                     ->join('INNER JOIN','TiposIndicadores ti', 'i.TipoIndicador = ti.CodigoTipo')
                     ->join('INNER JOIN','CategoriasIndicadores ci', 'i.Categoria = ci.CodigoCategoria')
                     ->join('INNER JOIN','IndicadoresUnidades iu', 'i.Unidad = iu.CodigoTipo')
-                    ->join('INNER JOIN','IndicadoresEstrategicosGestiones ieg', 'ieg.IndicadorEstrategico = i.CodigoIndicador')
-                    ->where(['I.CodigoIndicador' => $_POST["codigoIndicadorEstrategico"] ])
+                    ->join('left JOIN','IndicadoresEstrategicosGestiones ieg', 'ieg.IndicadorEstrategico = i.CodigoIndicador')
+                    ->where(['I.CodigoIndicador' => $codigo ])
                     ->groupBy('I.CodigoIndicador,I.Codigo,I.Meta,I.Descripcion,I.Resultado,tr.Descripcion,I.TipoIndicador,ti.Descripcion,I.Categoria, ci.Descripcion,
                                        I.Unidad, iu.Descripcion,I.ObjetivoEstrategico, o.CodigoObjetivo, o.Objetivo')
                     ->asArray()->one();
                 if ($indicador){
+                    IndicadorEstrategico::findOne($codigo)->generarProgramacion();
                     return json_encode($indicador);
                 } else {
                     return 'errorNoEncontrado';

@@ -130,7 +130,7 @@ class Pei extends ActiveRecord
             ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
             ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
             ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (Gestion < :Gestion)',[':pei'=>$this->CodigoPei,':Gestion'=>$inicioNuevo])
+            ->where('(p.CodigoPei = :pei) and (ig.Gestion < :Gestion) and (ig.Meta > 0) ',[':pei'=>$this->CodigoPei,':Gestion'=>$inicioNuevo])
             ->one();
         if (empty($ind)) {
             return true;
@@ -145,7 +145,7 @@ class Pei extends ActiveRecord
             ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
             ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
             ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (Gestion > :Gestion)',[':pei'=>$this->CodigoPei,':Gestion'=>$finNuevo])
+            ->where('(p.CodigoPei = :pei) and (ig.Gestion > :Gestion) and (ig.Meta > 0)',[':pei'=>$this->CodigoPei,':Gestion'=>$finNuevo])
             ->one();
         if (empty($ind)) {
             return true;

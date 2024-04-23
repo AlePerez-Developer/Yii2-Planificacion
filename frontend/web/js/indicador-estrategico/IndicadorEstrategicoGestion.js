@@ -3,6 +3,7 @@ $(document).ready(function (){
     let inputMeta, opcionesMeta;
     let metaTotal, metaProgramada
     $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
+        let btn = $(this)
         let codigo = $(this).attr("codigo");
         let datos = new FormData();
         datos.append("codigoIndicadorEstrategico", codigo);
@@ -24,28 +25,12 @@ $(document).ready(function (){
                 metaProgramada = parseInt(data.metaProgramada, 10)
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                let rta = xhr.responseText;
-                let mensaje;
-                if (rta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro el indicador estrategico seleccionado.";
-                } else if (rta === "errorEnvio") {
-                    mensaje = "Error: No se enviaron los datos de forma correcta.";
-                } else if (rta === "errorCabecera") {
-                    mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                } else {
-                    mensaje = thrownError;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Alerta...',
-                    text: mensaje,
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                })
+                MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
+                btn.find('span').css("display", "none");
+                btn.find('i').removeAttr("style")
             }
         }).done(function (){
-             tabla = $(".tablaIndicadoresGestion").DataTable({
+            tabla = $(".tablaIndicadoresGestion").DataTable({
                 destroy: true,
                 layout: {
                     topStart: null,
@@ -62,18 +47,24 @@ $(document).ready(function (){
                     cache: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
+                        $('#programarIndicadorEstrategico').modal('show');
+                        btn.find('span').css("display", "none");
+                        btn.find('i').removeAttr("style")
+                    }
                 },
-                 initComplete: function () {
-                     $('#programarIndicadorEstrategico').modal('show');
-                     $("#spiner").css("display", "none");
-                     $("#icono").removeAttr("style")
-                 },
+                initComplete: function () {
+                    $('#programarIndicadorEstrategico').modal('show');
+                    btn.find('span').css("display", "none");
+                    btn.find('i').removeAttr("style")
+                },
                 columnDefs: [
                     { className: "dt-small", targets: "_all" },
                 ],
-                 fixedColumns: true,
-                 autoWidth: false,
-                 columns: [
+                fixedColumns: true,
+                autoWidth: false,
+                columns: [
                     {
                         className: 'dt-small dt-center',
                         orderable: false,
@@ -109,7 +100,6 @@ $(document).ready(function (){
                         },
                     },
                 ],
-
             });
         });
     })
