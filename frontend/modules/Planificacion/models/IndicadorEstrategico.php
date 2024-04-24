@@ -5,8 +5,6 @@ namespace app\modules\Planificacion\models;
 use common\models\Usuario;
 use common\models\Estado;
 use yii\db\ActiveRecord;
-use Yii;
-
 
 /**
  * This is the model class for table "IndicadoresEstrategicos".
@@ -205,39 +203,5 @@ class IndicadorEstrategico extends ActiveRecord
             }
         }
         return $flag;
-    }
-
-    public function verificarProgramacion(): bool
-    {
-        $inicio = $this->objetivoEstrategico->codigoPei->GestionInicio;
-        $fin = $this->objetivoEstrategico->codigoPei->GestionFin;
-        for ($i = $inicio; $i<=$fin; $i++ )
-        {
-            $flag = false;
-            $programacion = IndicadorEstrategicoGestion::find()->where(['IndicadorEstrategico'=>$this->CodigoIndicador, 'Gestion' => $i])->one();
-            if (!$programacion){
-                $programacion = new IndicadorEstrategicoGestion();
-                $programacion->Gestion = $i;
-                $programacion->IndicadorEstrategico = $this->CodigoIndicador;
-                $programacion->Meta = 0;
-                if ($programacion->validate())
-                {
-                    if ($programacion->save())
-                    {
-                        $flag = true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-        }
-        return $flag;
-    }
-
-    public function estaProgramado()
-    {
-        $programacion = IndicadorEstrategicoGestion::find()->where(['Pei'=>$this->Pei,'Indicador'=>$this->CodigoIndicador])->sum('MetaProgramada');
     }
 }

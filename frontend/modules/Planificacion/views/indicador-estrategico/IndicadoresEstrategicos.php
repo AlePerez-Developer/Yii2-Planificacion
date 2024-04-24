@@ -78,7 +78,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                             <div class="row">
                                 <div class="form-group">
                                     <label for="descripcion" class="control-label">Descripcion del indicador</label>
-                                    <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="4" placeholder="Descripcion del indicador"></textarea>
+                                    <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="2" placeholder="Descripcion del indicador"></textarea>
                                 </div>
                             </div>
                             <div class="row">

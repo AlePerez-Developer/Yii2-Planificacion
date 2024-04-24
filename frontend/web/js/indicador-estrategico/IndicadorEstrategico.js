@@ -55,7 +55,7 @@ $(document).ready(function(){
                         .data()
                         .unique()
                         .sort()
-                        .each(function (d, j) {
+                        .each(function (d) {
                             select.append('<option value="' + d + '">' + d + '</option>');
                         });
                 });
@@ -66,6 +66,9 @@ $(document).ready(function(){
             cache: false,
             url: 'index.php?r=Planificacion/indicador-estrategico/listar-indicadores-estrategicos',
             dataSrc: '',
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
         },
         fixedColumns: true,
         autoWidth: false,
@@ -133,9 +136,9 @@ $(document).ready(function(){
                 searchable: false,
                 data: 'CodigoEstado',
                 render: function (data, type, row) {
-                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "V" ></button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "C" ></button>' ;
+                    return ( (type === 'display') && (row.CodigoEstado === ESTADO_VIGENTE))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado =  "' + ESTADO_VIGENTE + '" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoIndicador + '" estado = "' + ESTADO_CADUCO + '" ></button>' ;
                 },
             },
             {
@@ -288,8 +291,8 @@ $(document).ready(function(){
     })
 
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
-        $(this).find('span').removeAttr("style") // $("#spiner").removeAttr("style")
-        $(this).find('i').css("display", "none")   //("#icono").css("display", "none")
+        $(this).find('span').removeAttr("style")
+        $(this).find('i').css("display", "none")
     });
 
     /*=============================================================
@@ -362,12 +365,12 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estado === "V") {
+                    if (estado === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.attr('estado', 'C');
+                        objectBtn.attr('estado', ESTADO_CADUCO);
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.attr('estado', 'V');
+                        objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
                 }
                 else {
@@ -423,7 +426,7 @@ $(document).ready(function(){
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
-                        MostrarMensaje('error',GenerarMensajeError(thrownError))
+                        MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
                     }
                 });
             }
@@ -459,8 +462,7 @@ $(document).ready(function(){
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                let rta = xhr.responseText;
-                MostrarMensaje('error',GenerarMensajeError(rta))
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     });
@@ -514,7 +516,7 @@ $(document).ready(function(){
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError))
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }

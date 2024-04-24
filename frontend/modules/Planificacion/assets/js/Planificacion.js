@@ -1,3 +1,7 @@
+const ESTADO_VIGENTE = 'V'
+const ESTADO_CADUCO = 'C'
+const ESTADO_ELIMINADO = 'E'
+
 function GenerarMensajeError(Mensaje){
     if (Mensaje === "errorValidacion") {
         return "Error: Ocurrio un error al validar los datos enviados";
@@ -15,7 +19,6 @@ function GenerarMensajeError(Mensaje){
         return  Mensaje;
     }
 }
-
 
 function MostrarMensaje(icono, mensaje){
     let titulo

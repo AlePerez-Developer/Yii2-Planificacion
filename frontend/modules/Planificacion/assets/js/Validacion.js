@@ -56,10 +56,12 @@ $(document).ready(function() {
         });
 
     $.validator.addMethod("CodigoUnico",
-        function(value, element) {
-            var result = false;
+        function(value, element, param) {
+            let result = false;
+            let indicadorEstrategico = $(param).val();
             let datos = new FormData();
             datos.append("codigo", value);
+            datos.append("indicadorEstrategico", indicadorEstrategico);
             $.ajax({
                 url: "index.php?r=Planificacion/indicador-estrategico/verificar-codigo",
                 method: "POST",
@@ -69,7 +71,7 @@ $(document).ready(function() {
                 contentType: false,
                 processData: false,
                 success: function(data) {
-                    result = (data) ? true : false;
+                    result = !!(data);
                 }
             });
             return result;
@@ -196,7 +198,7 @@ $(document).ready(function() {
                 digits: true,
                 max: 999,
                 DiferenteQue: '0',
-                CodigoUnico: "#codigoIndicador"
+                CodigoUnico: "#codigoIndicadorEstrategico"
             },
             metaIndicador: {
                 required: true,

@@ -2,9 +2,6 @@
 
 namespace app\modules\Planificacion\models;
 
-use app\modules\Planificacion\models\IndicadorEstrategico;
-use app\modules\Planificacion\models\PEI;
-
 /**
  * This is the model class for table "IndicadoresEstrategicosGestiones".
  *
@@ -45,7 +42,6 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
     {
         return [
             'CodigoProgramacion' => 'Codigo Programacion',
-            'Pei' => 'Pei',
             'Gestion' => 'Gestion',
             'IndicadorEstrategico' => 'Indicador Estrategico',
             'MetaProgramada' => 'Meta Programada',
@@ -62,9 +58,4 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
         return $this->hasOne(IndicadorEstrategico::class, ['CodigoIndicador' => 'IndicadorEstrategico']);
     }
 
-    /**
-     * Gets query for [[Pei]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
 }
