@@ -188,6 +188,7 @@ $(document).ready(function (){
     });
 
     $('#cerrarModal').click(function (){
+        $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(null, false);
         inputMeta = '';
     })
 

@@ -200,6 +200,8 @@ class IndicadorEstrategico extends ActiveRecord
                 } else {
                     return false;
                 }
+            } else {
+                $flag = true;
             }
         }
         return $flag;

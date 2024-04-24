@@ -167,14 +167,15 @@ class IndicadorEstrategicoController extends Controller
         if (!$indicador){
             return 'errorNoEncontrado';
         }
+
         ($indicador->CodigoEstado == Estado::ESTADO_VIGENTE)?$indicador->CodigoEstado = Estado::ESTADO_CADUCO: $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
+
         if (!$indicador->update()) {
             return "errorSql";
         }
 
         return "ok";
     }
-
 
     /**
      * @throws StaleObjectException
@@ -197,6 +198,9 @@ class IndicadorEstrategicoController extends Controller
         if ($indicador->enUso()) {
             return "errorEnUso";
         }
+
+        $indicador->CodigoEstado = Estado::ESTADO_ELIMINADO;
+
         if (!$indicador->update()) {
             return "errorSql";
         }
@@ -296,10 +300,11 @@ class IndicadorEstrategicoController extends Controller
         }
 
         $indicadorEstrategico = IndicadorEstrategico::find()
-                ->where(['Codigo' => $_POST["codigo"], 'CodigoEstado' => Estado::ESTADO_VIGENTE])
-                ->andWhere(['!=','CodigoIndicador',$_POST["indicadorEstrategico"]])
-                ->one();
-        if (!$indicadorEstrategico) {
+            ->where(['Codigo' => $_POST["codigo"], 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','CodigoIndicador',$_POST["indicadorEstrategico"]])
+            ->one();
+
+        if ($indicadorEstrategico) {
             return false;
         }
 

@@ -70,6 +70,11 @@ $(document).ready(function(){
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         },
+        createdRow: function (row, data, dataIndex) {
+            if (data.Diff == 0 ) {
+                $(row).addClass('completo');
+            }
+        },
         fixedColumns: true,
         autoWidth: false,
         columns: [
@@ -207,18 +212,6 @@ $(document).ready(function(){
             this.data(i++);
         });
     }).draw();
-
-    table.on('init',function (){
-       for (let i = 0; i < table.rows().count(); i++){
-           row = table.row(i);
-           programado = row.data().Diff;
-           if (programado == 0){
-                $(row.node()).addClass('completo');
-           } else {
-               //$(row.node()).addClass('incompleto');
-           }
-       }
-    });
 
     $('.tablaListaIndicadoresEstrategicos tbody').on('click', 'td.dt-control', function () {
         var tr = $(this).closest('tr');

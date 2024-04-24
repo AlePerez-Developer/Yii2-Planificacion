@@ -4,17 +4,16 @@ use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/indicador-estrategico/IndicadorEstrategico.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategico.js",[
     'depends' => [
         JqueryAsset::className()
     ]
 ]);
-$this->registerJsFile("@web/js/indicador-estrategico/IndicadorEstrategicoGestion.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategicoGestion.js",[
     'depends' => [
         JqueryAsset::className()
     ]
 ]);
-
 
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
@@ -159,15 +158,8 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </thead>
         </table>
     </div>
-<style>
-    .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100px;
-        height: 100px;
-    }
-</style>
+
+
     <!-- Modal -->
     <div class="modal fade" id="programarIndicadorEstrategico" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -224,7 +216,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                             </div>
                         </div>
                     </div>
-                    <div id="programacionGestion" style="display: none">
+                    <div id="programacionAperturas" style="display: none">
 
                     </div>
                 </div>
@@ -234,5 +226,4 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </div>
         </div>
     </div>
-
 </div>
