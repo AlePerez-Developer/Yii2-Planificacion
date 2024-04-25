@@ -1,11 +1,11 @@
 <?php
 
-use yii\helpers\Html;
 use yii\web\JqueryAsset;
+use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/obj-estrategico/ObjEstrategico.js",[
+$this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js",[
     'depends' => [
         JqueryAsset::className()
     ]

@@ -10,6 +10,7 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use common\models\Estado;
 use yii\web\Controller;
+use Mpdf\MpdfException;
 use Mpdf\Mpdf;
 use Throwable;
 use Yii;
@@ -71,35 +72,33 @@ class PeisController extends Controller
 
     public function actionGuardarPei()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"])) {
-                $pei = new Pei();
-                $pei->CodigoPei = PeiDao::generarCodigoPei();
-                $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
-                $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
-                $pei->GestionInicio = trim($_POST["gestionInicio"]);
-                $pei->GestionFin = trim($_POST["gestionFin"]);
-                $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
-                $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
-                if ($pei->validate()) {
-                    if (!$pei->exist()) {
-                        if ($pei->save()) {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorExiste";
-                    }
-                } else {
-                    return "errorValidacion";
-                }
-            } else {
-                return 'errorEnvio';
-            }
-        } else {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return "errorCabecera";
         }
+        if (!(isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"]))) {
+            return 'errorEnvio';
+        }
+
+        $pei = new Pei();
+        $pei->CodigoPei = PeiDao::generarCodigoPei();
+        $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
+        $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
+        $pei->GestionInicio = trim($_POST["gestionInicio"]);
+        $pei->GestionFin = trim($_POST["gestionFin"]);
+        $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
+        $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+
+        if (!$pei->validate()) {
+            return "errorValidacion";
+        }
+        if ($pei->exist()) {
+            return "errorExiste";
+        }
+        if (!$pei->save()) {
+            return "errorSql";
+        }
+
+        return "ok";
     }
 
     /**
@@ -108,74 +107,68 @@ class PeisController extends Controller
      */
     public function actionCambiarEstadoPei()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoPei"])) {
-                $pei = Pei::findOne($_POST["codigoPei"]);
-                if ($pei) {
-                    if ($pei->CodigoEstado == Estado::ESTADO_VIGENTE) {
-                        $pei->CodigoEstado = Estado::ESTADO_CADUCO;
-                    } else {
-                        $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
-                    }
-                    if ($pei->update()) {
-                        return "ok";
-                    } else {
-                        return "errorSql";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return "errorCabecera";
         }
+        if (!isset($_POST["codigoPei"])) {
+            return "errorEnvio";
+        }
+
+        $pei = Pei::findOne($_POST["codigoPei"]);
+
+        if (!$pei) {
+            return 'errorNoEncontrado';
+        }
+
+        ($pei->CodigoEstado == Estado::ESTADO_VIGENTE)?$pei->CodigoEstado = Estado::ESTADO_CADUCO:$pei->CodigoEstado = Estado::ESTADO_VIGENTE;
+
+        if (!$pei->update()) {
+            return "errorSql";
+        }
+
+        return "ok";
     }
 
     public function actionEliminarPei()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "") {
-                $pei = Pei::findOne($_POST["codigoPei"]);
-                if ($pei) {
-                    if (!$pei->enUso()) {
-                        $pei->CodigoEstado = Estado::ESTADO_ELIMINADO;
-                        if ($pei->update()) {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorEnUso";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return "errorCabecera";
         }
+        if (!(isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "")) {
+            return "errorEnvio";
+        }
+
+        $pei = Pei::findOne($_POST["codigoPei"]);
+
+        if ($pei->enUso()) {
+            return "errorEnUso";
+        }
+
+        $pei->CodigoEstado = Estado::ESTADO_ELIMINADO;
+
+        if (!$pei->update()) {
+            return "errorSql";
+        }
+
+        return "ok";
     }
 
     public function actionBuscarPei()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "") {
-                $pei = Pei::findOne($_POST["codigoPei"]);
-                if ($pei) {
-                    return json_encode($pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin')));
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return "errorCabecera";
         }
+        if (!(isset($_POST["codigoPei"]) && $_POST["codigoPei"] != "")) {
+            return "errorEnvio";
+        }
+
+        $pei = Pei::findOne($_POST["codigoPei"]);
+
+        if (!$pei) {
+            return 'errorNoEncontrado';
+        }
+
+        return json_encode($pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin')));
     }
 
     /**
@@ -184,6 +177,89 @@ class PeisController extends Controller
      */
     public function actionActualizarPei()
     {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return "errorCabecera";
+        }
+        if (!(isset($_POST["codigoPei"]) && isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"])
+            && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"]))) {
+            return 'errorEnvio';
+        }
+
+        $pei = Pei::findOne($_POST["codigoPei"]);
+
+        if (!$pei) {
+            return "errorNoEncontrado";
+        }
+
+        $nuevoInicio = intval(trim($_POST["gestionInicio"]),10);
+        $nuevoFin = intval(trim($_POST["gestionFin"]),10);
+        $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
+        $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
+        if ($pei->GestionInicio< $nuevoInicio ){
+            if (!$pei->validarGestionInicio($nuevoInicio)) {
+                return 'errorGestionInicio';
+            }
+            $pei->GestionInicio = $nuevoInicio;
+        } else {
+            $pei->GestionInicio = $nuevoInicio;
+        }
+
+        if ($pei->GestionFin > $nuevoFin ){
+            if (!$pei->validarGestionFin($nuevoFin)) {
+                return 'errorGestionFin';
+            }
+            $pei->GestionFin = $nuevoFin;
+        } else {
+            $pei->GestionFin = $nuevoFin;
+        }
+
+        if (!$pei->validate()) {
+            return "errorValidacion";
+        }
+        if ($pei->exist()) {
+            return "errorExiste";
+        }
+
+        $transaction = Pei::getDb()->beginTransaction();
+
+        if (!$pei->update()) {
+            $transaction->rollBack();
+            return "errorSql";
+        }
+
+        $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+            ->where('(o.CodigoPei = :pei) and (ig.Gestion > :Gestion)',[':pei'=>$pei->CodigoPei,':Gestion'=>$nuevoFin])
+            ->all();
+        if ($programaciones){
+            foreach ($programaciones as $programacion){
+                if (!$programacion->delete()){
+                    $transaction->rollBack();
+                    break;
+                }
+            }
+        }
+
+        $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
+            ->where('(o.CodigoPei = :pei) and (ig.Gestion < :Gestion)',[':pei'=>$pei->CodigoPei,':Gestion'=>$nuevoInicio])
+            ->all();
+        if ($programaciones){
+            foreach ($programaciones as $programacion){
+                if (!$programacion->delete()){
+                    $transaction->rollBack();
+                    break;
+                }
+            }
+        }
+        $transaction->commit();
+        return "ok";
+
+
+
+/*
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             if (isset($_POST["codigoPei"]) && isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"])) {
                 $nuevoInicio = intval(trim($_POST["gestionInicio"]),10);
@@ -265,14 +341,17 @@ class PeisController extends Controller
             }
         } else {
             return "errorCabecera";
-        }
+        }*/
     }
 
+    /**
+     * @throws MpdfException
+     */
     public function actionReporte()
     {
         $mpdf = new Mpdf();
         $mpdf->SetMargins(0, 0,32);
-        $mpdf->SetHTMLHeader('
+        /*$mpdf->SetHTMLHeader('
             <table style="width: 100%" >
                 <tr>
                     <td width="7%" style="border-right: 1px solid black" >
@@ -320,7 +399,7 @@ class PeisController extends Controller
         $a .= '</table>';
 
 
-        $mpdf->WriteHTML($a);
+        $mpdf->WriteHTML($a);*/
 
         $mpdf->Output();
     }

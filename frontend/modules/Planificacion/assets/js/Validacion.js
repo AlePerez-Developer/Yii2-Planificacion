@@ -55,7 +55,7 @@ $(document).ready(function() {
             return value !== param;
         });
 
-    $.validator.addMethod("CodigoUnico",
+    $.validator.addMethod("CodigoIndicadorUnico",
         function(value, element, param) {
             let result = false;
             let indicadorEstrategico = $(param).val();
@@ -64,6 +64,29 @@ $(document).ready(function() {
             datos.append("indicadorEstrategico", indicadorEstrategico);
             $.ajax({
                 url: "index.php?r=Planificacion/indicador-estrategico/verificar-codigo",
+                method: "POST",
+                async: false,
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    result = !!(data);
+                }
+            });
+            return result;
+        }
+    );
+
+    $.validator.addMethod("CodigoObjetivoUnico",
+        function(value, element, param) {
+            let result = false;
+            let objetivoEstrategico = $(param).val();
+            let datos = new FormData();
+            datos.append("codigo", value);
+            datos.append("objetivoEstrategico", objetivoEstrategico);
+            $.ajax({
+                url: "index.php?r=Planificacion/obj-estrategico/verificar-codigo",
                 method: "POST",
                 async: false,
                 data: datos,
@@ -144,11 +167,12 @@ $(document).ready(function() {
                 required: true,
                 DiferenteQue: '0'
             },
-            codigoObj: {
+            codigoObjetivo: {
                 required: true,
                 digits: true,
                 max: 999,
-                largominimo: '2'
+                largominimo: '2',
+                CodigoObjetivoUnico: '#codigoObjEstrategico'
             },
             objetivo:{
                 required: true,
@@ -161,11 +185,12 @@ $(document).ready(function() {
                 required: "Debe seleccionar un codigo PEI",
                 DiferenteQue:"Debe seleccionar un codigo PEI"
             },
-            codigoObj: {
+            codigoObjetivo: {
                 required: "Debe ingresar un codigo de objetico estrategico (OE)",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero de 3 digitos como maximo",
-                largominimo: "Debe ingresar un numero de 3 digitos"
+                largominimo: "Debe ingresar un numero de 3 digitos",
+                CodigoObjetivoUnico: "El codigo de objetivo estrategico debe ser unico"
             },
             objetivo: {
                 required: "Debe ingresar la descripcion del objetivo estrategico",
@@ -198,7 +223,7 @@ $(document).ready(function() {
                 digits: true,
                 max: 999,
                 DiferenteQue: '0',
-                CodigoUnico: "#codigoIndicadorEstrategico"
+                CodigoIndicadorUnico: "#codigoIndicadorEstrategico"
             },
             metaIndicador: {
                 required: true,
@@ -236,7 +261,7 @@ $(document).ready(function() {
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero entero de maximo 3 digitos",
                 DiferenteQue: "Debe ingresar un numero mayor que 0",
-                CodigoUnico: "el codigo de indicador estrategico ya se encuentra en uso"
+                CodigoIndicadorUnico: "el codigo de indicador estrategico ya se encuentra en uso"
             },
             metaIndicador: {
                 required: "Debe ingresar una meta para el indicador",

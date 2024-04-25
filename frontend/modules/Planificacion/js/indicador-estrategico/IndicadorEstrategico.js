@@ -335,7 +335,7 @@ $(document).ready(function(){
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError))
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }
@@ -371,7 +371,7 @@ $(document).ready(function(){
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError))
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     });

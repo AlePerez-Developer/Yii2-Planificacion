@@ -43,7 +43,7 @@ $(document).ready(function(){
                 .columns([2])
                 .every(function () {
                     var column = this;
-                    var select = $('<select><option value="">Buscar pei...</option></select>')
+                    var select = $('</br><select><option value="">Buscar pei...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
                             var val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -66,8 +66,12 @@ $(document).ready(function(){
             cache: false,
             url: 'index.php?r=Planificacion/obj-estrategico/listar-objs',
             dataSrc: '',
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
         },
         fixedColumns: true,
+        autoWidth: false,
         columns: [
             {
                 className: 'dt-small dt-center',
@@ -246,29 +250,11 @@ $(document).ready(function(){
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a un objetivo estrategico existente";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }
@@ -291,36 +277,20 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estadoObj === "V") {
+                    if (estadoObj === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.attr('estado', 'C');
+                        objectBtn.attr('estado', ESTADO_CADUCO);
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.attr('estado', 'V');
+                        objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se pudo recuperar el Objetivo para su cambio de estado.";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Alerta...',
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'Cerrar'
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     });
@@ -364,29 +334,11 @@ $(document).ready(function(){
                             });
                         }
                         else {
-                            let mensaje;
-                            if (respuesta === "errorEnUso") {
-                                mensaje = "Error: el objetivo estrategico se encuentra en uso y no puede ser eliminado";
-                            } else if (respuesta === "errorNoEncontrado") {
-                                mensaje = "Error: No se pudo recuperar el Objetivo para su eliminacion";
-                            } else if (respuesta === "errorEnvio") {
-                                mensaje = "Error: No se enviaron los datos de forma correcta.";
-                            } else if (respuesta === "errorCabecera") {
-                                mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                            } else if (respuesta === "errorSql") {
-                                mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                            } else {
-                                mensaje = respuesta;
-                            }
-                            Swal.fire({
-                                icon: "error",
-                                title: 'Alerta...',
-                                text: mensaje,
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            })
+                            MostrarMensaje('error',GenerarMensajeError(respuesta))
                         }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
                     }
                 });
             }
@@ -416,26 +368,8 @@ $(document).ready(function(){
                 $("#objetivo").val(data.Objetivo);
                 $("#btnMostrarCrear").trigger('click');
             },
-            error: function (respuesta) {
-                let rta = respuesta['responseText'];
-                let mensaje;
-                if (rta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro el Objetivo seleccionado.";
-                } else if (rta === "errorEnvio") {
-                    mensaje = "Error: No se enviaron los datos de forma correcta.";
-                } else if (rta === "errorCabecera") {
-                    mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                } else {
-                    mensaje = rta;
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Alerta...',
-                    text: mensaje,
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                })
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     });
@@ -475,31 +409,11 @@ $(document).ready(function(){
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a un objetivo estrategico existente";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: Ocurrio un error al validar los datos enviados";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron los datos de forma correcta.";
-                    } else if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Ocurrio un error en el llamado del procedimiento";
-                    } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se encontro el Objetivo seleccionado.";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la sentencia SQL";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }

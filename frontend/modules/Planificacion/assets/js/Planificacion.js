@@ -13,12 +13,17 @@ function GenerarMensajeError(Mensaje){
         return "Error: No se encontro el indicador estrategico seleccionado.";
     } else if (Mensaje === "errorSql") {
         return "Error: Ocurrio un error en la sentencia SQL";
+    } else if (Mensaje === "errorExiste") {
+        return "Error: El valor ingresado ya existe en la base de datos";
     } else if (Mensaje === "errorMeta") {
         return "Error: la meta nueva excede la cantidad total";
     } else {
         return  Mensaje;
     }
 }
+
+
+errorEnUso
 
 function MostrarMensaje(icono, mensaje){
     let titulo
