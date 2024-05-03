@@ -70,17 +70,17 @@ class IndicadorEstrategicoGestionController extends Controller
     public function actionGuardarMetaProgramada()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            json_encode(["rta" => "errorCabecera"]);
         }
         if (!(isset($_POST["codigo"]) && $_POST["codigo"] != "" &&
             isset($_POST["metaProgramada"]) && $_POST["metaProgramada"] != "")) {
-            return "errorEnvio";
+            return json_encode(["rta" => "errorEnvio"]);
         }
 
         $programacion = IndicadorEstrategicoGestion::findOne($_POST["codigo"]);
 
         if (!$programacion) {
-            return 'errorNoEncontrado';
+            return json_encode(["rta" => 'errorNoEncontrado']);
         }
 
         $indicador = IndicadorEstrategico::findOne($programacion->IndicadorEstrategico);
@@ -94,18 +94,18 @@ class IndicadorEstrategicoGestionController extends Controller
             if ($indicador->Meta >= ($_POST["metaProgramada"] + $programado)){
                 $programacion->Meta = $_POST["metaProgramada"];
             } else {
-                return 'errorMeta';
+                return json_encode(["rta" => 'errorMeta']);
             }
         }
 
         if (!$programacion->validate()) {
-            return "errorValidacion";
+            return json_encode(["rta" => "errorValidacion"]);
         }
 
         if (!$programacion->update()) {
-            return "errorSql";
+            return json_encode(["rta" => "errorSql"]);
         }
 
-        return 'ok';
+        return json_encode(["rta" => "ok",'metaProg'=>$_POST["metaProgramada"] + $programado]);
     }
 }

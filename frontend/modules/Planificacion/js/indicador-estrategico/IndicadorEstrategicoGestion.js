@@ -2,6 +2,7 @@ $(document).ready(function (){
     let tabla;
     let inputMeta, opcionesMeta;
     let metaTotal, metaProgramada
+
     $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
         let btn = $(this)
         let codigo = $(this).attr("codigo");
@@ -19,10 +20,16 @@ $(document).ready(function (){
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $('#objetivoEstrategico').val('(' + data.CodigoObjetivo + ') - ' + data.Objetivo)
                 $('#metaIndicadorModal').val(data.Meta)
+                $('#metaProgIndicadorModal').val(data.metaProgramada)
                 $('#codigoIndicadorModal').val(data.Codigo)
                 $('#descripcionIndicador').val(data.Descripcion)
                 metaTotal = parseInt(data.Meta,10)
                 metaProgramada = parseInt(data.metaProgramada, 10)
+                if (metaTotal === metaProgramada){
+                    $( "#metaIndicadorModal" ).addClass( "completo" )
+                } else {
+                    $( "#metaIndicadorModal" ).removeClass( "completo" )
+                }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
@@ -129,13 +136,21 @@ $(document).ready(function (){
             cache: false,
             contentType: false,
             processData: false,
+            dataType: "json",
             success: function (respuesta){
-                if (respuesta === "ok") {
+                let data = JSON.parse(JSON.stringify(respuesta));
+                if (data.rta === "ok") {
+                    $('#metaProgIndicadorModal').val(data.metaProg)
                     $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
+                    if (metaTotal === data.metaProg){
+                        $( "#metaIndicadorModal" ).addClass( "completo" )
+                    } else {
+                        $( "#metaIndicadorModal" ).removeClass( "completo" )
+                    }
                     inputMeta = '';
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.rta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

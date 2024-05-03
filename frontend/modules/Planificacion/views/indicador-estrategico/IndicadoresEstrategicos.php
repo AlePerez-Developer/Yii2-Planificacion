@@ -167,6 +167,11 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             width: 100px;
             height: 100px;
         }
+
+        .completo {
+            background-color: #dcfadc !important;
+        }
+
     </style>
 
 
@@ -192,19 +197,25 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                         </div>
                                     </div>
                                     <div class="row mt-2">
-                                        <div class="col-2">
+                                        <div class="col-1">
                                             <form class="form-floating">
                                                 <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="codigoIndicadorModal" style="font-size: 14px">Codigo del indicador</label>
+                                                <label for="codigoIndicadorModal" style="font-size: 13px">indicador</label>
                                             </form>
                                         </div>
-                                        <div class="col-2">
+                                        <div class="col-1">
                                             <form class="form-floating">
                                                 <input type="text" class="form-control" id="metaIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="metaIndicadorModal" style="font-size: 14px">Meta del indicador</label>
+                                                <label for="metaIndicadorModal" style="font-size: 13px">Meta Total</label>
                                             </form>
                                         </div>
-                                        <div class="col-8">
+                                        <div class="col-1">
+                                            <form class="form-floating">
+                                                <input type="text" class="form-control" id="metaProgIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                                <label for="metaProgIndicadorModal" style="font-size: 13px">Meta Prog.</label>
+                                            </form>
+                                        </div>
+                                        <div class="col-9">
                                             <form class="form-floating">
                                                 <input type="text" class="form-control" id="descripcionIndicador" style="font-size: 12px" placeholder="" value="" disabled>
                                                 <label for="descripcionIndicador" style="font-size: 14px">Descripcion del indicador</label>
