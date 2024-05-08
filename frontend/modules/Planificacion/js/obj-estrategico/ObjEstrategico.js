@@ -32,12 +32,6 @@ $(document).ready(function(){
         );
     }
     let table = $(".tablaListaObjEstrategicos").DataTable({
-        layout: {
-            topStart: 'pageLength',
-            topEnd: 'search',
-            bottomStart: 'info',
-            bottomEnd: 'paging'
-        },
         initComplete: function () {
             this.api()
                 .columns([2])
@@ -70,8 +64,6 @@ $(document).ready(function(){
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         },
-        fixedColumns: true,
-        autoWidth: false,
         columns: [
             {
                 className: 'dt-small dt-center',
@@ -130,34 +122,6 @@ $(document).ready(function(){
                 },
             },
         ],
-
-        "deferRender": true,
-        "retrieve": true,
-        "processing": true,
-        "language": {
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "<span class='fas fa-angle-double-left'></span>",
-                "sLast": "<span class='fas fa-angle-double-right'></span>",
-                "sNext": "<span class='fas fa-angle-right'></span>",
-                "sPrevious": "<span class='fas fa-angle-left'></span>"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        }
     });
 
     table.on('order.dt search.dt', function () {

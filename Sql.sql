@@ -96,16 +96,14 @@ CREATE UNIQUE INDEX [UQ_Codigo]
 
 
 create table IndicadoresEstrategicosGestiones(
-     CodigoProgramacion int identity(1,1) primary key,
-     Gestion int not null,
-     IndicadorEstrategico int not null,
-     Meta int not null,
+    CodigoProgramacionGestion int identity(1,1) primary key,
+    IndicadorEstrategico int not null,
+    Gestion int not null,
+    Meta int not null,
 
-     constraint chk_MetaProgramada check (Meta > 0),
+    unique(Gestion,IndicadorEstrategico),
 
-     unique(Gestion,IndicadorEstrategico),
-
-     foreign key (IndicadorEstrategico) references IndicadoresEstrategicos(CodigoIndicador),
+    foreign key (IndicadorEstrategico) references IndicadoresEstrategicos(CodigoIndicador),
 )
 
 

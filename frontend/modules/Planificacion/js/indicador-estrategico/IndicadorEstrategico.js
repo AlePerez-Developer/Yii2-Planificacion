@@ -32,12 +32,6 @@ $(document).ready(function(){
     }
 
     let table = $(".tablaListaIndicadoresEstrategicos").DataTable({
-        layout: {
-            topStart: 'pageLength',
-            topEnd: 'search',
-            bottomStart: 'info',
-            bottomEnd: 'paging'
-        },
         initComplete: function () {
             this.api()
                 .columns([6,7,8,9])
@@ -75,8 +69,6 @@ $(document).ready(function(){
                 $(row).addClass('completo');
             }
         },
-        fixedColumns: true,
-        autoWidth: false,
         columns: [
             {
                 className: 'dt-small dt-center',
@@ -154,7 +146,7 @@ $(document).ready(function(){
                 render: function (data, type, row) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" >' +
+                        '<button type="button" class="btn btn-outline-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" >' +
                             '<span class="spinner-grow spinner-grow-sm" style="display: none" aria-hidden="true"></span>' +
                             '<i class="fa fa-eye"></i>' +
                         '</button>' +
@@ -177,33 +169,6 @@ $(document).ready(function(){
                 },
             },
         ],
-        "deferRender": true,
-        "retrieve": true,
-        "processing": true,
-        "language": {
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "<span class='fas fa-angle-double-left'></span>",
-                "sLast": "<span class='fas fa-angle-double-right'></span>",
-                "sNext": "<span class='fas fa-angle-right'></span>",
-                "sPrevious": "<span class='fas fa-angle-left'></span>"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        }
     });
 
     table.on('order.dt search.dt', function () {
@@ -229,7 +194,7 @@ $(document).ready(function(){
         theme: 'bootstrap4',
         placeholder: "Elija un objetivo estrategico",
         allowClear: true
-    }).change(function(e) {
+    }).change(function() {
         if (!formReset){
             $("#formIndicadorEstrategico").validate().element('#codigoObjEstrategico');
         }
@@ -280,7 +245,8 @@ $(document).ready(function(){
     });
 
     $('#tipoUnidad').change(function (){
-        ($(this).val() === '2')? $('#metaIndicador').val('100').prop('readonly',true): $('#metaIndicador').prop('readonly',false)
+        let metaIndicador = $('#metaIndicador');
+        ($(this).val() === '2')? metaIndicador.val('100').prop('readonly',true): metaIndicador.prop('readonly',false)
     })
 
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
@@ -319,16 +285,8 @@ $(document).ready(function(){
             success: function (respuesta) {
                 if (respuesta === "ok") {
                     $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "Los datos del nuevo indicador estrategico se guardaron correctamente",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
-                    });
+                    MostrarMensaje('success','Los datos del nuevo indicador estrategico se guardaron correctamente')
+                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))

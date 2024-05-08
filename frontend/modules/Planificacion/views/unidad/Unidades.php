@@ -5,7 +5,7 @@ use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/unidad/Unidad.js", [
+$this->registerJsFile("@planificacionModule/js/unidad/Unidad.js", [
     'depends' => [
         JqueryAsset::className()
     ]
@@ -90,7 +90,7 @@ $this->params['breadcrumbs'] = [['label' => '/Unidades']];
             </div>
         </div>
     </div>
-    <div id="divTabla" name="divTabla" class="card-body">
+    <div id="divTabla" class="card-body">
         <table id="tablaListaUnidades"  class="table table-bordered table-striped dt-responsive" >
             <thead>
             <th>#</th>

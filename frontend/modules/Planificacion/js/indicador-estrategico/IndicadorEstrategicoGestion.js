@@ -31,7 +31,7 @@ $(document).ready(function (){
                     $( "#metaIndicadorModal" ).removeClass( "completo" )
                 }
             },
-            error: function (xhr, ajaxOptions, thrownError) {
+            error: function (xhr) {
                 MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
                 btn.find('span').css("display", "none");
                 btn.find('i').removeAttr("style")
@@ -39,12 +39,6 @@ $(document).ready(function (){
         }).done(function (){
             tabla = $(".tablaIndicadoresGestion").DataTable({
                 destroy: true,
-                layout: {
-                    topStart: null,
-                    topEnd: null,
-                    bottomStart: null,
-                    bottomEnd: null
-                },
                 ajax: {
                     method: "POST",
                     dataType: 'json',
@@ -54,29 +48,27 @@ $(document).ready(function (){
                     cache: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
-                    error: function (xhr, ajaxOptions, thrownError) {
+                    error: function (xhr) {
                         MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
-                        $('#programarIndicadorEstrategico').modal('show');
+                        $('#programarIndicadorEstrategicoGestion').modal('show');
                         btn.find('span').css("display", "none");
                         btn.find('i').removeAttr("style")
                     }
                 },
                 initComplete: function () {
-                    $('#programarIndicadorEstrategico').modal('show');
+                    $('#programarIndicadorEstrategicoGestion').modal('show');
                     btn.find('span').css("display", "none");
                     btn.find('i').removeAttr("style")
                 },
                 columnDefs: [
                     { className: "dt-small", targets: "_all" },
                 ],
-                fixedColumns: true,
-                autoWidth: false,
                 columns: [
                     {
                         className: 'dt-small dt-center',
                         orderable: false,
                         searchable: false,
-                        data: 'CodigoProgramacion',
+                        data: 'CodigoProgramacionGestion',
                         width: 30
                     },
                     {
@@ -97,7 +89,7 @@ $(document).ready(function (){
                         className: 'dt-small dt-acciones dt-center',
                         orderable: false,
                         searchable: false,
-                        data: 'CodigoProgramacion',
+                        data: 'CodigoProgramacionGestion',
                         render: function (data, type, row) {
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -106,6 +98,19 @@ $(document).ready(function (){
                                 : data;
                         },
                     },
+                    {
+                        className: 'dt-small dt-acciones dt-center',
+                        orderable: false,
+                        searchable: false,
+                        data: 'CodigoProgramacionGestion',
+                        render: function (data, type, row) {
+                            return type === 'display'
+                                ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                                '<button type="button" class="btn btn-outline-info btn-sm btnP" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-eye"></i></button>' +
+                                '</div>'
+                                : data;
+                        },
+                    }
                 ],
             });
         });
@@ -202,9 +207,8 @@ $(document).ready(function (){
         restaurarMeta()
     });
 
-    $('#cerrarModal').click(function (){
+    $(document).on('hide.bs.modal','.programargestion', function () {
         $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(null, false);
         inputMeta = '';
     })
-
 })

@@ -5,7 +5,7 @@ namespace app\modules\Planificacion\models;
 /**
  * This is the model class for table "IndicadoresEstrategicosGestiones".
  *
- * @property int $CodigoProgramacion
+ * @property int $CodigoProgramacionGestion
  * @property int $Gestion
  * @property int $IndicadorEstrategico
  * @property int $Meta
@@ -41,7 +41,7 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'CodigoProgramacion' => 'Codigo Programacion',
+            'CodigoProgramacionGestion' => 'Codigo Programacion',
             'Gestion' => 'Gestion',
             'IndicadorEstrategico' => 'Indicador Estrategico',
             'MetaProgramada' => 'Meta Programada',

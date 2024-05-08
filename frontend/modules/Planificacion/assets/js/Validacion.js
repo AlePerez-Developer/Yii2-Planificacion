@@ -115,7 +115,7 @@ $(document).ready(function() {
             gestionInicio:{
                 required: true,
                 digits: true,
-                min:2000
+                min:2001
             },
             gestionFin:{
                 required: true,

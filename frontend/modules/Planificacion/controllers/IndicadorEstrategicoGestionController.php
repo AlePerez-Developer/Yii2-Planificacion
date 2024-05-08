@@ -50,7 +50,7 @@ class IndicadorEstrategicoGestionController extends Controller
             return "errorEnvio";
         }
 
-        $programacion = IndicadorEstrategicoGestion::find()->select(['CodigoProgramacion','Gestion','IndicadorEstrategico','Meta'])
+        $programacion = IndicadorEstrategicoGestion::find()->select(['CodigoProgramacionGestion','Gestion','IndicadorEstrategico','Meta'])
             ->where(['IndicadorEstrategico' => $_POST["indicador"]])
             ->orderBy('Gestion')
             ->asArray()
@@ -86,7 +86,7 @@ class IndicadorEstrategicoGestionController extends Controller
         $indicador = IndicadorEstrategico::findOne($programacion->IndicadorEstrategico);
         $programado =  IndicadorEstrategicoGestion::find()
             ->where(['IndicadorEstrategico' => $programacion->IndicadorEstrategico])
-            ->andWhere(['!=','CodigoProgramacion',$_POST["codigo"]])
+            ->andWhere(['!=','CodigoProgramacionGestion',$_POST["codigo"]])
             ->sum('meta');
         if ($indicador->Meta == 0){
             $programacion->Meta = $_POST["metaProgramada"];

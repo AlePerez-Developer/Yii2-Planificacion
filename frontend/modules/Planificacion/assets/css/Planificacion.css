@@ -128,7 +128,7 @@ th.dt-estado, td.dt-estado  {
     height: 30px;
 }
 
-.btnEditar > span {
+.btnEditar > i {
     color:darkslategrey;
     font-size:15px
 }
@@ -138,12 +138,12 @@ th.dt-estado, td.dt-estado  {
     height: 30px;
 }
 
-.btnEliminar > span {
+.btnEliminar > i {
     color:darkslategrey;
     font-size:15px
 }
 
-.btnEliminar:hover > span {
+.btnEliminar:hover > i {
     color:white;
     font-size:15px
 }

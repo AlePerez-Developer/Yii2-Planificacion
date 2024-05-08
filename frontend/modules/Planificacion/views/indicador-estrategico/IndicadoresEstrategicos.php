@@ -171,12 +171,11 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         .completo {
             background-color: #dcfadc !important;
         }
-
     </style>
 
 
     <!-- Modal -->
-    <div class="modal fade" id="programarIndicadorEstrategico" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal fade programargestion" id="programarIndicadorEstrategicoGestion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -184,65 +183,79 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="programacionGestion">
-                        <div class="card">
-                            <div class="card-header border-primary">
-                                <div class="container text-center">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <form class="form-floating">
-                                                <input type="text" class="form-control" id="objetivoEstrategico" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="objetivoEstrategico" style="font-size: 14px">Objetivo estrategico</label>
-                                            </form>
-                                        </div>
+                    <div class="card">
+                        <div class="card-header border-primary">
+                            <div class="container text-center">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <form class="form-floating">
+                                            <input type="text" class="form-control" id="objetivoEstrategico" style="font-size: 12px" placeholder="" value="" disabled>
+                                            <label for="objetivoEstrategico" style="font-size: 14px">Objetivo estrategico</label>
+                                        </form>
                                     </div>
-                                    <div class="row mt-2">
-                                        <div class="col-1">
-                                            <form class="form-floating">
-                                                <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="codigoIndicadorModal" style="font-size: 13px">indicador</label>
-                                            </form>
-                                        </div>
-                                        <div class="col-1">
-                                            <form class="form-floating">
-                                                <input type="text" class="form-control" id="metaIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="metaIndicadorModal" style="font-size: 13px">Meta Total</label>
-                                            </form>
-                                        </div>
-                                        <div class="col-1">
-                                            <form class="form-floating">
-                                                <input type="text" class="form-control" id="metaProgIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="metaProgIndicadorModal" style="font-size: 13px">Meta Prog.</label>
-                                            </form>
-                                        </div>
-                                        <div class="col-9">
-                                            <form class="form-floating">
-                                                <input type="text" class="form-control" id="descripcionIndicador" style="font-size: 12px" placeholder="" value="" disabled>
-                                                <label for="descripcionIndicador" style="font-size: 14px">Descripcion del indicador</label>
-                                            </form>
-                                        </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-1">
+                                        <form class="form-floating">
+                                            <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                            <label for="codigoIndicadorModal" style="font-size: 13px">indicador</label>
+                                        </form>
+                                    </div>
+                                    <div class="col-1">
+                                        <form class="form-floating">
+                                            <input type="text" class="form-control" id="metaIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                            <label for="metaIndicadorModal" style="font-size: 13px">Meta Total</label>
+                                        </form>
+                                    </div>
+                                    <div class="col-1">
+                                        <form class="form-floating">
+                                            <input type="text" class="form-control" id="metaProgIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
+                                            <label for="metaProgIndicadorModal" style="font-size: 13px">Meta Prog.</label>
+                                        </form>
+                                    </div>
+                                    <div class="col-9">
+                                        <form class="form-floating">
+                                            <input type="text" class="form-control" id="descripcionIndicador" style="font-size: 12px" placeholder="" value="" disabled>
+                                            <label for="descripcionIndicador" style="font-size: 14px">Descripcion del indicador</label>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <table class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresGestion" style="width: 100%" >
-                                    <thead>
-                                    <th>#</th>
-                                    <th>Gestion</th>
-                                    <th>Meta</th>
-                                    <th>Indicador</th>
-                                    <th>Acciones</th>
-                                    </thead>
-                                </table>
-                            </div>
                         </div>
-                    </div>
-                    <div id="programacionAperturas" style="display: none">
-
+                        <div class="card-body">
+                            <table class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresGestion" style="width: 100%" >
+                                <thead>
+                                <th>#</th>
+                                <th>Gestion</th>
+                                <th>Meta</th>
+                                <th>Indicador</th>
+                                <th>Acciones</th>
+                                <th>Prog. Apertura</th>
+                                </thead>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="cerrarModal" class='btn btn-outline-danger' data-bs-dismiss="modal"><span class='fa fa-times-circle'></span> Cerrar </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade programarapertura" id="programarIndicadorEstrategicoApertura" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Programacion de indicadores estrategicos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="cerrarModal" class='btn btn-outline-danger' data-bs-dismiss="modal"><span class='fa fa-times-circle'></span> Volver </button>
                 </div>
             </div>
         </div>

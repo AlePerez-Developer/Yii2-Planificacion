@@ -1,19 +1,44 @@
 $(document).ready(function () {
-    let table = $("#tablaListaPeis").DataTable({
-        layout: {
-            topStart: 'pageLength',
-            topEnd: 'search',
-            bottomStart: 'info',
-            bottomEnd: 'paging'
+    function format(d) {
+        return (
+            '<dl>' +
+            '<dt class="dt-small">Vigencia</dt>' +
+            '<dd class="dt-small"> De: ' + d.FechaInicio +  ' Hasta: ' + d.FechaFin + '</dd>' +
+            '</dl>'
+        );
+    }
+
+    let table = $("#tablaListaUnidades").DataTable({
+        initComplete: function () {
+            this.api()
+                .columns([2,3])
+                .every(function () {
+                    var column = this;
+                    var select = $('</br><select><option value="">Buscar...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
         },
         ajax: {
             method: "POST",
             dataType: 'json',
             cache: false,
-            url: 'index.php?r=Planificacion/peis/listar-peis',
+            url: 'index.php?r=Planificacion/unidad/listar-unidades',
             dataSrc: '',
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
         },
-        fixedColumns: true,
         columns: [
             {
                 className: 'dt-small dt-center',
@@ -23,37 +48,55 @@ $(document).ready(function () {
                 width: 30
             },
             {
+                className: 'dt-control dt-small dt-center',
+                orderable: false,
+                searchable: false,
+                data: null,
+                defaultContent: '',
+            },
+            {
+                className: 'dt-small dt-center',
+                orderable: false,
+                data: 'Da'
+            },
+            {
+                className: 'dt-small dt-center',
+                orderable: false,
+                data: 'Ue'
+            },
+            {
                 className: 'dt-small',
-                data: 'DescripcionPei' },
-            {
-                className: 'dt-small dt-center',
-                data: 'FechaAprobacion'
+                orderable: false,
+                data: 'Descripcion'
             },
             {
                 className: 'dt-small dt-center',
-                data: 'GestionInicio'
+                orderable: false,
+                searchable: false,
+                data: 'Organizacional' ,
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.Organizacional === '1'))
+                        ? 'SI'
+                        : 'NO' ;
+                },
             },
             {
-                className: 'dt-small dt-center',
-                data: 'GestionFin'
-            },
-            {
-                className: 'dt-small dt-estado dt-center',
+                className: 'dt-estado dt-small dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'CodigoEstado',
-                render: function (data, type, row) {
-                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm btnEstado" codigo="' + row.CodigoPei + '" estado = "V" ></button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado = "C" ></button>' ;
+                render: function (data, type, row, meta) {
+                    return ( (type === 'display') && (row.CodigoEstado === ESTADO_VIGENTE))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado =  "' + ESTADO_VIGENTE + '" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "' + ESTADO_CADUCO + '" ></button>' ;
                 },
             },
             {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoPei',
-                render: function (data, type) {
+                data: 'CodigoUnidad',
+                render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
                         '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
@@ -63,33 +106,6 @@ $(document).ready(function () {
                 },
             },
         ],
-        "deferRender": true,
-        "retrieve": true,
-        "processing": true,
-        "language": {
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "<span class='fas fa-angle-double-left'></span>",
-                "sLast": "<span class='fas fa-angle-double-right'></span>",
-                "sNext": "<span class='fas fa-angle-right'></span>",
-                "sPrevious": "<span class='fas fa-angle-left'></span>"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        }
     });
 
     table.on('order.dt search.dt', function () {
@@ -99,12 +115,24 @@ $(document).ready(function () {
         });
     }).draw();
 
+    $('#tablaListaUnidades tbody').on('click', 'td.dt-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+        }
+        else {
+            row.child(format(row.data())).show();
+        }
+    });
+
     function reiniciarCampos() {
-        $('#formPei *').filter(':input').each(function () {
+        $('#formUnidad *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $('#codigoPei').val('');
-        $('#formPei').trigger("reset");
+        $("#codigoUnidad").val('');
+        $('#formUnidad').trigger("reset");
     }
 
     $("#btnMostrarCrear").click(function () {
@@ -127,38 +155,44 @@ $(document).ready(function () {
     });
 
     $("#btnGuardar").click(function () {
-        if ($("#formPei").valid()) {
-            if ($("#codigoPei").val() === '') {
-                guardarPei();
+        if ($("#formUnidad").valid()) {
+            if ($("#codigoUnidad").val() === '') {
+                guardarUnidad();
             } else {
-                actualizarPei();
+                actualizarUnidad()
             }
         }
     });
 
-    $("#gestionInicio").on( "keypress",function(){
-        $("#formPei").validate().element('#gestionFin');
+    $('#fechaInicio').change(function (){
+        $("#formUnidad").validate().element('#fechaInicio');
+        $("#formUnidad").validate().element('#fechaFin');
     })
 
-    $("#gestionFin").on( "keypress",function(){
-        $("#formPei").validate().element('#gestionInicio');
+    $('#fechaFin').change(function (){
+        $("#formUnidad").validate().element('#fechaInicio');
+        $("#formUnidad").validate().element('#fechaFin');
     })
 
     /*=============================================
-    INSERTA EN LA BD UN NUEVO REGISTRO DE PEI
+    INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-    function guardarPei() {
-        let descripcionPei = $("#descripcionPei").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
+    function guardarUnidad() {
+        let da = $("#da").val();
+        let ue = $("#ue").val();
+        let descripcion = $("#descripcion").val();
+        let organizacional = $("#organizacional").is(':checked')?1:0;
+        let fechaInicio = $("#fechaInicio").val();
+        let FechaFin = $("#fechaFin").val();
         let datos = new FormData();
-        datos.append("descripcionPei", descripcionPei);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("gestionFin", gestionFin);
+        datos.append("da", da);
+        datos.append("ue", ue);
+        datos.append("descripcion", descripcion);
+        datos.append("organizacional", organizacional);
+        datos.append("fechaInicio", fechaInicio);
+        datos.append("fechaFin", FechaFin);
         $.ajax({
-            url: "index.php?r=Planificacion/peis/guardar-pei",
+            url: "index.php?r=Planificacion/unidad/guardar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -170,12 +204,12 @@ $(document).ready(function () {
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "Los datos del nuevo PEI se guardaron correctamente.",
+                        text: "Los datos de la nueva unidad se guardaron correctamente.",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
                     }).then(function () {
-                        $("#tablaListaPeis").DataTable().ajax.reload();
+                        $("#tablaListaUnidades").DataTable().ajax.reload();
                     });
                 }
                 else {
@@ -187,9 +221,9 @@ $(document).ready(function () {
                     } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: No se llenaron correctamente los datos requeridos.";
                     } else if (respuesta === "errorExiste") {
-                        mensaje = "Error: Los datos ingresados ya corresponden a un PEI existente.";
+                        mensaje = "Error: Los datos ingresados ya corresponden a una unidad existente.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al guardar el PEI.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al guardar la unidad.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -209,14 +243,14 @@ $(document).ready(function () {
     /*=============================================
     CAMBIA EL ESTADO DEL REGISTRO
     =============================================*/
-    $("#tablaListaPeis tbody").on("click", ".btnEstado", function () {
+    $("#tablaListaUnidades tbody").on("click", ".btnEstado", function () {
         let objectBtn = $(this);
-        let codigoPei = objectBtn.attr("codigo");
-        let estadoPei = objectBtn.attr("estado");
+        let codigoUnidad = objectBtn.attr("codigo");
+        let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
+        datos.append("codigoUnidad", codigoUnidad);
         $.ajax({
-            url: "index.php?r=Planificacion/peis/cambiar-estado-pei",
+            url: "index.php?r=Planificacion/unidad/cambiar-estado-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -224,7 +258,7 @@ $(document).ready(function () {
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estadoPei === "V") {
+                    if (estado === "V") {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
                         objectBtn.attr('estado', 'C');
                     } else {
@@ -239,9 +273,9 @@ $(document).ready(function () {
                     } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: Ocurrio un error en el envio de los datos.";
                     } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se pudo recuperar el PEI para su cambio de estado.";
+                        mensaje = "Error: No se pudo recuperar los datos de la unidad para su cambio de estado.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al cambiar el estado del PEI.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al cambiar el estado del la unidad.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -259,16 +293,16 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    ELIMINA DE LA BD UN REGISTRO DE PEI
+    ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $("#tablaListaPeis tbody").on("click", ".btnEliminar", function () {
-        let codigoPei = $(this).attr("codigo");
+    $("#tablaListaUnidades tbody").on("click", ".btnEliminar", function () {
+        let codigoUnidad = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
+        datos.append("codigoUnidad", codigoUnidad);
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de borrar el pei seleccionado?",
+            text: "¿Está seguro de eliminar la unidad seleccionada?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -277,7 +311,7 @@ $(document).ready(function () {
         }).then(function (resultado) {
             if (resultado.value) {
                 $.ajax({
-                    url: "index.php?r=Planificacion/peis/eliminar-pei",
+                    url: "index.php?r=Planificacion/unidad/eliminar-unidad",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -288,12 +322,12 @@ $(document).ready(function () {
                             Swal.fire({
                                 icon: "success",
                                 title: "Exito...",
-                                text: "El PEI ha sido borrado correctamente.",
+                                text: "La unidad ha sido borrada correctamente.",
                                 showCancelButton: false,
                                 confirmButtonColor: "#3085d6",
                                 confirmButtonText: "Cerrar"
                             }).then(function () {
-                                $("#tablaListaPeis").DataTable().ajax.reload();
+                                $("#tablaListaUnidades").DataTable().ajax.reload();
                             });
                         }
                         else {
@@ -304,12 +338,10 @@ $(document).ready(function () {
                                 mensaje = "Error: Ocurrio un error en el envio de los datos.";
                             } else if (respuesta === "errorValidacion") {
                                 mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                            } else if (respuesta === "errorNoEncontrado") {
-                                mensaje = "Error: No se pudo recuperar el PEI para su eliminacion.";
                             } else if (respuesta === "errorSql") {
-                                mensaje = "Error: Ocurrio un error en la base de datos al eliminar el PEI.";
+                                mensaje = "Error: Ocurrio un error en la base de datos al eliminar la unidad.";
                             } else if (respuesta === "errorEnUso") {
-                                mensaje = "Error: El pei se encuentra en uso y no puede ser eliminado.";
+                                mensaje = "Error: La unidad se encuentra en uso y no puede ser eliminada.";
                             } else {
                                 mensaje = respuesta;
                             }
@@ -329,14 +361,14 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    BUSCA EL PEI SELECCIONADO EN LA BD
+    BUSCA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
-    $("#tablaListaPeis tbody").on("click", ".btnEditar", function () {
-        let codigoPei = $(this).attr("codigo");
+    $("#tablaListaUnidades tbody").on("click", ".btnEditar", function () {
+        let codigoUnidad = $(this).attr("codigo");
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
+        datos.append("codigoUnidad", codigoUnidad);
         $.ajax({
-            url: "index.php?r=Planificacion/peis/buscar-pei",
+            url: "index.php?r=Planificacion/unidad/buscar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -345,11 +377,13 @@ $(document).ready(function () {
             dataType: "json",
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigoPei").val(data.CodigoPei);
-                $("#descripcionPei").val(data.DescripcionPei);
-                $("#fechaAprobacion").val(data.FechaAprobacion);
-                $("#gestionInicio").val(data.GestionInicio);
-                $("#gestionFin").val(data.GestionFin);
+                $("#codigoUnidad").val(data.CodigoUnidad);
+                $("#da").val(data.Da);
+                $("#ue").val(data.Ue);
+                $("#descripcion").val(data.Descripcion);
+                $("#organizacional").prop( "checked", (data.Organizacional === 1))
+                $("#fechaInicio").val(data.FechaInicio);
+                $("#fechaFin").val(data.FechaFin);
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (respuesta) {
@@ -360,7 +394,7 @@ $(document).ready(function () {
                 } else if (mensajeRespuesta === "errorEnvio") {
                     mensaje = "Error: No se enviaron correctamente de los datos.";
                 } else if (mensajeRespuesta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro el PEI seleccionado.";
+                    mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
                 } else {
                     mensaje = mensajeRespuesta;
                 }
@@ -378,22 +412,26 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    ACTUALIZA EL PEI SELECCIONADO EN LA BD
+    ACTUALIZA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
-    function actualizarPei() {
-        let codigoPei = $("#codigoPei").val();
-        let descripcionPei = $("#descripcionPei").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
+    function actualizarUnidad() {
+        let codigoUnidad = $("#codigoUnidad").val();
+        let da = $("#da").val();
+        let ue = $("#ue").val();
+        let descripcion = $("#descripcion").val();
+        let organizacional = $("#organizacional").is(':checked')?1:0;
+        let fechaInicio = $("#fechaInicio").val();
+        let FechaFin = $("#fechaFin").val();
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
-        datos.append("descripcionPei", descripcionPei);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionFin", gestionFin);
+        datos.append("codigoUnidad", codigoUnidad);
+        datos.append("da", da);
+        datos.append("ue", ue);
+        datos.append("descripcion", descripcion);
+        datos.append("organizacional", organizacional);
+        datos.append("fechaInicio", fechaInicio);
+        datos.append("fechaFin", FechaFin);
         $.ajax({
-            url: "index.php?r=Planificacion/peis/actualizar-pei",
+            url: "index.php?r=Planificacion/unidad/actualizar-unidad",
             method: "POST",
             data: datos,
             cache: false,
@@ -405,12 +443,12 @@ $(document).ready(function () {
                     Swal.fire({
                         icon: "success",
                         title: "Exito...",
-                        text: "El PEI se actualizó correctamente.",
+                        text: "La unidad se actualizó correctamente.",
                         showCancelButton: false,
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "Cerrar"
                     }).then(function () {
-                        $("#tablaListaPeis").DataTable().ajax.reload(null, false);
+                        $("#tablaListaUnidades").DataTable().ajax.reload(null, false);
                     });
                 }
                 else {
@@ -420,17 +458,13 @@ $(document).ready(function () {
                     } else if (respuesta === "errorEnvio") {
                         mensaje = "Error: No se enviaron correctamente de los datos.";
                     } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se encontro el PEI seleccionado.";
+                        mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
                     } else if (respuesta === "errorValidacion") {
                         mensaje = "Error: No se llenaron correctamente los datos requeridos.";
                     } else if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a un PEI existente.";
+                        mensaje = "Los datos ingresados ya corresponden a una unidad existente.";
                     } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al actualizar el PEI seleccionado.";
-                    } else if (respuesta === "errorGestionInicio") {
-                        mensaje = "Error: El valor de la gestion de inicio afecta la programacion de los indicadores estrategicos.";
-                    } else if (respuesta === "errorGestionFin") {
-                        mensaje = "Error: El valor de la gestion final afecta la programacion de los indicadores estrategicos.";
+                        mensaje = "Error: Ocurrio un error en la base de datos al actualizar los datos de la unidad seleccionada.";
                     } else {
                         mensaje = respuesta;
                     }
@@ -446,4 +480,4 @@ $(document).ready(function () {
             }
         });
     }
-})
+});
