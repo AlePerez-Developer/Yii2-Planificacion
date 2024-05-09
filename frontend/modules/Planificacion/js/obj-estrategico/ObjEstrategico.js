@@ -102,9 +102,9 @@ $(document).ready(function(){
                 searchable: false,
                 data: 'CodigoEstado',
                 render: function (data, type, row) {
-                    return ( (type === 'display') && (row.CodigoEstado === 'V'))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "V" ></button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado = "C" ></button>' ;
+                    return ( (type === 'display') && (row.CodigoEstado === ESTADO_VIGENTE))
+                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado =  "' + ESTADO_VIGENTE + '" ></button>'
+                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoObjEstrategico + '" estado =  "' + ESTADO_CADUCO + '" ></button>' ;
                 },
             },
             {
@@ -115,8 +115,8 @@ $(document).ready(function(){
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
-                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
                         '</div>'
                         : data;
                 },
@@ -201,17 +201,10 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "Los datos del nuevo objetivo estreategico se guardaron correctamente",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $(".tablaListaObjEstrategicos").DataTable().ajax.reload();
-                    });
+                    MostrarMensaje('success','Los datos del nuevo objetivo estreategico se guardaron correctamente.')
+                    $("#tablaListaObjEstrategicos").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click()
+                    })
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))
@@ -232,6 +225,7 @@ $(document).ready(function(){
         let estadoObj = objectBtn.attr("estado");
         let datos = new FormData();
         datos.append("codigoObjEstrategico", codigoObjEstrategico);
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado-obj",
             method: "POST",
@@ -248,13 +242,16 @@ $(document).ready(function(){
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
                         objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
+                    DetenerSpiner(objectBtn)
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    DetenerSpiner(objectBtn)
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -263,7 +260,8 @@ $(document).ready(function(){
         ELIMINA DE LA BD UN REGISTRO DE OBJETIVO ESTRATEGICO
     ==========================================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEliminar", function () {
-        let codigoObjEstrategico = $(this).attr("codigo");
+        let objectBtn = $(this)
+        let codigoObjEstrategico = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoObjEstrategico", codigoObjEstrategico);
         Swal.fire({
@@ -277,6 +275,7 @@ $(document).ready(function(){
             cancelButtonText: 'Cancelar'
         }).then(function (resultado) {
             if (resultado.value) {
+                IniciarSpiner(objectBtn)
                 $.ajax({
                     url: "index.php?r=Planificacion/obj-estrategico/eliminar-obj",
                     method: "POST",
@@ -286,23 +285,18 @@ $(document).ready(function(){
                     processData: false,
                     success: function (respuesta) {
                         if (respuesta === "ok") {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Exito...",
-                                text: "El objetivo estrategico ha sido borrado correctamente.",
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            }).then(function () {
-                                $(".tablaListaObjEstrategicos").DataTable().ajax.reload();
-                            });
+                            MostrarMensaje('success','El objetivo estrategico ha sido borrado correctamente.')
+                            $(".tablaListaObjEstrategicos").DataTable().ajax.reload();
+                            DetenerSpiner(objectBtn)
                         }
                         else {
                             MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            DetenerSpiner(objectBtn)
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                        DetenerSpiner(objectBtn)
                     }
                 });
             }
@@ -313,9 +307,11 @@ $(document).ready(function(){
         BUSCA EL OBJETIVO ESTRATEGICO SELECCIONADO EN LA BD
     ========================================================*/
     $(".tablaListaObjEstrategicos tbody").on("click", ".btnEditar", function () {
-        let codigoObjEstrategico = $(this).attr("codigo");
+        let objectBtn = $(this)
+        let codigoObjEstrategico = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoObjEstrategico", codigoObjEstrategico);
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/buscar-obj",
             method: "POST",
@@ -330,10 +326,12 @@ $(document).ready(function(){
                 $("#codigoPei").val(data.CodigoPei);
                 $("#codigoObjetivo").val(data.CodigoObjetivo);
                 $("#objetivo").val(data.Objetivo);
+                DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });

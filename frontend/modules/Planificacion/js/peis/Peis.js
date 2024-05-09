@@ -195,8 +195,8 @@ $(document).ready(function () {
     ELIMINA DE LA BD UN REGISTRO DE PEI
     =============================================*/
     $("#tablaListaPeis tbody").on("click", ".btnEliminar", function () {
-        let btn = $(this)
-        let codigoPei = $(this).attr("codigo");
+        let objectBtn = $(this)
+        let codigoPei = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoPei", codigoPei);
         Swal.fire({
@@ -210,7 +210,7 @@ $(document).ready(function () {
             cancelButtonText: 'Cancelar'
         }).then(function (resultado) {
             if (resultado.value) {
-                IniciarSpiner(btn)
+                IniciarSpiner(objectBtn)
                 $.ajax({
                     url: "index.php?r=Planificacion/peis/eliminar-pei",
                     method: "POST",
@@ -222,16 +222,16 @@ $(document).ready(function () {
                         if (respuesta === "ok") {
                             MostrarMensaje('success','El PEI ha sido borrado correctamente.')
                             $("#tablaListaPeis").DataTable().ajax.reload();
-                            DetenerSpiner(btn)
+                            DetenerSpiner(objectBtn)
                         }
                         else {
                             MostrarMensaje('error',GenerarMensajeError(respuesta))
-                            DetenerSpiner(btn)
+                            DetenerSpiner(objectBtn)
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
-                        DetenerSpiner(btn)
+                        DetenerSpiner(objectBtn)
                     }
                 });
             }
@@ -242,11 +242,11 @@ $(document).ready(function () {
     BUSCA EL PEI SELECCIONADO EN LA BD
     =============================================*/
     $("#tablaListaPeis tbody").on("click", ".btnEditar", function () {
-        let btn = $(this)
-        let codigoPei = btn.attr("codigo");
+        let objectBtn = $(this)
+        let codigoPei = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoPei", codigoPei);
-        IniciarSpiner(btn)
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/peis/buscar-pei",
             method: "POST",
@@ -262,12 +262,12 @@ $(document).ready(function () {
                 $("#fechaAprobacion").val(data.FechaAprobacion);
                 $("#gestionInicio").val(data.GestionInicio);
                 $("#gestionFin").val(data.GestionFin);
-                DetenerSpiner(btn)
+                DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (xhr) {
                 MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
-                DetenerSpiner(btn)
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -304,6 +304,9 @@ $(document).ready(function () {
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
+            },
+            error: function (xhr) {
+                MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
             }
         });
     }

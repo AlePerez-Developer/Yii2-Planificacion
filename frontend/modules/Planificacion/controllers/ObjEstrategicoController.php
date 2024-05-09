@@ -17,7 +17,7 @@ use Yii;
 
 class ObjEstrategicoController extends Controller
 {
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -51,7 +51,6 @@ class ObjEstrategicoController extends Controller
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
-
 
     public function actionIndex()
     {

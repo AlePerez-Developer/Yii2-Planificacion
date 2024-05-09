@@ -66,11 +66,13 @@ function GenerarMensajeError(Mensaje){
 function IniciarSpiner(Btn){
     Btn.append('<span class="spinner-grow spinner-grow-sm"></span>')
     Btn.find('i').css("display", "none")
+    Btn.prop( "disabled", true );
 }
 
 function DetenerSpiner(Btn){
     Btn.find('span').remove()
     Btn.find('i').removeAttr("style")
+    Btn.prop( "disabled", false );
 }
 
 function MostrarMensaje(icono, mensaje){
