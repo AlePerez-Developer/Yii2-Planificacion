@@ -36,11 +36,11 @@ $(document).ready(function(){
             this.api()
                 .columns([6,7,8,9])
                 .every(function () {
-                    var column = this;
-                    var select = $('</br><select><option value="">Buscar...</option></select>')
+                    let column = this;
+                    let select = $('</br><select><option value="">Buscar...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            let val = $.fn.dataTable.util.escapeRegex($(this).val());
 
                             column.search(val ? '^' + val + '$' : '', true, false).draw();
                         });
@@ -64,7 +64,7 @@ $(document).ready(function(){
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         },
-        createdRow: function (row, data, dataIndex) {
+        createdRow: function (row, data) {
             if (data.Diff == 0 ) {
                 $(row).addClass('completo');
             }
@@ -162,8 +162,8 @@ $(document).ready(function(){
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
-                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
                         '</div>'
                         : data;
                 },
@@ -179,8 +179,8 @@ $(document).ready(function(){
     }).draw();
 
     $('.tablaListaIndicadoresEstrategicos tbody').on('click', 'td.dt-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row(tr);
+        let tr = $(this).closest('tr');
+        let row = table.row(tr);
 
         if (row.child.isShown()) {
             row.child.hide();
@@ -250,8 +250,8 @@ $(document).ready(function(){
     })
 
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
-        $(this).find('span').removeAttr("style")
-        $(this).find('i').css("display", "none")
+        let objectBtn = $(this)
+        IniciarSpiner(objectBtn)
     });
 
     /*=============================================================
@@ -284,9 +284,10 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $("#btnCancelar").click();
                     MostrarMensaje('success','Los datos del nuevo indicador estrategico se guardaron correctamente')
-                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
+                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click()
+                    });
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))
@@ -307,6 +308,7 @@ $(document).ready(function(){
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
         datos.append("codigoIndicadorEstrategico", codigo);
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/indicador-estrategico/cambiar-estado-indicador-estrategico",
             method: "POST",
@@ -323,13 +325,16 @@ $(document).ready(function(){
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
                         objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
+                    DetenerSpiner(objectBtn)
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    DetenerSpiner(objectBtn)
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -338,7 +343,8 @@ $(document).ready(function(){
         ELIMINA DE LA BD UN REGISTRO DE INDICADOR ESTRATEGICO
     ==========================================================*/
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnEliminar", function () {
-        let codigo = $(this).attr("codigo");
+        let objectBtn = $(this);
+        let codigo = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoIndicadorEstrategico", codigo);
         Swal.fire({
@@ -352,6 +358,7 @@ $(document).ready(function(){
             cancelButtonText: 'Cancelar'
         }).then(function (resultado) {
             if (resultado.value) {
+                IniciarSpiner(objectBtn)
                 $.ajax({
                     url: "index.php?r=Planificacion/indicador-estrategico/eliminar-indicador-estrategico",
                     method: "POST",
@@ -361,23 +368,18 @@ $(document).ready(function(){
                     processData: false,
                     success: function (respuesta) {
                         if (respuesta === "ok") {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Exito...",
-                                text: "El indicador estrategico ha sido eliminado correctamente.",
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            }).then(function () {
-                                $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
-                            });
+                            MostrarMensaje('success','El indicador estrategico ha sido eliminado correctamente.')
+                            $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
+                            DetenerSpiner(objectBtn)
                         }
                         else {
                             MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            DetenerSpiner(objectBtn)
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                        DetenerSpiner(objectBtn)
                     }
                 });
             }
@@ -388,9 +390,11 @@ $(document).ready(function(){
        BUSCA EL INDICADOR ESTRATEGICO SELECCIONADO EN LA BD
     ========================================================*/
     $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnEditar", function () {
-        let codigo = $(this).attr("codigo");
+        let objectBtn = $(this);
+        let codigo = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoIndicadorEstrategico", codigo);
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/indicador-estrategico/buscar-indicador-estrategico",
             method: "POST",
@@ -410,10 +414,12 @@ $(document).ready(function(){
                 $("#tipoIndicador").val(data.TipoIndicador);
                 $("#categoriaIndicador").val(data.Categoria);
                 $("#tipoUnidad").val(data.Unidad);
+                DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -450,16 +456,9 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "El indicador estrategico seleccionado se actualizo correctamente.",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(null, false);
+                    MostrarMensaje('success','El indicador estrategico seleccionado se actualizo correctamente.')
+                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click()
                     });
                 }
                 else {

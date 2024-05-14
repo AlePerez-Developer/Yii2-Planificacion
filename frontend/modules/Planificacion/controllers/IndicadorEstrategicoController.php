@@ -170,7 +170,7 @@ class IndicadorEstrategicoController extends Controller
 
         ($indicador->CodigoEstado == Estado::ESTADO_VIGENTE)?$indicador->CodigoEstado = Estado::ESTADO_CADUCO: $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
 
-        if (!$indicador->update()) {
+        if ($indicador->update() === false) {
             return "errorSql";
         }
 
@@ -201,7 +201,7 @@ class IndicadorEstrategicoController extends Controller
 
         $indicador->CodigoEstado = Estado::ESTADO_ELIMINADO;
 
-        if (!$indicador->update()) {
+        if ($indicador->update() === false) {
             return "errorSql";
         }
 
@@ -283,9 +283,9 @@ class IndicadorEstrategicoController extends Controller
         if ($indicador->exist()) {
             return "errorExiste";
         }
-        if (!$indicador->update()) {
+
+        if ($indicador->update() === false)
             return "errorSql";
-        }
 
         return "ok";
     }

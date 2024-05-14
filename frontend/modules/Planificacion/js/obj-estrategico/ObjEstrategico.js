@@ -36,8 +36,8 @@ $(document).ready(function(){
             this.api()
                 .columns([2])
                 .every(function () {
-                    var column = this;
-                    var select = $('</br><select><option value="">Buscar pei...</option></select>')
+                    let column = this;
+                    let select = $('</br><select><option value="">Buscar pei...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
                             var val = $.fn.dataTable.util.escapeRegex($(this).val());
@@ -49,7 +49,7 @@ $(document).ready(function(){
                         .data()
                         .unique()
                         .sort()
-                        .each(function (d, j) {
+                        .each(function (d) {
                             select.append('<option value="' + d + '">' + d + '</option>');
                         });
                 });
@@ -95,7 +95,8 @@ $(document).ready(function(){
             },
             {
                 className: 'dt-small',
-                data: 'Objetivo' },
+                data: 'Objetivo'
+            },
             {
                 className: 'dt-small dt-estado dt-center',
                 orderable: false,
@@ -358,16 +359,9 @@ $(document).ready(function(){
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "El objetivo estrategico seleccionado se actualizo correctamente.",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $(".tablaListaObjEstrategicos").DataTable().ajax.reload(null, false);
+                    MostrarMensaje('success','El objetivo estrategico seleccionado se actualizo correctamente.')
+                    $(".tablaListaObjEstrategicos").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click()
                     });
                 }
                 else {

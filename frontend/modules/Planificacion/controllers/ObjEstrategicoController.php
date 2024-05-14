@@ -123,7 +123,7 @@ class ObjEstrategicoController extends Controller
 
         ($obj->CodigoEstado == Estado::ESTADO_VIGENTE)?$obj->CodigoEstado = Estado::ESTADO_CADUCO: $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
 
-        if (!$obj->update()) {
+        if ($obj->update() === false) {
             return "errorSql";
         }
 
@@ -151,7 +151,7 @@ class ObjEstrategicoController extends Controller
 
         $obj->CodigoEstado = Estado::ESTADO_ELIMINADO;
 
-        if (!$obj->update()) {
+        if ($obj->update() === false) {
             return "errorSql";
         }
 
@@ -176,6 +176,10 @@ class ObjEstrategicoController extends Controller
         return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoObjetivo','Objetivo')));
     }
 
+    /**
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public function actionActualizarObj()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
@@ -202,7 +206,7 @@ class ObjEstrategicoController extends Controller
             return "errorExiste";
         }
 
-        if (!$obj->update()) {
+        if ($obj->update() === false) {
             return "errorSql";
         }
 

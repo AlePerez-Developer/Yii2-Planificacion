@@ -1,11 +1,16 @@
+const RTA_CORRECTO = "ok"
 const ESTADO_VIGENTE = 'V'
 const ESTADO_CADUCO = 'C'
 const ESTADO_ELIMINADO = 'E'
 
 $.extend($.fn.dataTable.defaults, {
     layout: {
-        topStart: 'pageLength',
-        topEnd: 'search',
+        topStart: {
+            search: {
+                placeholder: 'Buscar registros..'
+            }
+        } ,
+        topEnd:'pageLength' ,
         bottomStart: 'info',
         bottomEnd: 'paging'
     },
@@ -58,6 +63,10 @@ function GenerarMensajeError(Mensaje){
         return "Error: la meta nueva excede la cantidad total";
     } else if (Mensaje === "errorEnUso") {
         return "Error: el registro esta en uso en otro formulario y no puede ser eliminado";
+    } else if (Mensaje === "errorGestionInicio") {
+        return "Error: No se puede modificar el valor dela Gestion de inicio, Afecta la programacion de indicadores estrategicos";
+    } else if (Mensaje === "errorGestionFin") {
+        return "Error: No se puede modificar el valor dela Gestion final, Afecta la programacion de indicadores estrategicos";
     } else {
         return  Mensaje;
     }

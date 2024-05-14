@@ -4,6 +4,8 @@ $(document).ready(function () {
             method: "POST",
             dataType: 'json',
             cache: false,
+            contentType: false,
+            processData: false,
             url: 'index.php?r=Planificacion/peis/listar-peis',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
@@ -134,15 +136,16 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','Los datos del nuevo PEI se guardaron correctamente.')
                     $("#tablaListaPeis").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     })
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -168,8 +171,9 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     if (estadoPei === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
                         objectBtn.attr('estado', ESTADO_CADUCO);
@@ -180,7 +184,7 @@ $(document).ready(function () {
                     DetenerSpiner(objectBtn)
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                     DetenerSpiner(objectBtn)
                 }
             },
@@ -218,14 +222,15 @@ $(document).ready(function () {
                     cache: false,
                     contentType: false,
                     processData: false,
-                    success: function (respuesta) {
-                        if (respuesta === "ok") {
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.respuesta === RTA_CORRECTO) {
                             MostrarMensaje('success','El PEI ha sido borrado correctamente.')
                             $("#tablaListaPeis").DataTable().ajax.reload();
                             DetenerSpiner(objectBtn)
                         }
                         else {
-                            MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                             DetenerSpiner(objectBtn)
                         }
                     },
@@ -255,18 +260,23 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta) {
-                let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigoPei").val(data.CodigoPei);
-                $("#descripcionPei").val(data.DescripcionPei);
-                $("#fechaAprobacion").val(data.FechaAprobacion);
-                $("#gestionInicio").val(data.GestionInicio);
-                $("#gestionFin").val(data.GestionFin);
-                DetenerSpiner(objectBtn)
-                $("#btnMostrarCrear").trigger('click');
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    let pei = JSON.parse(JSON.stringify(data.pei));
+                    $("#codigoPei").val(pei.CodigoPei);
+                    $("#descripcionPei").val(pei.DescripcionPei);
+                    $("#fechaAprobacion").val(pei.FechaAprobacion);
+                    $("#gestionInicio").val(pei.GestionInicio);
+                    $("#gestionFin").val(pei.GestionFin);
+                    DetenerSpiner(objectBtn)
+                    $("#btnMostrarCrear").trigger('click');
+                } else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
+                }
             },
-            error: function (xhr) {
-                MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
                 DetenerSpiner(objectBtn)
             }
         });
@@ -294,19 +304,20 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','El PEI se actualizó correctamente.')
                     $("#tablaListaPeis").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     })
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
-            error: function (xhr) {
-                MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }

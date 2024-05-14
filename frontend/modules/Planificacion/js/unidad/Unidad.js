@@ -13,11 +13,11 @@ $(document).ready(function () {
             this.api()
                 .columns([2,3])
                 .every(function () {
-                    var column = this;
-                    var select = $('</br><select><option value="">Buscar...</option></select>')
+                    let column = this;
+                    let select = $('</br><select><option value="">Buscar...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            let val = $.fn.dataTable.util.escapeRegex($(this).val());
                             column.search(val ? '^' + val + '$' : '', true, false).draw();
                         });
                     column
@@ -99,8 +99,8 @@ $(document).ready(function () {
                 render: function (data, type, row, meta) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
-                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><span class="fa fa-trash-alt"></span></button>' +
+                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
                         '</div>'
                         : data;
                 },
@@ -200,42 +200,17 @@ $(document).ready(function () {
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "Los datos de la nueva unidad se guardaron correctamente.",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $("#tablaListaUnidades").DataTable().ajax.reload();
+                    MostrarMensaje('success','Los datos de la nueva unidad se guardaron correctamente.')
+                    $("#tablaListaUnidades").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click();
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: Ocurrio un error en el envio de los datos.";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                    } else if (respuesta === "errorExiste") {
-                        mensaje = "Error: Los datos ingresados ya corresponden a una unidad existente.";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al guardar la unidad.";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         });
     }
@@ -249,6 +224,7 @@ $(document).ready(function () {
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
         datos.append("codigoUnidad", codigoUnidad);
+        IniciarSpiner(objectBtn);
         $.ajax({
             url: "index.php?r=Planificacion/unidad/cambiar-estado-unidad",
             method: "POST",
@@ -258,36 +234,23 @@ $(document).ready(function () {
             processData: false,
             success: function (respuesta) {
                 if (respuesta === "ok") {
-                    if (estado === "V") {
+                    if (estado === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
-                        objectBtn.attr('estado', 'C');
+                        objectBtn.attr('estado', ESTADO_CADUCO);
                     } else {
                         objectBtn.addClass('btn-success').removeClass('btn-danger');
-                        objectBtn.attr('estado', 'V');
+                        objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
+                    DetenerSpiner(objectBtn);
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: Ocurrio un error en el envio de los datos.";
-                    } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se pudo recuperar los datos de la unidad para su cambio de estado.";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al cambiar el estado del la unidad.";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Alerta...',
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'Cerrar'
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    DetenerSpiner(objectBtn)
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -296,7 +259,8 @@ $(document).ready(function () {
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
     $("#tablaListaUnidades tbody").on("click", ".btnEliminar", function () {
-        let codigoUnidad = $(this).attr("codigo");
+        let objectBtn = $(this);
+        let codigoUnidad = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoUnidad", codigoUnidad);
         Swal.fire({
@@ -310,6 +274,7 @@ $(document).ready(function () {
             cancelButtonText: 'Cancelar'
         }).then(function (resultado) {
             if (resultado.value) {
+                IniciarSpiner(objectBtn);
                 $.ajax({
                     url: "index.php?r=Planificacion/unidad/eliminar-unidad",
                     method: "POST",
@@ -319,40 +284,13 @@ $(document).ready(function () {
                     processData: false,
                     success: function (respuesta) {
                         if (respuesta === "ok") {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Exito...",
-                                text: "La unidad ha sido borrada correctamente.",
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            }).then(function () {
-                                $("#tablaListaUnidades").DataTable().ajax.reload();
-                            });
+                            MostrarMensaje('success','La unidad ha sido borrada correctamente.')
+                            DetenerSpiner(objectBtn);
+                            $("#tablaListaUnidades").DataTable().ajax.reload();
                         }
                         else {
-                            let mensaje;
-                            if (respuesta === "errorCabecera") {
-                                mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
-                            } else if (respuesta === "errorEnvio") {
-                                mensaje = "Error: Ocurrio un error en el envio de los datos.";
-                            } else if (respuesta === "errorValidacion") {
-                                mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                            } else if (respuesta === "errorSql") {
-                                mensaje = "Error: Ocurrio un error en la base de datos al eliminar la unidad.";
-                            } else if (respuesta === "errorEnUso") {
-                                mensaje = "Error: La unidad se encuentra en uso y no puede ser eliminada.";
-                            } else {
-                                mensaje = respuesta;
-                            }
-                            Swal.fire({
-                                icon: "error",
-                                title: 'Alerta...',
-                                text: mensaje,
-                                showCancelButton: false,
-                                confirmButtonColor: "#3085d6",
-                                confirmButtonText: "Cerrar"
-                            })
+                            MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            DetenerSpiner(objectBtn);
                         }
                     }
                 });

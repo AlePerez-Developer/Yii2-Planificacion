@@ -4,8 +4,8 @@ $(document).ready(function (){
     let metaTotal, metaProgramada
 
     $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
-        let btn = $(this)
-        let codigo = $(this).attr("codigo");
+        let objectBtn = $(this)
+        let codigo = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoIndicadorEstrategico", codigo);
         $.ajax({
@@ -31,10 +31,9 @@ $(document).ready(function (){
                     $( "#metaIndicadorModal" ).removeClass( "completo" )
                 }
             },
-            error: function (xhr) {
-                MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
-                btn.find('span').css("display", "none");
-                btn.find('i').removeAttr("style")
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         }).done(function (){
             tabla = $(".tablaIndicadoresGestion").DataTable({
@@ -48,17 +47,15 @@ $(document).ready(function (){
                     cache: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
-                    error: function (xhr) {
-                        MostrarMensaje('error',GenerarMensajeError(xhr.responseText))
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        MostrarMensaje('error',GenerarMensajeError(GenerarMensajeError( thrownError + ' >' +xhr.responseText)))
                         $('#programarIndicadorEstrategicoGestion').modal('show');
-                        btn.find('span').css("display", "none");
-                        btn.find('i').removeAttr("style")
+                        DetenerSpiner(objectBtn)
                     }
                 },
                 initComplete: function () {
                     $('#programarIndicadorEstrategicoGestion').modal('show');
-                    btn.find('span').css("display", "none");
-                    btn.find('i').removeAttr("style")
+                    DetenerSpiner(objectBtn)
                 },
                 columnDefs: [
                     { className: "dt-small", targets: "_all" },
@@ -144,7 +141,7 @@ $(document).ready(function (){
             dataType: "json",
             success: function (respuesta){
                 let data = JSON.parse(JSON.stringify(respuesta));
-                if (data.rta === "ok") {
+                if (data.respuesta === "ok") {
                     $('#metaProgIndicadorModal').val(data.metaProg)
                     $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
                     if (metaTotal === data.metaProg){
@@ -155,7 +152,7 @@ $(document).ready(function (){
                     inputMeta = '';
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(data.rta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
