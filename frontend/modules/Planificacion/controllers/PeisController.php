@@ -71,7 +71,7 @@ class PeisController extends Controller
                 ->all();
             return json_encode($peis);
         } else
-            return Yii::$app->params['ERROR_CABECERA'];
+            return 'ERROR_CABECERA';
     }
 
     public function actionGuardarPei()
@@ -121,7 +121,7 @@ class PeisController extends Controller
         $pei = Pei::findOne($_POST["codigoPei"]);
 
         if (!$pei) {
-            return json_encode(['respuesta' => 'errorNoEncontrado']);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         ($pei->CodigoEstado == Estado::ESTADO_VIGENTE)?$pei->CodigoEstado = Estado::ESTADO_CADUCO:$pei->CodigoEstado = Estado::ESTADO_VIGENTE;
@@ -148,6 +148,9 @@ class PeisController extends Controller
 
         $pei = Pei::findOne($_POST["codigoPei"]);
 
+        if (!$pei) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
         if ($pei->enUso()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
         }

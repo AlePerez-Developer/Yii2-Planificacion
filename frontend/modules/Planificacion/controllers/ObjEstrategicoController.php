@@ -68,17 +68,18 @@ class ObjEstrategicoController extends Controller
                 ->orderBy('O.CodigoObjetivo')
                 ->asArray()
                 ->all();
-        }
-        return json_encode($objs);
+            return json_encode($objs);
+        } else
+            return 'ERROR_CABECERA';
     }
 
     public function actionGuardarObjs()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoPei"]) && isset($_POST["codigoObjetivo"]) && isset($_POST["objetivo"]))) {
-            return 'errorEnvio';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $obj = new ObjetivoEstrategico();
@@ -90,16 +91,16 @@ class ObjEstrategicoController extends Controller
         $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
         if (!$obj->validate()) {
-            return "errorValidacion";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if ($obj->exist()) {
-            return "errorExiste";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
         }
         if (!$obj->save()) {
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return 'ok';
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     /**
@@ -109,25 +110,25 @@ class ObjEstrategicoController extends Controller
     public function actionCambiarEstadoObj()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoObjEstrategico"]))) {
-            return "errorEnvio";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
 
         if (!$obj) {
-            return 'errorNoEncontrado';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         ($obj->CodigoEstado == Estado::ESTADO_VIGENTE)?$obj->CodigoEstado = Estado::ESTADO_CADUCO: $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
 
         if ($obj->update() === false) {
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return "ok";
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     /**
@@ -137,43 +138,46 @@ class ObjEstrategicoController extends Controller
     public function actionEliminarObj()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "")) {
-            return "errorEnvio";
-        }
-
-        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
-
-        if ($obj->enUso()) {
-            return "errorEnUso";
-        }
-
-        $obj->CodigoEstado = Estado::ESTADO_ELIMINADO;
-
-        if ($obj->update() === false) {
-            return "errorSql";
-        }
-
-        return 'ok';
-    }
-
-    public function actionBuscarObj()
-    {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
-        }
-        if (!(isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "")) {
-            return "errorEnvio";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
 
         if (!$obj) {
-            return 'errorNoEncontrado';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+        if ($obj->enUso()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
         }
 
-        return json_encode($obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoObjetivo','Objetivo')));
+        $obj->CodigoEstado = Estado::ESTADO_ELIMINADO;
+
+        if ($obj->update() === false) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
+        }
+
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+    }
+
+    public function actionBuscarObj()
+    {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+        if (!(isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "")) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
+        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
+
+        if (!$obj) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'obj' => $obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoObjetivo','Objetivo'))]);
     }
 
     /**
@@ -183,16 +187,16 @@ class ObjEstrategicoController extends Controller
     public function actionActualizarObj()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return 'errorEnvio';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoPei"]) && isset($_POST["codigoObjEstrategico"]) && isset($_POST["codigoObjetivo"]) && isset($_POST["objetivo"]))) {
-            return 'errorEnvio';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
 
         if (!$obj) {
-            return "errorNoEncontrado";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         $obj->CodigoPei = $_POST["codigoPei"];
@@ -200,17 +204,17 @@ class ObjEstrategicoController extends Controller
         $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
 
         if (!$obj->validate()) {
-            return "errorValidacion";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if ($obj->exist()) {
-            return "errorExiste";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
         }
 
         if ($obj->update() === false) {
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return "ok";
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     public function actionVerificarCodigo()

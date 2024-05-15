@@ -67,7 +67,7 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         </div>
     </div>
     <div id="divTabla" class="card-body">
-        <table class="table table-bordered table-striped dt-responsive tablaListaObjEstrategicos" style="width: 100%" >
+        <table id="tablaListaObjEstrategicos" class="table table-bordered table-striped dt-responsive tablaListaObjEstrategicos" style="width: 100%" >
             <thead>
             <th>#</th>
             <th>#</th>

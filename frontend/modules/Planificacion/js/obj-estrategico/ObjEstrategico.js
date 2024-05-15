@@ -40,7 +40,7 @@ $(document).ready(function(){
                     let select = $('</br><select><option value="">Buscar pei...</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            let val = $.fn.dataTable.util.escapeRegex($(this).val());
 
                             column.search(val ? '^' + val + '$' : '', true, false).draw();
                         });
@@ -58,6 +58,8 @@ $(document).ready(function(){
             method: "POST",
             dataType: 'json',
             cache: false,
+            contentType: false,
+            processData: false,
             url: 'index.php?r=Planificacion/obj-estrategico/listar-objs',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
@@ -200,15 +202,16 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','Los datos del nuevo objetivo estreategico se guardaron correctamente.')
                     $("#tablaListaObjEstrategicos").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     })
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -234,8 +237,9 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     if (estadoObj === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
                         objectBtn.attr('estado', ESTADO_CADUCO);
@@ -246,7 +250,7 @@ $(document).ready(function(){
                     DetenerSpiner(objectBtn)
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                     DetenerSpiner(objectBtn)
                 }
             },
@@ -284,14 +288,15 @@ $(document).ready(function(){
                     cache: false,
                     contentType: false,
                     processData: false,
-                    success: function (respuesta) {
-                        if (respuesta === "ok") {
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.respuesta === RTA_CORRECTO) {
                             MostrarMensaje('success','El objetivo estrategico ha sido borrado correctamente.')
-                            $(".tablaListaObjEstrategicos").DataTable().ajax.reload();
+                            $("#tablaListaObjEstrategicos").DataTable().ajax.reload();
                             DetenerSpiner(objectBtn)
                         }
                         else {
-                            MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                             DetenerSpiner(objectBtn)
                         }
                     },
@@ -321,14 +326,19 @@ $(document).ready(function(){
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta) {
-                let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigoObjEstrategico").val(data.CodigoObjEstrategico);
-                $("#codigoPei").val(data.CodigoPei);
-                $("#codigoObjetivo").val(data.CodigoObjetivo);
-                $("#objetivo").val(data.Objetivo);
-                DetenerSpiner(objectBtn)
-                $("#btnMostrarCrear").trigger('click');
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    let obj = JSON.parse(JSON.stringify(data.obj));
+                    $("#codigoObjEstrategico").val(obj.CodigoObjEstrategico);
+                    $("#codigoPei").val(obj.CodigoPei);
+                    $("#codigoObjetivo").val(obj.CodigoObjetivo);
+                    $("#objetivo").val(obj.Objetivo);
+                    DetenerSpiner(objectBtn)
+                    $("#btnMostrarCrear").trigger('click');
+                } else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
+                }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
@@ -357,15 +367,16 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','El objetivo estrategico seleccionado se actualizo correctamente.')
-                    $(".tablaListaObjEstrategicos").DataTable().ajax.reload(async () => {
+                    $("#tablaListaObjEstrategicos").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     });
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

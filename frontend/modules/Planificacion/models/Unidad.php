@@ -11,7 +11,7 @@ use common\models\Usuario;
  * @property string $Da
  * @property string $Ue
  * @property string $Descripcion
- * @property string $Organizacional
+ * @property int $Organizacional
  * @property string $FechaInicio
  * @property string $FechaFin
  * @property string $CodigoEstado

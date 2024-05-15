@@ -139,7 +139,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         </div>
     </div>
     <div id="Divtabla" class="card-body">
-        <table class="table-bordered table-striped dt-responsive table-sm tablaListaIndicadoresEstrategicos" style="width: 100%" >
+        <table id="tablaListaIndicadoresEstrategicos" class="table-bordered table-striped dt-responsive table-sm tablaListaIndicadoresEstrategicos" style="width: 100%" >
             <thead>
                 <th>#</th>
                 <th>#</th>

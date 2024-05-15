@@ -16,19 +16,24 @@ $(document).ready(function (){
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta) {
-                let data = JSON.parse(JSON.stringify(respuesta));
-                $('#objetivoEstrategico').val('(' + data.CodigoObjetivo + ') - ' + data.Objetivo)
-                $('#metaIndicadorModal').val(data.Meta)
-                $('#metaProgIndicadorModal').val(data.metaProgramada)
-                $('#codigoIndicadorModal').val(data.Codigo)
-                $('#descripcionIndicador').val(data.Descripcion)
-                metaTotal = parseInt(data.Meta,10)
-                metaProgramada = parseInt(data.metaProgramada, 10)
-                if (metaTotal === metaProgramada){
-                    $( "#metaIndicadorModal" ).addClass( "completo" )
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    let ind = JSON.parse(JSON.stringify(data.ind));
+                    $('#objetivoEstrategico').val('(' + ind.CodigoObjetivo + ') - ' + data.Objetivo)
+                    $('#metaIndicadorModal').val(ind.Meta)
+                    $('#metaProgIndicadorModal').val(ind.metaProgramada)
+                    $('#codigoIndicadorModal').val(ind.Codigo)
+                    $('#descripcionIndicador').val(ind.Descripcion)
+                    metaTotal = parseInt(ind.Meta,10)
+                    metaProgramada = parseInt(ind.metaProgramada, 10)
+                    if (metaTotal === metaProgramada){
+                        $( "#metaIndicadorModal" ).addClass( "completo" )
+                    } else {
+                        $( "#metaIndicadorModal" ).removeClass( "completo" )
+                    }
                 } else {
-                    $( "#metaIndicadorModal" ).removeClass( "completo" )
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -40,11 +45,13 @@ $(document).ready(function (){
                 destroy: true,
                 ajax: {
                     method: "POST",
-                    dataType: 'json',
                     data: function ( d ) {
                         d.indicador = codigo
                     },
+                    dataType: 'json',
                     cache: false,
+                    contentType: false,
+                    processData: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -139,12 +146,12 @@ $(document).ready(function (){
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta){
-                let data = JSON.parse(JSON.stringify(respuesta));
-                if (data.respuesta === "ok") {
-                    $('#metaProgIndicadorModal').val(data.metaProg)
+            success: function (data){
+                if (data.respuesta === RTA_CORRECTO) {
+                    let metaProg = JSON.parse(JSON.stringify(data.metaProg));
+                    $('#metaProgIndicadorModal').val(metaProg.metaProg)
                     $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
-                    if (metaTotal === data.metaProg){
+                    if (metaTotal === metaProg.metaProg){
                         $( "#metaIndicadorModal" ).addClass( "completo" )
                     } else {
                         $( "#metaIndicadorModal" ).removeClass( "completo" )

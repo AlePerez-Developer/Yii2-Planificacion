@@ -2,8 +2,8 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
+use app\modules\Planificacion\models\IndicadorEstrategico;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -43,24 +43,15 @@ class IndicadorEstrategicoGestionController extends Controller
 
     public function actionListarIndicadoresEstrategicosGestiones()
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
-        }
-        if (!(isset($_POST["indicador"]) && $_POST["indicador"] != "")) {
-            return "errorEnvio";
-        }
-
-        $programacion = IndicadorEstrategicoGestion::find()->select(['CodigoProgramacionGestion','Gestion','IndicadorEstrategico','Meta'])
-            ->where(['IndicadorEstrategico' => $_POST["indicador"]])
-            ->orderBy('Gestion')
-            ->asArray()
-            ->all();
-
-        if (!$programacion) {
-            return 'errorNoEncontrado';
-        }
-
-        return json_encode($programacion);
+        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
+            $programacion = IndicadorEstrategicoGestion::find()->select(['CodigoProgramacionGestion','Gestion','IndicadorEstrategico','Meta'])
+                ->where(['IndicadorEstrategico' => $_POST["indicador"]])
+                ->orderBy('Gestion')
+                ->asArray()
+                ->all();
+            return json_encode($programacion);
+        } else
+            return 'ERROR_CABECERA';
     }
 
     /**
@@ -70,17 +61,17 @@ class IndicadorEstrategicoGestionController extends Controller
     public function actionGuardarMetaProgramada()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            json_encode(["respuesta" => "errorCabecera"]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigo"]) && $_POST["codigo"] != "" &&
             isset($_POST["metaProgramada"]) && $_POST["metaProgramada"] != "")) {
-            return json_encode(["rta" => "errorEnvio"]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $programacion = IndicadorEstrategicoGestion::findOne($_POST["codigo"]);
 
         if (!$programacion) {
-            return json_encode(["respuesta" => 'errorNoEncontrado']);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         $indicador = IndicadorEstrategico::findOne($programacion->IndicadorEstrategico);
@@ -99,11 +90,11 @@ class IndicadorEstrategicoGestionController extends Controller
         }
 
         if (!$programacion->validate()) {
-            return json_encode(["respuesta" => "errorValidacion"]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
 
         if (!$programacion->update()) {
-            return json_encode(["respuesta" => "errorSql"]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
         return json_encode(["respuesta" => "ok",'metaProg'=>$_POST["metaProgramada"] + $programado]);

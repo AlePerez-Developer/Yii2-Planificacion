@@ -58,6 +58,8 @@ $(document).ready(function(){
             method: "POST",
             dataType: 'json',
             cache: false,
+            contentType: false,
+            processData: false,
             url: 'index.php?r=Planificacion/indicador-estrategico/listar-indicadores-estrategicos',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
@@ -146,11 +148,8 @@ $(document).ready(function(){
                 render: function (data, type, row) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-outline-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" >' +
-                            '<span class="spinner-grow spinner-grow-sm" style="display: none" aria-hidden="true"></span>' +
-                            '<i class="fa fa-eye"></i>' +
-                        '</button>' +
-                        '</div>'
+                            '<button type="button" class="btn btn-outline-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" ><i class="fa fa-eye"></i></button>' +
+                          '</div>'
                         : data;
                 },
             },
@@ -282,15 +281,16 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','Los datos del nuevo indicador estrategico se guardaron correctamente')
-                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
+                    $("#tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     });
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -316,8 +316,9 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     if (estado === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
                         objectBtn.attr('estado', ESTADO_CADUCO);
@@ -328,7 +329,7 @@ $(document).ready(function(){
                     DetenerSpiner(objectBtn)
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                     DetenerSpiner(objectBtn)
                 }
             },
@@ -366,14 +367,15 @@ $(document).ready(function(){
                     cache: false,
                     contentType: false,
                     processData: false,
-                    success: function (respuesta) {
-                        if (respuesta === "ok") {
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.respuesta === RTA_CORRECTO) {
                             MostrarMensaje('success','El indicador estrategico ha sido eliminado correctamente.')
-                            $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
+                            $("#tablaListaIndicadoresEstrategicos").DataTable().ajax.reload();
                             DetenerSpiner(objectBtn)
                         }
                         else {
-                            MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                             DetenerSpiner(objectBtn)
                         }
                     },
@@ -403,19 +405,24 @@ $(document).ready(function(){
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta) {
-                let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigoIndicadorEstrategico").val(data.CodigoIndicador);
-                $("#codigoIndicador").val(data.Codigo);
-                $("#metaIndicador").val(data.Meta);
-                $("#descripcion").val(data.Descripcion);
-                $('#codigoObjEstrategico').val(data.ObjetivoEstrategico).trigger('change');
-                $("#tipoResultado").val(data.Resultado);
-                $("#tipoIndicador").val(data.TipoIndicador);
-                $("#categoriaIndicador").val(data.Categoria);
-                $("#tipoUnidad").val(data.Unidad);
-                DetenerSpiner(objectBtn)
-                $("#btnMostrarCrear").trigger('click');
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    let ind = JSON.parse(JSON.stringify(data.ind));
+                    $("#codigoIndicadorEstrategico").val(ind.CodigoIndicador);
+                    $("#codigoIndicador").val(ind.Codigo);
+                    $("#metaIndicador").val(ind.Meta);
+                    $("#descripcion").val(ind.Descripcion);
+                    $('#codigoObjEstrategico').val(ind.ObjetivoEstrategico).trigger('change');
+                    $("#tipoResultado").val(ind.Resultado);
+                    $("#tipoIndicador").val(ind.TipoIndicador);
+                    $("#categoriaIndicador").val(ind.Categoria);
+                    $("#tipoUnidad").val(ind.Unidad);
+                    DetenerSpiner(objectBtn)
+                    $("#btnMostrarCrear").trigger('click');
+                } else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
+                }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
@@ -454,15 +461,16 @@ $(document).ready(function(){
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','El indicador estrategico seleccionado se actualizo correctamente.')
-                    $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
+                    $("#tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click()
                     });
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

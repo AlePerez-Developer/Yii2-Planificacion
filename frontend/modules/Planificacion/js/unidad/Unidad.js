@@ -33,6 +33,8 @@ $(document).ready(function () {
             method: "POST",
             dataType: 'json',
             cache: false,
+            contentType: false,
+            processData: false,
             url: 'index.php?r=Planificacion/unidad/listar-unidades',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
@@ -198,15 +200,16 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','Los datos de la nueva unidad se guardaron correctamente.')
                     $("#tablaListaUnidades").DataTable().ajax.reload(async () => {
                         $("#btnCancelar").click();
                     });
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -232,8 +235,9 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
                     if (estado === ESTADO_VIGENTE) {
                         objectBtn.removeClass('btn-success').addClass('btn-danger')
                         objectBtn.attr('estado', ESTADO_CADUCO);
@@ -244,7 +248,7 @@ $(document).ready(function () {
                     DetenerSpiner(objectBtn);
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(respuesta))
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                     DetenerSpiner(objectBtn)
                 }
             },
@@ -282,14 +286,15 @@ $(document).ready(function () {
                     cache: false,
                     contentType: false,
                     processData: false,
-                    success: function (respuesta) {
-                        if (respuesta === "ok") {
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.respuesta === RTA_CORRECTO) {
                             MostrarMensaje('success','La unidad ha sido borrada correctamente.')
                             DetenerSpiner(objectBtn);
                             $("#tablaListaUnidades").DataTable().ajax.reload();
                         }
                         else {
-                            MostrarMensaje('error',GenerarMensajeError(respuesta))
+                            MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                             DetenerSpiner(objectBtn);
                         }
                     }
@@ -313,38 +318,26 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (respuesta) {
-                let data = JSON.parse(JSON.stringify(respuesta));
-                $("#codigoUnidad").val(data.CodigoUnidad);
-                $("#da").val(data.Da);
-                $("#ue").val(data.Ue);
-                $("#descripcion").val(data.Descripcion);
-                $("#organizacional").prop( "checked", (data.Organizacional === 1))
-                $("#fechaInicio").val(data.FechaInicio);
-                $("#fechaFin").val(data.FechaFin);
-                $("#btnMostrarCrear").trigger('click');
-            },
-            error: function (respuesta) {
-                let mensajeRespuesta = respuesta['responseText'];
-                let mensaje;
-                if (mensajeRespuesta === "errorCabecera") {
-                    mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
-                } else if (mensajeRespuesta === "errorEnvio") {
-                    mensaje = "Error: No se enviaron correctamente de los datos.";
-                } else if (mensajeRespuesta === "errorNoEncontrado") {
-                    mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    let unidad = JSON.parse(JSON.stringify(data.unidad));
+                    $("#codigoUnidad").val(unidad.CodigoUnidad);
+                    $("#da").val(unidad.Da);
+                    $("#ue").val(unidad.Ue);
+                    $("#descripcion").val(unidad.Descripcion);
+                    $("#organizacional").prop( "checked", (unidad.Organizacional === 1))
+                    $("#fechaInicio").val(unidad.FechaInicio);
+                    $("#fechaFin").val(unidad.FechaFin);
+                    DetenerSpiner(objectBtn)
+                    $("#btnMostrarCrear").trigger('click');
                 } else {
-                    mensaje = mensajeRespuesta;
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
                 }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Alerta...',
-                    text: mensaje,
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                })
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
             }
         });
     });
@@ -375,46 +368,20 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            success: function (respuesta) {
-                if (respuesta === "ok") {
-                    $("#btnCancelar").click();
-                    Swal.fire({
-                        icon: "success",
-                        title: "Exito...",
-                        text: "La unidad se actualizó correctamente.",
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    }).then(function () {
-                        $("#tablaListaUnidades").DataTable().ajax.reload(null, false);
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    MostrarMensaje('success','La unidad se actualizó correctamente.')
+                    $("#tablaListaUnidades").DataTable().ajax.reload(async () =>{
+                        $("#btnCancelar").click();
                     });
                 }
                 else {
-                    let mensaje;
-                    if (respuesta === "errorCabecera") {
-                        mensaje = "Error: Se esta intentando ingresar por un acceso no autorizado.";
-                    } else if (respuesta === "errorEnvio") {
-                        mensaje = "Error: No se enviaron correctamente de los datos.";
-                    } else if (respuesta === "errorNoEncontrado") {
-                        mensaje = "Error: No se encontro la informacion de la unidad seleccionada.";
-                    } else if (respuesta === "errorValidacion") {
-                        mensaje = "Error: No se llenaron correctamente los datos requeridos.";
-                    } else if (respuesta === "errorExiste") {
-                        mensaje = "Los datos ingresados ya corresponden a una unidad existente.";
-                    } else if (respuesta === "errorSql") {
-                        mensaje = "Error: Ocurrio un error en la base de datos al actualizar los datos de la unidad seleccionada.";
-                    } else {
-                        mensaje = respuesta;
-                    }
-                    Swal.fire({
-                        icon: "error",
-                        title: "Advertencia...",
-                        text: mensaje,
-                        showCancelButton: false,
-                        confirmButtonColor: "#3085d6",
-                        confirmButtonText: "Cerrar"
-                    });
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
         });
     }

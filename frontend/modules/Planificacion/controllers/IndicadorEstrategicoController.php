@@ -97,20 +97,21 @@ class IndicadorEstrategicoController extends Controller
                                    Tr.Descripcion, Ti.Descripcion, Ci.Descripcion, U.Descripcion')
                 ->orderBy('I.Codigo')
                 ->asArray()->all();
-        }
-        return json_encode($indicadores);
+            return json_encode($indicadores);
+        } else
+            return 'ERROR_CABECERA';
     }
 
     public function actionGuardarIndicadorEstrategico()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoObjetivoEstrategico"])
             && isset($_POST["codigoIndicador"]) && isset($_POST["metaIndicador"])  && isset($_POST["descripcion"])
             && isset($_POST["tipoResultado"]) && isset($_POST["tipoIndicador"]) && isset($_POST["categoriaIndicador"]) && isset($_POST["tipoUnidad"]))
         ) {
-            return 'errorEnvio';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $indicador = new IndicadorEstrategico();
@@ -125,28 +126,31 @@ class IndicadorEstrategicoController extends Controller
         $indicador->Unidad = intval($_POST["tipoUnidad"]);
         $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
         $indicador->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+
         if (!$indicador->validate()){
-            return "errorValidacion";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if ($indicador->exist()) {
-            return "errorExiste";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
         }
+
         $transaction = IndicadorEstrategico::getDb()->beginTransaction();
         try {
             if (!$indicador->save()){
                 $transaction->rollBack();
-                return "errorSql";
+                return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
             }
             if (!$indicador->generarProgramacion()){
                 $transaction->rollBack();
-                return "errorSql";
+                return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
             }
 
             $transaction->commit();
-            return "ok";
+            return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+
         } catch(\Exception|Throwable $e) {
             $transaction->rollBack();
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
     }
 
@@ -157,24 +161,25 @@ class IndicadorEstrategicoController extends Controller
     public function actionCambiarEstadoIndicadorEstrategico()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!isset($_POST["codigoIndicadorEstrategico"])) {
-            return "errorEnvio";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $indicador = IndicadorEstrategico::findOne($_POST["codigoIndicadorEstrategico"]);
+
         if (!$indicador){
-            return 'errorNoEncontrado';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         ($indicador->CodigoEstado == Estado::ESTADO_VIGENTE)?$indicador->CodigoEstado = Estado::ESTADO_CADUCO: $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
 
         if ($indicador->update() === false) {
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return "ok";
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     /**
@@ -184,37 +189,37 @@ class IndicadorEstrategicoController extends Controller
     public function actionEliminarIndicadorEstrategico()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoIndicadorEstrategico"]) && $_POST["codigoIndicadorEstrategico"] != "")) {
-            return "errorEnvio";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $indicador = IndicadorEstrategico::findOne($_POST["codigoIndicadorEstrategico"]);
 
         if (!$indicador) {
-            return 'errorNoEncontrado';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
         if ($indicador->enUso()) {
-            return "errorEnUso";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
         }
 
         $indicador->CodigoEstado = Estado::ESTADO_ELIMINADO;
 
         if ($indicador->update() === false) {
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return 'ok';
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     public function actionBuscarIndicadorEstrategico()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoIndicadorEstrategico"]) && $_POST["codigoIndicadorEstrategico"] != "")) {
-            return "errorEnvio";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $indicador = IndicadorEstrategico::find()->alias('I')->select([
@@ -235,14 +240,15 @@ class IndicadorEstrategicoController extends Controller
             ->groupBy('I.CodigoIndicador,I.Codigo,I.Meta,I.Descripcion,I.Resultado,tr.Descripcion,I.TipoIndicador,ti.Descripcion,I.Categoria, ci.Descripcion,
                                        I.Unidad, iu.Descripcion,I.ObjetivoEstrategico, o.CodigoObjetivo, o.Objetivo')
             ->asArray()->one();
+
         if (!$indicador) {
-            return 'errorNoEncontrado';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
         if (!IndicadorEstrategico::findOne($_POST["codigoIndicadorEstrategico"])->generarProgramacion()) {
-            return 'errorSql';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
 
-        return json_encode($indicador);
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'ind' => $indicador]);
     }
 
     /**
@@ -252,20 +258,20 @@ class IndicadorEstrategicoController extends Controller
     public function actionActualizarIndicadorEstrategico()
     {
         if(!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return "errorCabecera";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
         if (!(isset($_POST["codigoIndicadorEstrategico"]) && $_POST["codigoIndicadorEstrategico"] != ""
             && isset($_POST["codigoObjetivoEstrategico"])
             && isset($_POST["codigoIndicador"]) && isset($_POST["metaIndicador"]) && isset($_POST["descripcion"])
             && isset($_POST["tipoResultado"]) && isset($_POST["tipoIndicador"]) && isset($_POST["categoriaIndicador"]) && isset($_POST["tipoUnidad"])
         )) {
-            return 'errorEnvio';
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
         $indicador = IndicadorEstrategico::findOne($_POST["codigoIndicadorEstrategico"]);
 
         if (!$indicador) {
-            return "errorNoEncontrado";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
         $indicador->Codigo = intval($_POST["codigoIndicador"]);
@@ -278,16 +284,15 @@ class IndicadorEstrategicoController extends Controller
         $indicador->Unidad = intval($_POST["tipoUnidad"]);
 
         if (!$indicador->validate()) {
-            return "errorValidacion";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if ($indicador->exist()) {
-            return "errorExiste";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
         }
-
         if ($indicador->update() === false)
-            return "errorSql";
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
 
-        return "ok";
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
     public function actionVerificarCodigo()
