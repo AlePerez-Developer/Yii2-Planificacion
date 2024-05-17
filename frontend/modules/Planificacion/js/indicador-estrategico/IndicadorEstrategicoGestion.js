@@ -41,8 +41,9 @@ $(document).ready(function (){
                 DetenerSpiner(objectBtn)
             }
         }).done(function (){
-            tabla = $(".tablaIndicadoresGestion").DataTable({
-                destroy: true,
+            //if (tabla) tabla.destroy()
+            tabla = $("#tablaIndicadoresGestion").DataTable({
+                //destroy: true,
                 ajax: {
                     method: "POST",
                     data: function ( d ) {
@@ -50,8 +51,6 @@ $(document).ready(function (){
                     },
                     dataType: 'json',
                     cache: false,
-                    contentType: false,
-                    processData: false,
                     url: 'index.php?r=Planificacion/indicador-estrategico-gestion/listar-indicadores-estrategicos-gestiones',
                     dataSrc: '',
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -148,10 +147,10 @@ $(document).ready(function (){
             dataType: "json",
             success: function (data){
                 if (data.respuesta === RTA_CORRECTO) {
-                    let metaProg = JSON.parse(JSON.stringify(data.metaProg));
-                    $('#metaProgIndicadorModal').val(metaProg.metaProg)
+                    //let metaProg = JSON.parse(JSON.stringify(data.metaProg));
+                    $('#metaProgIndicadorModal').val(data.metaProg)
                     $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
-                    if (metaTotal === metaProg.metaProg){
+                    if (metaTotal === data.metaProg){
                         $( "#metaIndicadorModal" ).addClass( "completo" )
                     } else {
                         $( "#metaIndicadorModal" ).removeClass( "completo" )
@@ -213,6 +212,7 @@ $(document).ready(function (){
 
     $(document).on('hide.bs.modal','.programargestion', function () {
         $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(null, false);
+        tabla.destroy();
         inputMeta = '';
     })
 })
