@@ -48,7 +48,7 @@ class UnidadController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('Unidades');
+        return $this->render('unidad');
     }
 
     public function actionListarUnidades()
@@ -86,11 +86,11 @@ class UnidadController extends Controller
         $unidad->CodigoEstado = Estado::ESTADO_VIGENTE;
         $unidad->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
-        if (!$unidad->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($unidad->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$unidad->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if (!$unidad->save()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
@@ -192,11 +192,11 @@ class UnidadController extends Controller
         $unidad->FechaInicio = date("d/m/Y", strtotime($_POST["fechaInicio"]));
         $unidad->FechaFin = date("d/m/Y", strtotime($_POST["fechaFin"]));
 
-        if (!$unidad->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($unidad->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$unidad->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if (!$unidad->save()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);

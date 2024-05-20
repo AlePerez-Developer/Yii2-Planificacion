@@ -106,8 +106,6 @@ create table IndicadoresEstrategicosGestiones(
     foreign key (IndicadorEstrategico) references IndicadoresEstrategicos(CodigoIndicador),
 )
 
-
-
 create table Unidades
 (
     CodigoUnidad int primary key not null,
@@ -132,7 +130,22 @@ CREATE UNIQUE INDEX [UQ_Apertura]
     ON [dbo].Unidades(Da,Ue)
     WHERE   ([CodigoEstado] = 'V');
 
+create table Programas
+(
+    CodigoPrograma int primary key not null,
+    Codigo varchar(20) not null,
+    Descripcion varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
 
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Codigo]
+    ON [dbo].Programas(Codigo)
+    WHERE   ([CodigoEstado] = 'V');
 
 
 
@@ -321,18 +334,7 @@ create table Proyectos
 
 go
 
-create table Programas
-(
-    CodigoPrograma int primary key not null,
-    Codigo varchar(20) not null,
-    Descripcion varchar(250) not null,
-    CodigoEstado char(1) not null,
-    FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null,
 
-    foreign key (CodigoEstado) references Estados(CodigoEstado),
-    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
-)
 
 go
 

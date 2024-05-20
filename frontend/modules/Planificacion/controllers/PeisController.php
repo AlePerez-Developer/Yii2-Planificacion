@@ -92,11 +92,11 @@ class PeisController extends Controller
         $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
         $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
-        if (!$pei->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($pei->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$pei->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if (!$pei->save()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
@@ -224,11 +224,11 @@ class PeisController extends Controller
             $pei->GestionFin = $nuevoFin;
         }
 
-        if (!$pei->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($pei->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$pei->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
 
         $transaction = Pei::getDb()->beginTransaction();

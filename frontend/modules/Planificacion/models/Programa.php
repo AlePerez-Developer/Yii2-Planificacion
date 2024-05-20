@@ -2,8 +2,8 @@
 
 namespace app\modules\Planificacion\models;
 
-use common\models\Estado;
 use common\models\Usuario;
+use common\models\Estado;
 use Yii;
 
 /**
@@ -85,15 +85,18 @@ class Programa extends \yii\db\ActiveRecord
 
     public function exist()
     {
-        $data = Proyecto::find()->where(["Codigo" => $this->Codigo])->andWhere(["CodigoEstado"=>"E"])->all();
-        if(!empty($data)){
+        $programa = Programa::find()->where(['Codigo' => $this->Codigo])
+            ->andWhere(['!=','CodigoPrograma', $this->CodigoPrograma])
+            ->andWhere(["CodigoEstado" => Estado::ESTADO_VIGENTE])
+            ->all();
+        if(!empty($programa)){
             return true;
         }else{
             return false;
         }
     }
 
-    public function isUsed()
+    public function enUso()
     {
         return false;
     }

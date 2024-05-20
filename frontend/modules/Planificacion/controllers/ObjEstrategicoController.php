@@ -90,11 +90,11 @@ class ObjEstrategicoController extends Controller
         $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
         $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
-        if (!$obj->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($obj->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$obj->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if (!$obj->save()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
@@ -203,11 +203,11 @@ class ObjEstrategicoController extends Controller
         $obj->CodigoObjetivo = trim($_POST["codigoObjetivo"]);
         $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
 
-        if (!$obj->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($obj->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$obj->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
 
         if ($obj->update() === false) {

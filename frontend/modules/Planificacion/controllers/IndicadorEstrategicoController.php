@@ -127,11 +127,11 @@ class IndicadorEstrategicoController extends Controller
         $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
         $indicador->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
-        if (!$indicador->validate()){
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($indicador->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$indicador->validate()){
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
 
         $transaction = IndicadorEstrategico::getDb()->beginTransaction();
@@ -283,11 +283,11 @@ class IndicadorEstrategicoController extends Controller
         $indicador->Categoria = intval($_POST["categoriaIndicador"]);
         $indicador->Unidad = intval($_POST["tipoUnidad"]);
 
-        if (!$indicador->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
         if ($indicador->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
+        }
+        if (!$indicador->validate()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
         }
         if ($indicador->update() === false)
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
