@@ -307,9 +307,11 @@ $(document).ready(function () {
     BUSCA LA UNIDAD SELECCIONADA EN LA BD
     =============================================*/
     $("#tablaListaUnidades tbody").on("click", ".btnEditar", function () {
-        let codigoUnidad = $(this).attr("codigo");
+        let objectBtn = $(this);
+        let codigoUnidad = objectBtn.attr("codigo");
         let datos = new FormData();
         datos.append("codigoUnidad", codigoUnidad);
+        IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=Planificacion/unidad/buscar-unidad",
             method: "POST",

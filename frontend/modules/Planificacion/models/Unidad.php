@@ -104,7 +104,7 @@ class Unidad extends \yii\db\ActiveRecord
         }
     }
 
-    public function isUsed()
+    public function enUso()
     {
         return false;
     }

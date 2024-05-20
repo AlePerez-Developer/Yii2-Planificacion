@@ -41,9 +41,7 @@ $(document).ready(function (){
                 DetenerSpiner(objectBtn)
             }
         }).done(function (){
-            //if (tabla) tabla.destroy()
             tabla = $("#tablaIndicadoresGestion").DataTable({
-                //destroy: true,
                 ajax: {
                     method: "POST",
                     data: function ( d ) {
@@ -147,7 +145,6 @@ $(document).ready(function (){
             dataType: "json",
             success: function (data){
                 if (data.respuesta === RTA_CORRECTO) {
-                    //let metaProg = JSON.parse(JSON.stringify(data.metaProg));
                     $('#metaProgIndicadorModal').val(data.metaProg)
                     $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
                     if (metaTotal === data.metaProg){
