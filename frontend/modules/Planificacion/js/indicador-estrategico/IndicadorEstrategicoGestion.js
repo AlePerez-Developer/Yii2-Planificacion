@@ -3,7 +3,7 @@ $(document).ready(function (){
     let inputMeta, opcionesMeta;
     let metaTotal, metaProgramada
 
-    $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramar', function (){
+    $('.tablaListaIndicadoresEstrategicos tbody').on('click','.btnProgramarG', function (){
         let objectBtn = $(this)
         let codigo = objectBtn.attr("codigo");
         let datos = new FormData();
@@ -19,7 +19,7 @@ $(document).ready(function (){
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
                     let ind = JSON.parse(JSON.stringify(data.ind));
-                    $('#objetivoEstrategico').val('(' + ind.CodigoObjetivo + ') - ' + data.Objetivo)
+                    $('#objetivoEstrategico').val('(' + ind.CodigoObjetivo + ') - ' + ind.Objetivo)
                     $('#metaIndicadorModal').val(ind.Meta)
                     $('#metaProgIndicadorModal').val(ind.metaProgramada)
                     $('#codigoIndicadorModal').val(ind.Codigo)
@@ -94,7 +94,7 @@ $(document).ready(function (){
                         render: function (data, type, row) {
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                                '<button type="button" class="btn btn-outline-warning btn-sm btnP" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                                '<button type="button" class="btn btn-outline-warning btn-sm btnProgramarM" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
                                 '</div>'
                                 : data;
                         },
@@ -107,7 +107,7 @@ $(document).ready(function (){
                         render: function (data, type, row) {
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                                '<button type="button" class="btn btn-outline-info btn-sm btnP" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-eye"></i></button>' +
+                                '<button type="button" class="btn btn-outline-info btn-sm btnProgramarU" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-eye"></i></button>' +
                                 '</div>'
                                 : data;
                         },
@@ -115,6 +115,11 @@ $(document).ready(function (){
                 ],
             });
         });
+    })
+
+    $(document).on('click','#tablaIndicadoresGestion .btnProgramarU', function () {
+        let objectBtn = $(this)
+        IniciarSpiner(objectBtn)
     })
 
     function restaurarMeta(){
@@ -164,7 +169,7 @@ $(document).ready(function (){
         })
     }
 
-    $(document).on('click', '.btnP', function(){
+    $(document).on('click', '.btnProgramarM', function(){
         if (inputMeta){
             restaurarMeta()
         }
@@ -207,8 +212,12 @@ $(document).ready(function (){
         restaurarMeta()
     });
 
-    $(document).on('hide.bs.modal','.programargestion', function () {
-        $(".tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(null, false);
+    $(document).on('hide.bs.modal','.programarIndicadorEstrategicoGestion', function () {
+        $('#gestionBody').show()
+        $('#gestionFooter').show()
+        $('#unidadBody').hide()
+        $('#unidadFooter').hide()
+        $(".tablaIndicadoresGestion").DataTable().ajax.reload(null, false);
         tabla.destroy();
         inputMeta = '';
     })

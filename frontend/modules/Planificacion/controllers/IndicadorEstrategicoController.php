@@ -3,6 +3,7 @@ namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\dao\IndicadorEstrategicoDao;
 use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\models\ObjetivoEstrategico;
 use app\modules\Planificacion\models\CategoriaIndicador;
 use app\modules\Planificacion\models\IndicadorUnidad;
@@ -58,7 +59,7 @@ class IndicadorEstrategicoController extends Controller
         $tiposIndicadores = TipoIndicador::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
         $categoriasIndicadores = CategoriaIndicador::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
         $indicadoresUnidades = IndicadorUnidad::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
-        return $this->render('IndicadoresEstrategicos',[
+        return $this->render('indicadorEstrategico',[
             'objsEstrategicos' => $objsEstrategicos,
             'Resultados'=> $tiposResultados,
             'Tipos'=> $tiposIndicadores,
@@ -250,6 +251,32 @@ class IndicadorEstrategicoController extends Controller
 
         return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'ind' => $indicador]);
     }
+
+
+    public function actionBuscarIndicadorEstrategico2()
+    {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+        if (!(isset($_POST["codigoProgramacionGestion"]) && $_POST["codigoProgramacionGestion"] != "")) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
+        $programacion = IndicadorEstrategicoGestion::findOne($_POST["codigoProgramacionGestion"]);
+
+        if (!$programacion) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode(
+            [
+                'respuesta' => Yii::$app->params['PROCESO_CORRECTO'],
+                'gestion' => $programacion->getAttributes(array('CodigoProgramacionGestion','Gestion','Meta')),
+                'indicador' => $programacion->indicadorEstrategico->getAttributes(array('Meta','Descripcion')),
+                'obj' => $programacion->indicadorEstrategico->objetivoEstrategico->getAttributes(array('CodigoObjetivo','Objetivo'))
+            ]);
+    }
+
 
     /**
      * @throws Throwable

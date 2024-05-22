@@ -148,7 +148,7 @@ $(document).ready(function(){
                 render: function (data, type, row) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                            '<button type="button" class="btn btn-outline-info btn-sm  btnProgramar" codigo="' + row.CodigoIndicador + '" ><i class="fa fa-eye"></i></button>' +
+                            '<button type="button" class="btn btn-outline-info btn-sm  btnProgramarG" codigo="' + row.CodigoIndicador + '" ><i class="fa fa-eye"></i></button>' +
                           '</div>'
                         : data;
                 },
@@ -248,7 +248,7 @@ $(document).ready(function(){
         ($(this).val() === '2')? metaIndicador.val('100').prop('readonly',true): metaIndicador.prop('readonly',false)
     })
 
-    $(".tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramar", function () {
+    $("#tablaListaIndicadoresEstrategicos tbody").on("click", ".btnProgramarG", function () {
         let objectBtn = $(this)
         IniciarSpiner(objectBtn)
     });

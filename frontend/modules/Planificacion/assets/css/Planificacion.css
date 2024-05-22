@@ -105,6 +105,10 @@ tr.completo {
     background-color: #dcfadc !important;
 }
 
+.completo {
+    background-color: #dcfadc !important;
+}
+
 th.dt-center, td.dt-center { text-align: center !important; }
 
 th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; !important; }

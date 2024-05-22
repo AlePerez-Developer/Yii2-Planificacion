@@ -55,7 +55,7 @@ class ObjEstrategicoController extends Controller
     public function actionIndex()
     {
         $peis = Pei::find()->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])->all();
-        return $this->render('ObjEstrategicos',['peis'=>$peis]);
+        return $this->render('objEstrategico',['peis'=>$peis]);
     }
 
     public function actionListarObjs()
