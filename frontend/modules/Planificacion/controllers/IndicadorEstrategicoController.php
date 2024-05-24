@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\controllers;
 use app\modules\Planificacion\dao\IndicadorEstrategicoDao;
 use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
+use app\modules\Planificacion\models\IndicadorEstrategicoUnidad;
 use app\modules\Planificacion\models\ObjetivoEstrategico;
 use app\modules\Planificacion\models\CategoriaIndicador;
 use app\modules\Planificacion\models\IndicadorUnidad;
@@ -18,6 +19,7 @@ use Mpdf\MpdfException;
 use Throwable;
 use Mpdf\Mpdf;
 use Yii;
+use function PHPUnit\Framework\isNull;
 
 class IndicadorEstrategicoController extends Controller
 {
@@ -253,7 +255,7 @@ class IndicadorEstrategicoController extends Controller
     }
 
 
-    public function actionBuscarIndicadorEstrategico2()
+    public function actionBuscarIndicadorEstrategicoUnidades()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
@@ -273,7 +275,8 @@ class IndicadorEstrategicoController extends Controller
                 'respuesta' => Yii::$app->params['PROCESO_CORRECTO'],
                 'gestion' => $programacion->getAttributes(array('CodigoProgramacionGestion','Gestion','Meta')),
                 'indicador' => $programacion->indicadorEstrategico->getAttributes(array('Meta','Descripcion')),
-                'obj' => $programacion->indicadorEstrategico->objetivoEstrategico->getAttributes(array('CodigoObjetivo','Objetivo'))
+                'obj' => $programacion->indicadorEstrategico->objetivoEstrategico->getAttributes(array('CodigoObjetivo','Objetivo')),
+                'metaPro' => (int)IndicadorEstrategicoUnidad::find()->where(['ProgramacionGestion'=>$_POST["codigoProgramacionGestion"]])->sum('Meta')
             ]);
     }
 

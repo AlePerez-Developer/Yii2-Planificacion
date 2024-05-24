@@ -2,16 +2,19 @@
 
 namespace app\modules\Planificacion\models;
 
+use Yii;
+
 /**
  * This is the model class for table "IndicadoresEstrategicosGestiones".
  *
  * @property int $CodigoProgramacionGestion
- * @property int $Gestion
  * @property int $IndicadorEstrategico
+ * @property int $Gestion
  * @property int $Meta
  *
- * @property IndicadoresEstrategico $indicadorEstrategico
-  */
+ * @property IndicadorEstrategico $indicadorEstrategico
+ * @property IndicadorEstrategicoUnidad[] $indicadorEstrategicoUnidades
+ */
 class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
 {
     /**
@@ -28,8 +31,8 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['Gestion', 'IndicadorEstrategico', 'Meta'], 'required'],
-            [['Gestion', 'IndicadorEstrategico', 'Meta'], 'integer'],
+            [['IndicadorEstrategico', 'Gestion', 'Meta'], 'required'],
+            [['IndicadorEstrategico', 'Gestion', 'Meta'], 'integer'],
             [['Gestion', 'IndicadorEstrategico'], 'unique', 'targetAttribute' => ['Gestion', 'IndicadorEstrategico']],
             [['IndicadorEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => IndicadorEstrategico::class, 'targetAttribute' => ['IndicadorEstrategico' => 'CodigoIndicador']],
         ];
@@ -41,10 +44,10 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'CodigoProgramacionGestion' => 'Codigo Programacion',
-            'Gestion' => 'Gestion',
+            'CodigoProgramacionGestion' => 'Codigo Programacion Gestion',
             'IndicadorEstrategico' => 'Indicador Estrategico',
-            'MetaProgramada' => 'Meta Programada',
+            'Gestion' => 'Gestion',
+            'Meta' => 'Meta',
         ];
     }
 
@@ -58,4 +61,13 @@ class IndicadorEstrategicoGestion extends \yii\db\ActiveRecord
         return $this->hasOne(IndicadorEstrategico::class, ['CodigoIndicador' => 'IndicadorEstrategico']);
     }
 
+    /**
+     * Gets query for [[IndicadoresEstrategicosUnidades]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIndicadoresEstrategicosUnidades()
+    {
+        return $this->hasMany(IndicadorEstrategicoUnidad::class, ['ProgramacionGestion' => 'CodigoProgramacionGestion']);
+    }
 }

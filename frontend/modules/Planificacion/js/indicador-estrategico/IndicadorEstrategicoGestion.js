@@ -42,6 +42,12 @@ $(document).ready(function (){
             }
         }).done(function (){
             tabla = $("#tablaIndicadoresGestion").DataTable({
+                layout: {
+                    topStart: null,
+                    topEnd: null ,
+                    bottomStart: null,
+                    bottomEnd: null
+                },
                 ajax: {
                     method: "POST",
                     data: function ( d ) {
@@ -61,9 +67,6 @@ $(document).ready(function (){
                     $('#programarIndicadorEstrategicoGestion').modal('show');
                     DetenerSpiner(objectBtn)
                 },
-                columnDefs: [
-                    { className: "dt-small", targets: "_all" },
-                ],
                 columns: [
                     {
                         className: 'dt-small dt-center',
@@ -94,7 +97,7 @@ $(document).ready(function (){
                         render: function (data, type, row) {
                             return type === 'display'
                                 ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                                '<button type="button" class="btn btn-outline-warning btn-sm btnProgramarM" codigo="' + data + '" meta="' + row.Meta + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
+                                '<button type="button" class="btn btn-outline-warning btn-sm btnProgramarM" codigo="' + data + '" meta="' + row.Meta + '" unidad="' + row.ProgUnidad + '" data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
                                 '</div>'
                                 : data;
                         },
@@ -170,22 +173,30 @@ $(document).ready(function (){
     }
 
     $(document).on('click', '.btnProgramarM', function(){
+
+
         if (inputMeta){
             restaurarMeta()
         }
         let objectBtn = $(this);
         let codigo = objectBtn.attr("codigo");
         let meta = objectBtn.attr("meta");
+        let progUnidad =  (objectBtn.attr("unidad"));
+
+        if (progUnidad !== '0'){
+            MostrarMensaje('info','No se puede cambiar la programacion de la gestion, existen unidades programadas')
+            return false
+        }
 
         let td = $(this).closest('td');
         let colIndex = tabla.cell(td).index().column;
         let rowIndex = tabla.cell(td).index().row;
 
         inputMeta = "<div id='opcionesMeta' class='input-group'>" +
-                    "<input type='text' id='metaInput' codigo='"+codigo+"' meta='"+meta+"'  value='"+meta+"' class='form-control input-sm num' style='width: 100px; height: 25px'>" +
-                    "<button class='btn btn-outline-success center' type='button' id='guardarMeta' style='width: 25px; height: 25px'><span class='fa fa-check-circle'></span></button>" +
-                    "<button class='btn btn-outline-danger center' type='button' id='revertirMeta' style='width: 25px; height: 25px'><span class='fa fa-times-circle'></span></button>" +
-                "</div>"
+            "<input type='text' id='metaInput' codigo='"+codigo+"' meta='"+meta+"'  value='"+meta+"' class='form-control input-sm num' style='width: 100px; height: 25px'>" +
+            "<button class='btn btn-outline-success center' type='button' id='guardarMeta' style='width: 25px; height: 25px'><span class='fa fa-check-circle'></span></button>" +
+            "<button class='btn btn-outline-danger center' type='button' id='revertirMeta' style='width: 25px; height: 25px'><span class='fa fa-times-circle'></span></button>" +
+            "</div>"
         tabla.cell(rowIndex, colIndex-2).data(inputMeta)
         opcionesMeta = $('#opcionesMeta')
         $('#metaInput').select()

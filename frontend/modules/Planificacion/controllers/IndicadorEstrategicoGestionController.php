@@ -44,8 +44,11 @@ class IndicadorEstrategicoGestionController extends Controller
     public function actionListarIndicadoresEstrategicosGestiones()
     {
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $programacion = IndicadorEstrategicoGestion::find()->select(['CodigoProgramacionGestion','Gestion','IndicadorEstrategico','Meta'])
+            $programacion = IndicadorEstrategicoGestion::find()->alias('ieg')
+                ->select(['ieg.CodigoProgramacionGestion','ieg.Gestion','ieg.IndicadorEstrategico','ieg.Meta','isnull(sum(iue.Meta),0) as ProgUnidad'])
+                ->LeftJoin('IndicadoresEstrategicosUnidades iue','iue.ProgramacionGestion = ieg.CodigoProgramacionGestion')
                 ->where(['IndicadorEstrategico' => $_POST["indicador"]])
+                ->groupBy(['ieg.CodigoProgramacionGestion','ieg.Gestion','ieg.IndicadorEstrategico','ieg.Meta'])
                 ->orderBy('Gestion')
                 ->asArray()
                 ->all();

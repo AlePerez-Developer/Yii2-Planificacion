@@ -22,8 +22,8 @@
                                 <div class="row mt-2">
                                     <div class="col-1">
                                         <form class="form-floating">
-                                            <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px" placeholder="" value="" disabled>
-                                            <label for="codigoIndicadorModal" style="font-size: 13px">Ind</label>
+                                            <input type="text" class="form-control" id="codigoIndicadorModal" style="font-size: 12px; background-color: firebrick; color: white" placeholder="" value="" disabled>
+                                            <label for="codigoIndicadorModal" style="font-size: 13px; color: white;font-weight: bold">Ind</label>
                                         </form>
                                     </div>
                                     <div class="col-1">
@@ -77,8 +77,8 @@
                                 <div class="row mt-2">
                                     <div class="col-1">
                                         <form class="form-floating">
-                                            <input type="text" class="form-control" id="gestionUnidad" style="font-size: 12px" placeholder="" value="" disabled>
-                                            <label for="gestionUnidad" style="font-size: 13px">Gestion</label>
+                                            <input type="text" class="form-control" id="gestionUnidad" style="font-size: 12px; background-color: firebrick; color: white" placeholder="" value="" disabled>
+                                            <label for="gestionUnidad" style="font-size: 13px; color: white;font-weight: bold">Gestion</label>
                                         </form>
                                     </div>
                                     <div class="col-1">
@@ -103,17 +103,39 @@
                             </div>
                         </div>
                         <div class="card-body">
-
+                            <div>
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col-8">
+                                        <div class="form-group">
+                                            <label for="codigoObjEstrategico">Seleccione el objetivo estrategico</label>
+                                            <select class="form-control objEstrategico" id="codigoObjEstrategico" name="codigoObjEstrategico" >
+                                                <option></option>
+                                                <?php foreach ($unidades as $unidad){ ?>
+                                                    <option value="<?= $unidad['CodigoUnidad'] ?>"><?= '('.  $unidad['Da'] .') - ' . $objEstrategico['Objetivo']  ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <button id="agregarUnidad" class="btn btn-outline-success"><i class="fa fa-plus"></i> Agregar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <table id="tablaIndicadoresUnidad" class="table-bordered table-striped dt-responsive table-sm tablaIndicadoresUnidad" style="width: 100%" >
+                                <thead>
+                                <th>#</th>
+                                <th>Gestion</th>
+                                <th>DaUe</th>
+                                <th>Da</th>
+                                <th>Ue</th>
+                                <th>Descripcion</th>
+                                <th>Meta</th>
+                                <th>Acciones</th>
+                                </thead>
+                            </table>
                         </div>
                     </div>
-
-
-
                 </div>
-
-
-
-
             </div>
             <div class="modal-footer">
                 <div id="gestionFooter">
