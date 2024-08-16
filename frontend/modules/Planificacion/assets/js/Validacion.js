@@ -47,7 +47,12 @@ $(document).ready(function() {
 
     $.validator.addMethod("largominimo",
         function (value, element, param){
-            return value.length > parseInt(param);
+            return value.length >= parseInt(param);
+        })
+
+    $.validator.addMethod("dependencia",
+        function (value, element, param){
+            return $(param).val() > 0
         })
 
     $.validator.addMethod("DiferenteQue",
@@ -81,9 +86,11 @@ $(document).ready(function() {
     $.validator.addMethod("CodigoObjetivoUnico",
         function(value, element, param) {
             let result = false;
+            let pei = $('#codigoPei').val();
             let objetivoEstrategico = $(param).val();
             let datos = new FormData();
             datos.append("codigo", value);
+            datos.append("pei", pei);
             datos.append("objetivoEstrategico", objetivoEstrategico);
             $.ajax({
                 url: "index.php?r=Planificacion/obj-estrategico/verificar-codigo",
@@ -171,7 +178,8 @@ $(document).ready(function() {
                 required: true,
                 digits: true,
                 max: 999,
-                largominimo: '2',
+                largominimo: '3',
+                dependencia: '#codigoPei',
                 CodigoObjetivoUnico: '#codigoObjEstrategico'
             },
             objetivo:{
@@ -190,6 +198,7 @@ $(document).ready(function() {
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero de 3 digitos como maximo",
                 largominimo: "Debe ingresar un numero de 3 digitos",
+                dependencia: "Debe elegir un PEI para poder validar el codigo del objetivo",
                 CodigoObjetivoUnico: "El codigo de objetivo estrategico debe ser unico"
             },
             objetivo: {

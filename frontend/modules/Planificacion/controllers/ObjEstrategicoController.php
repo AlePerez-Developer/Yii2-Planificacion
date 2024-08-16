@@ -222,13 +222,14 @@ class ObjEstrategicoController extends Controller
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return false;
         }
-        if (!isset($_POST["codigo"])) {
+        if (!isset($_POST["codigo"]) && !isset($_POST["pei"]) && !isset($_POST["objetivoEstrategico"]) ) {
             return false;
         }
 
         $objetivoEstrategico = ObjetivoEstrategico::find()
             ->where(['CodigoObjetivo' => $_POST["codigo"], 'CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['!=','CodigoObjEstrategico',$_POST["objetivoEstrategico"]])
+            ->andWhere(['CodigoPei' => $_POST["pei"]])
             ->one();
 
         if ($objetivoEstrategico) {

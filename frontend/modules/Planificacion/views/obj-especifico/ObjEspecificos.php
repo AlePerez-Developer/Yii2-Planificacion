@@ -37,7 +37,7 @@ $this->params['breadcrumbs'] = [['label' => 'Objs Especificos']];
                             <select class="form-control objestrategicos" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
                                 <option></option>
                                 <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
-                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoCOGE .') - ' . $objEstrategico->Objetivo  ?></option>
+                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoObjetivo .') - ' . $objEstrategico->Objetivo  ?></option>
                                 <?php } ?>
                             </select>
                         </div>

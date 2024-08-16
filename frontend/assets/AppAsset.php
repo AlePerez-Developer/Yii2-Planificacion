@@ -31,6 +31,7 @@ class AppAsset extends AssetBundle
         '../../vendor/datatables.net/datatables.net-select/js/dataTables.select.js',
         '../../vendor/datatables.net/datatables.net-select-bs5/js/select.bootstrap5.js',
         '../../vendor/almasaeed2010/adminlte/plugins/jquery-validation/jquery.validate.js',
+        '../../vendor/almasaeed2010/adminlte/plugins/jquery-validation/additional-methods.js',
         '../../vendor/almasaeed2010/adminlte/plugins/select2/js/select2.js',
         '../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.js',
         '../../vendor/almasaeed2010/adminlte/plugins/jquery-ui/jquery-ui.js'

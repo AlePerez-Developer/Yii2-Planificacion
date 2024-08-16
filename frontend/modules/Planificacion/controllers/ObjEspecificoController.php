@@ -66,8 +66,8 @@ class ObjEspecificoController extends Controller
             $objs = ObjetivoEspecifico::find()->select([
                 'ObjetivosEspecificos.*',
                 'ObjetivosInstitucionales.CodigoCOGE as COGEInstitucional','ObjetivosInstitucionales.Objetivo as ObjInstitucional',
-                'ObjetivosEstrategicos.CodigoCOGE as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
-                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoCOGE, char(45) , ObjetivosInstitucionales.CodigoCOGE, char(45), ObjetivosEspecificos.CodigoCOGE) as Codigo  '
+                'ObjetivosEstrategicos.CodigoObjetivo as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
+                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoObjetivo, char(45) , ObjetivosInstitucionales.CodigoCOGE, char(45), ObjetivosEspecificos.CodigoCOGE) as Codigo  '
             ])
                 ->join('INNER JOIN','ObjetivosInstitucionales','ObjetivosEspecificos.CodigoObjInstitucional = ObjetivosInstitucionales.CodigoObjInstitucional')
                 ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')

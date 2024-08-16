@@ -42,7 +42,7 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                     <form id="formObjEstrategico" action="" method="post">
                         <div class="form-group">
                             <label for="CodigoPei">Seleccione el Pei</label>
-                            <select class="form-control" id="codigoPei" name="codigoPei" >
+                            <select class="form-control codigoPei" id="codigoPei" name="codigoPei" >
                             <option value="0" selected>Seleccione el Pei</option>
                                 <?php foreach ($peis as $pei){  ?>
                                 <option value="<?= $pei->CodigoPei ?>"><?=$pei->DescripcionPei . ' Periodo ' . $pei->GestionInicio . ' - ' . $pei->GestionFin ?></option>

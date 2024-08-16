@@ -110,9 +110,7 @@
                                             <label for="codigoObjEstrategico">Seleccione el objetivo estrategico</label>
                                             <select class="form-control objEstrategico" id="codigoObjEstrategico" name="codigoObjEstrategico" >
                                                 <option></option>
-                                                <?php foreach ($unidades as $unidad){ ?>
-                                                    <option value="<?= $unidad['CodigoUnidad'] ?>"><?= '('.  $unidad['Da'] .') - ' . $objEstrategico['Objetivo']  ?></option>
-                                                <?php } ?>
+
                                             </select>
                                         </div>
                                     </div>

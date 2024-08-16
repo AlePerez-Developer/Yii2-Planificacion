@@ -106,6 +106,7 @@ class ObjetivoEstrategico extends ActiveRecord
                 [':CodigoObjetivo' => $this->CodigoObjetivo, ':Objetivo' => $this->Objetivo]
             )
             ->andWhere(['!=','CodigoObjEstrategico', $this->CodigoObjEstrategico])
+            ->andWhere(["CodigoPei"=> $this->CodigoPei])
             ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
         if(!empty($obj)){
             return true;

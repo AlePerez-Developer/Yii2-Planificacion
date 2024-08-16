@@ -123,8 +123,10 @@ th.dt-estado, td.dt-estado  {
 }
 
 .btnEstado {
-    height: 20px;
-    width: 20px;
+    height: 30px;
+    width: 80px;
+    font-size: x-small;
+
 }
 
 .btnEditar {
