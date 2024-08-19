@@ -10,9 +10,8 @@ use Yii;
  * This is the model class for table "Indicadores".
  *
  * @property int $CodigoIndicador
- * @property string|null $CodigoPei
- * @property string|null $CodigoPoa
- * @property string $Descripcion
+ * @property string|null $Codigo
+  * @property string $Descripcion
  * @property int $Gestion
  * @property int $ObjetivoEspecifico
  * @property int $Actividad
@@ -54,7 +53,7 @@ class Indicador extends \yii\db\ActiveRecord
             [['CodigoIndicador', 'Descripcion', 'Gestion', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['CodigoIndicador', 'Gestion', 'ObjetivoEspecifico', 'Actividad', 'Articulacion', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
-            [['CodigoPei', 'CodigoPoa', 'CodigoUsuario'], 'string', 'max' => 3],
+            [['Codigo', 'CodigoUsuario'], 'string', 'max' => 3],
             [['Descripcion'], 'string', 'max' => 200],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoIndicador'], 'unique'],
@@ -77,8 +76,7 @@ class Indicador extends \yii\db\ActiveRecord
     {
         return [
             'CodigoIndicador' => 'Codigo Indicador',
-            'CodigoPei' => 'Codigo Pei',
-            'CodigoPoa' => 'Codigo Poa',
+            'Codigo' => 'Codigo',
             'Descripcion' => 'Descripcion',
             'Gestion' => 'Gestion',
             'ObjetivoEspecifico' => 'Objetivo Especifico',

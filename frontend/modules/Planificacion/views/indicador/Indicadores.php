@@ -87,17 +87,11 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                             <div class="row">
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label for="CodigoPei">Codigo indicador PEI</label>
+                                        <label for="CodigoPei">Codigo indicador</label>
                                         <input type="text" class="form-control input-sm num" id="CodigoPei" name="CodigoPei" maxlength="3"  placeholder="Codigo Pei" style="width: 120px" >
                                     </div>
                                 </div>
 
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label for="CodigoPoa">Codigo indicador POA</label>
-                                        <input type="text" class="form-control input-sm num" id="CodigoPoa" name="CodigoPoa" maxlength="3"  placeholder="Codigo Poa" style="width: 120px" >
-                                    </div>
-                                </div>
                             </div>
                             <div class="row">
                                 <div class="form-group">

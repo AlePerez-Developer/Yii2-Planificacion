@@ -322,12 +322,14 @@ go
 create table Proyectos
 (
     CodigoProyecto int primary key not null,
+    Programa int not null,
     Codigo varchar(20) not null,
     Descripcion varchar(250) not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
+    foreign key (Programa) references Programas(CodigoPrograma),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
@@ -357,13 +359,6 @@ create table  IndicadoresAperturas
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
-
-
-
-
-
-
-
 
 
 create table AperturasProgramaticas

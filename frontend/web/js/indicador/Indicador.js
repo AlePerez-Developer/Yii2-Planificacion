@@ -119,8 +119,7 @@ $(document).ready(function(){
                 data: null,
                 defaultContent: '',
             },
-            { data: 'CodigoPei'},
-            { data: 'CodigoPoa'},
+            { data: 'Codigo'},
             { data: 'Descripcion' },
             { data: 'ArticulacionDescripcion' },
             { data: 'ResultadoDescripcion' },
@@ -363,7 +362,7 @@ $(document).ready(function(){
     function GuardarIndicador(){
         let objEspecifico = $("#CodigoObjEspecifico").val();
         let actividad = $("#CodigoActividad").val();
-        let codigoPei = $("#CodigoPei").val();
+        let codigo = $("#CodigoPei").val();
         let codigoPoa = $("#CodigoPoa").val();
         let descripcion = $("#Descripcion").val();
         let articulacion = $("#Articulacion").val();
@@ -374,7 +373,7 @@ $(document).ready(function(){
         let datos = new FormData();
         datos.append("objEspecifico", objEspecifico);
         datos.append("actividad", actividad);
-        datos.append("codigoPei", codigoPei);
+        datos.append("codigo", codigo);
         datos.append("codigoPoa", codigoPoa);
         datos.append("descripcion", descripcion);
         datos.append("articulacion", articulacion);

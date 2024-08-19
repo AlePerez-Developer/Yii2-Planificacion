@@ -89,8 +89,8 @@ $(document).ready(function () {
                 data: 'CodigoEstado',
                 render: function (data, type, row, meta) {
                     return ( (type === 'display') && (row.CodigoEstado === ESTADO_VIGENTE))
-                        ? '<button type="button" class="btn btn-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado =  "' + ESTADO_VIGENTE + '" ></button>'
-                        : '<button type="button" class="btn btn-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "' + ESTADO_CADUCO + '" ></button>' ;
+                        ? '<button type="button" class="btn btn-outline-success btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado =  "' + ESTADO_VIGENTE + '" >Vigente</button>'
+                        : '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" codigo="' + row.CodigoUnidad + '" estado = "' + ESTADO_CADUCO + '" >Caducado</button>' ;
                 },
             },
             {
@@ -239,10 +239,12 @@ $(document).ready(function () {
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
                     if (estado === ESTADO_VIGENTE) {
-                        objectBtn.removeClass('btn-success').addClass('btn-danger')
+                        objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
+                        objectBtn.html('Caducado')
                         objectBtn.attr('estado', ESTADO_CADUCO);
                     } else {
-                        objectBtn.addClass('btn-success').removeClass('btn-danger');
+                        objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
+                        objectBtn.html('Vigente')
                         objectBtn.attr('estado', ESTADO_VIGENTE);
                     }
                     DetenerSpiner(objectBtn);
