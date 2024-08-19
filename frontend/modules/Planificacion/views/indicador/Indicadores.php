@@ -174,7 +174,6 @@ $this->params['breadcrumbs'] = [['label' => 'Indicadores']];
                 <th>#</th>
                 <th>#</th>
                 <th>Codigo Pei</th>
-                <th>Codigo Poa</th>
                 <th>Descripcion</th>
                 <th>Articulacion</th>
                 <th>Resultado</th>

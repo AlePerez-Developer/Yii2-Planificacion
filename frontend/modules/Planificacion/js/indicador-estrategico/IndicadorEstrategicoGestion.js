@@ -223,6 +223,12 @@ $(document).ready(function (){
         restaurarMeta()
     });
 
+    $(document).on('click','#cerrarModal', function () {
+        $("#tablaListaIndicadoresEstrategicos").DataTable().ajax.reload(async () => {
+            $("#btnCancelar").click()
+        });
+    })
+
     $(document).on('hide.bs.modal','.programarIndicadorEstrategicoGestion', function () {
         $('#gestionBody').show()
         $('#gestionFooter').show()

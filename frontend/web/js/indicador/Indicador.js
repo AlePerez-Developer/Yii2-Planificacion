@@ -570,8 +570,7 @@ $(document).ready(function(){
             success: function (respuesta) {
                 let data = JSON.parse(JSON.stringify(respuesta));
                 $("#codigo").val(data.CodigoIndicador);
-                $("#CodigoPei").val(data.CodigoPei);
-                $("#CodigoPoa").val(data.CodigoPoa);
+                $("#CodigoPei").val(data.Codigo);
                 $(".objinstitucional").val(data.CodigoObjInstitucional).trigger('change',data.ObjetivoEspecifico)
                 $(".programa").val(data.CodigoPrograma).trigger('change',data.Actividad)
                 $("#Descripcion").val(data.Descripcion);
@@ -625,8 +624,7 @@ $(document).ready(function(){
         datos.append("codigoindicador", codigoindicador);
         datos.append("objEspecifico", objEspecifico);
         datos.append("actividad", actividad);
-        datos.append("codigoPei", codigoPei);
-        datos.append("codigoPoa", codigoPoa);
+        datos.append("codigo", codigoPei);
         datos.append("descripcion", descripcion);
         datos.append("articulacion", articulacion);
         datos.append("resultado", resultado);
