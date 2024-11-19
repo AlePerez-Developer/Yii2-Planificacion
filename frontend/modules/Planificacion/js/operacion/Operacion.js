@@ -1,7 +1,43 @@
 $(document).ready(function(){
 
-    $("#CodigoObjEstrategico").change(function (){
-        let codigo = $("#CodigoObjEstrategico").val();
+    $('#codigoObjEstrategico').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un objetivo estrategico",
+        allowClear: true
+    });
+
+    $('#codigoObjInstitucional').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un objetivo estrategico",
+        allowClear: true
+    });
+
+    $('#codigoObjEspecifico').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un objetivo especifico",
+        allowClear: true
+    });
+
+    $('#codigoPrograma').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un programa",
+        allowClear: true
+    });
+
+    $('#codigoProyecto').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un proyecto",
+        allowClear: true
+    });
+
+    $('#codigoActividad').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un actividad",
+        allowClear: true
+    });
+
+    $("#codigoObjEstrategico").change(function (){
+        let codigo = $("#codigoObjEstrategico").val();
         if (codigo !== ''){
             let datos = new FormData();
             datos.append("codigo", codigo);
@@ -14,23 +50,26 @@ $(document).ready(function(){
                 processData: false,
                 success: function (respuesta) {
                     var data = jQuery.parseJSON(respuesta);
-                    var sel = $("#CodigoObjInstitucional");
+                    var sel = $("#codigoObjInstitucional");
                     sel.empty();
                     sel.append('<option></option>');
                     $.each(data, function(index, value) {
-                        sel.append('<option value="' + value['CodigoObjInstitucional'] + '">' + value['Objetivo'] + '</option>');
+                        sel.append('<option value="' + value['CodigoObjInstitucional'] + '">' + '(' + value['CodigoCOGE'] + ') - ' + value['Objetivo'] + '</option>');
                     });
-                    $('#CodigoObjInstitucional').prop('disabled', false);
+                    $('#codigoObjInstitucional').prop('disabled', false);
                 },
             });
         } else {
-            $("#CodigoObjInstitucional").val(null).trigger('change');
-            $('#CodigoObjInstitucional').prop('disabled', true);
+            $("#codigoObjInstitucional").val(null).trigger('change');
+            $('#codigoObjInstitucional').prop('disabled', true);
+
+            $("#codigoObjEspecifico").val(null).trigger('change');
+            $('#codigoObjEspecifico').prop('disabled', true);
         }
     });
 
-    $("#CodigoObjInstitucional").change(function (val, obj){
-        let codigo = $("#CodigoObjInstitucional").val();
+    $("#codigoObjInstitucional").change(function (val, obj){
+        let codigo = $("#codigoObjInstitucional").val();
         if (codigo !== ''){
             let datos = new FormData();
             datos.append("codigo", codigo);
@@ -43,38 +82,32 @@ $(document).ready(function(){
                 processData: false,
                 success: function (respuesta) {
                     var data = jQuery.parseJSON(respuesta);
-                    var sel = $("#CodigoObjEspecifico");
+                    var sel = $("#codigoObjEspecifico");
                     sel.empty();
                     sel.append('<option></option>');
                     $.each(data, function(index, value) {
                         sel.append('<option value="' + value['CodigoObjEspecifico'] + '">' + '(' + value['CodigoCOGE'] + ') - ' + value['Objetivo'] + '</option>');
                     });
-                    $('#CodigoObjEspecifico').prop('disabled', false);
+                    $('#codigoObjEspecifico').prop('disabled', false);
                 },
             }).done(function (){
                 if (obj !== undefined)
-                    $("#CodigoObjEspecifico").val(obj).trigger('change');
+                    $("#codigoObjEspecifico").val(obj).trigger('change');
             })
         } else {
-            $("#CodigoObjEspecifico").val(null).trigger('change');
-            $('#CodigoObjEspecifico').prop('disabled', true);
+            $("#codigoObjEspecifico").val(null).trigger('change');
+            $('#codigoObjEspecifico').prop('disabled', true);
         }
     });
 
-    $('.objestrategicos').select2({
-        placeholder: "Elija un objetivo estrategico",
-        allowClear: true
-    });
+
 
     $('.objinstitucional').select2({
         placeholder: "Elija un objetivo institucional",
         allowClear: true
     });
 
-    $('.objinstitucional').select2({
-        placeholder: "Elija un objetivo institucional",
-        allowClear: true
-    });
+
 
     $('.objinstitucional').select2({
         placeholder: "Elija un objetivo institucional",

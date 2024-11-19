@@ -34,8 +34,8 @@ $this->params['breadcrumbs'] = [['label' => 'Operaciones']];
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoObjEstrategico">Seleccione el objetivo estrategico</label>
-                                    <select class="form-control objestrategicos" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
+                                    <label for="codigoObjEstrategico">Seleccione el objetivo estrategico</label>
+                                    <select class="form-control" id="codigoObjEstrategico" name="codigoObjEstrategico" >
                                         <option></option>
                                         <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
                                             <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoObjetivo .') - ' . $objEstrategico->Objetivo  ?></option>
@@ -45,16 +45,16 @@ $this->params['breadcrumbs'] = [['label' => 'Operaciones']];
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoObjInstitucional">Seleccione el objetivo institucional</label>
-                                    <select class="form-control objinstitucional" id="CodigoObjInstitucional" name="CodigoObjInstitucional" disabled >
+                                    <label for="codigoObjInstitucional">Seleccione el objetivo institucional</label>
+                                    <select class="form-control" id="codigoObjInstitucional" name="codigoObjInstitucional" disabled >
                                         <option></option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoObjEspecifico">Seleccione el objetivo especifico</label>
-                                    <select class="form-control objespecifico" id="CodigoObjEspecifico" name="CodigoObjEspecifico" disabled >
+                                    <label for="codigoObjEspecifico">Seleccione el objetivo especifico</label>
+                                    <select class="form-control" id="codigoObjEspecifico" name="codigoObjEspecifico" disabled >
                                         <option></option>
                                     </select>
                                 </div>
@@ -63,8 +63,8 @@ $this->params['breadcrumbs'] = [['label' => 'Operaciones']];
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoPrograma">Seleccione el Programa</label>
-                                    <select class="form-control programa" id="CodigoPrograma" name="CodigoPrograma" >
+                                    <label for="codigoPrograma">Seleccione el Programa</label>
+                                    <select class="form-control" id="codigoPrograma" name="codigoPrograma" >
                                         <option></option>
                                         <?php foreach ($programas as $programa){  ?>
                                             <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
@@ -74,16 +74,16 @@ $this->params['breadcrumbs'] = [['label' => 'Operaciones']];
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoProyecto">Seleccione el proyecto</label>
-                                    <select class="form-control CodigoProyecto" id="CodigoProyecto" name="CodigoProyecto" disabled >
+                                    <label for="codigoProyecto">Seleccione un proyecto</label>
+                                    <select class="form-control" id="codigoProyecto" name="codigoProyecto" disabled >
                                         <option></option>
                                     </select>
                                 </div> 
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="CodigoActividad">Seleccione el objetivo especifico</label>
-                                    <select class="form-control CodigoActividad" id="CodigoActividad" name="CodigoActividad" disabled >
+                                    <label for="codigoActividad">Seleccione una actividad</label>
+                                    <select class="form-control" id="codigoActividad" name="codigoActividad" disabled >
                                         <option></option>
                                     </select>
                                 </div>
