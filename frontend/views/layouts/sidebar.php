@@ -54,6 +54,14 @@
                         ]
                     ],
                     [
+                        'label' => 'Planificacion CH',
+                        'icon' => 'th',
+                        'badge' => '<span class="right badge badge-info"></span>',
+                        'items' => [
+                            ['label' => 'Planificar', 'url' => ['/PlanificacionCH/planificar-carga-horaria/index'], 'iconStyle' => 'far'],
+                        ]
+                    ],
+                    [
                         'label' => 'Soa',
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',

@@ -15,6 +15,9 @@ return [
         'Planificacion' => [
             'class' => 'app\modules\Planificacion\PlanificacionModule',
         ],
+        'PlanificacionCH' => [
+            'class' => 'app\modules\PlanificacionCH\PlanificacionCHModule',
+        ],
     ],
     'components' => [
         'request' => [
