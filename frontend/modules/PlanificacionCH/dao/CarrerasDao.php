@@ -53,13 +53,12 @@ class CarrerasDao
     static public function listaSedesCarrera($codigoCarrera)
     {
         $dbRRHH = Yii::$app->dbAcademica;
-        $consulta = "SELECT DISTINCT sed.CodigoSede, lug.CodigoLugar, lug.NombreLugar, sed.CodigoLugarAcad
+        $consulta = "SELECT DISTINCT sed.CodigoSede, sed.NombreSede
                      FROM Carreras car
                      INNER JOIN CarrerasSedes carsed ON car.CodigoCarrera = carsed.CodigoCarrera
                      INNER JOIN Sedes sed ON carsed.CodigoSede = sed.CodigoSede
-                     INNER JOIN Lugares lug ON sed.CodigoLugar = lug.CodigoLugar
                      WHERE car.CodigoCarrera = :codigoCarrera                                                                     
-                     ORDER BY lug.NombreLugar ";
+                     ORDER BY sed.NombreSede ";
         $instruccion = $dbRRHH->createCommand($consulta)
             ->bindParam(":codigoCarrera", $codigoCarrera, PDO::PARAM_STR);
         $lector = $instruccion->query();

@@ -12,6 +12,7 @@ $this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/planif
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
 
+var_dump($a);
 ?>
 
 <style>

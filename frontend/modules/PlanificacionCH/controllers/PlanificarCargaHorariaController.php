@@ -6,6 +6,7 @@ namespace app\modules\PlanificacionCH\controllers;
 use app\modules\PlanificacionCH\dao\CarrerasDao;
 use app\modules\PlanificacionCH\dao\FacultadesDao;
 use app\modules\PlanificacionCH\dao\PlanesEstudiosDao;
+use app\modules\PlanificacionCH\models\Facultad;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -26,8 +27,11 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionIndex()
     {
+        $r = Facultad::find()->select(['CodigoFacultad','NombreFacultad'])->orderBy('CodigoFacultad')
+            ->asArray()
+            ->all();
         $listaFacultades = ArrayHelper::map(FacultadesDao::listaFacultades(), 'CodigoFacultad', 'NombreFacultad');
-        return $this->render('planificarcargahoraria', ['facultades' => $listaFacultades]);
+        return $this->render('planificarcargahoraria', ['facultades' => $listaFacultades,'a' => $r]);
     }
 
     public function actionListarCarreras(){
@@ -49,7 +53,7 @@ class PlanificarCargaHorariaController extends Controller
             $codigoCarrera = $_POST["carrera"];
             $sedes = CarrerasDao::listaSedesCarrera($codigoCarrera);
             foreach ($sedes as $sede) {
-                $opciones .= "<option value='" . $sede->CodigoSede . "' valueacad='" . $sede->CodigoLugarAcad . "'>" . $sede->NombreLugar . "</option>";
+                $opciones .= "<option value='" . $sede->CodigoSede . "' >" . $sede->NombreSede . "</option>";
             }
             return $opciones;
         }
