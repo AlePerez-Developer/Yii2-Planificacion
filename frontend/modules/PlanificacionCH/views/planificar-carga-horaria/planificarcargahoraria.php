@@ -69,59 +69,17 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
             </div>
         </div>
         <div class="card-body">
-            <div class="card" id="divConfiguracion" hidden>
-                <div class="card-header">
-                    <div class="row">
-                        <div class="col-10">
-                            <h3>CONFIGURACIÓN DE COMPARACIÓN</h3>
-                        </div>
-                        <div class="col-2">
-                            <button class='btn btn-outline-primary btnEditarConfiguracion' data-toggle='modal' data-target='#modalModificarConfiguracion'>
-                                <i class="fa fa-cog"></i>
-                            </button>
-                        </div>
-
-                    </div>
-                    <div class="row row-cols-8 align-items-start">
-                        <div class="col">
-                            <label>Año:</label>
-                        </div>
-                        <div class="col">
-                            <span id="gestionAnteriorConf"></span>
-                        </div>
-                        <div class="col">
-                            <label>Mes:</label>
-                        </div>
-                        <div class="col">
-                            <span id="mesAnteriorConf"></span>
-                        </div>
-                        <div class="col">
-                            <label>Gestion Anterior:</label>
-                        </div>
-                        <div class="col">
-                            <span id="gestionAcademicaAnteriorConf"></span>
-                        </div>
-                        <div class="col">
-                            <label>Gestion Planificacion:</label>
-                        </div>
-                        <div class="col">
-                            <span id="gestionAcademicaPlanificacionConf"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div id="divTabla" class="card-body" hidden>
-                <table class="table table-bordered table-striped dt-responsive tablaListaObjEspecificos" style="width: 100%" >
+                <table id="tablaMaterias" class="table table-bordered table-striped dt-responsive tablaMateriass" style="width: 100%" >
                     <thead>
                     <th style="text-align: center; vertical-align: middle;">#</th>
                     <th style="text-align: center; vertical-align: middle;">Sigla</th>
                     <th style="text-align: center; vertical-align: middle;">Materia</th>
-                    <th style="text-align: center; vertical-align: middle;">Configuracion</th>
+                    <th style="text-align: center; vertical-align: middle;">Horas Teoricas</th>
+                    <th style="text-align: center; vertical-align: middle;">Horas Practicas</th>
+                    <th style="text-align: center; vertical-align: middle;">Horas Laboratorio</th>
+                    <th style="text-align: center; vertical-align: middle;">Proyecccion Estudiantes</th>
                     <th style="text-align: center; vertical-align: middle;">Programados</th>
-                    <th style="text-align: center; vertical-align: middle;">G. Teoria</th>
-                    <th style="text-align: center; vertical-align: middle;">G. Practica</th>
-                    <th style="text-align: center; vertical-align: middle;">G. Laboratorio</th>
                     </thead>
                 </table>
             </div>

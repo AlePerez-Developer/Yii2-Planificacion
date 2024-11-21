@@ -6,6 +6,9 @@ namespace app\modules\PlanificacionCH\controllers;
 use app\modules\PlanificacionCH\dao\CarrerasDao;
 use app\modules\PlanificacionCH\dao\FacultadesDao;
 use app\modules\PlanificacionCH\dao\PlanesEstudiosDao;
+use app\modules\PlanificacionCH\models\Facultad;
+use app\modules\PlanificacionCH\models\Materia;
+use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -49,7 +52,7 @@ class PlanificarCargaHorariaController extends Controller
             $codigoCarrera = $_POST["carrera"];
             $sedes = CarrerasDao::listaSedesCarrera($codigoCarrera);
             foreach ($sedes as $sede) {
-                $opciones .= "<option value='" . $sede->CodigoSede . "' valueacad='" . $sede->CodigoLugarAcad . "'>" . $sede->NombreLugar . "</option>";
+                $opciones .= "<option value='" . $sede->CodigoSede . "' >" . $sede->NombreSede . "</option>";
             }
             return $opciones;
         }
@@ -81,6 +84,31 @@ class PlanificarCargaHorariaController extends Controller
             return $opciones;
         }
     }
+
+
+    public function actionListarMaterias(){
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $Materias = Materia::find()->alias('M')
+                ->select(['M.CodigoCarrera','M.NumeroPlanEstudios','M.SiglaMateria','M.NombreMateria','isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
+                    'sum(Md.NumeroEstudiantesProgramados) as Prog','p.CantidadProyeccion as Proy'])
+                ->join('INNER JOIN','Proyecciones P', 'P.CodigoCarrera = M.CodigoCarrera and P.SiglaMateria = m.SiglaMateria')
+                ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
+                ->where(['M.CodigoCarrera' => $_POST["carrera"]])
+                ->andWhere(['M.Curso' => $_POST["curso"]])
+                ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
+                ->andWhere(['P.GestionAcademica' => $_POST["gestion"]])
+                ->andWhere(['Md.GestionAcademica' => $_POST["gestion"]])
+                ->andWhere("Md.CodigoTipoGrupoMateria = 'T' and Md.CodigoModalidadCurso in ('NS','NA')")
+                ->groupBy(' M.CodigoCarrera,M.NumeroPlanEstudios,M.SiglaMateria,M.NombreMateria,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,p.CantidadProyeccion')
+                ->orderBy('M.SiglaMateria')
+                ->asArray()
+                ->all();
+            return json_encode($Materias);
+        } else
+            return 'ERROR_CABECERA';
+    }
+
+
 
     public function actionBuscarConfiguracionVigenteAjax()
     {

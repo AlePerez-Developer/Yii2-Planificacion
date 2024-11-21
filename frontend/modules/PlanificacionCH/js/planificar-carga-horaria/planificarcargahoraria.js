@@ -135,27 +135,6 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("carrera", codigoCarrera);
         datos.append("sede", sede);
-        $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/buscar-configuracion-vigente-ajax",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function (respuesta) {
-                let meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                let numeroMes = parseInt(respuesta["MesAnterior"]);
-                $(".search-plan").show();
-                $("#gestionAcademicaAnterior").text(respuesta["GestionAcademicaAnterior"]);
-                $("#gestionAcademicaPlanificacion").text(respuesta["GestionAcademicaPlanificacion"]);
-                $("#gestionAnteriorConf").text(respuesta["GestionAnterior"]);
-                $("#mesAnteriorConf").attr("numeromes", numeroMes);
-                $("#mesAnteriorConf").text(meses[numeroMes-1]);
-                $("#gestionAcademicaAnteriorConf").text(respuesta["GestionAcademicaAnterior"]);
-                $("#gestionAcademicaPlanificacionConf").text(respuesta["GestionAcademicaPlanificacion"]);
-            }
-        });
 
         $.ajax({
             url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-planes-estudios",
@@ -228,46 +207,135 @@ $(document).ready(function () {
         });
     });
 
-    $("#cursos").change(function () {
-        let codigoCarrera = $("#carreras").val();
-        let codigoSede = $("#sedes").val();
-        let codigoSedeAcad = $("#sedes option[value='" + codigoSede + "']").attr("valueacad");
-        let numeroPlanEstudios = $("#planes").val();
-        let curso = $(this).val();
-        if (codigoCarrera != "" && codigoSede != "" && codigoSedeAcad != "" && numeroPlanEstudios != "" && curso != "") {
-            let datos = new FormData();
-            datos.append("codigocarrera", codigoCarrera);
-            datos.append("codigosede", codigoSede);
-            datos.append("codigosedeacad", codigoSedeAcad);
-            datos.append("numeroplanestudios", numeroPlanEstudios);
-            datos.append("curso", curso);
 
-
-
-            $.ajax({
-                url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-materias-ajax",
-                method: "POST",
-                data: datos,
-                cache: false,
-                contentType: false,
-                processData: false,
-                dataType: "html",
-                success: function (respuesta) {
-                    $("#tablaMaterias tbody tr").remove();
-                    $("#contenidoMaterias").append(respuesta);
-                    $(".tabla-materias").show();
-                }
-            });
-        } else {
-            $(".tabla-materias").hide();
-        }
-    });
-
+    function format(d) {
+        return (
+            '<div class="row">' +
+            '   <div class="col-5">' +
+            '       <div class="titulosmall">Plan estrategico institucional</div>' +
+            '   </div>' +
+            '</div>' +
+            '<div class="row">' +
+            '   <div class="col-5">' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Desc: </div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' + 'd.DescripcionPEI' + '</div>' +
+            '           </div>' +
+            '       </div>' +
+            '       <div class="row">' +
+            '           <div class="col-2">' +
+            '               <div class="subsmall">Fechas</div>' +
+            '           </div>' +
+            '           <div class="col-4">' +
+            '               <div class="little">' +
+            '                   Vigencia: ' + 'd.GestionInicio' +  ' - ' + 'd.GestionFin' + '<br>' +
+            '                   Aprobacion: ' + d.FechaAprobacion +
+            '               </div>' +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '</div>'
+        );
+    }
 
     $('#cursos').change(function () {
         $('#divConfiguracion').attr('hidden',false)
         $('#divTabla').attr('hidden',false)
+
+        let carrera = $("#carreras").val()
+        let curso = $("#cursos").val()
+        let plan = $("#planes").val()
+        let gestion = '1/2022'
+
+        if (table){table.destroy();}
+
+        table = $("#tablaMaterias").DataTable({
+            layout: {
+                topStart: null,
+                topEnd: null ,
+                bottomStart: null,
+                bottomEnd: null
+            },
+            ajax: {
+                method: "POST",
+                data: {
+                    carrera: carrera,
+                    curso: curso,
+                    plan: plan,
+                    gestion: gestion
+                },
+                dataType: 'json',
+                cache: false,
+
+                url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-materias',
+                dataSrc: '',
+                error: function (xhr, ajaxOptions, thrownError) {
+                    MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+                }
+            },
+            columns: [
+                {
+                    className: 'dt-small dt-control dt-center',
+                    orderable: false,
+                    searchable: false,
+                    data: null,
+                    defaultContent: '',
+                    width: 30,
+                },
+                {
+                    className: 'dt-small',
+                    data: 'SiglaMateria'
+                },
+                {
+                    className: 'dt-small dt-control',
+                    data: 'NombreMateria'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'HorasTeoria'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'HorasPractica'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'HorasLaboratorio'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'Prog'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'Proy'
+                },
+            ],
+        });
+
     })
+
+    $('.tablaMateriass tbody').on('click', 'td.dt-control', function () {
+        console.log('adsasdasdasd')
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+        }
+        else {
+            row.child(format(row.data())).show();
+        }
+    });
+
+
+
+
+
+
 
 
     $('#nuevaConfiguracion').click(function (){
