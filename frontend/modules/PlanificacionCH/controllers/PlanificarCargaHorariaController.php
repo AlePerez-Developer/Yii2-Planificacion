@@ -29,8 +29,11 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionIndex()
     {
+        $r = Facultad::find()->select(['CodigoFacultad','NombreFacultad'])->orderBy('CodigoFacultad')
+            ->asArray()
+            ->all();
         $listaFacultades = ArrayHelper::map(FacultadesDao::listaFacultades(), 'CodigoFacultad', 'NombreFacultad');
-        return $this->render('planificarcargahoraria', ['facultades' => $listaFacultades]);
+        return $this->render('planificarcargahoraria', ['facultades' => $listaFacultades,'a' => $r]);
     }
 
     public function actionListarCarreras(){
