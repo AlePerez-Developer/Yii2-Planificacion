@@ -7,6 +7,28 @@ $(document).ready(function () {
         theme: 'bootstrap4',
         placeholder: "Elija una facultad",
         allowClear: true,
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                };
+            },
+            cache: false,
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-facultades',
+            dataSrc: '',
+            processResults: function (data) {
+                return {
+                    results: data.facultades
+                };
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
+        },
     })
 
     $('#carreras').select2({
@@ -253,6 +275,7 @@ $(document).ready(function () {
             '                            </div>'
         );
     }
+
 
     $('#cursos').change(function () {
         $('#divConfiguracion').attr('hidden',false)

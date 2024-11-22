@@ -38,6 +38,24 @@ class PlanificarCargaHorariaController extends Controller
         return $this->render('planificarcargahoraria', ['facultades' => $listaFacultades,'a' => $r]);
     }
 
+    public function actionListarFacultades() {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+
+        $search = str_replace(" ","%", $_POST['q'] ?? '');
+
+        $facultades = Facultad::find()->select(['CodigoFacultad as id','NombreFacultad as text'])
+            ->where(['like', 'NombreFacultad', '%' . $search . '%', false])
+            ->asArray()->all();
+
+        if (!$facultades) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'facultades' =>  $facultades]);
+    }
+
     public function actionListarCarreras(){
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $opciones = "<option value=''>Selecionar Carrera</option>";

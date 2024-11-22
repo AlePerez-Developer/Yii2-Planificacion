@@ -29,11 +29,6 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
                     <label for="facultades" style="font-size: 12px">Seleccione la facultad</label>
                     <select id="facultades" name="facultades" style="width: 95%">
                         <option></option>
-                        <?php
-                        foreach ($facultades as $codigo => $nombre) {
-                            echo "<option value='" . $codigo . "'>" . $nombre . "</option>";
-                        }
-                        ?>
                     </select>
                 </div>
 
