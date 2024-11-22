@@ -11,8 +11,6 @@ $this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/planif
 
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
-
-var_dump($a);
 ?>
 
 <style>
@@ -81,9 +79,12 @@ var_dump($a);
                     <th style="text-align: center; vertical-align: middle;">Horas Laboratorio</th>
                     <th style="text-align: center; vertical-align: middle;">Proyecccion Estudiantes</th>
                     <th style="text-align: center; vertical-align: middle;">Programados</th>
+                    <th style="text-align: center; vertical-align: middle;">Editar</th>
                     </thead>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<?php include_once "modalPlanificar.php"; ?>
