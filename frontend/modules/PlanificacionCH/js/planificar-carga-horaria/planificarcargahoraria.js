@@ -13,7 +13,7 @@ $(document).ready(function () {
             delay: 300,
             data: function (params) {
                 return {
-                    q: params.term, // search term
+                    q: params.term,
                     page: params.page
                 };
             },
@@ -233,46 +233,64 @@ $(document).ready(function () {
 
     function format(d) {
         return (
-            '<ul class="nav nav-tabs" id="myTab" role="tablist">\n' +
-            '                                <li class="nav-item" role="presentation">\n' +
-            '                                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#teoria" type="button" role="tab" aria-controls="home" aria-selected="true">Grupos de Teoria</button>\n' +
-            '                                </li>\n' +
-            '                                <li class="nav-item" role="presentation">\n' +
-            '                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#practica" type="button" role="tab" aria-controls="profile" aria-selected="false">Grupos de Practica</button>\n' +
-            '                                </li>\n' +
-            '                                <li class="nav-item" role="presentation">\n' +
-            '                                    <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#laboratorio" type="button" role="tab" aria-controls="contact" aria-selected="false">Grupos de Laboratorio</button>\n' +
-            '                                </li>\n' +
-            '                            </ul>\n' +
-            '                            <div class="tab-content" id="myTabContent">\n' +
-            '                                <div class="tab-pane fade show active" id="teoria" role="tabpanel" aria-labelledby="home-tab">\n' +
-            '                                    <div class="card">\n' +
-            '                                        <div class="card-header">\n' +
-            '                                            <button id="btnTeoria" type="button" class="btn btn-info form-control">Agregar Grupo Nuevo</button>\n' +
-            '                                        </div>\n' +
-            '                                        <div class="card-body">\n' +
-            '                                            <table id="tablaGrpTeoria" class="table table-bordered table-striped dt-responsive " style="width: 100%" >\n' +
-            '                                                <thead>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">#</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Sigla</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Grupo</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Ci</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Docente</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Obs</th>\n' +
-            '                                                    <th style="text-align: center; vertical-align: middle;">Editar</th>\n' +
-            '                                                </thead>\n' +
-            '                                            </table>\n' +
-            '                                        </div>\n' +
-            '                                    </div>\n' +
-            '\n' +
-            '                                </div>\n' +
-            '                                <div class="tab-pane fade" id="practica" role="tabpanel" aria-labelledby="profile-tab">\n' +
-            '\n' +
-            '                                </div>\n' +
-            '                                <div class="tab-pane fade" id="laboratorio" role="tabpanel" aria-labelledby="contact-tab">\n' +
-            '\n' +
-            '                                </div>\n' +
-            '                            </div>'
+            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">\n' +
+            '  <li class="nav-item" role="presentation">\n' +
+            '    <button class="nav-link active" id="pills-teoria-tab" data-bs-toggle="pill" data-bs-target="#pills-teoria" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Grupos Teoria</button>\n' +
+            '  </li>\n' +
+            '  <li class="nav-item" role="presentation">\n' +
+            '    <button class="nav-link" id="pills-laboratorio-tab" data-bs-toggle="pill" data-bs-target="#pills-laboratorio" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Grupos Laboratorio</button>\n' +
+            '  </li>\n' +
+            '  <li class="nav-item" role="presentation">\n' +
+            '    <button class="nav-link" id="pills-practica-tab" data-bs-toggle="pill" data-bs-target="#pills-practica" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Grupos Practica</button>\n' +
+            '  </li>\n' +
+            '</ul>\n' +
+            '<div class="tab-content" id="pills-tabContent">\n' +
+            '  <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">' +
+            '               <table id="tablaTeoria" class="table table-bordered  dt-responsive" style="width: 100%" >' +
+            '                    <thead>' +
+            '                    <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Programados</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
+            '                    <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
+            '                    </thead>\n' +
+            '                </table>' +
+            '   </div>' +
+            '  <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">' +
+                '         <table id="tablaLaboratorio" class="table table-bordered  dt-responsive" style="width: 100%" >' +
+            '            <thead>' +
+            '            <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Programados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
+            '            </thead>' +
+            '            </table>' +
+            '</div>' +
+            '  <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">' +
+            '<table id="tablaPractica" class="table table-bordered  dt-responsive" style="width: 100%" >' +
+            '            <thead>' +
+            '            <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Programados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
+            '            <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
+            '            </thead>' +
+            '            </table>' +
+            '</div>' +
+            '</div>'
         );
     }
 
@@ -284,7 +302,7 @@ $(document).ready(function () {
         let carrera = $("#carreras").val()
         let curso = $("#cursos").val()
         let plan = $("#planes").val()
-        let gestion = '1/2022'
+        let gestion = '1/2021'
 
         if (table){table.destroy();}
 
@@ -305,7 +323,6 @@ $(document).ready(function () {
                 },
                 dataType: 'json',
                 cache: false,
-
                 url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-materias',
                 dataSrc: '',
                 error: function (xhr, ajaxOptions, thrownError) {
@@ -314,11 +331,18 @@ $(document).ready(function () {
             },
             columns: [
                 {
-                    className: 'dt-small dt-control dt-center',
+                    className: 'dt-small details-control dt-center',
                     orderable: false,
                     searchable: false,
                     data: null,
                     defaultContent: '',
+                    "render": function () {
+                        return '<i class="fa fa-plus-square" aria-hidden="true"></i>';
+                    },
+                    select: {
+                        selector:'td:not(:first-child)',
+                        style:    'os'
+                    },
                     width: 30,
                 },
                 {
@@ -343,41 +367,235 @@ $(document).ready(function () {
                 },
                 {
                     className: 'dt-small dt-center',
-                    data: 'Prog'
+                    data: 'Programados'
                 },
                 {
                     className: 'dt-small dt-center',
-                    data: 'Proy'
+                    data: 'Aprobados'
                 },
                 {
-                    className: 'dt-small dt-acciones dt-center',
-                    orderable: false,
-                    searchable: false,
-                    data: 'CodigoCarrera',
-                    render: function (data, type, row) {
-                        return type === 'display'
-                            ? '<div class="btn-group" role="group" aria-label="Acciones">' +
-                            '<button type="button" class="btn btn-outline-primary btn-sm btnProgramar" facultad =  "' + $('#facultades').val() + '" carrera="' + data + '" sede = "' + row.CodigoSede + '"  plan="' + row.NumeroPlanEstudios + '" curso="' + row.Curso + '" sigla =  "' + row.SiglaMateria + '"  data-toggle="tooltip" title="Click! para editar el registro"><span class="fa fa-pen-fancy"></span></button>' +
-                            '</div>'
-                            : data;
-                    },
+                    className: 'dt-small dt-center',
+                    data: 'Reprobados'
                 },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'Abandonos'
+                },
+                {
+                    className: 'dt-small dt-center',
+                    data: 'CantidadProyeccion'
+                },
+
             ],
         });
 
     })
 
-    $(document).on('click','#tablaMaterias tbody td.dt-control', function () {
+    $(document).on('click','#tablaMaterias tbody td.details-control', function () {
         var tr = $(this).closest('tr');
+        var tdi = tr.find("i.fa");
         var row = table.row(tr);
 
         if (row.child.isShown()) {
+            tr.removeClass('shown');
+            tdi.first().removeClass('fa-minus-square');
+            tdi.first().addClass('fa-plus-square');
             row.child.hide();
         }
         else {
+            $("#tablaMaterias  tr.shown").each(function () {
+                let rowOpen = table.row($(this));
+                let tdiOpen = $(this).find("i.fa");
+                $(this).removeClass('shown');
+                tdiOpen.first().removeClass('fa-minus-square');
+                tdiOpen.first().addClass('fa-plus-square');
+                rowOpen.child.hide();
+            });
+
+            tr.addClass('shown');
+            tdi.first().removeClass('fa-plus-square');
+            tdi.first().addClass('fa-minus-square');
             row.child(format(row.data())).show();
+            llenarTablas(row.data().SiglaMateria)
         }
     })
+
+    function llenarTablas(sigla){
+        let carrera = $("#carreras").val()
+        let curso = $("#cursos").val()
+        let plan = $("#planes").val()
+        let gestion = '1/2021'
+        let datos = new FormData();
+        datos.append("carrera", carrera);
+        datos.append("curso", curso);
+        datos.append("plan", plan);
+        datos.append("gestion", gestion);
+        datos.append("sigla", sigla);
+
+        $.ajax({
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-grupos",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+
+                    $('#tablaTeoria').dataTable({
+                        layout: {
+                            topStart: null,
+                            topEnd: null ,
+                            bottomStart: null,
+                            bottomEnd: null
+                        },
+                        "data": data.teoria,
+                        columns: [
+                            {
+                                className: 'dt-small',
+                                data: 'IdPersona'
+                            },
+                            {
+                                className: 'dt-small',
+                                data: 'Nombre'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Grupo'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'HorasTeoria'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Programados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Aprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Reprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Abandonos'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'CantidadProyeccion'
+                            },
+                        ],
+                    })
+
+                    $('#tablaLaboratorio').dataTable({
+                        layout: {
+                            topStart: null,
+                            topEnd: null ,
+                            bottomStart: null,
+                            bottomEnd: null
+                        },
+                        "data": data.laboratorio,
+                        columns: [
+                            {
+                                className: 'dt-small',
+                                data: 'IdPersona'
+                            },
+                            {
+                                className: 'dt-small',
+                                data: 'Nombre'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Grupo'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'HorasTeoria'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Programados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Aprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Reprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Abandonos'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'CantidadProyeccion'
+                            },
+                        ],
+                    })
+
+                    $('#tablaPractica').dataTable({
+                        layout: {
+                            topStart: null,
+                            topEnd: null ,
+                            bottomStart: null,
+                            bottomEnd: null
+                        },
+                        "data": data.practica,
+                        columns: [
+                            {
+                                className: 'dt-small',
+                                data: 'IdPersona'
+                            },
+                            {
+                                className: 'dt-small',
+                                data: 'Nombre'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Grupo'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'HorasTeoria'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Programados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Aprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Reprobados'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'Abandonos'
+                            },
+                            {
+                                className: 'dt-small dt-center',
+                                data: 'CantidadProyeccion'
+                            },
+                        ],
+                    })
+                }
+                else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+            }
+        });
+    }
 
     $(document).on('click', '#tablaMaterias tbody .btnProgramar', function(){
         let objectBtn = $(this)
@@ -489,6 +707,15 @@ $(document).ready(function () {
         })
 
         $('#modalPlanificar').modal('show');
+    })
+
+    $('#rrrr').click(function(){
+        let a
+        $("#oso").each(function () {
+            a = $(this).val()
+            console.log(a)
+        });
+
     })
 
 

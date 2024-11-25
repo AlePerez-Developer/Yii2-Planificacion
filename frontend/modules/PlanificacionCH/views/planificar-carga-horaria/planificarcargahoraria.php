@@ -20,6 +20,14 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
     .select2-selection{
         font-size: 12px
     }
+    td.details-control {
+        text-align:center;
+        color:forestgreen;
+        cursor: pointer;
+    }
+    tr.shown td.details-control {
+        text-align:center;
+        color:red;
 </style>
 <div class="card">
     <div class="mt-2 ml-3 mb-3">
@@ -64,7 +72,7 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         </div>
         <div class="card-body">
             <div id="divTabla" class="card-body" hidden>
-                <table id="tablaMaterias" class="table table-bordered table-striped dt-responsive tablaMateriass" style="width: 100%" >
+                <table id="tablaMaterias" class="table table-bordered  dt-responsive tablaMateriass" style="width: 100%" >
                     <thead>
                     <th style="text-align: center; vertical-align: middle;">#</th>
                     <th style="text-align: center; vertical-align: middle;">Sigla</th>
@@ -72,14 +80,17 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
                     <th style="text-align: center; vertical-align: middle;">Horas Teoricas</th>
                     <th style="text-align: center; vertical-align: middle;">Horas Practicas</th>
                     <th style="text-align: center; vertical-align: middle;">Horas Laboratorio</th>
-                    <th style="text-align: center; vertical-align: middle;">Proyecccion Estudiantes</th>
                     <th style="text-align: center; vertical-align: middle;">Programados</th>
-                    <th style="text-align: center; vertical-align: middle;">Editar</th>
+                    <th style="text-align: center; vertical-align: middle;">Aprobados</th>
+                    <th style="text-align: center; vertical-align: middle;">Reprobados</th>
+                    <th style="text-align: center; vertical-align: middle;">Abandonos</th>
+                    <th style="text-align: center; vertical-align: middle;">Proyeccion</th>
                     </thead>
                 </table>
             </div>
         </div>
     </div>
 </div>
+<button type="button" class="form-control btn btn-outline-info" id="rrrr"><i class="fa-plus-square">orale</i></button>
 
 <?php include_once "modalPlanificar.php"; ?>
