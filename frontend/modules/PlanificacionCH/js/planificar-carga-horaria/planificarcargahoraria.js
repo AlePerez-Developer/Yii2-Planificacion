@@ -2,6 +2,7 @@ $(document).ready(function () {
     let table
     let tabla
     let gestiones
+    let vamosaver
 
     $('#facultades').select2({
         theme: 'bootstrap4',
@@ -35,6 +36,29 @@ $(document).ready(function () {
         theme: 'bootstrap4',
         placeholder: "Elija una carrera",
         allowClear: true,
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return {
+                    facultad: $('#facultades').val(),
+                    q: params.term,
+                    page: params.page
+                };
+            },
+            cache: false,
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-carreras',
+            dataSrc: '',
+            processResults: function (data) {
+                return {
+                    results: data.carreras
+                };
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
+        },
     })
 
     $('#sedes').select2({
@@ -65,40 +89,11 @@ $(document).ready(function () {
         $('#divTabla').attr('hidden',true)
 
         facultad = $(this).val()
-        let datos = new FormData()
-        datos.append('facultad',facultad)
-        $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-carreras",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                if (facultad != '') {
-                    $("#carreras").empty().append(data);
-                    $('#divCarreras').attr('hidden',false)
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: "No se pudo listar las carreras de la facultad",
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                }).then(function() {
-                    $('#divCarreras').attr('hidden',true)
-                    $('#rowDos').attr('hidden',true)
-                    $('#divSedes').attr('hidden',true)
-                    $('#divPlanes').attr('hidden',true)
-                    $('#divCursos').attr('hidden',true)
-                    $('#divConfiguracion').attr('hidden',true)
-                    $('#divTabla').attr('hidden',true)
-                })
-            }
-        });
+
+        if (facultad != '') {
+            $('#carreras').val(null).trigger('change')
+            $('#divCarreras').attr('hidden',false)
+        }
     })
 
     $('#carreras').change(function () {
@@ -233,7 +228,7 @@ $(document).ready(function () {
 
     function format(d) {
         return (
-            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">\n' +
+            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist" >\n' +
             '  <li class="nav-item" role="presentation">\n' +
             '    <button class="nav-link active" id="pills-teoria-tab" data-bs-toggle="pill" data-bs-target="#pills-teoria" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Grupos Teoria</button>\n' +
             '  </li>\n' +
@@ -248,46 +243,50 @@ $(document).ready(function () {
             '  <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">' +
             '               <table id="tablaTeoria" class="table table-bordered  dt-responsive" style="width: 100%" >' +
             '                    <thead>' +
-            '                    <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Programados</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
-            '                    <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
+            '                    <th>#</th>' +
+            '                    <th>IdPersona</th>' +
+            '                    <th>Nombre Docente</th>' +
+            '                    <th>Grupo</th>' +
+            '                    <th>Hrs.Teo</th>' +
+            '                    <th>Prog.</th>' +
+            '                    <th>Aprobados</th>' +
+            '                    <th>Reprobados</th>' +
+            '                    <th>Abandonos</th>' +
+            '                    <th>Proy.</th>' +
+            '                    <th>Accion</th>' +
             '                    </thead>\n' +
             '                </table>' +
             '   </div>' +
             '  <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">' +
                 '         <table id="tablaLaboratorio" class="table table-bordered  dt-responsive" style="width: 100%" >' +
-            '            <thead>' +
-            '            <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Programados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
-            '            </thead>' +
+            '                    <thead>' +
+            '                    <th>IdPersona</th>' +
+            '                    <th>Nombre Docente</th>' +
+            '                    <th>Grupo</th>' +
+            '                    <th>Hrs.Lab</th>' +
+            '                    <th>Prog.</th>' +
+            '                    <th>Aprobados</th>' +
+            '                    <th>Reprobados</th>' +
+            '                    <th>Abandonos</th>' +
+            '                    <th>Proy.</th>' +
+            '                    <th>Accion</th>' +
+            '                    </thead>\n' +
             '            </table>' +
             '</div>' +
             '  <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">' +
             '<table id="tablaPractica" class="table table-bordered  dt-responsive" style="width: 100%" >' +
-            '            <thead>' +
-            '            <th style="text-align: center; vertical-align: middle;">IdPersona</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Nombre</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Grupo</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Horas Teoria</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Programados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Aprobados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Reprobados</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Abandonos</th>' +
-            '            <th style="text-align: center; vertical-align: middle;">Proyeccion</th>' +
-            '            </thead>' +
+            '                    <thead>' +
+            '                    <th>IdPersona</th>' +
+            '                    <th>Nombre Docente</th>' +
+            '                    <th>Grupo</th>' +
+            '                    <th>Hrs.Prac</th>' +
+            '                    <th>Prog.</th>' +
+            '                    <th>Aprobados</th>' +
+            '                    <th>Reprobados</th>' +
+            '                    <th>Abandonos</th>' +
+            '                    <th>Proy.</th>' +
+            '                    <th>Accion</th>' +
+            '                    </thead>\n' +
             '            </table>' +
             '</div>' +
             '</div>'
@@ -442,8 +441,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
-
-                    $('#tablaTeoria').dataTable({
+                   vamosaver =  $('#tablaTeoria').dataTable({
                         layout: {
                             topStart: null,
                             topEnd: null ,
@@ -453,7 +451,14 @@ $(document).ready(function () {
                         "data": data.teoria,
                         columns: [
                             {
-                                className: 'dt-small',
+                                className: 'dt-small dt-center',
+                                orderable: false,
+                                searchable: false,
+                                data: 'CodigoCarrera',
+                                width: 30
+                            },
+                            {
+                                className: 'dt-small dt-center',
                                 data: 'IdPersona'
                             },
                             {
@@ -487,6 +492,20 @@ $(document).ready(function () {
                             {
                                 className: 'dt-small dt-center',
                                 data: 'CantidadProyeccion'
+                            },
+                            {
+                                className: 'dt-small dt-acciones dt-center',
+                                orderable: false,
+                                searchable: false,
+                                data: 'CodigoCarrera',
+                                render: function (data, type) {
+                                    return type === 'display'
+                                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
+                                        '</div>'
+                                        : data;
+                                },
                             },
                         ],
                     })
@@ -514,7 +533,7 @@ $(document).ready(function () {
                             },
                             {
                                 className: 'dt-small dt-center',
-                                data: 'HorasTeoria'
+                                data: 'HorasLaboratorio'
                             },
                             {
                                 className: 'dt-small dt-center',
@@ -535,6 +554,20 @@ $(document).ready(function () {
                             {
                                 className: 'dt-small dt-center',
                                 data: 'CantidadProyeccion'
+                            },
+                            {
+                                className: 'dt-small dt-acciones dt-center',
+                                orderable: false,
+                                searchable: false,
+                                data: 'CodigoCarrera',
+                                render: function (data, type) {
+                                    return type === 'display'
+                                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
+                                        '</div>'
+                                        : data;
+                                },
                             },
                         ],
                     })
@@ -562,7 +595,7 @@ $(document).ready(function () {
                             },
                             {
                                 className: 'dt-small dt-center',
-                                data: 'HorasTeoria'
+                                data: 'HorasPractica'
                             },
                             {
                                 className: 'dt-small dt-center',
@@ -584,6 +617,20 @@ $(document).ready(function () {
                                 className: 'dt-small dt-center',
                                 data: 'CantidadProyeccion'
                             },
+                            {
+                                className: 'dt-small dt-acciones dt-center',
+                                orderable: false,
+                                searchable: false,
+                                data: 'CodigoCarrera',
+                                render: function (data, type) {
+                                    return type === 'display'
+                                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
+                                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
+                                        '</div>'
+                                        : data;
+                                },
+                            },
                         ],
                     })
                 }
@@ -594,8 +641,9 @@ $(document).ready(function () {
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
             }
-        });
+        })
     }
+
 
     $(document).on('click', '#tablaMaterias tbody .btnProgramar', function(){
         let objectBtn = $(this)

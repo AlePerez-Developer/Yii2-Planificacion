@@ -22,12 +22,59 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
     }
     td.details-control {
         text-align:center;
-        color:forestgreen;
+        color:forestgreen; !important;
         cursor: pointer;
     }
     tr.shown td.details-control {
         text-align:center;
         color:red;
+    }
+
+    #tablaMaterias thead th{
+        text-align: center; !important;
+        vertical-align: middle; !important;
+        background-color: #2d4b73; !important;
+        color: white;
+    }
+
+    #tablaMaterias tr td{
+        background-color:  #EAF3FA; !important;
+    }
+
+    #tablaTeoria thead th{
+        text-align: center; !important;
+        vertical-align: middle; !important;
+        background-color:  #99ab69; !important;
+        color: white;
+    }
+
+    #tablaLaboratorio thead th{
+        text-align: center; !important;
+        vertical-align: middle; !important;
+        background-color:  #99ab69; !important;
+        color: white;
+    }
+
+    #tablaPractica thead th{
+        text-align: center; !important;
+        vertical-align: middle; !important;
+        background-color:  #99ab69; !important;
+        color: white;
+    }
+
+
+    #tablaTeoria tr td{
+        background-color:  whitesmoke; !important;
+    }
+
+    #tablaLaboratorio tr td{
+        background-color:  whitesmoke; !important;
+    }
+
+    #tablaPractica tr td{
+        background-color:  whitesmoke; !important;
+    }
+
 </style>
 <div class="card">
     <div class="mt-2 ml-3 mb-3">
@@ -74,17 +121,17 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
             <div id="divTabla" class="card-body" hidden>
                 <table id="tablaMaterias" class="table table-bordered  dt-responsive tablaMateriass" style="width: 100%" >
                     <thead>
-                    <th style="text-align: center; vertical-align: middle;">#</th>
-                    <th style="text-align: center; vertical-align: middle;">Sigla</th>
-                    <th style="text-align: center; vertical-align: middle;">Materia</th>
-                    <th style="text-align: center; vertical-align: middle;">Horas Teoricas</th>
-                    <th style="text-align: center; vertical-align: middle;">Horas Practicas</th>
-                    <th style="text-align: center; vertical-align: middle;">Horas Laboratorio</th>
-                    <th style="text-align: center; vertical-align: middle;">Programados</th>
-                    <th style="text-align: center; vertical-align: middle;">Aprobados</th>
-                    <th style="text-align: center; vertical-align: middle;">Reprobados</th>
-                    <th style="text-align: center; vertical-align: middle;">Abandonos</th>
-                    <th style="text-align: center; vertical-align: middle;">Proyeccion</th>
+                    <th>#</th>
+                    <th>Sigla</th>
+                    <th>Materia</th>
+                    <th>Hrs.Teo</th>
+                    <th>Hrs.Pra</th>
+                    <th>Hrs.Lab</th>
+                    <th>Prog.</th>
+                    <th>Apro.</th>
+                    <th>Repro.</th>
+                    <th>Abandonos</th>
+                    <th>Proy.</th>
                     </thead>
                 </table>
             </div>

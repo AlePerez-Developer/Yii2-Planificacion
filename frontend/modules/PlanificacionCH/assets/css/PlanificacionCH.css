@@ -1,0 +1,73 @@
+
+.dt-search label{
+    font-size: 13px;
+}
+
+.dt-length label{
+    font-size: 13px;
+}
+
+.dt-info {
+    font-size: 13px;
+}
+
+.dt-paging-button a {
+    font-size: 13px;
+}
+
+tr.incompleto {
+    background-color: #f7d2e0 !important;
+}
+
+tr.completo {
+    background-color: #dcfadc !important;
+}
+
+.completo {
+    background-color: #dcfadc !important;
+}
+
+th.dt-center, td.dt-center { text-align: center !important; }
+
+th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; !important; }
+
+th.dt-acciones, td.dt-acciones  {
+    width: 130px; !important;
+    text-align: center;
+}
+th.dt-estado, td.dt-estado  {
+    width: 50px;
+    text-align: center;
+}
+
+.btnEstado {
+    height: 30px;
+    width: 80px;
+    font-size: x-small;
+
+}
+
+.btnEditar {
+    width: 60px;
+    height: 30px;
+}
+
+.btnEditar > i {
+    color:darkslategrey;
+    font-size:15px
+}
+
+.btnEliminar {
+    width: 60px;
+    height: 30px;
+}
+
+.btnEliminar > i {
+    color:darkslategrey;
+    font-size:15px
+}
+
+.btnEliminar:hover > i {
+    color:white;
+    font-size:15px
+}
