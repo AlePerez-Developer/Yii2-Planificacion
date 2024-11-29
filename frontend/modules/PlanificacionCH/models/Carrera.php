@@ -5,7 +5,6 @@ namespace app\modules\PlanificacionCH\models;
 use app\models\CargaHorarium;
 use app\models\Facultade;
 use app\models\NivelesAcademico;
-use app\models\Sede;
 use Yii;
 
 /**

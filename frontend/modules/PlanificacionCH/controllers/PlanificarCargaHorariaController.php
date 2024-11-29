@@ -6,9 +6,12 @@ namespace app\modules\PlanificacionCH\controllers;
 use app\modules\PlanificacionCH\dao\CarrerasDao;
 use app\modules\PlanificacionCH\dao\FacultadesDao;
 use app\modules\PlanificacionCH\dao\PlanesEstudiosDao;
+use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
 use app\modules\PlanificacionCH\models\Carrera;
+use app\modules\PlanificacionCH\models\CarreraSede;
 use app\modules\PlanificacionCH\models\Facultad;
 use app\modules\PlanificacionCH\models\Materia;
+use app\modules\PlanificacionCH\models\Sede;
 use common\models\Estado;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -45,6 +48,7 @@ class PlanificarCargaHorariaController extends Controller
 
         $facultades = Facultad::find()->select(['CodigoFacultad as id','NombreFacultad as text'])
             ->where(['like', 'NombreFacultad', '%' . $search . '%', false])
+            ->orderBy('NombreFacultad')
             ->asArray()->all();
 
         if (!$facultades) {
@@ -65,6 +69,7 @@ class PlanificarCargaHorariaController extends Controller
             ->where(['CodigoFacultad' => $_POST['facultad']])
             ->andWhere(['like', 'NombreCarrera', '%' . $search . '%', false])
             ->andWhere(['CodigoEstadoCarrera' => Estado::ESTADO_VIGENTE])
+            ->orderBy('NombreCarrera')
             ->asArray()->all();
 
         if (!$carreras) {
@@ -76,15 +81,26 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionListarSedes()
     {
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $opciones = "<option value=''>Selecionar Sede</option>";
-            $codigoCarrera = $_POST["carrera"];
-            $sedes = CarrerasDao::listaSedesCarrera($codigoCarrera);
-            foreach ($sedes as $sede) {
-                $opciones .= "<option value='" . $sede->CodigoSede . "' > Sede academica: " . $sede->NombreSede . "</option>";
-            }
-            return $opciones;
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
+
+        $search = str_replace(" ","%", $_POST['q'] ?? '');
+
+        $sedes = CarreraSede::find()->alias('Cs')
+            ->select(['Cs.CodigoSede as id','S.NombreSede as text'])
+            ->join('inner join','Sedes S', 'Cs.CodigoSede = S.CodigoSede')
+            ->where(['Cs.CodigoCarrera' => $_POST['carrera']])
+            ->andWhere(['like', 'S.NombreSede', '%' . $search . '%', false])
+            ->orderBy('S.NombreSede')
+            ->asArray()
+            ->all();
+
+        if (!$sedes) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'sedes' =>  $sedes]);
     }
 
     public function actionListarPlanesEstudios()
@@ -114,6 +130,26 @@ class PlanificarCargaHorariaController extends Controller
         }
     }
 
+    public function actionListarDocentes() {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+
+        $search = str_replace(" ","%", $_POST['q'] ?? '');
+
+        $docentes = Carrera::find()->select(['CodigoCarrera as id','NombreCarrera as text'])
+            ->where(['CodigoFacultad' => $_POST['facultad']])
+            ->andWhere(['like', 'NombreCarrera', '%' . $search . '%', false])
+            ->andWhere(['CodigoEstadoCarrera' => Estado::ESTADO_VIGENTE])
+            ->orderBy('NombreCarrera')
+            ->asArray()->all();
+
+        if (!$docentes) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'docentes' =>  $docentes]);
+    }
 
     public function actionListarMaterias(){
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
@@ -148,82 +184,79 @@ class PlanificarCargaHorariaController extends Controller
             return 'ERROR_CABECERA';
         }
 
-        $teoria = (new Query)->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
-            'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio','Md.Grupo','Md.CodigoTipoGrupoMateria',
-            'Md.IdPersona', "isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
-            'count(distinct(Dp.CU)) as Programados','count(distinct(Ca.CU)) as Aprobados','count(distinct(Cr.CU)) as Reprobados','count(distinct(Cb.CU)) as Abandonos',
-            'pr.CantidadProyeccion'
-        ])->from(['Materias M'])
-            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','DetallesProgramaciones Dp', 'Dp.GestionAcademica = Md.GestionAcademica and Dp.CodigoCarrera = M.CodigoCarrera and Dp.NumeroPlanEstudios = M.NumeroPlanEstudios and Dp.CodigoModalidadCurso = Md.CodigoModalidadCurso  and Dp.SiglaMateria = Md.SiglaMateria and Dp.CodigoTipoGrupoMateria = Md.CodigoTipoGrupoMateria and Dp.Grupo = Md.Grupo')
+        $grupos = (new Query)
+            ->select(['Md.GestionAcademica as MGA','Chp.gestionAcademica as CGA',
+                      'M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
+                      'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
+                      'Chp.Grupo','Chp.TipoGrupo','Chp.IdPersona',"isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",'count(distinct(Dp.CU)) as Programados',
+                      'count(distinct(Ca.CU)) as Aprobados','count(distinct(Cr.CU)) as Reprobados','count(distinct(Cb.CU)) as Abandonos',
+                      'pr.CantidadProyeccion' ,'chp.CodigoEstado',
+                      "case [[chp.TipoGrupo]] when 'T' THEN [[HorasTeoria]]
+                                            when 'L' THEN [[HorasLaboratorio]]
+                                            when 'P' THEN [[HorasPractica]]
+                      end as HorasSemana"])
+            ->from(['Materias M'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
+            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo')
+            ->join('LEFT JOIN','DetallesProgramaciones Dp', 'Dp.GestionAcademica = Md.GestionAcademica and Dp.CodigoCarrera = M.CodigoCarrera and Dp.NumeroPlanEstudios = M.NumeroPlanEstudios and Dp.CodigoModalidadCurso = Md.CodigoModalidadCurso  and Dp.SiglaMateria = Chp.SiglaMateria and Dp.CodigoTipoGrupoMateria = Chp.TipoGrupo and Dp.Grupo = Chp.Grupo')
+            ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
             ->join('LEFT JOIN','Calificaciones Ca', "Ca.GestionAcademica = Md.GestionAcademica and Ca.CodigoCarrera = M.CodigoCarrera and Ca.NumeroPlanEstudios = M.NumeroPlanEstudios and Ca.CodigoModalidadCurso = Md.CodigoModalidadCurso and Ca.SiglaMateria = M.SiglaMateria and Ca.CU = Dp.CU and Ca.CodigoEstadoCalificacion = 'A'")
             ->join('LEFT JOIN','Calificaciones Cr', "Cr.GestionAcademica = Md.GestionAcademica and Cr.CodigoCarrera = M.CodigoCarrera and Cr.NumeroPlanEstudios = M.NumeroPlanEstudios and Cr.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cr.SiglaMateria = M.SiglaMateria and Cr.CU = Dp.CU and Cr.CodigoEstadoCalificacion = 'R'")
             ->join('LEFT JOIN','Calificaciones Cb', "Cb.GestionAcademica = Md.GestionAcademica and Cb.CodigoCarrera = M.CodigoCarrera and Cb.NumeroPlanEstudios = M.NumeroPlanEstudios and Cb.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cb.SiglaMateria = M.SiglaMateria and Cb.CU = Dp.CU and Cb.CodigoEstadoCalificacion = 'B'")
-            ->join('INNER JOIN','Proyecciones Pr', 'Pr.CodigoCarrera = M.CodigoCarrera and Pr.CodigoSede = Md.CodigoSede and Pr.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','Personas P', 'P.IdPersona = Md.IdPersona')
-            ->where(['M.CodigoCarrera' => $_POST["carrera"]])
-            ->andWhere(['M.Curso' => $_POST["curso"]])
-            ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
+            ->join('INNER JOIN','Proyecciones Pr', 'Pr.GestionAcademica = Chp.GestionAcademica and Pr.CodigoCarrera = M.CodigoCarrera and Pr.CodigoSede = Md.CodigoSede and Pr.SiglaMateria = M.SiglaMateria')
+            ->where(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
             ->andWhere(['Md.GestionAcademica' => $_POST["gestion"]])
-            ->andWhere(['Pr.GestionAcademica' => '1/2022'])
-            ->andWhere(['Md.CodigoTipoGrupoMateria' => 'T'])
+            ->andWhere(['Chp.GestionAcademica' => '1/2022'])
+            ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
             ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,Md.Grupo,Md.CodigoTipoGrupoMateria,Md.IdPersona,P.Paterno,P.Materno,P.Nombres, pr.CantidadProyeccion')
+            ->groupBy('Md.GestionAcademica,chp.GestionAcademica,  
+                               M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,
+                               M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,
+                               Chp.Grupo,Chp.TipoGrupo,Chp.IdPersona,P.Paterno,P.Materno,P.Nombres, pr.CantidadProyeccion, chp.CodigoEstado')
             ->orderBy('M.SiglaMateria')->all(Yii::$app->dbAcademica);
 
-        $laboratorio = (new Query)->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
-            'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio','Md.Grupo','Md.CodigoTipoGrupoMateria',
-            'Md.IdPersona', "isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
-            'count(distinct(Dp.CU)) as Programados','count(distinct(Ca.CU)) as Aprobados','count(distinct(Cr.CU)) as Reprobados','count(distinct(Cb.CU)) as Abandonos',
-            'pr.CantidadProyeccion'
-        ])->from(['Materias M'])
-            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','DetallesProgramaciones Dp', 'Dp.GestionAcademica = Md.GestionAcademica and Dp.CodigoCarrera = M.CodigoCarrera and Dp.NumeroPlanEstudios = M.NumeroPlanEstudios and Dp.CodigoModalidadCurso = Md.CodigoModalidadCurso  and Dp.SiglaMateria = Md.SiglaMateria and Dp.CodigoTipoGrupoMateria = Md.CodigoTipoGrupoMateria and Dp.Grupo = Md.Grupo')
-            ->join('LEFT JOIN','Calificaciones Ca', "Ca.GestionAcademica = Md.GestionAcademica and Ca.CodigoCarrera = M.CodigoCarrera and Ca.NumeroPlanEstudios = M.NumeroPlanEstudios and Ca.CodigoModalidadCurso = Md.CodigoModalidadCurso and Ca.SiglaMateria = M.SiglaMateria and Ca.CU = Dp.CU and Ca.CodigoEstadoCalificacion = 'A'")
-            ->join('LEFT JOIN','Calificaciones Cr', "Cr.GestionAcademica = Md.GestionAcademica and Cr.CodigoCarrera = M.CodigoCarrera and Cr.NumeroPlanEstudios = M.NumeroPlanEstudios and Cr.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cr.SiglaMateria = M.SiglaMateria and Cr.CU = Dp.CU and Cr.CodigoEstadoCalificacion = 'R'")
-            ->join('LEFT JOIN','Calificaciones Cb', "Cb.GestionAcademica = Md.GestionAcademica and Cb.CodigoCarrera = M.CodigoCarrera and Cb.NumeroPlanEstudios = M.NumeroPlanEstudios and Cb.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cb.SiglaMateria = M.SiglaMateria and Cb.CU = Dp.CU and Cb.CodigoEstadoCalificacion = 'B'")
-            ->join('INNER JOIN','Proyecciones Pr', 'Pr.CodigoCarrera = M.CodigoCarrera and Pr.CodigoSede = Md.CodigoSede and Pr.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','Personas P', 'P.IdPersona = Md.IdPersona')
-            ->where(['M.CodigoCarrera' => $_POST["carrera"]])
-            ->andWhere(['M.Curso' => $_POST["curso"]])
-            ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
-            ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
-            ->andWhere(['Md.GestionAcademica' => $_POST["gestion"]])
-            ->andWhere(['Pr.GestionAcademica' => '1/2022'])
-            ->andWhere(['Md.CodigoTipoGrupoMateria' => 'L'])
-            ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,Md.Grupo,Md.CodigoTipoGrupoMateria,Md.IdPersona,P.Paterno,P.Materno,P.Nombres, pr.CantidadProyeccion')
-            ->orderBy('M.SiglaMateria')->all(Yii::$app->dbAcademica);
-
-        $practica = (new Query)->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
-            'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio','Md.Grupo','Md.CodigoTipoGrupoMateria',
-            'Md.IdPersona', "isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
-            'count(distinct(Dp.CU)) as Programados','count(distinct(Ca.CU)) as Aprobados','count(distinct(Cr.CU)) as Reprobados','count(distinct(Cb.CU)) as Abandonos',
-            'pr.CantidadProyeccion'
-        ])->from(['Materias M'])
-            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','DetallesProgramaciones Dp', 'Dp.GestionAcademica = Md.GestionAcademica and Dp.CodigoCarrera = M.CodigoCarrera and Dp.NumeroPlanEstudios = M.NumeroPlanEstudios and Dp.CodigoModalidadCurso = Md.CodigoModalidadCurso  and Dp.SiglaMateria = Md.SiglaMateria and Dp.CodigoTipoGrupoMateria = Md.CodigoTipoGrupoMateria and Dp.Grupo = Md.Grupo')
-            ->join('LEFT JOIN','Calificaciones Ca', "Ca.GestionAcademica = Md.GestionAcademica and Ca.CodigoCarrera = M.CodigoCarrera and Ca.NumeroPlanEstudios = M.NumeroPlanEstudios and Ca.CodigoModalidadCurso = Md.CodigoModalidadCurso and Ca.SiglaMateria = M.SiglaMateria and Ca.CU = Dp.CU and Ca.CodigoEstadoCalificacion = 'A'")
-            ->join('LEFT JOIN','Calificaciones Cr', "Cr.GestionAcademica = Md.GestionAcademica and Cr.CodigoCarrera = M.CodigoCarrera and Cr.NumeroPlanEstudios = M.NumeroPlanEstudios and Cr.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cr.SiglaMateria = M.SiglaMateria and Cr.CU = Dp.CU and Cr.CodigoEstadoCalificacion = 'R'")
-            ->join('LEFT JOIN','Calificaciones Cb', "Cb.GestionAcademica = Md.GestionAcademica and Cb.CodigoCarrera = M.CodigoCarrera and Cb.NumeroPlanEstudios = M.NumeroPlanEstudios and Cb.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cb.SiglaMateria = M.SiglaMateria and Cb.CU = Dp.CU and Cb.CodigoEstadoCalificacion = 'B'")
-            ->join('INNER JOIN','Proyecciones Pr', 'Pr.CodigoCarrera = M.CodigoCarrera and Pr.CodigoSede = Md.CodigoSede and Pr.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','Personas P', 'P.IdPersona = Md.IdPersona')
-            ->where(['M.CodigoCarrera' => $_POST["carrera"]])
-            ->andWhere(['M.Curso' => $_POST["curso"]])
-            ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
-            ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
-            ->andWhere(['Md.GestionAcademica' => $_POST["gestion"]])
-            ->andWhere(['Pr.GestionAcademica' => '1/2022'])
-            ->andWhere(['Md.CodigoTipoGrupoMateria' => 'P'])
-            ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,Md.Grupo,Md.CodigoTipoGrupoMateria,Md.IdPersona,P.Paterno,P.Materno,P.Nombres, pr.CantidadProyeccion')
-            ->orderBy('M.SiglaMateria')->all(Yii::$app->dbAcademica);
-
-
-
-        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'teoria' => $teoria, 'laboratorio' => $laboratorio, 'practica' => $practica]);
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupos' => $grupos]);
     }
+
+
+    public function actionCambiarEstadoGrupo(){
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+        if (!(isset($_POST["grupo"]) && $_POST["grupo"] != "")) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+        if (!(isset($_POST["tipoGrupo"]) && $_POST["tipoGrupo"] != "")) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
+        $row = CargaHorariaPropuesta::findOne(['GestionAcademica'=>'1/2022',
+                                                'CodigoCarrera' => $_POST["carrera"],
+                                                'NumeroPlanEstudios' => $_POST["plan"],
+                                                'SiglaMateria' => $_POST["sigla"],
+                                                'Grupo' => $_POST["grupo"],
+                                                'TipoGrupo' => $_POST["tipoGrupo"]]);
+
+        if (!$row) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+
+        ($row->CodigoEstado == Estado::ESTADO_VIGENTE)?$row->CodigoEstado = Estado::ESTADO_ELIMINADO:$row->CodigoEstado = Estado::ESTADO_VIGENTE;
+
+
+        if ($row->update() === false) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
+        }
+
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+    }
+
+
+
+
+
 
 
     public function actionListarEncabezadoModal(){

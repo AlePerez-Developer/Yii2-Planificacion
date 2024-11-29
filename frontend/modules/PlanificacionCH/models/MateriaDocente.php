@@ -5,7 +5,6 @@ namespace app\modules\PlanificacionCH\models;
 use app\models\CarrerasAulasPeriodo;
 use app\models\CarrerasSede;
 use app\models\MateriasHorario;
-use app\models\Persona;
 use app\models\Usuario;
 use Yii;
 

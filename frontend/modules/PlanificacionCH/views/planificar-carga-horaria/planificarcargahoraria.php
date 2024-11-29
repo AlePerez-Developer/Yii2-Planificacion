@@ -9,6 +9,12 @@ $this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/planif
     ]
 ]);
 
+$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/datatableDeclaration.js", [
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);
+
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
 ?>
@@ -62,17 +68,20 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         color: white;
     }
 
-
-    #tablaTeoria tr td{
-        background-color:  whitesmoke; !important;
+    table tbody tr.vigente td {
+        background-color: whitesmoke !important;
     }
 
-    #tablaLaboratorio tr td{
-        background-color:  whitesmoke; !important;
+    table tbody tr.editado td {
+        background-color: #FFEAAF !important;
     }
 
-    #tablaPractica tr td{
-        background-color:  whitesmoke; !important;
+    table tbody tr.eliminado td {
+        background-color: #FFB9B9 !important;
+    }
+
+    table tbody tr.agregado td {
+        background-color: #CFE4C2 !important;
     }
 
 </style>
@@ -138,6 +147,5 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         </div>
     </div>
 </div>
-<button type="button" class="form-control btn btn-outline-info" id="rrrr"><i class="fa-plus-square">orale</i></button>
 
 <?php include_once "modalPlanificar.php"; ?>
