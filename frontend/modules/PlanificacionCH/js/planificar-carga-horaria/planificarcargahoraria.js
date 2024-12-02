@@ -121,9 +121,38 @@ $(document).ready(function () {
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
+            },
         },
+        templateResult: formatRepo,
+        templateSelection: formatRepoSelection
     })
+
+    function formatRepo (repo) {
+        if (repo.loading) {
+            return repo.text;
+        }
+
+        var $container = $(
+            "<div class='select2-result-repository clearfix'>" +
+            "<div class='select2-result-repository__avatar'><img src='http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_" + $.trim(repo.id) + ".jpg' /></div>" +
+            "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'></div>" +
+            "<div class='select2-result-repository__description'></div>" +
+            "</div>" +
+            "</div>"
+        );
+
+        $container.find(".select2-result-repository__title").text(repo.text);
+        $container.find(".select2-result-repository__description").text(repo.id);
+
+        return $container;
+    }
+
+    function formatRepoSelection (repo) {
+        return repo.full_name || repo.text;
+    }
+
+
 
     $('#facultades').change(function () {
         $('#divCarreras').attr('hidden',true)

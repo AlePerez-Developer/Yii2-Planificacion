@@ -137,12 +137,22 @@ class PlanificarCargaHorariaController extends Controller
 
         $search = str_replace(" ","%", $_POST['q'] ?? '');
 
-        $docentes = Carrera::find()->select(['CodigoCarrera as id','NombreCarrera as text'])
-            ->where(['CodigoFacultad' => $_POST['facultad']])
-            ->andWhere(['like', 'NombreCarrera', '%' . $search . '%', false])
-            ->andWhere(['CodigoEstadoCarrera' => Estado::ESTADO_VIGENTE])
-            ->orderBy('NombreCarrera')
-            ->asArray()->all();
+        $docentes = (new Query)
+            ->select(['convert(varchar(max),P.IdPersona) as id',"ltrim(rtrim(isnull(p.Paterno,''))) + ' ' + ltrim(rtrim(isnull(p.materno,''))) + ' ' + ltrim(rtrim(isnull(p.nombres,''))) as text",
+                      'cl.DescripcionCondicionLaboral'])
+            ->from(['DetalleItemFuncionario Dif'])
+            ->join('INNER JOIN', 'Items i', 'Dif.NroItem = I.NroItem')
+            ->join('INNER JOIN','Cargos C', 'c.IdCargo = i.IdCargo and C.CodigoSectorTrabajo = i.CodigoSectortrabajo')
+            ->join('INNER JOIN','Organigrama U', 'U.IdUnidad = i.IdUnidad ')
+            ->join('INNER JOIN','Funcionarios F', 'F.IdFuncionario = Dif.IdFuncionario and f.CodigoSectorTrabajo = i.CodigoSectortrabajo')
+            ->join('INNER JOIN','Personas P', 'P.IdPersona = F.IdPersona')
+            ->join('INNER JOIN','CondicionesLaborales Cl', 'Cl.CodigoCondicionLaboral = Dif.CodigoCondicionLaboral')
+            ->where(['Dif.CodigoEstadoCargo' => 'V'])->andWhere(['i.CodigoSectortrabajo' => 'DOC'])->andWhere(['i.EstadoCargoUnidad' => 'V'])
+            ->andWhere(['c.CodigoEstadoCargo' => 'V'])
+            ->andWhere(['u.CodigoEstadoUnidad' => 'V'])
+            ->andWhere(['F.CodigoEstadoFuncionario' => 'V'])
+            ->groupBy('convert(varchar(max),[[P.IdPersona]]),P.Paterno,P.Materno,P.Nombres,cl.DescripcionCondicionLaboral')
+            ->all(Yii::$app->dbrrhh);
 
         if (!$docentes) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
