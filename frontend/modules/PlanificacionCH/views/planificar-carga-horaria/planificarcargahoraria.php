@@ -9,11 +9,33 @@ $this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/planif
     ]
 ]);
 
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/datatableDeclaration.js", [
+$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/s2-declarations.js", [
     'depends' => [
         JqueryAsset::className()
     ]
 ]);
+
+$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/dt-Materias.js", [
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);
+
+$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/dt-Grupos.js", [
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);
+
+
+
+
+/*
+$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/datatableDeclaration.js", [
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);*/
 
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
@@ -84,11 +106,35 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         background-color: #CFE4C2 !important;
     }
 
+    .flex-container {
+        display: flex;
+    }
+    .flex-child {
+        flex: 1;
+        border: 2px solid yellow;
+        width: 20px;
+        height: 20px;
+    }
+    .flex-child:first-child {
+        margin-right: 20px;
+    }
+
+    img {
+        width: 15px;
+        height: 15px;
+    }
+
 </style>
+<div>
+    <div>
+        <label for="gestion">Gestion</label>
+        <input id="gestion" name="gestion" value="2021" >
+    </div>
+</div>
 <div class="card">
     <div class="mt-2 ml-3 mb-3">
         <div class="card-header">
-            <div class="row" style="background-color: #f8bb86; height: 90px" >
+            <div class="row" style="background-color: #f8bb86; height: 90px">
                 <div class="col-sm-6">
                     <label for="facultades" style="font-size: 12px">Seleccione la facultad</label>
                     <select id="facultades" name="facultades" style="width: 95%">

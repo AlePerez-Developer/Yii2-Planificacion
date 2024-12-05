@@ -132,4 +132,9 @@ class CargaHorariaPropuesta extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Persona::class, ['IdPersona' => 'IdPersona']);
     }
+
+    public function exist(){
+        return false;
+    }
+
 }

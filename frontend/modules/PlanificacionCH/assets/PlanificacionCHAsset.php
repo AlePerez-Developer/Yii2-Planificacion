@@ -19,4 +19,3 @@ class PlanificacionCHAsset extends AssetBundle
         'yii\web\YiiAsset',
     ];
 }
-

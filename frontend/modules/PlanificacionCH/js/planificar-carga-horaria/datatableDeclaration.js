@@ -1,19 +1,30 @@
 var materiasTable
+
 var teoriaTable
 var practicaTable
 var laboratorioTable
 
-var materiasData ={};
+var materiasData = {};
 
 var dataGrupos = {}
 var layoutGrupos
 var ajaxGrupos
 var columnsGrupos
+
+let a
 $(document).ready(function () {
-    materiasData.carrera = ''
-    materiasData.curso = ''
-    materiasData.plan = ''
-    materiasData.gestion = '1/2021'
+    a = function CrearRow(row, data, rowIndex){
+        console.log(data.SiglaMateria)
+    }
+
+
+    materiasData.flag = 1
+    materiasData.gestion = $('#gestion').val()
+    materiasData.carrera = '35'
+    materiasData.sede = 'su'
+    materiasData.curso = '1'
+    materiasData.plan = '9'
+
 
     materiasTable = $("#tablaMaterias").DataTable({
         layout: {
@@ -35,6 +46,7 @@ $(document).ready(function () {
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         },
+        createdRow:a,
         columns: [
             {
                 className: 'dt-small details-control dt-center',
@@ -44,10 +56,6 @@ $(document).ready(function () {
                 defaultContent: '',
                 "render": function () {
                     return '<i class="fa fa-plus-square" aria-hidden="true"></i>';
-                },
-                select: {
-                    selector:'td:not(:first-child)',
-                    style:    'os'
                 },
                 width: 30,
             },
@@ -96,6 +104,8 @@ $(document).ready(function () {
     });
 
 
+    createdRow:a,
+
     layoutGrupos = {
         topStart: null,
         topEnd: null ,
@@ -106,7 +116,7 @@ $(document).ready(function () {
     ajaxGrupos = {
         method: "POST",
             data: function ( d ) {
-            return  $.extend(d, dataGrupos);
+                    return  $.extend(d, dataGrupos);
         },
         dataType: 'json',
             cache: false,
@@ -168,7 +178,6 @@ $(document).ready(function () {
             data: 'CodigoCarrera',
             render: function (data, type, row) {
                 let button
-                console.log(row.CodigoEstado)
                 switch  (row.CodigoEstado){
                     case 'V':
                         button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
@@ -177,9 +186,11 @@ $(document).ready(function () {
                     case 'E':
                         button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
+                    case 'A':
+                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        break
                     default: button = ''
                 }
-                console.log(button)
                 return type === 'display'
                     ? '<div class="btn-group" role="group" aria-label="Basic example">' +
                         button +
@@ -189,35 +200,6 @@ $(document).ready(function () {
         },
     ]
 
-
-
-    teoriaTable =  $('.tablaTeoria').dataTable({
-        layout: {
-            topStart: null,
-            topEnd: null ,
-            bottomStart: null,
-            bottomEnd: null
-        },
-        pageLength : 20,
-        ajax: {
-            method: "POST",
-            data: function ( d ) {
-                return  $.extend(d, teoriaData);
-            },
-            dataType: 'json',
-            cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-grupos',
-            dataSrc: '',
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
-        },
-        createdRow: function (row, data) {
-            if (data.CodigoEstado == 'E' ) {
-                $(row).addClass('eliminado');
-            }
-        },
-    })
 
 })
 

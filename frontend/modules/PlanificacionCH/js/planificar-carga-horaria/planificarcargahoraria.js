@@ -1,95 +1,5 @@
 $(document).ready(function () {
-    $('#facultades').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija una facultad",
-        allowClear: true,
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                return {
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-facultades',
-            dataSrc: '',
-            processResults: function (data) {
-                return {
-                    results: data.facultades
-                };
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
-        },
-    })
 
-    $('#carreras').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija una carrera",
-        allowClear: true,
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                return {
-                    facultad: $('#facultades').val(),
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-carreras',
-            dataSrc: '',
-            processResults: function (data) {
-                return {
-                    results: data.carreras
-                };
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
-        },
-    })
-
-    $('#sedes').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija una sede",
-        allowClear: true,
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                return {
-                    carrera: $('#carreras').val(),
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-sedes',
-            dataSrc: '',
-            processResults: function (data) {
-                return {
-                    results: data.sedes
-                };
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
-        },
-    })
-
-    $('#planes').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija un plan",
-        allowClear: true,
-    })
 
     $('#cursos').select2({
         theme: 'bootstrap4',
@@ -104,7 +14,7 @@ $(document).ready(function () {
         ajax: {
             method: "POST",
             dataType: 'json',
-            delay: 300,
+            delay: 500,
             data: function (params) {
                 return {
                     q: params.term,
@@ -133,9 +43,9 @@ $(document).ready(function () {
         }
 
         var $container = $(
-            "<div class='select2-result-repository clearfix'>" +
-            "<div class='select2-result-repository__avatar'><img src='http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_" + $.trim(repo.id) + ".jpg' /></div>" +
-            "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository flex-container'>" +
+            "<div class='select2-result-repository__avatar flex-child magenta'><img src='http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_" + $.trim(repo.id) + ".jpg' /></div>" +
+            "<div class='select2-result-repository__meta flex-child green'>" +
             "<div class='select2-result-repository__title'></div>" +
             "<div class='select2-result-repository__description'></div>" +
             "</div>" +
@@ -190,42 +100,9 @@ $(document).ready(function () {
         $('#divTabla').attr('hidden',true)
         $('#divConfiguracion').attr('hidden',true)
 
-        let codigoCarrera = $("#carreras").val();
-        let sede = $(this).val();
-
-        let datos = new FormData();
-        datos.append("carrera", codigoCarrera);
-        datos.append("sede", sede);
-
-        $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-planes-estudios",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                if (sede != ''){
-                    $("#planes").empty().append(data);
-                    $('#divPlanes').attr('hidden',false)
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: "No se pudo listar las sedes de la carrera",
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                }).then(function() {
-                    $('#divPlanes').attr('hidden',true)
-                    $('#divCursos').attr('hidden',true)
-                    $('#divTabla').attr('hidden',true)
-                    $('#divConfiguracion').attr('hidden',true)
-                })
-            }
-        });
+        if ($(this).val() != ''){
+            $('#divPlanes').attr('hidden',false)
+        }
     });
 
     $("#planes").change(function () {
@@ -344,20 +221,24 @@ $(document).ready(function () {
 
     $('#cursos').change(function () {
         $('#divTabla').attr('hidden',true)
+
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
-            materiasData.carrera = $("#carreras").val()
-            materiasData.curso = $("#cursos").val()
-            materiasData.plan = $("#planes").val()
-            materiasData.gestion = '1/2021'
-            materiasTable.ajax.reload()
+
+            dataMaterias.carrera = $("#carreras").val()
+            dataMaterias.curso = $("#cursos").val()
+            dataMaterias.plan = $("#planes").val()
+            dataMaterias.sede = $("#sedes").val()
+            dataMaterias.flag = 1
+
+            tableMaterias.ajax.reload()
         }
     })
 
     $(document).on('click','#tablaMaterias tbody td.details-control', function () {
         var tr = $(this).closest('tr');
         var tdi = tr.find("i.fa");
-        var row = materiasTable.row(tr);
+        var row = tableMaterias.row(tr);
 
         if (row.child.isShown()) {
             tr.removeClass('shown');
@@ -379,183 +260,44 @@ $(document).ready(function () {
             tdi.first().removeClass('fa-plus-square');
             tdi.first().addClass('fa-minus-square');
             row.child(format(row.data())).show();
+
             llenarTablas(row.data().SiglaMateria)
         }
     })
 
     function llenarTablas(sigla){
-        let carrera = $("#carreras").val()
-        let curso = $("#cursos").val()
-        let plan = $("#planes").val()
-        let gestion = '1/2021'
-        let datos = new FormData();
-        datos.append("carrera", carrera);
-        datos.append("curso", curso);
-        datos.append("plan", plan);
-        datos.append("gestion", gestion);
-        datos.append("sigla", sigla);
 
-
+        dataGrupos.gestion = '1/2021'
         dataGrupos.carrera = $("#carreras").val()
         dataGrupos.curso = $("#cursos").val()
         dataGrupos.plan = $("#planes").val()
+        dataGrupos.sede = $("#sedes").val()
         dataGrupos.sigla = sigla
-        dataGrupos.gestion = '1/2021'
         dataGrupos.tipoGrupo = 'T'
 
-        teoriaTable = $('#tablaTeoria').dataTable({
+        tableTeoria = $('#tablaTeoria').dataTable({
             layout: layoutGrupos,
             pageLength : 20,
             ajax: ajaxGrupos,
             columns: columnsGrupos,
-            createdRow: function (row, data) {
-                $( row ).find('td:eq(2)')
-                    .attr('data-toggle', 'tooltip')
-                    .attr('data-placement', 'top')
-                    .attr('title', 'carga horaria docente')
-
-                switch (data.CodigoEstado){
-                    case 'E':
-                        $(row).addClass('eliminado');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('editado');
-                        break
-                    case 'V':
-                        $(row).addClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'A':
-                        $(row).addClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'C':
-                        $(row).addClass('editado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        break
-                }
-            },
+            createdRow: createdRows,
             initComplete: function (settings, json) {
                 $('#tablaTeoria').DataTable().on('order.dt search.dt', function () {
-                        var i = 1;
-                        $('#tablaTeoria').DataTable()
-                            .cells(null, 0, { search: 'applied', order: 'applied' })
-                            .every(function (cell) {
-                                this.data(i++);
-                            });
-                }).draw();
-            }
-        })
-
-        dataGrupos.tipoGrupo = 'L'
-        laboratorioTable = $('#tablaLaboratorio').dataTable({
-            layout: layoutGrupos,
-            pageLength : 20,
-            ajax: ajaxGrupos,
-            columns: columnsGrupos,
-            createdRow: function (row, data) {
-                $( row ).find('td:eq(2)')
-                    .attr('data-toggle', 'tooltip')
-                    .attr('data-placement', 'top')
-                    .attr('title', 'carga horaria docente')
-
-                switch (data.CodigoEstado){
-                    case 'E':
-                        $(row).addClass('eliminado');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('editado');
-                        break
-                    case 'V':
-                        $(row).addClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'A':
-                        $(row).addClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'C':
-                        $(row).addClass('editado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        break
-                }
-            },
-            initComplete: function (settings, json) {
-                $('#tablaLaboratorio').DataTable().on('order.dt search.dt', function () {
                     var i = 1;
-                    $('#tablaLaboratorio').DataTable()
+                    $('#tablaTeoria').DataTable()
                         .cells(null, 0, { search: 'applied', order: 'applied' })
                         .every(function (cell) {
                             this.data(i++);
                         });
                 }).draw();
-            }
-        })
 
-        dataGrupos.tipoGrupo = 'P'
-        practicaTable = $('#tablaPractica').dataTable({
-            layout: layoutGrupos,
-            pageLength : 20,
-            ajax: ajaxGrupos,
-            columns: columnsGrupos,
-            createdRow: function (row, data) {
-                $( row ).find('td:eq(2)')
-                    .attr('data-toggle', 'tooltip')
-                    .attr('data-placement', 'top')
-                    .attr('title', 'carga horaria docente')
-
-                switch (data.CodigoEstado){
-                    case 'E':
-                        $(row).addClass('eliminado');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('editado');
-                        break
-                    case 'V':
-                        $(row).addClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'A':
-                        $(row).addClass('agregado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('eliminado');
-                        $(row).removeClass('editado');
-                        break
-                    case 'C':
-                        $(row).addClass('editado');
-                        $(row).removeClass('vigente');
-                        $(row).removeClass('agregado');
-                        $(row).removeClass('eliminado');
-                        break
-                }
+                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                    .forEach(popover => {
+                        new bootstrap.Popover(popover)
+                    })
             },
-            initComplete: function (settings, json) {
-                $('#tablaPractica').DataTable().on('order.dt search.dt', function () {
-                    var i = 1;
-                    $('#tablaPractica').DataTable()
-                        .cells(null, 0, { search: 'applied', order: 'applied' })
-                        .every(function (cell) {
-                            this.data(i++);
-                        });
-                }).draw();
-            }
         })
     }
-
 
     $(document).on('click', 'tbody .btnEstado', function(){
         let objectBtn = $(this);
@@ -619,9 +361,100 @@ $(document).ready(function () {
         });
     })
 
+    $("#btnGuardar").click(function () {
+        if ($("#formCargaHorariaPropuesta").valid()) {
+            if ($("#codigoCrear").val() === '') {
+                guardarGrupo();
+            } else {
+                actualizarGrupo();
+            }
+        }
+    });
+
+    function guardarGrupo() {
+        let datos = new FormData();
+        datos.append("gestion", '1/2022')
+        datos.append("carrera", dataGrupos.carrera)
+        datos.append("plan", dataGrupos.plan)
+        datos.append("sigla", dataGrupos.sigla)
+        datos.append('sede',dataGrupos.sede)
+        datos.append("tipoGrupo", dataGrupos.tipoGrupo)
+        datos.append('docente',$('#docentes').val())
+        datos.append("grupo", $("#grupo").val())
+        $.ajax({
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/guardar-grupo",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    MostrarMensaje('success','Los datos del nuevo grupo se guardaron correctamente.')
+                    $('#modalPlanificar').modal('hide')
+                    switch (dataGrupos.tipoGrupo){
+                        case 'T': $("#tablaTeoria").DataTable().ajax.reload();
+                            break
+                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload();
+                            break
+                        case 'P': $("#tablaPractica").DataTable().ajax.reload();
+                            break
+                    }
+                }
+                else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+            }
+        });
+    }
+
+    function actualizarPei() {
+        let codigoPei = $("#codigoPei").val();
+        let descripcionPei = $("#descripcionPei").val();
+        let fechaAprobacion = $("#fechaAprobacion").val();
+        let gestionInicio = $("#gestionInicio").val();
+        let gestionFin = $("#gestionFin").val();
+        let datos = new FormData();
+        datos.append("codigoPei", codigoPei);
+        datos.append("descripcionPei", descripcionPei);
+        datos.append("gestionInicio", gestionInicio);
+        datos.append("fechaAprobacion", fechaAprobacion);
+        datos.append("gestionFin", gestionFin);
+        $.ajax({
+            url: "index.php?r=Planificacion/peis/actualizar-pei",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    MostrarMensaje('success','El PEI se actualizó correctamente.')
+                    $("#tablaListaPeis").DataTable().ajax.reload(async () => {
+                        $("#btnCancelar").click()
+                    })
+                }
+                else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+            }
+        });
+    }
+
     $(document).on('click', '.btnCrear', function(){
+        let objectBtn = $(this)
+        dataGrupos.tipoGrupo = objectBtn.attr('grupo')
         $('#modalPlanificar').modal('show')
     })
+
 });
 
 
