@@ -2,7 +2,7 @@ let tableMaterias
 let dataMaterias = {};
 $(document).ready(function () {
     dataMaterias.flag = 0
-    dataMaterias.gestion = $('#gestion').val()
+    dataMaterias.gestion = ''
     dataMaterias.carrera = ''
     dataMaterias.sede = ''
     dataMaterias.curso = ''

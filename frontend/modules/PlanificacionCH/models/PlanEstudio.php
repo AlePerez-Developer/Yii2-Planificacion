@@ -9,7 +9,7 @@ use app\models\ModalidadesCursosPlanesEstudios;
 use app\models\PlanesEstudiosNivelesAcademicos;
 use app\models\PlanesEstudiosTiposMaterias;
 use app\models\Universitarios;
-use app\models\Usuarios;
+use common\models\Usuario;
 use Yii;
 
 /**
@@ -71,7 +71,7 @@ class PlanEstudio extends \yii\db\ActiveRecord
             [['Annio'], 'string', 'max' => 50],
             [['TipoModificacion'], 'string', 'max' => 12],
             [['CodigoCarrera', 'NumeroPlanEstudios'], 'unique', 'targetAttribute' => ['CodigoCarrera', 'NumeroPlanEstudios']],
-            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuarios::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
     }
 

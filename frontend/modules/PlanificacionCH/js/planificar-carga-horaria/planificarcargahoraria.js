@@ -1,69 +1,4 @@
 $(document).ready(function () {
-
-
-    $('#cursos').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija un curso",
-        allowClear: true,
-    })
-
-    $('#docentes').select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija un docente",
-        allowClear: true,
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 500,
-            data: function (params) {
-                return {
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-docentes',
-            dataSrc: '',
-            processResults: function (data) {
-                return {
-                    results: data.docentes
-                };
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            },
-        },
-        templateResult: formatRepo,
-        templateSelection: formatRepoSelection
-    })
-
-    function formatRepo (repo) {
-        if (repo.loading) {
-            return repo.text;
-        }
-
-        var $container = $(
-            "<div class='select2-result-repository flex-container'>" +
-            "<div class='select2-result-repository__avatar flex-child magenta'><img src='http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_" + $.trim(repo.id) + ".jpg' /></div>" +
-            "<div class='select2-result-repository__meta flex-child green'>" +
-            "<div class='select2-result-repository__title'></div>" +
-            "<div class='select2-result-repository__description'></div>" +
-            "</div>" +
-            "</div>"
-        );
-
-        $container.find(".select2-result-repository__title").text(repo.text);
-        $container.find(".select2-result-repository__description").text(repo.id);
-
-        return $container;
-    }
-
-    function formatRepoSelection (repo) {
-        return repo.full_name || repo.text;
-    }
-
-
-
     $('#facultades').change(function () {
         $('#divCarreras').attr('hidden',true)
         $('#rowDos').attr('hidden',true)
@@ -101,6 +36,7 @@ $(document).ready(function () {
         $('#divConfiguracion').attr('hidden',true)
 
         if ($(this).val() != ''){
+            $('#planes').val(null).trigger('change')
             $('#divPlanes').attr('hidden',false)
         }
     });
@@ -110,41 +46,28 @@ $(document).ready(function () {
         $('#divTabla').attr('hidden',true)
         $('#divConfiguracion').attr('hidden',true)
 
-        let codigoCarrera = $("#carreras").val();
-        let numeroPlanEstudios = $(this).val();
-        let datos = new FormData();
-        datos.append("codigocarrera", codigoCarrera);
-        datos.append("numeroplanestudios", numeroPlanEstudios);
-        $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/listar-cursos",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                if (numeroPlanEstudios != ''){
-                    $("#cursos").empty().append(data);
-                    $('#divCursos').attr('hidden',false)
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: "No se pudo listar las sedes de la carrera",
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Cerrar'
-                }).then(function() {
-                    $('#divCursos').attr('hidden',true)
-                    $('#divTabla').attr('hidden',true)
-                    $('#divConfiguracion').attr('hidden',true)
-                })
-            }
-        });
+        if ($(this).val() != ''){
+            $('#cursos').val(null).trigger('change')
+            $('#divCursos').attr('hidden',false)
+        }
     });
 
+    $('#cursos').change(function () {
+        $('#divTabla').attr('hidden',true)
+
+        if ($(this).val() != ''){
+            $('#divTabla').attr('hidden',false)
+
+            dataMaterias.gestion = $('#gestion').val()
+            dataMaterias.carrera = $("#carreras").val()
+            dataMaterias.curso = $("#cursos").val()
+            dataMaterias.plan = $("#planes").val()
+            dataMaterias.sede = $("#sedes").val()
+            dataMaterias.flag = 1
+
+            tableMaterias.ajax.reload()
+        }
+    })
 
     function format(d) {
         return (
@@ -219,21 +142,7 @@ $(document).ready(function () {
     }
 
 
-    $('#cursos').change(function () {
-        $('#divTabla').attr('hidden',true)
 
-        if ($(this).val() != ''){
-            $('#divTabla').attr('hidden',false)
-
-            dataMaterias.carrera = $("#carreras").val()
-            dataMaterias.curso = $("#cursos").val()
-            dataMaterias.plan = $("#planes").val()
-            dataMaterias.sede = $("#sedes").val()
-            dataMaterias.flag = 1
-
-            tableMaterias.ajax.reload()
-        }
-    })
 
     $(document).on('click','#tablaMaterias tbody td.details-control', function () {
         var tr = $(this).closest('tr');
@@ -267,7 +176,7 @@ $(document).ready(function () {
 
     function llenarTablas(sigla){
 
-        dataGrupos.gestion = '1/2021'
+        dataGrupos.gestion = $("#gestion").val()
         dataGrupos.carrera = $("#carreras").val()
         dataGrupos.curso = $("#cursos").val()
         dataGrupos.plan = $("#planes").val()
@@ -281,21 +190,27 @@ $(document).ready(function () {
             ajax: ajaxGrupos,
             columns: columnsGrupos,
             createdRow: createdRows,
-            initComplete: function (settings, json) {
-                $('#tablaTeoria').DataTable().on('order.dt search.dt', function () {
-                    var i = 1;
-                    $('#tablaTeoria').DataTable()
-                        .cells(null, 0, { search: 'applied', order: 'applied' })
-                        .every(function (cell) {
-                            this.data(i++);
-                        });
-                }).draw();
+            initComplete: initComplete,
+        })
 
-                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
-                    .forEach(popover => {
-                        new bootstrap.Popover(popover)
-                    })
-            },
+        dataGrupos.tipoGrupo = 'L'
+        tableLaboratorio = $('#tablaLaboratorio').dataTable({
+            layout: layoutGrupos,
+            pageLength : 20,
+            ajax: ajaxGrupos,
+            columns: columnsGrupos,
+            createdRow: createdRows,
+            initComplete: initComplete,
+        })
+
+        dataGrupos.tipoGrupo = 'P'
+        tablePractica = $('#tablaPractica').dataTable({
+            layout: layoutGrupos,
+            pageLength : 20,
+            ajax: ajaxGrupos,
+            columns: columnsGrupos,
+            createdRow: createdRows,
+            initComplete: initComplete,
         })
     }
 

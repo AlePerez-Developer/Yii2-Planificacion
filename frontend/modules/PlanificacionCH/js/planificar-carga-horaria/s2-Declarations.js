@@ -111,13 +111,84 @@ $(document).ready(function(){
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             },
-            templateResult: formatRepo,
         },
+        templateResult: function (repo){
+            return (repo.loading)?repo.text:'Numero plan de estudios: ' + repo.id
+        },
+        templateSelection: function (repo) {
+            return (repo.id)?'Numero plan de estudios: ' + repo.id: repo.text;
+        }
     })
 
-    function formatRepo (rep){
+    $('#cursos').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un curso",
+        allowClear: true,
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            delay: 500,
+            data: function (params) {
+                return {
+                    carrera: $('#carreras').val(),
+                    plan: $('#planes').val(),
+                    q: params.term,
+                    page: params.page
+                };
+            },
+            cache: false,
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-cursos',
+            dataSrc: '',
+            processResults: function (data) {
+                return {
+                    results: data.cursos
+                };
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            },
+        },
+        templateResult: function (repo){
+            return (repo.loading)?repo.text:'Curso N°: ' + repo.id
+        },
+        templateSelection: function (repo) {
+            return (repo.id)?'Curso N°: ' + repo.id: repo.text;
+        }
+    })
+
+    $('#docentes').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija un docente",
+        allowClear: true,
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            delay: 500,
+            data: function (params) {
+                return {
+                    q: params.term,
+                    page: params.page
+                };
+            },
+            cache: false,
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-docentes',
+            dataSrc: '',
+            processResults: function (data) {
+                return {
+                    results: data.docentes
+                };
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            },
+        },
+        templateResult: formatRepo,
+        templateSelection: formatRepoSelection
+    })
+
+    function formatRepo (repo) {
         if (repo.loading) {
-            return 'asssssssssssssssss';
+            return repo.text;
         }
 
         var $container = $(
@@ -133,8 +204,10 @@ $(document).ready(function(){
         $container.find(".select2-result-repository__title").text(repo.text);
         $container.find(".select2-result-repository__description").text(repo.id);
 
-        return 'asdasdasdasd';
+        return $container;
     }
 
-
+    function formatRepoSelection (repo) {
+        return repo.full_name || repo.text;
+    }
 })

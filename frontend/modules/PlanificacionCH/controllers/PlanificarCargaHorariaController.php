@@ -136,47 +136,34 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionListarCursos()
     {
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $opciones = "<option value=''>Selecionar Curso</option>";
-            $codigoCarrera = $_POST["codigocarrera"];
-            $numeroPlanEstudios = $_POST["numeroplanestudios"];
-            $cursos = PlanesEstudiosDao::listaCursos($codigoCarrera, $numeroPlanEstudios);
-            foreach ($cursos as $curso) {
-                $opciones .= "<option value='" . $curso->Curso . "'> Curso N°: " . $curso->Curso . "</option>";
-            }
-            return $opciones;
-        }
-    }
-
-    public function actionListarDocentes() {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
 
+        if (!(isset($_POST["carrera"]) && $_POST["carrera"] != ""
+            && isset($_POST["plan"]) && $_POST["plan"] != ""
+        )){
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
         $search = str_replace(" ","%", $_POST['q'] ?? '');
 
-        $docentes = (new Query)
-            ->select(['convert(varchar(max),P.IdPersona) as id',"ltrim(rtrim(isnull(p.Paterno,''))) + ' ' + ltrim(rtrim(isnull(p.materno,''))) + ' ' + ltrim(rtrim(isnull(p.nombres,''))) as text",
-                      'cl.DescripcionCondicionLaboral'])
-            ->from(['DetalleItemFuncionario Dif'])
-            ->join('INNER JOIN', 'Items i', 'Dif.NroItem = I.NroItem')
-            ->join('INNER JOIN','Cargos C', 'c.IdCargo = i.IdCargo and C.CodigoSectorTrabajo = i.CodigoSectortrabajo')
-            ->join('INNER JOIN','Organigrama U', 'U.IdUnidad = i.IdUnidad ')
-            ->join('INNER JOIN','Funcionarios F', 'F.IdFuncionario = Dif.IdFuncionario and f.CodigoSectorTrabajo = i.CodigoSectortrabajo')
-            ->join('INNER JOIN','Personas P', 'P.IdPersona = F.IdPersona')
-            ->join('INNER JOIN','CondicionesLaborales Cl', 'Cl.CodigoCondicionLaboral = Dif.CodigoCondicionLaboral')
-            ->where(['Dif.CodigoEstadoCargo' => 'V'])->andWhere(['i.CodigoSectortrabajo' => 'DOC'])->andWhere(['i.EstadoCargoUnidad' => 'V'])
-            ->andWhere(['c.CodigoEstadoCargo' => 'V'])
-            ->andWhere(['u.CodigoEstadoUnidad' => 'V'])
-            ->andWhere(['F.CodigoEstadoFuncionario' => 'V'])
-            ->groupBy('convert(varchar(max),[[P.IdPersona]]),P.Paterno,P.Materno,P.Nombres,cl.DescripcionCondicionLaboral')
-            ->all(Yii::$app->dbrrhh);
+        $cursos = Materia::find()
+            ->select(['Curso as id','Curso as text'])
+            ->distinct()
+            ->where(['CodigoCarrera' => $_POST['carrera']])
+            ->andWhere(['NumeroPlanEstudios' => $_POST['plan']])
+            ->andWhere(['CodigoEstadoMateria' => 'A' ])
+            ->andWhere(['like', 'Curso', $search])
+            ->orderBy('Curso')
+            ->asArray()
+            ->all();
 
-        if (!$docentes) {
+        if (!$cursos) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
-        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'docentes' =>  $docentes]);
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'cursos' =>  $cursos]);
     }
 
     public function actionListarMaterias(){
@@ -224,6 +211,8 @@ class PlanificarCargaHorariaController extends Controller
             return 'ERROR_CABECERA';
         }
 
+        $gestion = intval($_POST['gestion']);
+
         $grupos = (new Query)
             ->select(['Md.GestionAcademica as MGA','Chp.gestionAcademica as CGA',
                       'M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
@@ -244,10 +233,9 @@ class PlanificarCargaHorariaController extends Controller
             ->join('LEFT JOIN','Calificaciones Cr', "Cr.GestionAcademica = Md.GestionAcademica and Cr.CodigoCarrera = M.CodigoCarrera and Cr.NumeroPlanEstudios = M.NumeroPlanEstudios and Cr.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cr.SiglaMateria = M.SiglaMateria and Cr.CU = Dp.CU and Cr.CodigoEstadoCalificacion = 'R'")
             ->join('LEFT JOIN','Calificaciones Cb', "Cb.GestionAcademica = Md.GestionAcademica and Cb.CodigoCarrera = M.CodigoCarrera and Cb.NumeroPlanEstudios = M.NumeroPlanEstudios and Cb.CodigoModalidadCurso = Md.CodigoModalidadCurso and Cb.SiglaMateria = M.SiglaMateria and Cb.CU = Dp.CU and Cb.CodigoEstadoCalificacion = 'B'")
             ->join('INNER JOIN','Proyecciones Pr', 'Pr.GestionAcademica = Chp.GestionAcademica and Pr.CodigoCarrera = M.CodigoCarrera and Pr.CodigoSede = Md.CodigoSede and Pr.SiglaMateria = M.SiglaMateria')
-            ->where(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
+            ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])->andWhere(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
+            ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
-            ->andWhere(['Md.GestionAcademica' => $_POST["gestion"]])
-            ->andWhere(['Chp.GestionAcademica' => '1/2022'])
             ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
             ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
             ->groupBy('Md.GestionAcademica,chp.GestionAcademica,  
@@ -257,6 +245,37 @@ class PlanificarCargaHorariaController extends Controller
             ->orderBy('M.SiglaMateria')->all(Yii::$app->dbAcademica);
 
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupos' => $grupos]);
+    }
+
+    public function actionListarDocentes() {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+
+        $search = str_replace(" ","%", $_POST['q'] ?? '');
+
+        $docentes = (new Query)
+            ->select(['convert(varchar(max),P.IdPersona) as id',"ltrim(rtrim(isnull(p.Paterno,''))) + ' ' + ltrim(rtrim(isnull(p.materno,''))) + ' ' + ltrim(rtrim(isnull(p.nombres,''))) as text",
+                'cl.DescripcionCondicionLaboral'])
+            ->from(['DetalleItemFuncionario Dif'])
+            ->join('INNER JOIN', 'Items i', 'Dif.NroItem = I.NroItem')
+            ->join('INNER JOIN','Cargos C', 'c.IdCargo = i.IdCargo and C.CodigoSectorTrabajo = i.CodigoSectortrabajo')
+            ->join('INNER JOIN','Organigrama U', 'U.IdUnidad = i.IdUnidad ')
+            ->join('INNER JOIN','Funcionarios F', 'F.IdFuncionario = Dif.IdFuncionario and f.CodigoSectorTrabajo = i.CodigoSectortrabajo')
+            ->join('INNER JOIN','Personas P', 'P.IdPersona = F.IdPersona')
+            ->join('INNER JOIN','CondicionesLaborales Cl', 'Cl.CodigoCondicionLaboral = Dif.CodigoCondicionLaboral')
+            ->where(['Dif.CodigoEstadoCargo' => 'V'])->andWhere(['i.CodigoSectortrabajo' => 'DOC'])->andWhere(['i.EstadoCargoUnidad' => 'V'])
+            ->andWhere(['c.CodigoEstadoCargo' => 'V'])
+            ->andWhere(['u.CodigoEstadoUnidad' => 'V'])
+            ->andWhere(['F.CodigoEstadoFuncionario' => 'V'])
+            ->groupBy('convert(varchar(max),[[P.IdPersona]]),P.Paterno,P.Materno,P.Nombres,cl.DescripcionCondicionLaboral')
+            ->all(Yii::$app->dbrrhh);
+
+        if (!$docentes) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'docentes' =>  $docentes]);
     }
 
 

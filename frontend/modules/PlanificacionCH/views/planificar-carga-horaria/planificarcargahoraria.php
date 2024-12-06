@@ -130,6 +130,22 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value="2021" >
     </div>
+    <div class="row">
+        <div class="col-sm-1" style="height: 70px;width: 70px">
+            <img src="oso.jpg" style="height: 70px; width: 70px">
+        </div>
+        <div class="col-sm-8">
+            <div class="row">
+                <div class="col-1">IdPersona</div>
+                <div class="col-2">5493446</div>
+            </div>
+            <div class="row">
+                <div class="col-1">Nombre</div>
+                <div class="col-2">alecito bonito</div>
+            </div>
+        </div>
+
+    </div>
 </div>
 <div class="card">
     <div class="mt-2 ml-3 mb-3">
@@ -195,3 +211,5 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
 </div>
 
 <?php include_once "modalPlanificar.php"; ?>
+
+

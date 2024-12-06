@@ -9,6 +9,7 @@ let ajaxGrupos
 let columnsGrupos
 
 let createdRows
+let initComplete
 $(document).ready(function () {
     layoutGrupos = {
         topStart: null,
@@ -29,6 +30,22 @@ $(document).ready(function () {
         error: function (xhr, ajaxOptions, thrownError) {
             MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
         }
+    }
+
+    initComplete = function initComplete(settings, json){
+        $(this).DataTable().on('order.dt search.dt', function () {
+            var i = 1;
+            $(this).DataTable()
+                .cells(null, 0, { search: 'applied', order: 'applied' })
+                .every(function (cell) {
+                    this.data(i++);
+                });
+        }).draw();
+
+        document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+            .forEach(popover => {
+                new bootstrap.Popover(popover)
+            })
     }
 
     createdRows = function createdRow(row, data, rowIndex){
