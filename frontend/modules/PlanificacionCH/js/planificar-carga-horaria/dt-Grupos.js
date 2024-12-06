@@ -56,19 +56,21 @@ $(document).ready(function () {
             .attr('data-bs-html', true)
             .attr('data-bs-title', data.NombreMateria)
             .attr('data-html',true)
-            .attr('data-bs-content','<div class="container">' +
-                '<div class="row" style="display:inline;">' +
-                '<div class="col-sm-2 bg-info" style="width:20px; display:inline;">x</div>' +
-                '<div class="col-sm-2" style="display:inline;">1 a 5</div>'+
-                '</div><br>'+
-                '<div class="row" style="display:inline;">'+
-                '<div class="col-sm-2 bg-warning" style="width:20px; display:inline;">x</div>'+
-                '<div class="col-sm-2" style="display:inline;">6 a 8</div>'+
-                '</div><br>'+
-                '<div class="row" style="display:inline;">'+
-                '<div class="col-sm-2 bg-danger" style="width:20px; display:inline;">x</div>'+
-                '<div class="col-sm-2" style="display:inline;">9 a 10</div>'+
-                '</div></div>')
+            .attr('data-bs-content','<div class="row">\n' +
+        '        <div class="col-sm-1" style="height: 70px;width: 70px">\n' +
+        '            <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(data.IdPersona) + '.jpg\" style="height: 70px; width: 70px">\n' +
+        '        </div>\n' +
+        '        <div class="col-sm-8">\n' +
+        '            <div class="row">\n' +
+        '                <div class="col-1">IdPersona</div>\n' +
+        '                <div class="col-2">' + $.trim(data.IdPersona) + '</div>\n' +
+        '            </div>\n' +
+        '            <div class="row">\n' +
+        '                <div class="col-1">Nombre</div>\n' +
+        '                <div class="col-2">' + $.trim(data.NombreCompleto) + '</div>\n' +
+        '            </div>\n' +
+        '        </div>\n' +
+        '    </div>')
             .attr('tabindex', 0)
 
         switch (data.CodigoEstado){

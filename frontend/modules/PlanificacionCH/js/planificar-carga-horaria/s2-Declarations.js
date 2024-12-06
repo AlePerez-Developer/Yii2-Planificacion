@@ -192,18 +192,22 @@ $(document).ready(function(){
         }
 
         var $container = $(
-            "<div class='select2-result-repository flex-container'>" +
-            "<div class='select2-result-repository__avatar flex-child magenta'><img src='http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_" + $.trim(repo.id) + ".jpg' /></div>" +
-            "<div class='select2-result-repository__meta flex-child green'>" +
-            "<div class='select2-result-repository__title'></div>" +
-            "<div class='select2-result-repository__description'></div>" +
-            "</div>" +
-            "</div>"
+            '<div class="row">\n' +
+            '        <div class="col-sm-1" style="height: 70px;width: 70px">\n' +
+            '            <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(repo.id) + '.jpg\" style="height: 70px; width: 70px">\n' +
+            '        </div>\n' +
+            '        <div class="col-sm-8">\n' +
+            '            <div class="row">\n' +
+            '                <div class="col-1">IdPersona</div>\n' +
+            '                <div class="col-2">' + $.trim(repo.id) + '</div>\n' +
+            '            </div>\n' +
+            '            <div class="row">\n' +
+            '                <div class="col-1">Nombre</div>\n' +
+            '                <div class="col-2">' + $.trim(repo.text) + '</div>\n' +
+            '            </div>\n' +
+            '        </div>\n' +
+            '    </div>'
         );
-
-        $container.find(".select2-result-repository__title").text(repo.text);
-        $container.find(".select2-result-repository__description").text(repo.id);
-
         return $container;
     }
 
