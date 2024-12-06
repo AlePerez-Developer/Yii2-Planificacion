@@ -303,19 +303,16 @@ class PlanificarCargaHorariaController extends Controller
 
         switch ($row->CodigoEstado) {
             case 'V':
-                $row->CodigoEstado = Estado::ESTADO_ELIMINADO;
-                if ($row->update() === false) {
-                    return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-                }
-                break;
             case 'E':
-                $row->CodigoEstado = Estado::ESTADO_VIGENTE;
+                ($row->CodigoEstado == Estado::ESTADO_VIGENTE)?$row->CodigoEstado = Estado::ESTADO_ELIMINADO:$row->CodigoEstado = Estado::ESTADO_VIGENTE;
                 if ($row->update() === false) {
                     return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
                 }
                 break;
             case 'A':
-                $row->delete();
+                if ($row->delete() === false) {
+                    return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
+                }
                 break;
         }
 

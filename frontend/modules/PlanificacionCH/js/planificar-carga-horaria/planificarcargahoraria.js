@@ -157,7 +157,7 @@ $(document).ready(function () {
         }
         else {
             $("#tablaMaterias  tr.shown").each(function () {
-                let rowOpen = table.row($(this));
+                let rowOpen = tableMaterias.row($(this));
                 let tdiOpen = $(this).find("i.fa");
                 $(this).removeClass('shown');
                 tdiOpen.first().removeClass('fa-minus-square');

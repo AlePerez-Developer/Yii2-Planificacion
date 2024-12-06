@@ -27,16 +27,6 @@ $this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/dt-Gru
     ]
 ]);
 
-
-
-
-/*
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/datatableDeclaration.js", [
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);*/
-
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
 ?>
