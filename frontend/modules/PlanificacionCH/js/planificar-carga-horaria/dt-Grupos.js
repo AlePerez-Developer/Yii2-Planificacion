@@ -54,26 +54,41 @@ $(document).ready(function () {
             .attr('data-bs-trigger', 'focus')
             .attr('data-bs-placement', 'top')
             .attr('data-bs-html', true)
-            .attr('data-bs-container', 'body')
+            //.attr('data-bs-container', 'body')
             .attr('data-bs-title', data.NombreMateria)
             .attr('data-html',true)
-            .attr('data-bs-content','<div class="row">\n' +
-        '        <div class="col-sm-1" style="height: 70px;width: 70px">\n' +
-        '            <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(data.IdPersona) + '.jpg\" style="height: 70px; width: 70px">\n' +
-        '        </div>\n' +
-        '        <div class="col-sm-8">\n' +
-        '            <div class="row">\n' +
-        '                <div class="col-7 sNombre">' + $.trim(data.NombreCompleto).toUpperCase() + '</div>\n' +
-        '            </div>\n' +
-        '            <div class="row">\n' +
-        '                <div class="col-1 sCi"><b>CI: </b></div>\n' +
-        '                <div class="col-3 sCi">' + $.trim(data.IdPersona) + '</div>\n' +
-        '            </div>\n' +
-        '            <div class="row">\n' +
-        '                <div class="col-7 sCi">' + $.trim('DOCENTE').toUpperCase() + '</div>\n' +
-        '            </div>\n' +
-        '        </div>\n' +
-        '    </div>')
+            .attr('data-bs-content','' +
+                '<div class="container mt-1 d-flex justify-content-center"> ' +
+                '  <div class="card card2 p-3"> ' +
+                '    <div class="d-flex align-items-center"> ' +
+                '      <div class="image"> ' +
+                '        <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(data.IdPersona) + '.jpg" class="rounded" width="155"> ' +
+                '      </div>' +
+                '      <div class="ml-3 w-100"> ' +
+                '        <h4 class="mb-0 mt-0">'+data.Nombre+'</h4> ' +
+                '        <span>Docente</span> ' +
+                '        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats"> ' +
+                '          <div class="d-flex flex-column"> ' +
+                '            <span class="articles">Ch. vigente</span> ' +
+                '            <span class="number1">38</span> ' +
+                '          </div>' +
+                '          <div class="d-flex flex-column"> ' +
+                '            <span class="followers">Ch. Eliminada</span> ' +
+                '            <span class="number2">980</span> ' +
+                '          </div>' +
+                '          <div class="d-flex flex-column"> ' +
+                '            <span class="rating">Ch. Agregada</span> ' +
+                '            <span class="number3">8.9</span> ' +
+                '          </div>' +
+                '        </div>' +
+                '        <div class="button mt-2 d-flex flex-row align-items-center"> ' +
+                '          <button class="btn btn-sm btn-outline-primary w-100">Chat</button> ' +
+                '          <button class="btn btn-sm btn-primary w-100 ml-2">Follow</button> ' +
+                '        </div>' +
+                '      </div>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>')
             .attr('tabindex', 0)
 
         switch (data.CodigoEstado){

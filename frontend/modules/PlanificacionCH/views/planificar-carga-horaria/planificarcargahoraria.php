@@ -119,13 +119,56 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
     }
 
     img {
-        width: 15px;
-        height: 15px;
+        width: 100px;
+        height: 100px;
+    }
+
+    .popover{
+        max-width: 100%; /* Max Width of the popover (depending on the container!) */
+    }
+
+    .card2 {
+        width: 400px;
+        border: none;
+        border-radius: 10px;
+        background-color: #fff
+    }
+
+    .stats {
+        background: #f2f5f8 !important;
+        color: #000 !important
+    }
+
+    .articles {
+        font-size: 10px;
+        color: #a1aab9
+    }
+
+    .number1 {
+        font-weight: 500
+    }
+
+    .followers {
+        font-size: 10px;
+        color: #a1aab9
+    }
+
+    .number2 {
+        font-weight: 500
+    }
+
+    .rating {
+        font-size: 10px;
+        color: #a1aab9
+    }
+
+    .number3 {
+        font-weight: 500
     }
 
 </style>
 <div>
-    <div>
+    <div hidden>
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value="2021" >
     </div>
