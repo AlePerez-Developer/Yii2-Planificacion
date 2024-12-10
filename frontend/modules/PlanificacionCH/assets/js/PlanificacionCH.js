@@ -58,7 +58,7 @@ function GenerarMensajeError(Mensaje){
     } else if (Mensaje === "errorSql") {
         return "Error: Ocurrio un error en la sentencia SQL";
     } else if (Mensaje === "errorExiste") {
-        return "Error: El valor ingresado ya existe en la base de datos";
+        return "Error: El grupo ya existe en la base de datos";
     } else if (Mensaje === "errorMeta") {
         return "Error: la meta nueva excede la cantidad total";
     } else if (Mensaje === "errorEnUso") {
@@ -84,7 +84,7 @@ function DetenerSpiner(Btn){
     Btn.prop( "disabled", false );
 }
 
-function MostrarMensaje(icono, mensaje){
+function MostrarMensaje(icono, mensaje, tipo){
     let titulo
     switch(icono) {
         case 'success':
@@ -103,14 +103,33 @@ function MostrarMensaje(icono, mensaje){
             titulo = '??????...........'
             break;
     }
-    Swal.fire({
-        icon: icono,
-        title: titulo,
-        text: mensaje,
-        showCancelButton: false,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Cerrar"
-    });
+
+    if (tipo == 'toast') {
+        Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        }).fire({
+            icon: icono,
+            title: titulo,
+            text: mensaje
+        });
+    } else {
+        Swal.fire({
+            icon: icono,
+            title: titulo,
+            text: mensaje,
+            showCancelButton: false,
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Cerrar"
+        });
+    }
 }
 $(document).ready(function(){
 });

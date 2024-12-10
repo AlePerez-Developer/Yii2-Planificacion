@@ -160,6 +160,7 @@ $(document).ready(function(){
         theme: 'bootstrap4',
         placeholder: "Elija un docente",
         allowClear: true,
+        dropdownParent: $('#modalPlanificar'),
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -198,12 +199,14 @@ $(document).ready(function(){
             '        </div>\n' +
             '        <div class="col-sm-8">\n' +
             '            <div class="row">\n' +
-            '                <div class="col-1">IdPersona</div>\n' +
-            '                <div class="col-2">' + $.trim(repo.id) + '</div>\n' +
+            '                <div class="col-7 sNombre">' + $.trim(repo.text).toUpperCase() + '</div>\n' +
             '            </div>\n' +
             '            <div class="row">\n' +
-            '                <div class="col-1">Nombre</div>\n' +
-            '                <div class="col-2">' + $.trim(repo.text) + '</div>\n' +
+            '                <div class="col-1 sCi"><b>CI: </b></div>\n' +
+            '                <div class="col-3 sCi">' + $.trim(repo.id) + '</div>\n' +
+            '            </div>\n' +
+            '            <div class="row">\n' +
+            '                <div class="col-7 sCi">' + $.trim(repo.condicion).toUpperCase() + '</div>\n' +
             '            </div>\n' +
             '        </div>\n' +
             '    </div>'

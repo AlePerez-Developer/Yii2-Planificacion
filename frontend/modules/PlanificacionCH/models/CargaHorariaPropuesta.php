@@ -62,7 +62,7 @@ class CargaHorariaPropuesta extends \yii\db\ActiveRecord
             [['IdPersona'], 'string', 'max' => 15],
             [['Observaciones'], 'string', 'max' => 500],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['CodigoCarrera', 'GestionAcademica', 'Grupo', 'NumeroPlanEstudios', 'SiglaMateria', 'TipoGrupo'], 'unique', 'targetAttribute' => ['CodigoCarrera', 'GestionAcademica', 'Grupo', 'NumeroPlanEstudios', 'SiglaMateria', 'TipoGrupo']],
+            [['CodigoCarrera', 'GestionAcademica', 'Grupo', 'NumeroPlanEstudios', 'SiglaMateria', 'TipoGrupo', 'CodigoEstado'], 'unique', 'targetAttribute' => ['CodigoCarrera', 'GestionAcademica', 'Grupo', 'NumeroPlanEstudios', 'SiglaMateria', 'TipoGrupo', 'CodigoEstado']],
             [['IdPersona'], 'exist', 'skipOnError' => true, 'targetClass' => Persona::class, 'targetAttribute' => ['IdPersona' => 'IdPersona']],
             [['CodigoSede'], 'exist', 'skipOnError' => true, 'targetClass' => Sede::class, 'targetAttribute' => ['CodigoSede' => 'CodigoSede']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
@@ -134,7 +134,22 @@ class CargaHorariaPropuesta extends \yii\db\ActiveRecord
     }
 
     public function exist(){
-        return false;
+        $row = CargaHorariaPropuesta::find()
+            ->where(['GestionAcademica' => $this->GestionAcademica])
+            ->andWhere(['CodigoCarrera' => $this->CodigoCarrera])
+            ->andWhere(['CodigoSede' => $this->CodigoSede])
+            ->andWhere(['NumeroPlanEstudios' => $this->NumeroPlanEstudios])
+            ->andWhere(['SiglaMateria' => $this->SiglaMateria])
+            ->andWhere(['Grupo' => $this->Grupo])
+            ->andWhere(['TipoGrupo' => $this->TipoGrupo])
+            ->andWhere(['in','CodigoEstado' ,['V','A']])
+            ->all();
+
+        if(!empty($row)){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

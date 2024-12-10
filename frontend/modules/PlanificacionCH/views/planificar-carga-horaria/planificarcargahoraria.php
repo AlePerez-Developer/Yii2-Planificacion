@@ -109,6 +109,15 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         margin-right: 20px;
     }
 
+    .sNombre{
+        font-weight: bold;
+        font-size: medium;
+    }
+
+    .sCi{
+        font-size: medium;
+    }
+
     img {
         width: 15px;
         height: 15px;

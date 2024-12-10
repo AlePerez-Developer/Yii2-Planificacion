@@ -35,8 +35,9 @@ $(document).ready(function() {
         function(value, element, param) {
             let result = false;
             let datos = new FormData()
-            datos.append("gestion", '1/2022')
+            datos.append("gestion", dataGrupos.gestion)
             datos.append("carrera", dataGrupos.carrera)
+            datos.append("sede", dataGrupos.sede)
             datos.append("plan", dataGrupos.plan)
             datos.append("sigla", dataGrupos.sigla)
             datos.append("tipoGrupo", dataGrupos.tipoGrupo)

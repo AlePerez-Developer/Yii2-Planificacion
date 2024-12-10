@@ -54,6 +54,7 @@ $(document).ready(function () {
             .attr('data-bs-trigger', 'focus')
             .attr('data-bs-placement', 'top')
             .attr('data-bs-html', true)
+            .attr('data-bs-container', 'body')
             .attr('data-bs-title', data.NombreMateria)
             .attr('data-html',true)
             .attr('data-bs-content','<div class="row">\n' +
@@ -62,12 +63,14 @@ $(document).ready(function () {
         '        </div>\n' +
         '        <div class="col-sm-8">\n' +
         '            <div class="row">\n' +
-        '                <div class="col-1">IdPersona</div>\n' +
-        '                <div class="col-2">' + $.trim(data.IdPersona) + '</div>\n' +
+        '                <div class="col-7 sNombre">' + $.trim(data.NombreCompleto).toUpperCase() + '</div>\n' +
         '            </div>\n' +
         '            <div class="row">\n' +
-        '                <div class="col-1">Nombre</div>\n' +
-        '                <div class="col-2">' + $.trim(data.NombreCompleto) + '</div>\n' +
+        '                <div class="col-1 sCi"><b>CI: </b></div>\n' +
+        '                <div class="col-3 sCi">' + $.trim(data.IdPersona) + '</div>\n' +
+        '            </div>\n' +
+        '            <div class="row">\n' +
+        '                <div class="col-7 sCi">' + $.trim('DOCENTE').toUpperCase() + '</div>\n' +
         '            </div>\n' +
         '        </div>\n' +
         '    </div>')
@@ -111,7 +114,16 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small dt-center',
-            data: 'IdPersona'
+            data: 'IdPersona',
+            render: function (data, type, row) {
+                if (row.CodigoEstado == 'C') {
+                    let texto = row.Observaciones.split(',')
+                    return texto[1] + ' -> ' + data
+                } else {
+                    return data
+                }
+
+            }
         },
         {
             className: 'dt-small',
@@ -119,7 +131,16 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small dt-center',
-            data: 'Grupo'
+            data: 'Grupo',
+            render: function (data, type, row) {
+                if (row.CodigoEstado == 'C') {
+                    let texto = row.Observaciones.split(',')
+                    return texto[0] + ' -> ' + data
+                } else {
+                    return data
+                }
+
+            }
         },
         {
             className: 'dt-small dt-center',
@@ -154,14 +175,17 @@ $(document).ready(function () {
                 let button
                 switch  (row.CodigoEstado){
                     case 'V':
-                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
-                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'E':
-                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     case 'A':
-                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + data + '" plan="' + row.NumeroPlanEstudios + '" sigla="' + row.SiglaMateria + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        break
+                    case 'C':
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     default: button = ''
                 }

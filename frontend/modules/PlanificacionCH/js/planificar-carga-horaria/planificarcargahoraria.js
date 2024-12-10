@@ -141,9 +141,6 @@ $(document).ready(function () {
         );
     }
 
-
-
-
     $(document).on('click','#tablaMaterias tbody td.details-control', function () {
         var tr = $(this).closest('tr');
         var tdi = tr.find("i.fa");
@@ -182,8 +179,8 @@ $(document).ready(function () {
         dataGrupos.plan = $("#planes").val()
         dataGrupos.sede = $("#sedes").val()
         dataGrupos.sigla = sigla
-        dataGrupos.tipoGrupo = 'T'
 
+        dataGrupos.tipoGrupo = 'T'
         tableTeoria = $('#tablaTeoria').dataTable({
             layout: layoutGrupos,
             pageLength : 20,
@@ -216,19 +213,20 @@ $(document).ready(function () {
 
     $(document).on('click', 'tbody .btnEstado', function(){
         let objectBtn = $(this);
-        let carrera = objectBtn.attr("carrera");
-        let plan = objectBtn.attr("plan");
-        let sigla = objectBtn.attr("sigla");
         let grupo = objectBtn.attr("grupo");
         let tipoGrupo = objectBtn.attr("tipogrupo");
+        let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("carrera", carrera);
-        datos.append("plan", plan);
-        datos.append("sigla", sigla);
+        datos.append("gestion", dataGrupos.gestion);
+        datos.append("carrera", dataGrupos.carrera);
+        datos.append("sede", dataGrupos.sede);
+        datos.append("plan", dataGrupos.plan);
+        datos.append("sigla", dataGrupos.sigla);
         datos.append("grupo", grupo);
         datos.append("tipoGrupo", tipoGrupo);
-
+        datos.append("estado", estado);
         dataGrupos.tipoGrupo = tipoGrupo
+
         Swal.fire({
             icon: "warning",
             title: "Confirmación",
@@ -251,13 +249,28 @@ $(document).ready(function () {
                     dataType: "json",
                     success: function (data) {
                         if (data.respuesta === RTA_CORRECTO) {
-                            MostrarMensaje('success','El estado del grupo se cambio de forma correcta.')
+                            MostrarMensaje('success','El estado del grupo se cambio de forma correcta.','toast')
                             switch (tipoGrupo){
-                                case 'T': $("#tablaTeoria").DataTable().ajax.reload();
+                                case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                        .forEach(popover => {
+                                            new bootstrap.Popover(popover)
+                                        })
+                                });
                                     break
-                                case 'L': $("#tablaLaboratorio").DataTable().ajax.reload();
+                                case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                        .forEach(popover => {
+                                            new bootstrap.Popover(popover)
+                                        })
+                                });
                                     break
-                                case 'P': $("#tablaPractica").DataTable().ajax.reload();
+                                case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                        .forEach(popover => {
+                                            new bootstrap.Popover(popover)
+                                        })
+                                });
                                     break
                             }
                             DetenerSpiner(objectBtn)
@@ -288,7 +301,7 @@ $(document).ready(function () {
 
     function guardarGrupo() {
         let datos = new FormData();
-        datos.append("gestion", '1/2022')
+        datos.append("gestion", dataGrupos.gestion)
         datos.append("carrera", dataGrupos.carrera)
         datos.append("plan", dataGrupos.plan)
         datos.append("sigla", dataGrupos.sigla)
@@ -306,16 +319,32 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
-                    MostrarMensaje('success','Los datos del nuevo grupo se guardaron correctamente.')
+                    MostrarMensaje('success','Los datos del nuevo grupo se guardaron correctamente.','toast')
                     $('#modalPlanificar').modal('hide')
                     switch (dataGrupos.tipoGrupo){
-                        case 'T': $("#tablaTeoria").DataTable().ajax.reload();
+                        case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
                             break
-                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload();
+                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
                             break
-                        case 'P': $("#tablaPractica").DataTable().ajax.reload();
+                        case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
                             break
                     }
+                    reiniciarCampos()
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(data.respuesta))
@@ -327,20 +356,24 @@ $(document).ready(function () {
         });
     }
 
-    function actualizarPei() {
-        let codigoPei = $("#codigoPei").val();
-        let descripcionPei = $("#descripcionPei").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
+    $(document).on('click', 'tbody .btnEditar', function() {
+        let objectBtn = $(this);
+        let grupo = objectBtn.attr("grupo");
+        let tipoGrupo = objectBtn.attr("tipogrupo");
+        let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
-        datos.append("descripcionPei", descripcionPei);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionFin", gestionFin);
+        datos.append("gestion", dataGrupos.gestion);
+        datos.append("carrera", dataGrupos.carrera);
+        datos.append("sede", dataGrupos.sede);
+        datos.append("plan", dataGrupos.plan);
+        datos.append("sigla", dataGrupos.sigla);
+        datos.append("grupo", grupo);
+        datos.append("tipoGrupo", tipoGrupo);
+        dataGrupos.grupo = grupo
+        dataGrupos.tipoGrupo = tipoGrupo
+        IniciarSpiner(objectBtn)
         $.ajax({
-            url: "index.php?r=Planificacion/peis/actualizar-pei",
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/buscar-grupo",
             method: "POST",
             data: datos,
             cache: false,
@@ -349,10 +382,71 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
-                    MostrarMensaje('success','El PEI se actualizó correctamente.')
-                    $("#tablaListaPeis").DataTable().ajax.reload(async () => {
-                        $("#btnCancelar").click()
-                    })
+                    let grupo = JSON.parse(JSON.stringify(data.grupo));
+                    $('#docentes').val(grupo.IdPersona).trigger('change')
+                    $("#grupo").val(grupo.Grupo);
+                    $("#codigoCrear").val('update');
+                    DetenerSpiner(objectBtn)
+                    $("#modalPlanificar").modal('show');
+                } else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
+            }
+        });
+    });
+
+    function actualizarGrupo() {
+        let datos = new FormData();
+        datos.append("gestion", dataGrupos.gestion);
+        datos.append("carrera", dataGrupos.carrera);
+        datos.append("sede", dataGrupos.sede);
+        datos.append("plan", dataGrupos.plan);
+        datos.append("sigla", dataGrupos.sigla);
+        datos.append("grupo", dataGrupos.grupo);
+        datos.append("tipoGrupo", dataGrupos.tipoGrupo);
+        datos.append("grupoN", $('#grupo').val());
+        datos.append("idPersonaN", $('#docentes').val());
+        $.ajax({
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/actualizar-grupo",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    MostrarMensaje('success','El grupo se actualizó correctamente.','toast')
+                    switch (dataGrupos.tipoGrupo){
+                        case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
+                            break
+                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
+                            break
+                        case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                            document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                                .forEach(popover => {
+                                    new bootstrap.Popover(popover)
+                                })
+                        });
+                            break
+                    }
+                    reiniciarCampos()
+                    $('#modalPlanificar').modal('hide')
                 }
                 else {
                     MostrarMensaje('error',GenerarMensajeError(data.respuesta))
@@ -364,11 +458,25 @@ $(document).ready(function () {
         });
     }
 
+
     $(document).on('click', '.btnCrear', function(){
         let objectBtn = $(this)
         dataGrupos.tipoGrupo = objectBtn.attr('grupo')
         $('#modalPlanificar').modal('show')
     })
+
+    $(document).on('click', '#cerrarModal', function(){
+        reiniciarCampos()
+    })
+
+    function reiniciarCampos() {
+        $('#formCargaHorariaPropuesta *').filter(':input').each(function () {
+            $(this).removeClass('is-invalid is-valid');
+        });
+        $('#codigoCrear').val('');
+        $('#formCargaHorariaPropuesta').trigger("reset");
+        $('#docentes').val(null).trigger('change')
+    }
 
 });
 

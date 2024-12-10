@@ -20,6 +20,7 @@ class AppAsset extends AssetBundle
         '../../vendor/almasaeed2010/adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.css',
         '../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.css',
         '../../vendor/almasaeed2010/adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.css',
+        '../../vendor/almasaeed2010/adminlte/plugins/toastr/toastr.css',
         '../../vendor/almasaeed2010/adminlte/plugins/jquery-ui/jquery-ui.css',
         '../../vendor/almasaeed2010/adminlte/plugins/fontawesome-free/css/fontawesome.css'
     ];
@@ -34,6 +35,7 @@ class AppAsset extends AssetBundle
         '../../vendor/almasaeed2010/adminlte/plugins/jquery-validation/additional-methods.js',
         '../../vendor/almasaeed2010/adminlte/plugins/select2/js/select2.js',
         '../../vendor/almasaeed2010/adminlte/plugins/sweetalert2/sweetalert2.js',
+        '../../vendor/almasaeed2010/adminlte/plugins/toastr/toastr.min.js',
         '../../vendor/almasaeed2010/adminlte/plugins/jquery-ui/jquery-ui.js'
     ];
     public $depends = [
