@@ -10,6 +10,8 @@ let columnsGrupos
 
 let createdRows
 let initComplete
+
+var chDocente
 $(document).ready(function () {
     layoutGrupos = {
         topStart: null,
@@ -70,15 +72,15 @@ $(document).ready(function () {
                 '        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats"> ' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="articles">Ch. vigente</span> ' +
-                '            <span class="number1">38</span> ' +
+                '            <span class="number1 jo">' + data.chv + '</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="followers">Ch. Eliminada</span> ' +
-                '            <span class="number2">980</span> ' +
+                '            <span class="number2">' + data.che + '</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="rating">Ch. Agregada</span> ' +
-                '            <span class="number3">8.9</span> ' +
+                '            <span class="number3">' + data.cha + '</span> ' +
                 '          </div>' +
                 '        </div>' +
                 '        <div class="button mt-2 d-flex flex-row align-items-center"> ' +
@@ -185,6 +187,7 @@ $(document).ready(function () {
             className: 'dt-small dt-acciones dt-center',
             orderable: false,
             searchable: false,
+            visible: ( $('#nivel').val() === "1") ? true : false,
             data: 'CodigoCarrera',
             render: function (data, type, row) {
                 let button
@@ -212,5 +215,4 @@ $(document).ready(function () {
             },
         },
     ]
-
 })

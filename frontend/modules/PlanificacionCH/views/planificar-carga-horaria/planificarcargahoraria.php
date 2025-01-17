@@ -1,34 +1,14 @@
 <?php
+
 use yii\web\JqueryAsset;
+use app\modules\PlanificacionCH\assets\PlanificacionCHAsset;
+use app\modules\PlanificacionCH\assets\PlanificacionChjs;
 
-app\modules\PlanificacionCH\assets\PlanificacionCHAsset::register($this);
-
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/planificarcargahoraria.js", [
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);
-
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/s2-declarations.js", [
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);
-
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/dt-Materias.js", [
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);
-
-$this->registerJsFile("@planificacionCHModule/js/planificar-carga-horaria/dt-Grupos.js", [
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);
+PlanificacionCHAsset::register($this);
+PlanificacionChjs::register($this);
 
 $this->title = 'Administración Planificación C.H.';
-$this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
+$this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
 ?>
 
 <style>
@@ -166,11 +146,20 @@ $this->params['breadcrumbs'] = [['label' => 'Admin. Planificación C.H.']];
         font-weight: 500
     }
 
+    .divGrupos {
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 360px;
+        width: 100%
+    }
+
 </style>
 <div>
-    <div hidden>
+
+    <div >
         <label for="gestion">Gestion</label>
-        <input id="gestion" name="gestion" value="2021" >
+        <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
+        <input id="nivel" name="nivel" value="<?= $rol ?>" >
     </div>
 </div>
 <div class="card">

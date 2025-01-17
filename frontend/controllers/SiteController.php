@@ -79,7 +79,14 @@ class SiteController extends Controller
         //return $this->render('index');
         if(Yii::$app->user->isGuest)
         {
-            $this->actionLogin();
+            if(
+                isset($_GET['cu'])&&(trim($_GET['cu'])!='') &&
+                isset($_GET['ci'])&&(trim($_GET['ci'])!='')
+            ){
+                $this->actionLogin($_GET['ci'],$_GET['cu']);
+            } else {
+                throw new \Exception('No tienes los suficientes permisos para acceder a esta página');
+            }
         }
         else{
             return $this->render('index');
@@ -91,30 +98,16 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionLogin()
+    public function actionLogin($ci,$cu)
     {
-        $cu = '3596b69d068cc15535018bb257b3e1ff';
-        $usuario = Usuario::find()->where(['Llave' => $cu /*$_GET['cu']*/])->one();
+        //$cu = '3596b69d068cc15535018bb257b3e1ff';
+        $usuario = Usuario::find()->where(['Llave' => $cu, 'idPersona' => $ci])->one();
         if($usuario != null){
             Yii::$app->user->login($usuario);
             $this->redirect('index.php');
         }else{
             return $this->render('unauthorized');
         }
-        /*if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
-
-        $model->password = '';
-
-        return $this->render('login', [
-            'model' => $model,
-        ]);*/
     }
 
     /**

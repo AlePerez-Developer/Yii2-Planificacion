@@ -3,6 +3,7 @@
 namespace common\models;
 
 use yii\web\IdentityInterface;
+use Yii;
 
 /**
  * This is the model class for table "PEIs".
@@ -16,6 +17,14 @@ class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
     public static function tableName()
     {
         return 'Usuarios';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('dbAcademica');
     }
 
     public function getRol()
@@ -91,5 +100,10 @@ class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey)
     {
         return $this->getAuthKey() === $authKey;
+    }
+
+    public function getPersona()
+    {
+        return $this->hasOne(Persona::class, ['IdPersona' => 'IdPersona']);
     }
 }

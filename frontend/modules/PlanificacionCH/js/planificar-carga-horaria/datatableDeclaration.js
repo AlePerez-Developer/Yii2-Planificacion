@@ -11,20 +11,9 @@ var layoutGrupos
 var ajaxGrupos
 var columnsGrupos
 
-let a
 $(document).ready(function () {
-    a = function CrearRow(row, data, rowIndex){
-        console.log(data.SiglaMateria)
-    }
-
-
     materiasData.flag = 1
     materiasData.gestion = $('#gestion').val()
-    materiasData.carrera = '35'
-    materiasData.sede = 'su'
-    materiasData.curso = '1'
-    materiasData.plan = '9'
-
 
     materiasTable = $("#tablaMaterias").DataTable({
         layout: {
@@ -46,7 +35,7 @@ $(document).ready(function () {
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
             }
         },
-        createdRow:a,
+
         columns: [
             {
                 className: 'dt-small details-control dt-center',
@@ -102,9 +91,6 @@ $(document).ready(function () {
 
         ],
     });
-
-
-    createdRow:a,
 
     layoutGrupos = {
         topStart: null,
@@ -199,7 +185,4 @@ $(document).ready(function () {
             },
         },
     ]
-
-
 })
-

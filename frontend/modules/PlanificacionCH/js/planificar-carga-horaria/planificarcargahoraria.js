@@ -71,7 +71,8 @@ $(document).ready(function () {
 
     function format(d) {
         return (
-            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist" >\n' +
+            '<div style="background-color: white">'+
+            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">\n' +
             '  <li class="nav-item" role="presentation">\n' +
             '    <button class="nav-link active" id="pills-teoria-tab" data-bs-toggle="pill" data-bs-target="#pills-teoria" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Grupos Teoria</button>\n' +
             '  </li>\n' +
@@ -82,9 +83,10 @@ $(document).ready(function () {
             '    <button class="nav-link" id="pills-practica-tab" data-bs-toggle="pill" data-bs-target="#pills-practica" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Grupos Practica</button>\n' +
             '  </li>\n' +
             '</ul>\n' +
-            '<div class="tab-content" id="pills-tabContent">\n' +
+            '<div class="tab-content" id="pills-tabContent" >\n' +
             '  <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "T" class="form-control btn btn-info btnCrear">Crear Grupo de Teoria</button></div></div>' +
+            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "T" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Teoria</button></div></div>' +
+            '    <div class="divGrupos">'+
             '               <table id="tablaTeoria" class="table table-bordered  dt-responsive tablaTeoria" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
@@ -100,9 +102,11 @@ $(document).ready(function () {
             '                    <th>Accion</th>' +
             '                    </thead>\n' +
             '                </table>' +
+            '     </div>' +
             '   </div>' +
             '  <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "L" class="form-control btn btn-info btnCrear">Crear Grupo de Laboratorio</button></div></div>' +
+            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "L" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Laboratorio</button></div></div>' +
+            '    <div class="divGrupos">'+
             '            <table id="tablaLaboratorio" class="table table-bordered  dt-responsive" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
@@ -118,9 +122,11 @@ $(document).ready(function () {
             '                    <th>Accion</th>' +
             '                    </thead>\n' +
             '            </table>' +
+            '     </div>' +
             '</div>' +
             '  <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn btn-info btnCrear">Crear Grupo de Practica</button></div></div>' +
+            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Practica</button></div></div>' +
+            '    <div class="divGrupos">'+
             '           <table id="tablaPractica" class="table table-bordered  dt-responsive" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
@@ -136,7 +142,9 @@ $(document).ready(function () {
             '                    <th>Accion</th>' +
             '                    </thead>\n' +
             '            </table>' +
+            '     </div>' +
             '</div>' +
+            '</div>'+
             '</div>'
         );
     }
@@ -477,7 +485,6 @@ $(document).ready(function () {
         $('#formCargaHorariaPropuesta').trigger("reset");
         $('#docentes').val(null).trigger('change')
     }
-
 });
 
 

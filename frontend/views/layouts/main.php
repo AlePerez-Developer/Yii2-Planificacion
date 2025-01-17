@@ -4,13 +4,18 @@
 /* @var $content string */
 
 use yii\helpers\Html;
-\frontend\assets\AppAsset::register($this);
-\hail812\adminlte3\assets\FontAwesomeAsset::register($this);
-\hail812\adminlte3\assets\AdminLteAsset::register($this);
+use \frontend\assets\AppAsset;
+use \hail812\adminlte3\assets\AdminLteAsset;
+use \hail812\adminlte3\assets\FontAwesomeAsset;
+
+AppAsset::register($this);
+FontAwesomeAsset::register($this);
+AdminLteAsset::register($this);
+
 $this->registerCssFile('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback');
+$this->registerCssFile('@web/css/site.css');
 
 $assetDir = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed2010/adminlte/dist');
-
 $publishedRes = Yii::$app->assetManager->publish('@vendor/hail812/yii2-adminlte3/src/web/js');
 $this->registerJsFile($publishedRes[1].'/control_sidebar.js', ['depends' => '\hail812\adminlte3\assets\AdminLteAsset']);
 ?>
