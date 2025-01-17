@@ -156,10 +156,10 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
 </style>
 <div>
 
-    <div >
+    <div hidden>
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
-        <input id="nivel" name="nivel" value="<?= $rol ?>" >
+        <input id="nivel" name="nivel" value="<?=$rol?>" >
     </div>
 </div>
 <div class="card">
