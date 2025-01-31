@@ -27,11 +27,6 @@ class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
         return Yii::$app->get('dbAcademica');
     }
 
-    public function getRol()
-    {
-        return $this->hasOne(Rol::className(), ['CodigoRol' => 'CodigoRol']);
-    }
-
     /**
      * Finds an identity by the given ID.
      * @param string|int $id the ID to be looked for
@@ -55,7 +50,7 @@ class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        // TODO: Implement findIdentityByAccessToken() method.
+        return null;
     }
 
     /**
@@ -105,5 +100,47 @@ class Usuario extends \yii\db\ActiveRecord implements IdentityInterface
     public function getPersona()
     {
         return $this->hasOne(Persona::class, ['IdPersona' => 'IdPersona']);
+    }
+
+    public function getRoles()
+    {
+        return $this->hasMany(UsuarioRol::class, ['CodigoUsuario' => 'CodigoUsuario'])->asArray();
+    }
+
+    public function getGestion(){
+        return date('Y') - 1;
+    }
+
+    public function getEsDirector(){
+        $flag = false;
+        foreach ($this->roles as $rol){
+            if($rol['IdRol'] === Yii::$app->params['ROL_ES_DIRECTOR']){
+                $flag = true;
+                break;
+            }
+        }
+        return $flag;
+    }
+
+    public function getEsDecano(){
+        $flag = false;
+        foreach ($this->roles as $rol){
+            if($rol['IdRol'] === Yii::$app->params['ROL_ES_DECANO']){
+                $flag = true;
+                break;
+            }
+        }
+        return $flag;
+    }
+
+    public function getEsRector(){
+        $flag = false;
+        foreach ($this->roles as $rol){
+            if($rol['IdRol'] === Yii::$app->params['ROL_ES_RECTOR']){
+                $flag = true;
+                break;
+            }
+        }
+        return $flag;
     }
 }

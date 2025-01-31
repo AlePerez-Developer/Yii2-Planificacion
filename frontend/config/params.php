@@ -8,5 +8,9 @@ return [
     'ERROR_REGISTRO_EXISTE' => 'errorExiste',
     'ERROR_REGISTRO_EN_USO' => 'errorEnUso',
     'ERROR_EJECUCION_SQL' => 'errorSql',
-    'ERROR_REGISTRO_NO_ENCONTRADO' => 'errorNoEncontrado'
+    'ERROR_REGISTRO_NO_ENCONTRADO' => 'errorNoEncontrado',
+    'ROL_ES_DIRECTOR' => '1',
+    'ROL_ES_DECANO' => '46',
+    'ROL_ES_RECTOR' => '34',
+    'ROL_ADMINISTRADOR' => '21'
 ];

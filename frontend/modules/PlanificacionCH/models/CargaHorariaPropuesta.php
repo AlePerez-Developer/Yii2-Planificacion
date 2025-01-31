@@ -4,6 +4,7 @@ namespace app\modules\PlanificacionCH\models;
 
 use common\models\Estado;
 use common\models\Usuario;
+use common\models\Persona;
 use Yii;
 
 /**

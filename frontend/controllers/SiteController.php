@@ -2,20 +2,20 @@
 
 namespace frontend\controllers;
 
-use common\models\Usuario;
 use frontend\models\ResendVerificationEmailForm;
-use frontend\models\VerifyEmailForm;
-use Yii;
-use yii\base\InvalidArgumentException;
-use yii\web\BadRequestHttpException;
-use yii\web\Controller;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use common\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
+use yii\base\InvalidArgumentException;
 use frontend\models\ResetPasswordForm;
-use frontend\models\SignupForm;
+use frontend\models\VerifyEmailForm;
+use yii\web\BadRequestHttpException;
 use frontend\models\ContactForm;
+use frontend\models\SignupForm;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use common\models\Usuario;
+use yii\web\Controller;
+use Yii;
+
 
 /**
  * Site controller
@@ -76,21 +76,11 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        //return $this->render('index');
-        if(Yii::$app->user->isGuest)
-        {
-            if(
-                isset($_GET['cu'])&&(trim($_GET['cu'])!='') &&
-                isset($_GET['ci'])&&(trim($_GET['ci'])!='')
-            ){
-                $this->actionLogin($_GET['ci'],$_GET['cu']);
-            } else {
-                throw new \Exception('No tienes los suficientes permisos para acceder a esta página');
-            }
-        }
-        else{
+        if (!Yii::$app->user->isGuest) {
             return $this->render('index');
         }
+
+        $this->actionLogin();
     }
 
     /**
@@ -98,16 +88,26 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionLogin($ci,$cu)
+    public function actionLogin()
     {
-        //$cu = '3596b69d068cc15535018bb257b3e1ff';
-        $usuario = Usuario::find()->where(['Llave' => $cu, 'idPersona' => $ci])->one();
-        if($usuario != null){
-            Yii::$app->user->login($usuario);
-            $this->redirect('index.php');
-        }else{
-            return $this->render('unauthorized');
+        if (!(isset($_GET['cu'])&&(trim($_GET['cu'])!='')))
+            throw new \Exception('No se recibieron todos los datos del usuario');
+
+        if (!(isset($_GET['ci'])&&(trim($_GET['ci'])!='')))
+            throw new \Exception('No se recibieron todos los datos del usuario');
+
+        $usuario = Usuario::find()->where(['Llave' => $_GET['cu'], 'idPersona' => $_GET['ci']])->one();
+
+        if ($usuario == null){
+            throw new \Exception('Los datos no coinciden con un usuario registrado');
         }
+
+        if (Yii::$app->user->login($usuario)) {
+            $this->redirect('index.php');
+        } else {
+            throw new \Exception('Ocurrio un problema al realizar el login');
+        }
+        return false;
     }
 
     /**

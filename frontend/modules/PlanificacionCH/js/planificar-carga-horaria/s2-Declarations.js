@@ -192,29 +192,28 @@ $(document).ready(function(){
             return repo.text;
         }
 
-        var $container = $(
-            '<div class="row">\n' +
-            '        <div class="col-sm-1" style="height: 70px;width: 70px">\n' +
-            '            <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(repo.id) + '.jpg\" style="height: 70px; width: 70px">\n' +
-            '        </div>\n' +
-            '        <div class="col-sm-8">\n' +
-            '            <div class="row">\n' +
-            '                <div class="col-7 sNombre">' + $.trim(repo.text).toUpperCase() + '</div>\n' +
-            '            </div>\n' +
-            '            <div class="row">\n' +
-            '                <div class="col-1 sCi"><b>CI: </b></div>\n' +
-            '                <div class="col-3 sCi">' + $.trim(repo.id) + '</div>\n' +
-            '            </div>\n' +
-            '            <div class="row">\n' +
-            '                <div class="col-7 sCi">' + $.trim(repo.condicion).toUpperCase() + '</div>\n' +
-            '            </div>\n' +
-            '        </div>\n' +
-            '    </div>'
+        let $container = $(
+            '<div class="row">' +
+            '<label class="docNombreList" >'+ $.trim(repo.text).toUpperCase()+' </label>'+
+            '</div>'
         );
+
         return $container;
     }
 
     function formatRepoSelection (repo) {
-        return repo.full_name || repo.text;
+        $('#lblCi').text(repo.id)
+        $('#lblCondicion').text($.trim(repo.condicion).toUpperCase())
+        if (repo.id !== '')
+            $('#docImage').attr('src','http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(repo.id) + '.jpg');
+        else
+            $('#docImage').attr('src','img/logo.jpg');
+
+        let $container = $(
+            '<div class="row">' +
+            '<label class="docNombre" >'+ $.trim(repo.text).toUpperCase()+' </label>'+
+            '</div>'
+        );
+        return $container;
     }
 })

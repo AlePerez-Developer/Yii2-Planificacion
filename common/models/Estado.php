@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use Yii;
 use yii\db\ActiveRecord;
 
 class Estado extends ActiveRecord
@@ -14,4 +15,10 @@ class Estado extends ActiveRecord
     {
         return 'Estados';
     }
+
+    public static function getDb()
+    {
+        return Yii::$app->get('dbAcademica');
+    }
+
 }

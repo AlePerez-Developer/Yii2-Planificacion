@@ -167,7 +167,7 @@ class Persona extends \yii\db\ActiveRecord
 
     public function getNombreCompleto()
     {
-        return  $this->Paterno . ' ' . $this->Materno . ' ' . $this->Nombres;
+        return  trim($this->Paterno) . ' ' . trim($this->Materno) . ' ' . trim($this->Nombres);
     }
 
     /**

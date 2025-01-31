@@ -391,7 +391,12 @@ $(document).ready(function () {
             success: function (data) {
                 if (data.respuesta === RTA_CORRECTO) {
                     let grupo = JSON.parse(JSON.stringify(data.grupo));
-                    $('#docentes').val(grupo.IdPersona).trigger('change')
+
+                    $("#docentes").select2("trigger", "select", {
+                        data: { id: $.trim(grupo.IdPersona), text: $.trim(grupo.Paterno).toUpperCase() + ' ' + $.trim(grupo.Materno).toUpperCase() + ' ' + $.trim(grupo.Nombres).toUpperCase(), condicion: 'Docente' }
+                    });
+
+
                     $("#grupo").val(grupo.Grupo);
                     $("#codigoCrear").val('update');
                     DetenerSpiner(objectBtn)

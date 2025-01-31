@@ -3,14 +3,12 @@
 namespace app\modules\PlanificacionCH\controllers;
 
 use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
-use app\modules\PlanificacionCH\dao\PlanesEstudiosDao;
-use app\modules\PlanificacionCH\models\CarreraSede;
-use app\modules\PlanificacionCH\models\Carrera;
-use app\modules\PlanificacionCH\models\Facultad;
-use app\modules\PlanificacionCH\models\Materia;
 use app\modules\PlanificacionCH\models\MateriaDocente;
+use app\modules\PlanificacionCH\models\CarreraSede;
 use app\modules\PlanificacionCH\models\PlanEstudio;
-use common\models\UsuarioRol;
+use app\modules\PlanificacionCH\models\Facultad;
+use app\modules\PlanificacionCH\models\Carrera;
+use app\modules\PlanificacionCH\models\Materia;
 use yii\filters\VerbFilter;
 use common\models\Estado;
 use yii\web\Controller;
@@ -33,14 +31,8 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionIndex()
     {
-        $rol = UsuarioRol::find()->where(['CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario, 'IdRol' => 1])->one();
-        if ($rol) {
-            $nivel = 1;
-        } else {
-            $nivel = 0;
-        }
-
-        return $this->render('planificarcargahoraria', ['rol' => $nivel]);
+        Yii::$app->session->set('language', 'en-US');
+        return $this->render('planificarcargahoraria');
     }
 
     public function actionListarFacultades() {
@@ -77,7 +69,9 @@ class PlanificarCargaHorariaController extends Controller
 
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
 
+        Yii::$app->session->set('facultad', $_POST['facultad']);
         $carreras = Carrera::find()->select(['C.CodigoCarrera as id','C.NombreCarrera as text'])->alias('C')
+            ->distinct(true)
             ->join('INNER JOIN', 'ConfiguracionesUsuariosCarreras cfg', 'C.CodigoCarrera = cfg.CodigoCarrera')
             ->where(['CodigoFacultad' => $_POST['facultad']])
             ->andWhere(['like', 'NombreCarrera', $search, false])
@@ -105,6 +99,7 @@ class PlanificarCargaHorariaController extends Controller
 
         $search = str_replace(" ","%", $_POST['q'] ?? '');
 
+        Yii::$app->session->set('carrera', $_POST['carrera']);
         $sedes = CarreraSede::find()->alias('Cs')
             ->select(['Cs.CodigoSede as id','S.NombreSede as text'])
             ->join('inner join','Sedes S', 'Cs.CodigoSede = S.CodigoSede')
@@ -163,6 +158,7 @@ class PlanificarCargaHorariaController extends Controller
 
         $search = str_replace(" ","%", $_POST['q'] ?? '');
 
+        Yii::$app->session->set('plan', $_POST['plan']);
         $cursos = Materia::find()
             ->select(['Curso as id','Curso as text'])
             ->distinct()
@@ -198,18 +194,36 @@ class PlanificarCargaHorariaController extends Controller
         if ($_POST['flag'] == 0)
             return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
 
+        Yii::$app->session->set('curso', $_POST['curso']);
+        Yii::$app->session->set('sede', $_POST['sede']);
         $Materias = Materia::find()->alias('M')
             ->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
                 'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
                 'SUM(Chp.Programados) AS [Programados]', 'SUM(Chp.Aprobados) AS [Aprobados]', 'SUM(chp.Reprobados) AS [Reprobados]', 'SUM(Chp.Abandonos) AS [Abandonos]',
                 'chp.ProyectadosGeneral as CantidadProyeccion'])
             ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
+            ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo and Md.Grupo = Chp.Grupo')
             ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])
             ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Md.CodigoSede' => $_POST["sede"]])
             ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
             ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio, chp.ProyectadosGeneral')
+            ->orderBy('M.SiglaMateria')
+            ->asArray()
+            ->all();
+
+        $Materias = Materia::find()->alias('M')
+            ->select(['Chp.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria',
+                'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
+                'SUM(Chp.Programados) AS [Programados]', 'SUM(Chp.Aprobados) AS [Aprobados]', 'SUM(chp.Reprobados) AS [Reprobados]', 'SUM(Chp.Abandonos) AS [Abandonos]',
+                'chp.ProyectadosGeneral as CantidadProyeccion'])
+            //->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
+            ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
+            ->where(['in','Chp.GestionAcademica',[(string)$gestion+1,'1/'.$gestion+1]])
+            ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])
+            ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Chp.CodigoSede' => $_POST["sede"]])
+            //->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
+            ->groupBy('Chp.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio, chp.ProyectadosGeneral')
             ->orderBy('M.SiglaMateria')
             ->asArray()
             ->all();
@@ -238,7 +252,7 @@ class PlanificarCargaHorariaController extends Controller
                       end as HorasSemana",'isnull(Chv.Ch,0) as chv','isnull(Cha.Ch,0) as cha','isnull(Che.Ch,0) as che'])
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo')
+            ->join('left JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo /*and Md.Grupo = Chp.Grupo*/')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
             ->join('LEFT JOIN', 'VCargaHorariaV Chv', 'Md.IdPersona = Chv.IdPersona')
             ->join('LEFT JOIN', 'VCargaHorariaE Che', 'Md.IdPersona = Che.IdPersona')
@@ -467,7 +481,9 @@ class PlanificarCargaHorariaController extends Controller
 
         $gestion = intval($_POST['gestion']);
 
-        $row = CargaHorariaPropuesta::find()
+        $row = CargaHorariaPropuesta::find()->alias('chp')
+            ->select('chp.*,P.*')
+            ->join('INNER JOIN','Personas P', 'P.IdPersona = chp.IdPersona')
             ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
             ->andWhere(['CodigoCarrera' => $_POST["carrera"]])
             ->andWhere(['CodigoSede' => $_POST['sede']])
@@ -482,7 +498,7 @@ class PlanificarCargaHorariaController extends Controller
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
         }
 
-        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupo' => $row ]);
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupo' => $row]);
     }
 
     public function actionActualizarGrupo(){

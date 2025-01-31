@@ -11,7 +11,12 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
 ?>
 
 <style>
-
+    .select2-results__option{
+        font-size: 12px;
+    }
+    .select2-selection{
+        font-size: 12px
+    }
     td.details-control {
         text-align:center;
         color:forestgreen; !important;
@@ -136,73 +141,43 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
     }
 
 
-    #rowUno{
-        background-color: #f8bb86;
-        height: 90px;
-    }
-
-    #rowDos{
-        background-color: peachpuff;
-        height: 90px;
-    }
-
-    .select2-results__option{
-        font-size: 12px;
-        font-weight: bold;
-    }
-    .select2-selection{
-        font-size: 12px;
-        font-weight: bold;
-        background-color: #1C005A; !important;
-    }
-
-    .lblTitulo {
-        font-size: 12px;
-    }
 </style>
-<div>
-<?php var_dump(Yii::$app->user->identity->esDirector);?>
-    <div >
-        <label for="gestion">Gestion</label>
-        <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
-        <input id="nivel" name="nivel" value="<?=(Yii::$app->user->identity->esDirector)?'1':'0'?>" >
-    </div>
-</div>
+
 <div class="card">
     <div class="card-header">
-        <div id="rowUno" class="row">
+        <div class="row" style="background-color: #f8bb86; height: 90px;">
             <div class="col-sm-6">
-                <label for="facultades" class="lblTitulo">Seleccione la facultad</label>
-                <select id="facultades" name="facultades" class="form-control">
+                <label for="facultades" style="font-size: 12px">Seleccione la facultad</label>
+                <select id="facultades" name="facultades" style="width: 95%">
                     <option></option>
                 </select>
             </div>
 
             <div class="col-sm-6" id="divCarreras" hidden>
-                <label for="carreras" class="lblTitulo">Seleccione la carrera</label>
-                <select id="carreras" name="carreras" class="form-control">
+                <label for="carreras" style="font-size: 12px">Seleccione la carrera</label>
+                <select id="carreras" name="carreras" class="form-control" style="width: 95%">
                     <option></option>
                 </select>
             </div>
 
         </div>
-        <div id="rowDos" class="row" hidden>
+        <div id="rowDos" class="row" style="background-color: peachpuff; height: 90px" hidden>
             <div class="col-sm-4 mt-2" id="divSedes" hidden>
-                <label for="sedes" class="lblTitulo">Seleccione la sede</label>
-                <select id="sedes" name="sedes" class="form-control">
+                <label for="sedes" style="font-size: 12px">Seleccione la sede</label>
+                <select id="sedes" name="sedes" class="form-control" style="width: 95%">
                     <option></option>
                 </select>
             </div>
 
-            <div class="col-sm-4  mt-2" id="divPlanes" hidden>
-                <label for="planes" class="lblTitulo">Seleccione el plan de estudios</label>
-                <select id="planes" name="planes" class="form-control">
+            <div class="col-sm-4 mt-2" id="divPlanes" hidden>
+                <label for="planes" style="font-size: 12px">Seleccione el plan de estudios</label>
+                <select id="planes" name="planes" class="form-control" style="width: 95%">
                     <option></option>
                 </select>
             </div>
-            <div class="col-sm-4  mt-2" id="divCursos" hidden>
-                <label for="cursos" class="lblTitulo">Seleccione el curso</label>
-                <select id="cursos" name="cursos" class="form-control">
+            <div class="col-sm-4 mt-2" id="divCursos" hidden>
+                <label for="cursos" style="font-size: 12px">Seleccione el curso</label>
+                <select id="cursos" name="cursos" class="form-control" style="width: 95%">
                     <option></option>
                 </select>
             </div>
@@ -216,7 +191,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                     <button id="enviarPlanificacion" class="btn btn-info form-control btn-xs" >Enviar Carrera</button>
                 </div>
             </div>
-            <table id="tablaMaterias" class="table table-bordered  dt-responsive tablaMateriass" style="width: 100%" >
+            <table id="tablaMateriasMatriciales" class="table table-bordered  dt-responsive" style="width: 100%" >
                 <thead>
                 <th>#</th>
                 <th>Sigla</th>
@@ -234,7 +209,3 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         </div>
     </div>
 </div>
-
-<?php include_once "modalPlanificar.php"; ?>
-
-
