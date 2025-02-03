@@ -32,7 +32,6 @@ class PlanificarCargaHorariaController extends Controller
 
     public function actionIndex()
     {
-        Yii::$app->session->set('language', 'en-US');
         return $this->render('planificarcargahoraria');
     }
 

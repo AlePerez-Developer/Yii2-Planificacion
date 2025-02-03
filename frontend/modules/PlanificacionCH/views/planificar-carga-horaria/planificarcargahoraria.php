@@ -161,8 +161,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
     }
 </style>
 <div>
-<?php var_dump(Yii::$app->user->identity->esDirector);?>
-    <div >
+    <div hidden="" >
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
         <input id="nivel" name="nivel" value="<?=(Yii::$app->user->identity->esDirector)?'1':'0'?>" >

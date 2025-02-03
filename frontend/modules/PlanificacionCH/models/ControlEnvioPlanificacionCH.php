@@ -4,6 +4,8 @@ namespace app\modules\PlanificacionCH\models;
 
 use yii\db\ActiveRecord;
 
+use Yii;
+
 /**
  * This is the model class for table "ControlEnvioPlanificacionCH".
  *
@@ -19,6 +21,14 @@ class ControlEnvioPlanificacionCH extends ActiveRecord
     public static function tableName()
     {
         return 'ControlEnvioPlanificacionCH';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('dbAcademica');
     }
 
 }
