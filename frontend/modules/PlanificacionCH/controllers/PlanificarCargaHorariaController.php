@@ -3,6 +3,7 @@
 namespace app\modules\PlanificacionCH\controllers;
 
 use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
+use app\modules\PlanificacionCH\models\ControlEnvioPlanificacionCH;
 use app\modules\PlanificacionCH\models\MateriaDocente;
 use app\modules\PlanificacionCH\models\CarreraSede;
 use app\modules\PlanificacionCH\models\PlanEstudio;
@@ -177,6 +178,39 @@ class PlanificarCargaHorariaController extends Controller
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'cursos' =>  $cursos]);
     }
 
+    public function actionObtenerEstadoEnvio()
+    {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+
+        if (!(isset($_POST["gestion"]) && ($_POST["gestion"] != "") &&
+            isset($_POST["carrera"]) && isset($_POST["sede"])  &&
+            isset($_POST["plan"]))
+        ) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
+        $estado = (new Query)
+            ->select(['isnull(CodigoEstado,0)'])
+            ->from(['ControlEnvioPlanificacionCH C'])
+            ->where(['c.GestionAcademica' => $_POST["gestion"] ])
+            ->andwhere(['c.CodigoCarrera' => $_POST["carrera"] ])
+            ->andwhere(['c.CodigoSede' => $_POST["sede"] ])
+            ->andwhere(['c.NumeroPlanEstudios' => $_POST["plan"] ])
+            ->all(Yii::$app->dbAcademica);
+
+
+        if (!$estado) {
+            return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'estado' =>  '0']);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'estado' =>  $estado]);
+    }
+
+
+
+
     public function actionListarMaterias(){
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
@@ -196,7 +230,7 @@ class PlanificarCargaHorariaController extends Controller
 
         Yii::$app->session->set('curso', $_POST['curso']);
         Yii::$app->session->set('sede', $_POST['sede']);
-        $Materias = Materia::find()->alias('M')
+        /*$Materias = Materia::find()->alias('M')
             ->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
                 'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
                 'SUM(Chp.Programados) AS [Programados]', 'SUM(Chp.Aprobados) AS [Aprobados]', 'SUM(chp.Reprobados) AS [Reprobados]', 'SUM(Chp.Abandonos) AS [Abandonos]',
@@ -210,7 +244,7 @@ class PlanificarCargaHorariaController extends Controller
             ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio, chp.ProyectadosGeneral')
             ->orderBy('M.SiglaMateria')
             ->asArray()
-            ->all();
+            ->all();*/
 
         $Materias = Materia::find()->alias('M')
             ->select(['Chp.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria',
@@ -219,7 +253,7 @@ class PlanificarCargaHorariaController extends Controller
                 'chp.ProyectadosGeneral as CantidadProyeccion'])
             //->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
             ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
-            ->where(['in','Chp.GestionAcademica',[(string)$gestion+1,'1/'.$gestion+1]])
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])
             ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Chp.CodigoSede' => $_POST["sede"]])
             //->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
@@ -542,6 +576,28 @@ class PlanificarCargaHorariaController extends Controller
         return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
     }
 
+    public function actionEnviarCargahoraria(){
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+        }
+
+        if (!(isset($_POST["gestion"]) && ($_POST["gestion"] != "") &&
+            isset($_POST["carrera"]) && isset($_POST["sede"]) && isset($_POST["plan"]))
+        ) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        }
+
+        $envio = new ControlEnvioPlanificacionCH();
+        $envio->GestionAcademica = $_POST["gestion"];
+        $envio->CodigoCarrera = $_POST["carrera"];
+        $envio->CodigoSede = $_POST["sede"];
+        $envio->NumeroPlanEstudios = $_POST["plan"];
+        $envio->CodigoEstado = '1';
+
+        $envio->save();
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+    }
 
 
 

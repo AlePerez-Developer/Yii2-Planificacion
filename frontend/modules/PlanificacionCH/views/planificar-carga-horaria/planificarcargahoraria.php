@@ -166,6 +166,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
         <input id="nivel" name="nivel" value="<?=(Yii::$app->user->identity->esDirector)?'1':'0'?>" >
+        <input id="envio" name="envio" value="0" >
     </div>
 </div>
 <div class="card">

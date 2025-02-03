@@ -22,7 +22,7 @@ $(document).ready(function () {
             dataMaterias.gestion = $('#gestion').val()
             dataMaterias.carrera = $("#carreras").val()
             dataMaterias.flag = 1
-            tableMaterias.ajax.reload()
+            tableMateriasMatriciales.ajax.reload()
         }
     })
 

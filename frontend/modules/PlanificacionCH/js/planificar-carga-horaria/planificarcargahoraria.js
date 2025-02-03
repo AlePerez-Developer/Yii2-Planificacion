@@ -58,6 +58,7 @@ $(document).ready(function () {
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
 
+
             dataMaterias.gestion = $('#gestion').val()
             dataMaterias.carrera = $("#carreras").val()
             dataMaterias.curso = $("#cursos").val()
@@ -65,8 +66,69 @@ $(document).ready(function () {
             dataMaterias.sede = $("#sedes").val()
             dataMaterias.flag = 1
 
+            let datos = new FormData();
+            datos.append("gestion", $('#gestion').val());
+            datos.append("carrera", $('#carreras').val());
+            datos.append("sede", $('#sedes').val());
+            datos.append("plan", $('#planes').val());
+
+
+
+            $.ajax({
+                url: "index.php?r=PlanificacionCH/planificar-carga-horaria/obtener-estado-envio",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data.respuesta === RTA_CORRECTO) {
+                        $('#envio').val(data.estado)
+                        if (data.estado == '1'){
+                            $('#enviarPlanificacion').hide()
+                        }
+                    }
+                    else {
+                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                }
+            });
+
             tableMaterias.ajax.reload()
         }
+    })
+
+    $('#enviarPlanificacion').click(function (){
+        let datos = new FormData();
+        datos.append("gestion", $('#gestion').val());
+        datos.append("carrera", $('#carreras').val());
+        datos.append("sede", $('#sedes').val());
+        datos.append("plan", $('#planes').val());
+
+        $.ajax({
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/enviar-cargahoraria",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    $('#enviarPlanificacion').hide()
+                }
+                else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+            }
+        });
     })
 
     function format(d) {

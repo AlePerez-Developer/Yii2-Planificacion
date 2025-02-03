@@ -187,7 +187,7 @@ $(document).ready(function () {
             className: 'dt-small dt-acciones dt-center',
             orderable: false,
             searchable: false,
-            visible: ( $('#nivel').val() === "1") ? true : false,
+            visible: ( ($('#nivel').val() === "1") && ($('#envio').val() === "0")) ? true : false,
             data: 'CodigoCarrera',
             render: function (data, type, row) {
                 let button
