@@ -13,24 +13,17 @@ $(document).ready(function () {
             $('#carreras').val(null).trigger('change')
             $('#divCarreras').attr('hidden',false)
         }
+    })
 
+    $('#carreras').change(function () {
         $('#divTabla').attr('hidden',true)
-
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
-
             dataMaterias.gestion = $('#gestion').val()
             dataMaterias.carrera = $("#carreras").val()
-            dataMaterias.curso = $("#cursos").val()
-            dataMaterias.plan = $("#planes").val()
-            dataMaterias.sede = $("#sedes").val()
             dataMaterias.flag = 1
-
-            materiasMatricialesTable.ajax.reload()
+            tableMaterias.ajax.reload()
         }
-
-
-
     })
 
 

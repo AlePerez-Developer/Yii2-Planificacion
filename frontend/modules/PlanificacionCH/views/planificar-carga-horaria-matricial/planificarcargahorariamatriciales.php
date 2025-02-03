@@ -1,10 +1,10 @@
 <?php
 
 use app\modules\PlanificacionCH\assets\PlanificacionCHAsset;
-use app\modules\PlanificacionCH\assets\PlanificacionChjs;
+use app\modules\PlanificacionCH\assets\planificacionChMatricialjs;
 
 PlanificacionCHAsset::register($this);
-PlanificacionChjs::register($this);
+planificacionChMatricialjs::register($this);
 
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
