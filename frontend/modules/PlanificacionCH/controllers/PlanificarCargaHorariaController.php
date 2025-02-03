@@ -282,14 +282,11 @@ class PlanificarCargaHorariaController extends Controller
                       "case [[chp.TipoGrupo]] when 'T' THEN [[HorasTeoria]]
                                             when 'L' THEN [[HorasLaboratorio]]
                                             when 'P' THEN [[HorasPractica]]
-                      end as HorasSemana",'isnull(Chv.Ch,0) as chv','isnull(Cha.Ch,0) as cha','isnull(Che.Ch,0) as che'])
+                      end as HorasSemana"])
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
             ->join('left JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo /*and Md.Grupo = Chp.Grupo*/')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
-            ->join('LEFT JOIN', 'VCargaHorariaV Chv', 'Md.IdPersona = Chv.IdPersona')
-            ->join('LEFT JOIN', 'VCargaHorariaE Che', 'Md.IdPersona = Che.IdPersona')
-            ->join('LEFT JOIN', 'VCargaHorariaA Cha', 'Md.IdPersona = Cha.IdPersona')
             ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])->andWhere(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
@@ -299,8 +296,12 @@ class PlanificarCargaHorariaController extends Controller
                                M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,
                                M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,
                                Chp.Grupo,Chp.TipoGrupo,Chp.IdPersona,P.Paterno,P.Materno,P.Nombres, 
-                               Chp.Programados, Chp.Aprobados, Chp.reprobados, Chp.abandonos, Chp.proyectadosgeneral, chp.CodigoEstado,Chp.Observaciones,chv.ch,cha.ch,che.ch')
-            ->orderBy('M.SiglaMateria')->all(Yii::$app->dbAcademica);
+                               Chp.Programados, Chp.Aprobados, Chp.reprobados, Chp.abandonos, Chp.proyectadosgeneral, chp.CodigoEstado,Chp.Observaciones')
+            ->orderBy("M.SiglaMateria,
+case when (ISNUMERIC([Chp].[Grupo])) between 1 and 100 then  CONVERT(int,[Chp].[grupo]) end,
+case when ([Chp].[Grupo]) between 'A' and 'Z' then  [Chp].[grupo] end,
+case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
+            ")->all(Yii::$app->dbAcademica);
 
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupos' => $grupos]);
     }
@@ -725,6 +726,54 @@ class PlanificarCargaHorariaController extends Controller
         }
 
         return json_encode(['rta' => 'ok', 'data' => $configuracion]);
+    }
+
+    public function actionMostrar(){
+
+        $gestion = intval($_POST['gestion']);
+
+        $vigente = (new Query)
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona',"sum(case Chp.TipoGrupo
+                                                                     when 'T' THEN m.HorasTeoria *4
+                                                                     when 'L' THEN m.HorasLaboratorio *4
+                                                                     when 'P' THEN m.HorasPractica *4
+                                                                 end) as Ch"])
+            ->from(['Materias M'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
+            ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'V'])
+            ->groupBy('Chp.IdPersona')
+            ->all(Yii::$app->dbAcademica);
+
+        $eliminada = (new Query)
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona',"sum(case Chp.TipoGrupo
+                                                                     when 'T' THEN m.HorasTeoria *4
+                                                                     when 'L' THEN m.HorasLaboratorio *4
+                                                                     when 'P' THEN m.HorasPractica *4
+                                                                 end) as Ch"])
+            ->from(['Materias M'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
+            ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'E'])
+            ->groupBy('Chp.IdPersona')
+            ->all(Yii::$app->dbAcademica);
+
+
+        $agregada = (new Query)
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona',"sum(case Chp.TipoGrupo
+                                                                     when 'T' THEN m.HorasTeoria *4
+                                                                     when 'L' THEN m.HorasLaboratorio *4
+                                                                     when 'P' THEN m.HorasPractica *4
+                                                                 end) as Ch"])
+            ->from(['Materias M'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
+            ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'A'])
+            ->groupBy('Chp.IdPersona')
+            ->all(Yii::$app->dbAcademica);
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'vigente' =>  $vigente, 'eliminada' =>  $eliminada, 'agregada' =>  $agregada] );
+
     }
 
 

@@ -90,13 +90,12 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
+
         if (!(isset($_GET['cu'])&&(trim($_GET['cu'])!='')))
             throw new \Exception('No se recibieron todos los datos del usuario');
 
-        if (!(isset($_GET['ci'])&&(trim($_GET['ci'])!='')))
-            throw new \Exception('No se recibieron todos los datos del usuario');
 
-        $usuario = Usuario::find()->where(['Llave' => $_GET['cu'], 'idPersona' => $_GET['ci']])->one();
+        $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one();
 
         if ($usuario == null){
             throw new \Exception('Los datos no coinciden con un usuario registrado');

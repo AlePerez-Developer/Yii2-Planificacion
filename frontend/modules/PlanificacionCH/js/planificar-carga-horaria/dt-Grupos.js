@@ -181,7 +181,30 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small dt-center',
-            data: 'CantidadProyeccion'
+            data: 'CantidadProyeccion',
+            render: function (data, type, row) {
+                let eliminados = 0
+                let table
+
+                switch(row.TipoGrupo) {
+                    case 'T':
+                        eliminados = $('#tablaTeoria tbody tr.eliminado').length
+                        table = $('#tablaTeoria').DataTable();
+                        break;
+                    case 'P':
+                        eliminados = $('#tablaPractica tbody tr.eliminado').length
+                        table = $('#tablaPractica').DataTable();
+                        break;
+                    case 'L':
+                        eliminados = $('#tablaLaboratorio tbody tr.eliminado').length
+                        table = $('#tablaLaboratorio').DataTable();
+                        break;
+                    default:
+                    // code block
+                }
+                var table_length = table.data().count();
+                return (data/(table_length-eliminados)).toFixed(2)
+            }
         },
         {
             className: 'dt-small dt-acciones dt-center',

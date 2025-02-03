@@ -1,3 +1,7 @@
+var vigente
+var eliminada
+var agregada
+
 $(document).ready(function () {
     $('#facultades').change(function () {
         $('#divCarreras').attr('hidden',true)
@@ -243,42 +247,74 @@ $(document).ready(function () {
 
     function llenarTablas(sigla){
 
-        dataGrupos.gestion = $("#gestion").val()
-        dataGrupos.carrera = $("#carreras").val()
-        dataGrupos.curso = $("#cursos").val()
-        dataGrupos.plan = $("#planes").val()
-        dataGrupos.sede = $("#sedes").val()
-        dataGrupos.sigla = sigla
+        let datos = new FormData();
+        datos.append("gestion", $('#gestion').val());
+        $.ajax({
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/mostrar",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (data) {
+                if (data.respuesta === RTA_CORRECTO) {
+                    vigente = data.vigente
+                    agregada = data.agregada
+                    eliminada = data.eliminada
+                } else {
+                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    DetenerSpiner(objectBtn)
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                DetenerSpiner(objectBtn)
+            }
+        }).done(function (){
+            dataGrupos.gestion = $("#gestion").val()
+            dataGrupos.carrera = $("#carreras").val()
+            dataGrupos.curso = $("#cursos").val()
+            dataGrupos.plan = $("#planes").val()
+            dataGrupos.sede = $("#sedes").val()
+            dataGrupos.sigla = sigla
 
-        dataGrupos.tipoGrupo = 'T'
-        tableTeoria = $('#tablaTeoria').dataTable({
-            layout: layoutGrupos,
-            pageLength : 20,
-            ajax: ajaxGrupos,
-            columns: columnsGrupos,
-            createdRow: createdRows,
-            initComplete: initComplete,
+            dataGrupos.tipoGrupo = 'T'
+            tableTeoria = $('#tablaTeoria').dataTable({
+                layout: layoutGrupos,
+                pageLength : 50,
+                ajax: ajaxGrupos,
+                columns: columnsGrupos,
+                createdRow: createdRows,
+                initComplete: initComplete,
+            })
+
+            dataGrupos.tipoGrupo = 'L'
+            tableLaboratorio = $('#tablaLaboratorio').dataTable({
+                layout: layoutGrupos,
+                pageLength : 50,
+                ajax: ajaxGrupos,
+                columns: columnsGrupos,
+                createdRow: createdRows,
+                initComplete: initComplete,
+            })
+
+            dataGrupos.tipoGrupo = 'P'
+            tablePractica = $('#tablaPractica').dataTable({
+                layout: layoutGrupos,
+                pageLength : 50,
+                ajax: ajaxGrupos,
+                columns: columnsGrupos,
+                createdRow: createdRows,
+                initComplete: initComplete,
+            })
         })
 
-        dataGrupos.tipoGrupo = 'L'
-        tableLaboratorio = $('#tablaLaboratorio').dataTable({
-            layout: layoutGrupos,
-            pageLength : 20,
-            ajax: ajaxGrupos,
-            columns: columnsGrupos,
-            createdRow: createdRows,
-            initComplete: initComplete,
-        })
 
-        dataGrupos.tipoGrupo = 'P'
-        tablePractica = $('#tablaPractica').dataTable({
-            layout: layoutGrupos,
-            pageLength : 20,
-            ajax: ajaxGrupos,
-            columns: columnsGrupos,
-            createdRow: createdRows,
-            initComplete: initComplete,
-        })
+
+
+
+
     }
 
     $(document).on('click', 'tbody .btnEstado', function(){
