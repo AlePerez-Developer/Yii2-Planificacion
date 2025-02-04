@@ -310,11 +310,6 @@ $(document).ready(function () {
             })
         })
 
-
-
-
-
-
     }
 
     $(document).on('click', 'tbody .btnEstado', function(){

@@ -51,6 +51,21 @@ $(document).ready(function () {
     }
 
     createdRows = function createdRow(row, data, rowIndex){
+        let chv = 0
+        let che = 0
+        let cha = 0
+        vigente.forEach(function(persona, index) {
+            if (persona.IdPersona === $.trim(data.IdPersona))
+                     chv = persona.Ch
+        });
+        agregada.forEach(function(persona, index) {
+            if (persona.IdPersona === $.trim(data.IdPersona))
+                cha = persona.Ch
+        });
+        eliminada.forEach(function(persona, index) {
+            if (persona.IdPersona === $.trim(data.IdPersona))
+                che = persona.Ch
+        });
         $( row ).find('td:eq(2)')
             .attr('data-bs-toggle', 'popover')
             .attr('data-bs-trigger', 'focus')
@@ -72,15 +87,15 @@ $(document).ready(function () {
                 '        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats"> ' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="articles">Ch. vigente</span> ' +
-                '            <span class="number1 jo">' + data.chv + '</span> ' +
+                '            <span class="number1 jo">' + chv + '</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="followers">Ch. Eliminada</span> ' +
-                '            <span class="number2">' + data.che + '</span> ' +
+                '            <span class="number2">' + che + '</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="rating">Ch. Agregada</span> ' +
-                '            <span class="number3">' + data.cha + '</span> ' +
+                '            <span class="number3">' + cha + '</span> ' +
                 '          </div>' +
                 '        </div>' +
                 '        <div class="button mt-2 d-flex flex-row align-items-center"> ' +

@@ -754,7 +754,7 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
-            ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'E'])
+            ->andWhere(['Chp.CodigoEstado' => 'E'])
             ->groupBy('Chp.IdPersona')
             ->all(Yii::$app->dbAcademica);
 
@@ -768,7 +768,7 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
-            ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'A'])
+            ->andWhere(['Chp.CodigoEstado' => 'A'])
             ->groupBy('Chp.IdPersona')
             ->all(Yii::$app->dbAcademica);
 
