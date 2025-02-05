@@ -9,10 +9,10 @@ class planificacionChMatricialjs extends AssetBundle
 {
     public $sourcePath = '@app/modules/PlanificacionCH';
     public $js = [
-        'js/planificar-carga-horaria/planificarcargahorariamatricial.js',
-        'js/planificar-carga-horaria/dt-Grupos.js',
+        'js/planificar-carga-horaria-matricial/planificarcargahorariamatricial.js',
+        'js/planificar-carga-horaria-matricial/dt-Grupos-Matriciales.js',
         'js/planificar-carga-horaria/s2-Declarations.js',
-        'js/planificar-carga-horaria/dt-Materias.js',
+        'js/planificar-carga-horaria-matricial/dt-Materias-Matriciales.js',
     ];
     public $depends = [
         JqueryAsset::class,

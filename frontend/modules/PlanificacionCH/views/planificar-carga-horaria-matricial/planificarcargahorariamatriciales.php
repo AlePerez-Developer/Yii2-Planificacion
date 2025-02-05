@@ -6,8 +6,8 @@ use app\modules\PlanificacionCH\assets\planificacionChMatricialjs;
 PlanificacionCHAsset::register($this);
 planificacionChMatricialjs::register($this);
 
-$this->title = 'Administración Planificación C.H.';
-$this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
+$this->title = 'Administración Planificación C.H. Matriciales';
+$this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matriciales']];
 ?>
 
 <style>
@@ -209,3 +209,5 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         </div>
     </div>
 </div>
+
+<?php include_once "modalPlanificar.php"; ?>

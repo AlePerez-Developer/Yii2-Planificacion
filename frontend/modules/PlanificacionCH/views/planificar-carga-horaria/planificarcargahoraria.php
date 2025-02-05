@@ -159,9 +159,23 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
     .lblTitulo {
         font-size: 12px;
     }
+
+    .list-group{
+        font-size: 12px;
+    }
+
+    .r{
+        border: none;
+        width: 400px;
+    }
+    .c{
+        border: none;
+        width: 400px;
+    }
+
 </style>
 <div>
-    <div >
+    <div  >
         <label for="gestion">Gestion</label>
         <input id="gestion" name="gestion" value=<?=date("Y")-1?> >
         <input id="nivel" name="nivel" value="<?=(Yii::$app->user->identity->esDirector)?'1':'0'?>" >
@@ -232,6 +246,37 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                 </thead>
             </table>
         </div>
+
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Cras justo odio
+                <span class="badge badge-primary badge-pill">14</span>
+            </li>
+            <li class="list-group-item   justify-content-between align-items-center">
+                jijo de su madre
+                <span class="badge badge-primary badge-pill">1</span>
+                <ul class="list-group r">
+                    <li class="list-group-item d-flex justify-content-between align-items-center c">
+                        Cras justo odio
+                        <span class="badge badge-primary badge-pill">14</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center c">
+                        Dapibus ac facilisis in
+                        <span class="badge badge-primary badge-pill">2</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center c">
+                        Morbi leo risus
+                        <span class="badge badge-primary badge-pill">1</span>
+                    </li>
+                </ul>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Morbi leo risus
+                <span class="badge badge-primary badge-pill">1</span>
+            </li>
+        </ul>
+
+
     </div>
 </div>
 

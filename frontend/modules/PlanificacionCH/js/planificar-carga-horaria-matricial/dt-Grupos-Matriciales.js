@@ -1,40 +1,40 @@
-let tableTeoria
-let tablePractica
-let tableLaboratorio
+let tableTeoriaMatricial
+let tablePracticaMatricial
+let tableLaboratorioMatricial
 
-let dataGrupos = {};
+let dataGruposMatricial = {};
 
-let layoutGrupos
-let ajaxGrupos
-let columnsGrupos
+let layoutGruposMatricial
+let ajaxGruposMatricial
+let columnsGruposMatricial
 
-let createdRows
-let initComplete
+let createdRowsMatricial
+let initCompleteMatricial
 
 var chDocente
 $(document).ready(function () {
-    layoutGrupos = {
+    layoutGruposMatricial = {
         topStart: null,
         topEnd: null ,
         bottomStart: null,
         bottomEnd: null
     }
 
-    ajaxGrupos = {
+    ajaxGruposMatricial = {
         method: "POST",
         data: function ( d ) {
-            return  $.extend(d, dataGrupos);
+            return  $.extend(d, dataGruposMatricial);
         },
         dataType: 'json',
         cache: false,
-        url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-grupos',
+        url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-grupos',
         dataSrc: 'grupos',
         error: function (xhr, ajaxOptions, thrownError) {
             MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
         }
     }
 
-    initComplete = function initComplete(settings, json){
+    initCompleteMatricial = function initComplete(settings, json){
         $(this).DataTable().on('order.dt search.dt', function () {
             var i = 1;
             $(this).DataTable()
@@ -50,51 +50,24 @@ $(document).ready(function () {
             })
     }
 
-    createdRows = function createdRow(row, data, rowIndex) {
+    createdRowsMatricial = function createdRow(row, data, rowIndex) {
         let chv = 0
         let che = 0
         let cha = 0
 
-        let subtotalMateria = 0
         let group = '<ul class="list-group">'
 
-        let grupocarreras = ''
-        let grupomaterias = ''
-
-        let carrera = ''
         vigente.forEach(function (persona, index) {
             if (persona.IdPersona === $.trim(data.IdPersona))
             {
-                if (carrera === '') {
-                    carrera = persona.carrera
-                    grupomaterias = '<ul class="list-group">'
-                } else {
-                    if (carrera !== persona.carrera ){
-                        grupomaterias += '</ul>'
-                        grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+
-                            '+persona.carrera+' +
-                            '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
-                            grupomaterias +
-                            '</li>'
-                        grupomaterias = ''
-                    } else {
-                        subtotalMateria = subtotalMateria + parseInt(persona.Ch)
-                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center">'+ persona.materia +
-                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                            '        </li>'
-
-                    }
-                }
-
                 chv = chv + parseInt(persona.Ch)
-                /*
                 group += '<li class="list-group-item d-flex justify-content-between align-items-center">'+ persona.carrera +
                     '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                    '        </li>'*/
+                    '        </li>'
             }
         });
 
-        group += grupocarreras + '</ul>'
+        group += '</ul>'
         console.log(group)
         agregada.forEach(function (persona, index) {
             if (persona.IdPersona === $.trim(data.IdPersona))
@@ -178,7 +151,7 @@ $(document).ready(function () {
         }
     }
 
-    columnsGrupos = [
+    columnsGruposMatricial = [
         {
             className: 'dt-small dt-center',
             orderable: false,
@@ -245,15 +218,15 @@ $(document).ready(function () {
 
                 switch(row.TipoGrupo) {
                     case 'T':
-                        eliminados = $('#tablaTeoria tbody tr.eliminado').length
+                        eliminados = $('#tablaTeoriaMatricial tbody tr.eliminado').length
                         table = $('#tablaTeoria').DataTable();
                         break;
                     case 'P':
-                        eliminados = $('#tablaPractica tbody tr.eliminado').length
+                        eliminados = $('#tablaPracticaMatricial tbody tr.eliminado').length
                         table = $('#tablaPractica').DataTable();
                         break;
                     case 'L':
-                        eliminados = $('#tablaLaboratorio tbody tr.eliminado').length
+                        eliminados = $('#tablaLaboratorioMatricial tbody tr.eliminado').length
                         table = $('#tablaLaboratorio').DataTable();
                         break;
                     default:

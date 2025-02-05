@@ -291,6 +291,7 @@ class PlanificarCargaHorariaController extends Controller
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
             ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
+            ->andWhere(['Chp.CodigoSede' => $_POST['sede']])
             ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
             ->groupBy('Md.GestionAcademica,chp.GestionAcademica,  
                                M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,
@@ -426,6 +427,7 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
             ->andWhere(['SiglaMateria' => $_POST["sigla"]])
             ->andWhere(['TipoGrupo' => $_POST["tipoGrupo"]])
             ->andWhere(['grupo' => $_POST["grupo"]])
+            ->andWhere(['!=','IdPersona',$_POST['docente']])
             ->andWhere(['!=','CodigoEstado','E'])
             ->one();
 
@@ -733,16 +735,17 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
         $gestion = intval($_POST['gestion']);
 
         $vigente = (new Query)
-            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona',"sum(case Chp.TipoGrupo
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona','M.CodigoCarrera as codigo','c.NombreCortoCarrera as carrera',"sum(case Chp.TipoGrupo
                                                                      when 'T' THEN m.HorasTeoria *4
                                                                      when 'L' THEN m.HorasLaboratorio *4
                                                                      when 'P' THEN m.HorasPractica *4
                                                                  end) as Ch"])
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
+            ->join('INNER JOIN', 'Carreras c','M.CodigoCarrera = c.CodigoCarrera')
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
             ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'V'])
-            ->groupBy('Chp.IdPersona')
+            ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera')
             ->all(Yii::$app->dbAcademica);
 
         $eliminada = (new Query)

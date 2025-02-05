@@ -1,6 +1,13 @@
 let tableMateriasMatriciales
 let dataMateriasMatriciales = {};
 $(document).ready(function () {
+    dataMateriasMatriciales.flag = 0
+    dataMateriasMatriciales.gestion = ''
+    dataMateriasMatriciales.carrera = ''
+    dataMateriasMatriciales.sede = ''
+    dataMateriasMatriciales.curso = ''
+    dataMateriasMatriciales.plan = ''
+
     tableMateriasMatriciales = $("#tablaMateriasMatriciales").DataTable({
         layout: {
             topStart: null,
@@ -8,6 +15,7 @@ $(document).ready(function () {
             bottomStart: null,
             bottomEnd: null
         },
+        pageLength : 50,
         ajax: {
             method: "POST",
             data: function ( d ) {
@@ -15,7 +23,7 @@ $(document).ready(function () {
             },
             dataType: 'json',
             cache: false,
-            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-materias-matriciales',
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-materias',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
@@ -75,6 +83,4 @@ $(document).ready(function () {
             },
         ],
     });
-
-
 })

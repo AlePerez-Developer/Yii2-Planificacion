@@ -42,6 +42,7 @@ $(document).ready(function() {
             datos.append("sigla", dataGrupos.sigla)
             datos.append("tipoGrupo", dataGrupos.tipoGrupo)
             datos.append("grupo", $(param).val())
+            datos.append("docente", $(param).attr('p'))
             $.ajax({
                 url: "index.php?r=PlanificacionCH/planificar-carga-horaria/verificar-grupo",
                 method: "POST",

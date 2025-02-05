@@ -1,8 +1,5 @@
-var vigente
-var eliminada
-var agregada
-
 $(document).ready(function () {
+
     $('#facultades').change(function () {
         $('#divCarreras').attr('hidden',true)
         $('#rowDos').attr('hidden',true)
@@ -62,13 +59,12 @@ $(document).ready(function () {
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
 
-
-            dataMaterias.gestion = $('#gestion').val()
-            dataMaterias.carrera = $("#carreras").val()
-            dataMaterias.curso = $("#cursos").val()
-            dataMaterias.plan = $("#planes").val()
-            dataMaterias.sede = $("#sedes").val()
-            dataMaterias.flag = 1
+            dataMateriasMatriciales.gestion = $('#gestion').val()
+            dataMateriasMatriciales.carrera = $("#carreras").val()
+            dataMateriasMatriciales.curso = $("#cursos").val()
+            dataMateriasMatriciales.plan = $("#planes").val()
+            dataMateriasMatriciales.sede = $("#sedes").val()
+            dataMateriasMatriciales.flag = 1
 
             let datos = new FormData();
             datos.append("gestion", $('#gestion').val());
@@ -76,10 +72,8 @@ $(document).ready(function () {
             datos.append("sede", $('#sedes').val());
             datos.append("plan", $('#planes').val());
 
-
-
             $.ajax({
-                url: "index.php?r=PlanificacionCH/planificar-carga-horaria/obtener-estado-envio",
+                url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/obtener-estado-envio",
                 method: "POST",
                 data: datos,
                 cache: false,
@@ -102,37 +96,8 @@ $(document).ready(function () {
                 }
             });
 
-            tableMaterias.ajax.reload()
+            tableMateriasMatriciales.ajax.reload()
         }
-    })
-
-    $('#enviarPlanificacion').click(function (){
-        let datos = new FormData();
-        datos.append("gestion", $('#gestion').val());
-        datos.append("carrera", $('#carreras').val());
-        datos.append("sede", $('#sedes').val());
-        datos.append("plan", $('#planes').val());
-
-        $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/enviar-cargahoraria",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function (data) {
-                if (data.respuesta === RTA_CORRECTO) {
-                    $('#enviarPlanificacion').hide()
-                }
-                else {
-                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
-            }
-        });
     })
 
     function format(d) {
@@ -153,7 +118,7 @@ $(document).ready(function () {
             '  <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">' +
             '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "T" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Teoria</button></div></div>' +
             '    <div class="divGrupos">'+
-            '               <table id="tablaTeoria" class="table table-bordered  dt-responsive tablaTeoria" style="width: 100%" >' +
+            '               <table id="tablaTeoriaMatricial" class="table table-bordered  dt-responsive tablaTeoria" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
             '                    <th>IdPersona</th>' +
@@ -173,7 +138,7 @@ $(document).ready(function () {
             '  <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">' +
             '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "L" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Laboratorio</button></div></div>' +
             '    <div class="divGrupos">'+
-            '            <table id="tablaLaboratorio" class="table table-bordered  dt-responsive" style="width: 100%" >' +
+            '            <table id="tablaLaboratorioMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
             '                    <th>IdPersona</th>' +
@@ -193,7 +158,7 @@ $(document).ready(function () {
             '  <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">' +
             '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Practica</button></div></div>' +
             '    <div class="divGrupos">'+
-            '           <table id="tablaPractica" class="table table-bordered  dt-responsive" style="width: 100%" >' +
+            '           <table id="tablaPracticaMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >' +
             '                    <thead>' +
             '                    <th>#</th>' +
             '                    <th>IdPersona</th>' +
@@ -215,10 +180,10 @@ $(document).ready(function () {
         );
     }
 
-    $(document).on('click','#tablaMaterias tbody td.details-control', function () {
+    $(document).on('click','#tablaMateriasMatriciales tbody td.details-control', function () {
         var tr = $(this).closest('tr');
         var tdi = tr.find("i.fa");
-        var row = tableMaterias.row(tr);
+        var row = tableMateriasMatriciales.row(tr);
 
         if (row.child.isShown()) {
             tr.removeClass('shown');
@@ -227,8 +192,8 @@ $(document).ready(function () {
             row.child.hide();
         }
         else {
-            $("#tablaMaterias  tr.shown").each(function () {
-                let rowOpen = tableMaterias.row($(this));
+            $("#tablaMateriasMatriciales  tr.shown").each(function () {
+                let rowOpen = tableMateriasMatriciales.row($(this));
                 let tdiOpen = $(this).find("i.fa");
                 $(this).removeClass('shown');
                 tdiOpen.first().removeClass('fa-minus-square');
@@ -250,7 +215,7 @@ $(document).ready(function () {
         let datos = new FormData();
         datos.append("gestion", $('#gestion').val());
         $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/mostrar",
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/mostrar",
             method: "POST",
             data: datos,
             cache: false,
@@ -272,41 +237,41 @@ $(document).ready(function () {
                 DetenerSpiner(objectBtn)
             }
         }).done(function (){
-            dataGrupos.gestion = $("#gestion").val()
-            dataGrupos.carrera = $("#carreras").val()
-            dataGrupos.curso = $("#cursos").val()
-            dataGrupos.plan = $("#planes").val()
-            dataGrupos.sede = $("#sedes").val()
-            dataGrupos.sigla = sigla
+            dataGruposMatricial.gestion = $("#gestion").val()
+            dataGruposMatricial.carrera = $("#carreras").val()
+            dataGruposMatricial.curso = $("#cursos").val()
+            dataGruposMatricial.plan = $("#planes").val()
+            dataGruposMatricial.sede = $("#sedes").val()
+            dataGruposMatricial.sigla = sigla
 
-            dataGrupos.tipoGrupo = 'T'
-            tableTeoria = $('#tablaTeoria').dataTable({
-                layout: layoutGrupos,
+            dataGruposMatricial.tipoGrupo = 'T'
+            tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
+                layout: layoutGruposMatricial,
                 pageLength : 50,
-                ajax: ajaxGrupos,
-                columns: columnsGrupos,
-                createdRow: createdRows,
-                initComplete: initComplete,
+                ajax: ajaxGruposMatricial,
+                columns: columnsGruposMatricial,
+                createdRow: createdRowsMatricial,
+                initComplete: initCompleteMatricial,
             })
 
-            dataGrupos.tipoGrupo = 'L'
-            tableLaboratorio = $('#tablaLaboratorio').dataTable({
-                layout: layoutGrupos,
+            dataGruposMatricial.tipoGrupo = 'L'
+            tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
+                layout: layoutGruposMatricial,
                 pageLength : 50,
-                ajax: ajaxGrupos,
-                columns: columnsGrupos,
-                createdRow: createdRows,
-                initComplete: initComplete,
+                ajax: ajaxGruposMatricial,
+                columns: columnsGruposMatricial,
+                createdRow: createdRowsMatricial,
+                initComplete: initCompleteMatricial,
             })
 
-            dataGrupos.tipoGrupo = 'P'
-            tablePractica = $('#tablaPractica').dataTable({
-                layout: layoutGrupos,
+            dataGruposMatricial.tipoGrupo = 'P'
+            tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
+                layout: layoutGruposMatricial,
                 pageLength : 50,
-                ajax: ajaxGrupos,
-                columns: columnsGrupos,
-                createdRow: createdRows,
-                initComplete: initComplete,
+                ajax: ajaxGruposMatricial,
+                columns: columnsGruposMatricial,
+                createdRow: createdRowsMatricial,
+                initComplete: initCompleteMatricial,
             })
         })
 
@@ -318,15 +283,15 @@ $(document).ready(function () {
         let tipoGrupo = objectBtn.attr("tipogrupo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("gestion", dataGrupos.gestion);
-        datos.append("carrera", dataGrupos.carrera);
-        datos.append("sede", dataGrupos.sede);
-        datos.append("plan", dataGrupos.plan);
-        datos.append("sigla", dataGrupos.sigla);
+        datos.append("gestion", dataGruposMatricial.gestion);
+        datos.append("carrera", dataGruposMatricial.carrera);
+        datos.append("sede", dataGruposMatricial.sede);
+        datos.append("plan", dataGruposMatricial.plan);
+        datos.append("sigla", dataGruposMatricial.sigla);
         datos.append("grupo", grupo);
         datos.append("tipoGrupo", tipoGrupo);
         datos.append("estado", estado);
-        dataGrupos.tipoGrupo = tipoGrupo
+        dataGruposMatricial.tipoGrupo = tipoGrupo
 
         Swal.fire({
             icon: "warning",
@@ -341,7 +306,7 @@ $(document).ready(function () {
             if (resultado.value) {
                 IniciarSpiner(objectBtn)
                 $.ajax({
-                    url: "index.php?r=PlanificacionCH/planificar-carga-horaria/cambiar-estado-grupo",
+                    url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/cambiar-estado-grupo",
                     method: "POST",
                     data: datos,
                     cache: false,
@@ -402,16 +367,16 @@ $(document).ready(function () {
 
     function guardarGrupo() {
         let datos = new FormData();
-        datos.append("gestion", dataGrupos.gestion)
-        datos.append("carrera", dataGrupos.carrera)
-        datos.append("plan", dataGrupos.plan)
-        datos.append("sigla", dataGrupos.sigla)
-        datos.append('sede',dataGrupos.sede)
-        datos.append("tipoGrupo", dataGrupos.tipoGrupo)
+        datos.append("gestion", dataGruposMatricial.gestion)
+        datos.append("carrera", dataGruposMatricial.carrera)
+        datos.append("plan", dataGruposMatricial.plan)
+        datos.append("sigla", dataGruposMatricial.sigla)
+        datos.append('sede',dataGruposMatricial.sede)
+        datos.append("tipoGrupo", dataGruposMatricial.tipoGrupo)
         datos.append('docente',$('#docentes').val())
         datos.append("grupo", $("#grupo").val())
         $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/guardar-grupo",
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/guardar-grupo",
             method: "POST",
             data: datos,
             cache: false,
@@ -422,22 +387,22 @@ $(document).ready(function () {
                 if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','Los datos del nuevo grupo se guardaron correctamente.','toast')
                     $('#modalPlanificar').modal('hide')
-                    switch (dataGrupos.tipoGrupo){
-                        case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                    switch (dataGruposMatricial.tipoGrupo){
+                        case 'T': $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
                                 })
                         });
                             break
-                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                        case 'L': $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
                                 })
                         });
                             break
-                        case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                        case 'P': $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
@@ -463,18 +428,18 @@ $(document).ready(function () {
         let tipoGrupo = objectBtn.attr("tipogrupo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("gestion", dataGrupos.gestion);
-        datos.append("carrera", dataGrupos.carrera);
-        datos.append("sede", dataGrupos.sede);
-        datos.append("plan", dataGrupos.plan);
-        datos.append("sigla", dataGrupos.sigla);
+        datos.append("gestion", dataGruposMatricial.gestion);
+        datos.append("carrera", dataGruposMatricial.carrera);
+        datos.append("sede", dataGruposMatricial.sede);
+        datos.append("plan", dataGruposMatricial.plan);
+        datos.append("sigla", dataGruposMatricial.sigla);
         datos.append("grupo", grupo);
         datos.append("tipoGrupo", tipoGrupo);
-        dataGrupos.grupo = grupo
-        dataGrupos.tipoGrupo = tipoGrupo
+        dataGruposMatricial.grupo = grupo
+        dataGruposMatricial.tipoGrupo = tipoGrupo
         IniciarSpiner(objectBtn)
         $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/buscar-grupo",
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/buscar-grupo",
             method: "POST",
             data: datos,
             cache: false,
@@ -509,17 +474,17 @@ $(document).ready(function () {
 
     function actualizarGrupo() {
         let datos = new FormData();
-        datos.append("gestion", dataGrupos.gestion);
-        datos.append("carrera", dataGrupos.carrera);
-        datos.append("sede", dataGrupos.sede);
-        datos.append("plan", dataGrupos.plan);
-        datos.append("sigla", dataGrupos.sigla);
-        datos.append("grupo", dataGrupos.grupo);
-        datos.append("tipoGrupo", dataGrupos.tipoGrupo);
+        datos.append("gestion", dataGruposMatricial.gestion);
+        datos.append("carrera", dataGruposMatricial.carrera);
+        datos.append("sede", dataGruposMatricial.sede);
+        datos.append("plan", dataGruposMatricial.plan);
+        datos.append("sigla", dataGruposMatricial.sigla);
+        datos.append("grupo", dataGruposMatricial.grupo);
+        datos.append("tipoGrupo", dataGruposMatricial.tipoGrupo);
         datos.append("grupoN", $('#grupo').val());
         datos.append("idPersonaN", $('#docentes').val());
         $.ajax({
-            url: "index.php?r=PlanificacionCH/planificar-carga-horaria/actualizar-grupo",
+            url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/actualizar-grupo",
             method: "POST",
             data: datos,
             cache: false,
@@ -530,21 +495,21 @@ $(document).ready(function () {
                 if (data.respuesta === RTA_CORRECTO) {
                     MostrarMensaje('success','El grupo se actualizó correctamente.','toast')
                     switch (dataGrupos.tipoGrupo){
-                        case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                        case 'T': $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
                                 })
                         });
                             break
-                        case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                        case 'L': $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
                                 })
                         });
                             break
-                        case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                        case 'P': $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
                             document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                 .forEach(popover => {
                                     new bootstrap.Popover(popover)
@@ -584,6 +549,6 @@ $(document).ready(function () {
         $('#formCargaHorariaPropuesta').trigger("reset");
         $('#docentes').val(null).trigger('change')
     }
-});
 
 
+})

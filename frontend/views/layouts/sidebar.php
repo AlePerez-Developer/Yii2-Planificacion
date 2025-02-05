@@ -59,7 +59,7 @@
                         'badge' => '<span class="right badge badge-info"></span>',
                         'items' => [
                             ['label' => 'Planificar', 'url' => ['/PlanificacionCH/planificar-carga-horaria/index'], 'iconStyle' => 'far'],
-                            //['label' => 'Planificar Matriciales', 'url' => ['/PlanificacionCH/planificar-carga-horaria-matricial/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Planificar Matriciales', 'url' => ['/PlanificacionCH/planificar-carga-horaria-matricial/index'], 'iconStyle' => 'far'],
                         ]
                     ],
                    /* [
