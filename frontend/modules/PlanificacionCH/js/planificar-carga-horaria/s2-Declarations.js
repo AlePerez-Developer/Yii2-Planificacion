@@ -156,6 +156,41 @@ $(document).ready(function(){
         }
     })
 
+    $('#materias').select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija una materia",
+        allowClear: true,
+        ajax: {
+            method: "POST",
+            dataType: 'json',
+            delay: 500,
+            data: function (params) {
+                return {
+                    facultad: $('#facultades').val(),
+                    q: params.term,
+                    page: params.page
+                };
+            },
+            cache: false,
+            url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-materias-select',
+            dataSrc: '',
+            processResults: function (data) {
+                return {
+                    results: data.materias
+                };
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            }
+        },
+        templateResult: function (repo){
+            return (repo.loading)?repo.text:repo.text + ' ( ' + repo.id + ' ) ';
+        },
+        templateSelection: function (repo) {
+            return (repo.id)?repo.text + ' ( ' + repo.id + ' ) ': repo.text;
+        }
+    })
+
     $('#docentes').select2({
         theme: 'bootstrap4',
         placeholder: "Elija un docente",

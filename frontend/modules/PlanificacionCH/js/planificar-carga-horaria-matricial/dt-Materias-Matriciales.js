@@ -2,11 +2,7 @@ let tableMateriasMatriciales
 let dataMateriasMatriciales = {};
 $(document).ready(function () {
     dataMateriasMatriciales.flag = 0
-    dataMateriasMatriciales.gestion = ''
-    dataMateriasMatriciales.carrera = ''
-    dataMateriasMatriciales.sede = ''
-    dataMateriasMatriciales.curso = ''
-    dataMateriasMatriciales.plan = ''
+    dataMateriasMatriciales.materia = ''
 
     tableMateriasMatriciales = $("#tablaMateriasMatriciales").DataTable({
         layout: {

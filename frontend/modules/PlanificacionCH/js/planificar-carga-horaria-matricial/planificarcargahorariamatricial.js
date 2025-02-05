@@ -1,100 +1,23 @@
 $(document).ready(function () {
 
     $('#facultades').change(function () {
-        $('#divCarreras').attr('hidden',true)
-        $('#rowDos').attr('hidden',true)
-        $('#divSedes').attr('hidden',true)
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
+        $('#divMaterias').attr('hidden',true)
         $('#divTabla').attr('hidden',true)
 
         if ($(this).val() != '') {
-            $('#carreras').val(null).trigger('change')
-            $('#divCarreras').attr('hidden',false)
+            $('#materias').val(null).trigger('change')
+            $('#divMaterias').attr('hidden',false)
         }
     })
 
-    $('#carreras').change(function () {
-        $('#rowDos').attr('hidden',true)
-        $('#divSedes').attr('hidden',true)
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
-
-        if ($(this).val() != ''){
-            $('#sedes').val(null).trigger('change')
-            $('#divSedes').attr('hidden',false)
-            $('#rowDos').attr('hidden',false)
-        }
-    })
-
-    $("#sedes").change(function () {
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
-
-        if ($(this).val() != ''){
-            $('#planes').val(null).trigger('change')
-            $('#divPlanes').attr('hidden',false)
-        }
-    });
-
-    $("#planes").change(function () {
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
-
-        if ($(this).val() != ''){
-            $('#cursos').val(null).trigger('change')
-            $('#divCursos').attr('hidden',false)
-        }
-    });
-
-    $('#cursos').change(function () {
+    $('#materias').change(function () {
         $('#divTabla').attr('hidden',true)
 
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
 
-            dataMateriasMatriciales.gestion = $('#gestion').val()
-            dataMateriasMatriciales.carrera = $("#carreras").val()
-            dataMateriasMatriciales.curso = $("#cursos").val()
-            dataMateriasMatriciales.plan = $("#planes").val()
-            dataMateriasMatriciales.sede = $("#sedes").val()
+            dataMateriasMatriciales.materia = $('#materias').val()
             dataMateriasMatriciales.flag = 1
-
-            let datos = new FormData();
-            datos.append("gestion", $('#gestion').val());
-            datos.append("carrera", $('#carreras').val());
-            datos.append("sede", $('#sedes').val());
-            datos.append("plan", $('#planes').val());
-
-            $.ajax({
-                url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/obtener-estado-envio",
-                method: "POST",
-                data: datos,
-                cache: false,
-                contentType: false,
-                processData: false,
-                dataType: "json",
-                success: function (data) {
-                    if (data.respuesta === RTA_CORRECTO) {
-                        $('#envio').val(data.estado)
-                        if (data.estado == '1'){
-                            $('#enviarPlanificacion').hide()
-                        }
-                    }
-                    else {
-                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
-                }
-            });
 
             tableMateriasMatriciales.ajax.reload()
         }

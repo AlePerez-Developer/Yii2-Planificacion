@@ -153,31 +153,9 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matri
                 </select>
             </div>
 
-            <div class="col-sm-6" id="divCarreras" hidden>
-                <label for="carreras" style="font-size: 12px">Seleccione la carrera</label>
-                <select id="carreras" name="carreras" class="form-control" style="width: 95%">
-                    <option></option>
-                </select>
-            </div>
-
-        </div>
-        <div id="rowDos" class="row" style="background-color: peachpuff; height: 90px" hidden>
-            <div class="col-sm-4 mt-2" id="divSedes" hidden>
-                <label for="sedes" style="font-size: 12px">Seleccione la sede</label>
-                <select id="sedes" name="sedes" class="form-control" style="width: 95%">
-                    <option></option>
-                </select>
-            </div>
-
-            <div class="col-sm-4 mt-2" id="divPlanes" hidden>
-                <label for="planes" style="font-size: 12px">Seleccione el plan de estudios</label>
-                <select id="planes" name="planes" class="form-control" style="width: 95%">
-                    <option></option>
-                </select>
-            </div>
-            <div class="col-sm-4 mt-2" id="divCursos" hidden>
-                <label for="cursos" style="font-size: 12px">Seleccione el curso</label>
-                <select id="cursos" name="cursos" class="form-control" style="width: 95%">
+            <div class="col-sm-6" id="divMaterias" hidden>
+                <label for="materias" style="font-size: 12px">Seleccione la materia</label>
+                <select id="materias" name="materias" class="form-control" style="width: 95%">
                     <option></option>
                 </select>
             </div>
