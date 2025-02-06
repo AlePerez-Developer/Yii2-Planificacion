@@ -3,20 +3,24 @@ let tablePracticaMatricial
 let tableLaboratorioMatricial
 
 let dataGruposMatricial = {};
+let layoutGruposMatricial
+let ajaxGruposMatricial
+let columnsGruposMatricial
 
-
+let initCompleteMatricial
+let createdRowsMatricial
 
 var chDocente
 $(document).ready(function () {
 
-    let layoutGruposMatricial = {
+    layoutGruposMatricial = {
         topStart: null,
         topEnd: null ,
         bottomStart: null,
         bottomEnd: null
     }
 
-    let ajaxGruposMatricial = {
+    ajaxGruposMatricial = {
         method: "POST",
         data: function ( d ) {
             return  $.extend(d, dataGruposMatricial);
@@ -26,11 +30,16 @@ $(document).ready(function () {
         url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-grupos',
         dataSrc: 'grupos',
         error: function (xhr, ajaxOptions, thrownError) {
+            console.log(ajaxOptions)
+            console.log('**********************************************************************')
+            console.log(xhr)
+            console.log('**********************************************************************')
+            console.log(thrownError)
             MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
         }
     }
 
-    let initCompleteMatricial = function initComplete(settings, json){
+    initCompleteMatricial = function initComplete(settings, json){
         $(this).DataTable().on('order.dt search.dt', function () {
             var i = 1;
             $(this).DataTable()
@@ -46,7 +55,7 @@ $(document).ready(function () {
             })
     }
 
-    let createdRowsMatricial = function createdRow(row, data, rowIndex) {
+    createdRowsMatricial = function createdRow(row, data, rowIndex) {
         let chv = 0
         let che = 0
         let cha = 0
@@ -186,7 +195,7 @@ $(document).ready(function () {
         }
     }
 
-        let columnsGruposMatricial = [
+    columnsGruposMatricial = [
         {
             className: 'dt-small dt-center',
             orderable: false,
@@ -262,10 +271,10 @@ $(document).ready(function () {
                 switch  (row.CodigoEstado){
                     case 'V':
                         button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
-                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'E':
-                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     case 'A':
                         button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
@@ -285,6 +294,9 @@ $(document).ready(function () {
     ]
 
 
+    dataGruposMatricial.flag = 0
+
+    dataGruposMatricial.tipoGrupo = 'T'
     tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
         layout: layoutGruposMatricial,
         fixedHeader: true,

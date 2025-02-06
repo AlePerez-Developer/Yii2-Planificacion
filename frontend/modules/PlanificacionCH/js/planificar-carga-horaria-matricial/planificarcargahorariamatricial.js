@@ -5,9 +5,24 @@ $(document).ready(function () {
 
         if ($(this).val() != '') {
             $('#materias').val(null).trigger('change')
+
+
+
+
             $('#divMaterias').attr('hidden',false)
         }
     })
+
+
+    $('#carreras').change(function () {
+        $('#divPlanes').attr('hidden',true)
+
+        if ($(this).val() != ''){
+            $('#planes').val(null).trigger('change')
+            $('#divPlanes').attr('hidden',false)
+        }
+    })
+
 
     $('#materias').change(function () {
         $('#divTabla').attr('hidden',true)
@@ -84,70 +99,46 @@ $(document).ready(function () {
                 DetenerSpiner(objectBtn)
             }
         }).done(function (){
-            console.log('entra')
-            dataGruposMatricial.gestion = $("#gestion").val()
-            dataGruposMatricial.carrera = $("#carreras").val()
-            dataGruposMatricial.curso = $("#cursos").val()
-            dataGruposMatricial.plan = $("#planes").val()
-            dataGruposMatricial.sede = $("#sedes").val()
+            dataGruposMatricial.flag = 1
             dataGruposMatricial.sigla = sigla
 
             dataGruposMatricial.tipoGrupo = 'T'
-            $("#tablaTeoriaMatricial").DataTable().ajax.reload()
-            /*tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
-                layout: layoutGruposMatricial,
-                fixedHeader: true,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '500px',
-                ajax: ajaxGruposMatricial,
-                columns: columnsGruposMatricial,
-                createdRow: createdRowsMatricial,
-                initComplete: initCompleteMatricial,
-            })*/
+            $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
+                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                    .forEach(popover => {
+                        new bootstrap.Popover(popover)
+                    })
+            });
 
             dataGruposMatricial.tipoGrupo = 'L'
-            $("#tablaLaboratorioMatricial").DataTable().ajax.reload()
-            /*tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
-                layout: layoutGruposMatricial,
-                fixedHeader: true,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '500px',
-                ajax: ajaxGruposMatricial,
-                columns: columnsGruposMatricial,
-                createdRow: createdRowsMatricial,
-                initComplete: initCompleteMatricial,
-            })*/
+            $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
+                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                    .forEach(popover => {
+                        new bootstrap.Popover(popover)
+                    })
+            });
 
             dataGruposMatricial.tipoGrupo = 'P'
-            $("#tablaPracticaMatricial").DataTable().ajax.reload()
-
-            /*tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
-                layout: layoutGruposMatricial,
-                fixedHeader: true,
-                paging: false,
-                scrollCollapse: true,
-                scrollY: '500px',
-                ajax: ajaxGruposMatricial,
-                columns: columnsGruposMatricial,
-                createdRow: createdRowsMatricial,
-                initComplete: initCompleteMatricial,
-            })*/
+            $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
+                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                    .forEach(popover => {
+                        new bootstrap.Popover(popover)
+                    })
+            });
         })
-
     }
 
     $(document).on('click', 'tbody .btnEstado', function(){
         let objectBtn = $(this);
+        let carrera = objectBtn.attr("carrera");
+        let plan = objectBtn.attr("plan");
         let grupo = objectBtn.attr("grupo");
         let tipoGrupo = objectBtn.attr("tipogrupo");
         let estado = objectBtn.attr("estado");
         let datos = new FormData();
-        datos.append("gestion", dataGruposMatricial.gestion);
-        datos.append("carrera", dataGruposMatricial.carrera);
-        datos.append("sede", dataGruposMatricial.sede);
-        datos.append("plan", dataGruposMatricial.plan);
+        datos.append("carrera", carrera);
+        datos.append("sede", 'SU');
+        datos.append("plan", plan);
         datos.append("sigla", dataGruposMatricial.sigla);
         datos.append("grupo", grupo);
         datos.append("tipoGrupo", tipoGrupo);
@@ -178,21 +169,21 @@ $(document).ready(function () {
                         if (data.respuesta === RTA_CORRECTO) {
                             MostrarMensaje('success','El estado del grupo se cambio de forma correcta.','toast')
                             switch (tipoGrupo){
-                                case 'T': $("#tablaTeoria").DataTable().ajax.reload(function (){
+                                case 'T': $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
                                     document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                         .forEach(popover => {
                                             new bootstrap.Popover(popover)
                                         })
                                 });
                                     break
-                                case 'L': $("#tablaLaboratorio").DataTable().ajax.reload(function (){
+                                case 'L': $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
                                     document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                         .forEach(popover => {
                                             new bootstrap.Popover(popover)
                                         })
                                 });
                                     break
-                                case 'P': $("#tablaPractica").DataTable().ajax.reload(function (){
+                                case 'P': $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
                                     document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
                                         .forEach(popover => {
                                             new bootstrap.Popover(popover)
@@ -217,7 +208,7 @@ $(document).ready(function () {
     })
 
     $("#btnGuardar").click(function () {
-        if ($("#formCargaHorariaPropuesta").valid()) {
+        if ($("#formCargaHorariaPropuestaMatricial").valid()) {
             if ($("#codigoCrear").val() === '') {
                 guardarGrupo();
             } else {
@@ -228,11 +219,10 @@ $(document).ready(function () {
 
     function guardarGrupo() {
         let datos = new FormData();
-        datos.append("gestion", dataGruposMatricial.gestion)
-        datos.append("carrera", dataGruposMatricial.carrera)
-        datos.append("plan", dataGruposMatricial.plan)
-        datos.append("sigla", dataGruposMatricial.sigla)
-        datos.append('sede',dataGruposMatricial.sede)
+        datos.append("carrera", $('#carreras').val())
+        datos.append("plan", $('#planes').val())
+        datos.append("sigla", $('#materias').val())
+        datos.append('sede','SU')
         datos.append("tipoGrupo", dataGruposMatricial.tipoGrupo)
         datos.append('docente',$('#docentes').val())
         datos.append("grupo", $("#grupo").val())
@@ -403,12 +393,13 @@ $(document).ready(function () {
     })
 
     function reiniciarCampos() {
-        $('#formCargaHorariaPropuesta *').filter(':input').each(function () {
+        $('#formCargaHorariaPropuestaMatricial *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#codigoCrear').val('');
         $('#formCargaHorariaPropuesta').trigger("reset");
         $('#docentes').val(null).trigger('change')
+        $('#carreras').val(null).trigger('change')
     }
 
 

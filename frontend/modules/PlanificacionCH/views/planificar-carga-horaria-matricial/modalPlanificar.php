@@ -27,7 +27,7 @@
                     <div class="card-body">
                         <input type="text" id="codigoCrear"  disabled hidden>
 
-                        <form id="formCargaHorariaPropuesta" action="" method="post">
+                        <form id="formCargaHorariaPropuestaMatricial" action="" method="post">
 
 
                             <div class="form-row">
@@ -56,6 +56,18 @@
                                         <div class="form-group col-10"><label id="lblCondicion">docente contrato</label></div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="col-sm-6" id="divCarreras" >
+                                <label for="carreras" class="lblTitulo">Seleccione la carrera</label>
+                                <select id="carreras" name="carreras" class="form-control">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4  mt-2" id="divPlanes" hidden>
+                                <label for="planes" class="lblTitulo">Seleccione el plan de estudios</label>
+                                <select id="planes" name="planes" class="form-control">
+                                    <option></option>
+                                </select>
                             </div>
                             <div class="row">
                                 <div class="col-sm-12">
