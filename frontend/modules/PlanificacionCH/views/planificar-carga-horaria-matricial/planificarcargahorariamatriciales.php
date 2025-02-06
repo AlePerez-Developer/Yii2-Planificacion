@@ -163,27 +163,75 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matri
     </div>
     <div class="card-body">
         <div id="divTabla"  hidden>
-            <div class='row'>
-                <div class="col-9"></div>
-                <div class="col-3">
-                    <button id="enviarPlanificacion" class="btn btn-info form-control btn-xs" >Enviar Carrera</button>
+            <div style="background-color: white">
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-teoria-tab" data-bs-toggle="pill" data-bs-target="#pills-teoria" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Grupos Teoria</button>
+                        </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-laboratorio-tab" data-bs-toggle="pill" data-bs-target="#pills-laboratorio" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Grupos Laboratorio</button>
+                        </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-practica-tab" data-bs-toggle="pill" data-bs-target="#pills-practica" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Grupos Practica</button>
+                        </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent" >
+                    <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "T" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Teoria</button></div></div>
+                            <table id="tablaTeoriaMatricial" class="table table-bordered  dt-responsive tablaTeoria" style="width: 100%" >
+                                <thead>
+                                    <th>#</th>
+                                    <th>IdPersona</th>
+                                    <th>Nombre Docente</th>
+                                    <th>Grupo</th>
+                                    <th>Hrs.Teo</th>
+                                    <th>Prog.</th>
+                                    <th>Aprobados</th>
+                                    <th>Reprobados</th>
+                                    <th>Abandonos</th>
+                                    <th>Proy.</th>
+                                    <th>Accion</th>
+                               </thead>
+                            </table>
+                    </div>
+                    <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "L" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Laboratorio</button></div></div>
+                            <table id="tablaLaboratorioMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >
+                                <thead>
+                                    <th>#</th>
+                                    <th>IdPersona</th>
+                                    <th>Nombre Docente</th>
+                                    <th>Grupo</th>
+                                    <th>Hrs.Lab</th>
+                                    <th>Prog.</th>
+                                    <th>Aprobados</th>
+                                    <th>Reprobados</th>
+                                    <th>Abandonos</th>
+                                    <th>Proy.</th>
+                                    <th>Accion</th>
+                                </thead>
+                            </table>
+                        </div>
+                    <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">
+                        <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Practica</button></div></div>
+                            <table id="tablaPracticaMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >
+                                <thead>
+                                    <th>#</th>
+                                    <th>IdPersona</th>
+                                    <th>Nombre Docente</th>
+                                    <th>Grupo</th>
+                                    <th>Hrs.Prac</th>
+                                    <th>Prog.</th>
+                                    <th>Aprobados</th>
+                                    <th>Reprobados</th>
+                                    <th>Abandonos</th>
+                                    <th>Proy.</th>
+                                    <th>Accion</th>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <table id="tablaMateriasMatriciales" class="table table-bordered  dt-responsive" style="width: 100%" >
-                <thead>
-                <th>#</th>
-                <th>Sigla</th>
-                <th>Materia</th>
-                <th>Hrs.Teo</th>
-                <th>Hrs.Pra</th>
-                <th>Hrs.Lab</th>
-                <th>Prog.</th>
-                <th>Apro.</th>
-                <th>Repro.</th>
-                <th>Abandonos</th>
-                <th>Proy.</th>
-                </thead>
-            </table>
         </div>
     </div>
 </div>

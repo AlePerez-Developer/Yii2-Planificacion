@@ -62,24 +62,33 @@ $(document).ready(function () {
         let grupomaterias = ''
 
         let carrera = ''
+        let flag = false
         vigente.forEach(function (persona, index) {
+            flag = true
             if (persona.IdPersona === $.trim(data.IdPersona))
             {
                 if (carrera === '') {
                     carrera = persona.carrera
+                    subtotalMateria = subtotalMateria + parseInt(persona.Ch)
                     grupomaterias = '<ul class="list-group">'
+                    grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
+                        '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
+                        '        </li>'
                 } else {
                     if (carrera !== persona.carrera ){
                         grupomaterias += '</ul>'
-                        grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+
-                            '+persona.carrera+' +
-                            '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
+                        grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
+                                         '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
                             grupomaterias +
                             '</li>'
-                        grupomaterias = ''
+                        grupomaterias = '<ul class="list-group">'
+                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
+                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
+                            '        </li>'
+                        subtotalMateria =  parseInt(persona.Ch)
                     } else {
                         subtotalMateria = subtotalMateria + parseInt(persona.Ch)
-                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center">'+ persona.materia +
+                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
                             '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
                             '        </li>'
 
@@ -93,9 +102,16 @@ $(document).ready(function () {
                     '        </li>'*/
             }
         });
+        if (flag){
+            grupomaterias += '</ul>'
+            grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
+                '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
+                grupomaterias +
+                '</li></ul>'
+        }
 
         group += grupocarreras + '</ul>'
-        console.log(group)
+
         agregada.forEach(function (persona, index) {
             if (persona.IdPersona === $.trim(data.IdPersona))
                 cha = persona.Ch
@@ -110,7 +126,7 @@ $(document).ready(function () {
             .attr('data-bs-placement', 'top')
             .attr('data-bs-html', true)
             //.attr('data-bs-container', 'body')
-            .attr('data-bs-title', data.NombreMateria)
+            .attr('data-bs-title', data.NombreMateria + '<a  class="close" data-dismiss="alert">&times;</a>')
             .attr('data-html', true)
             .attr('data-bs-content', '' +
                 '<div class="container mt-1 d-flex justify-content-center"> ' +

@@ -4,23 +4,19 @@ let tableLaboratorioMatricial
 
 let dataGruposMatricial = {};
 
-let layoutGruposMatricial
-let ajaxGruposMatricial
-let columnsGruposMatricial
 
-let createdRowsMatricial
-let initCompleteMatricial
 
 var chDocente
 $(document).ready(function () {
-    layoutGruposMatricial = {
+
+    let layoutGruposMatricial = {
         topStart: null,
         topEnd: null ,
         bottomStart: null,
         bottomEnd: null
     }
 
-    ajaxGruposMatricial = {
+    let ajaxGruposMatricial = {
         method: "POST",
         data: function ( d ) {
             return  $.extend(d, dataGruposMatricial);
@@ -34,7 +30,7 @@ $(document).ready(function () {
         }
     }
 
-    initCompleteMatricial = function initComplete(settings, json){
+    let initCompleteMatricial = function initComplete(settings, json){
         $(this).DataTable().on('order.dt search.dt', function () {
             var i = 1;
             $(this).DataTable()
@@ -50,25 +46,64 @@ $(document).ready(function () {
             })
     }
 
-    createdRowsMatricial = function createdRow(row, data, rowIndex) {
+    let createdRowsMatricial = function createdRow(row, data, rowIndex) {
         let chv = 0
         let che = 0
         let cha = 0
 
+        let subtotalMateria = 0
         let group = '<ul class="list-group">'
 
+        let grupocarreras = ''
+        let grupomaterias = ''
+
+        let carrera = ''
+        let flag = false
         vigente.forEach(function (persona, index) {
+            flag = true
             if (persona.IdPersona === $.trim(data.IdPersona))
             {
+                if (carrera === '') {
+                    carrera = persona.carrera
+                    subtotalMateria = subtotalMateria + parseInt(persona.Ch)
+                    grupomaterias = '<ul class="list-group">'
+                    grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
+                        '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
+                        '        </li>'
+                } else {
+                    if (carrera !== persona.carrera ){
+                        grupomaterias += '</ul>'
+                        grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
+                            '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
+                            grupomaterias +
+                            '</li>'
+                        grupomaterias = '<ul class="list-group">'
+                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
+                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
+                            '        </li>'
+                        subtotalMateria =  parseInt(persona.Ch)
+                    } else {
+                        subtotalMateria = subtotalMateria + parseInt(persona.Ch)
+                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
+                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
+                            '        </li>'
+
+                    }
+                }
+
                 chv = chv + parseInt(persona.Ch)
-                group += '<li class="list-group-item d-flex justify-content-between align-items-center">'+ persona.carrera +
-                    '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                    '        </li>'
             }
         });
+        if (flag){
+            grupomaterias += '</ul>'
+            grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
+                '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
+                grupomaterias +
+                '</li></ul>'
+        }
 
-        group += '</ul>'
-        console.log(group)
+        group += grupocarreras + '</ul>'
+
         agregada.forEach(function (persona, index) {
             if (persona.IdPersona === $.trim(data.IdPersona))
                 cha = persona.Ch
@@ -83,7 +118,7 @@ $(document).ready(function () {
             .attr('data-bs-placement', 'top')
             .attr('data-bs-html', true)
             //.attr('data-bs-container', 'body')
-            .attr('data-bs-title', data.NombreMateria)
+            .attr('data-bs-title', data.NombreMateria + '<a  class="close" data-dismiss="alert">&times;</a>')
             .attr('data-html', true)
             .attr('data-bs-content', '' +
                 '<div class="container mt-1 d-flex justify-content-center"> ' +
@@ -151,12 +186,12 @@ $(document).ready(function () {
         }
     }
 
-    columnsGruposMatricial = [
+        let columnsGruposMatricial = [
         {
             className: 'dt-small dt-center',
             orderable: false,
             searchable: false,
-            data: 'MGA',
+            data: 'CGA',
             width: 30
         },
         {
@@ -174,7 +209,10 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small',
-            data: 'Nombre'
+            data: 'Nombre',
+            render: function (data, type, row) {
+                return '<div>'+data+'</div><div style="color: salmon">'+row.NombreCortoCarrera+'</div>'
+            }
         },
         {
             className: 'dt-small dt-center',
@@ -211,36 +249,13 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small dt-center',
-            data: 'CantidadProyeccion',
-            render: function (data, type, row) {
-                let eliminados = 0
-                let table
-
-                switch(row.TipoGrupo) {
-                    case 'T':
-                        eliminados = $('#tablaTeoriaMatricial tbody tr.eliminado').length
-                        table = $('#tablaTeoria').DataTable();
-                        break;
-                    case 'P':
-                        eliminados = $('#tablaPracticaMatricial tbody tr.eliminado').length
-                        table = $('#tablaPractica').DataTable();
-                        break;
-                    case 'L':
-                        eliminados = $('#tablaLaboratorioMatricial tbody tr.eliminado').length
-                        table = $('#tablaLaboratorio').DataTable();
-                        break;
-                    default:
-                    // code block
-                }
-                var table_length = table.data().count();
-                return (data/(table_length-eliminados)).toFixed(2)
-            }
+            data: 'CantidadProyeccion'
         },
         {
             className: 'dt-small dt-acciones dt-center',
             orderable: false,
             searchable: false,
-            visible: ( ($('#nivel').val() === "1") && ($('#envio').val() === "0")) ? true : false,
+            //visible: ( ($('#nivel').val() === "1") && ($('#envio').val() === "0")) ? true : false,
             data: 'CodigoCarrera',
             render: function (data, type, row) {
                 let button
@@ -268,4 +283,45 @@ $(document).ready(function () {
             },
         },
     ]
+
+
+    tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
+        layout: layoutGruposMatricial,
+        fixedHeader: true,
+        paging: false,
+        scrollCollapse: true,
+        scrollY: '500px',
+        ajax: ajaxGruposMatricial,
+        columns: columnsGruposMatricial,
+        createdRow: createdRowsMatricial,
+        initComplete: initCompleteMatricial,
+    })
+
+    dataGruposMatricial.tipoGrupo = 'L'
+    tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
+        layout: layoutGruposMatricial,
+        fixedHeader: true,
+        paging: false,
+        scrollCollapse: true,
+        scrollY: '500px',
+        ajax: ajaxGruposMatricial,
+        columns: columnsGruposMatricial,
+        createdRow: createdRowsMatricial,
+        initComplete: initCompleteMatricial,
+    })
+
+    dataGruposMatricial.tipoGrupo = 'P'
+    tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
+        layout: layoutGruposMatricial,
+        fixedHeader: true,
+        paging: false,
+        scrollCollapse: true,
+        scrollY: '500px',
+        ajax: ajaxGruposMatricial,
+        columns: columnsGruposMatricial,
+        createdRow: createdRowsMatricial,
+        initComplete: initCompleteMatricial,
+    })
+
+
 })

@@ -169,8 +169,13 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         width: 400px;
     }
     .c{
+        font-size: 12px;
         border: none;
-        width: 400px;
+        width: 300px;
+    }
+
+    .list-group-item {
+        padding: 3px 10px
     }
 
 </style>
@@ -246,37 +251,6 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                 </thead>
             </table>
         </div>
-
-        <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                Cras justo odio
-                <span class="badge badge-primary badge-pill">14</span>
-            </li>
-            <li class="list-group-item   justify-content-between align-items-center">
-                jijo de su madre
-                <span class="badge badge-primary badge-pill">1</span>
-                <ul class="list-group r">
-                    <li class="list-group-item d-flex justify-content-between align-items-center c">
-                        Cras justo odio
-                        <span class="badge badge-primary badge-pill">14</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center c">
-                        Dapibus ac facilisis in
-                        <span class="badge badge-primary badge-pill">2</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center c">
-                        Morbi leo risus
-                        <span class="badge badge-primary badge-pill">1</span>
-                    </li>
-                </ul>
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                Morbi leo risus
-                <span class="badge badge-primary badge-pill">1</span>
-            </li>
-        </ul>
-
-
     </div>
 </div>
 

@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     $('#facultades').change(function () {
         $('#divMaterias').attr('hidden',true)
         $('#divTabla').attr('hidden',true)
@@ -16,92 +15,17 @@ $(document).ready(function () {
         if ($(this).val() != ''){
             $('#divTabla').attr('hidden',false)
 
-            dataMateriasMatriciales.materia = $('#materias').val()
+
+            llenarTablas($('#materias').val())
+            /*dataMateriasMatriciales.materia = $('#materias').val()
             dataMateriasMatriciales.flag = 1
 
-            tableMateriasMatriciales.ajax.reload()
+            tableMateriasMatriciales.ajax.reload()*/
+
+
         }
     })
 
-    function format(d) {
-        return (
-            '<div style="background-color: white">'+
-            '<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">\n' +
-            '  <li class="nav-item" role="presentation">\n' +
-            '    <button class="nav-link active" id="pills-teoria-tab" data-bs-toggle="pill" data-bs-target="#pills-teoria" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Grupos Teoria</button>\n' +
-            '  </li>\n' +
-            '  <li class="nav-item" role="presentation">\n' +
-            '    <button class="nav-link" id="pills-laboratorio-tab" data-bs-toggle="pill" data-bs-target="#pills-laboratorio" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Grupos Laboratorio</button>\n' +
-            '  </li>\n' +
-            '  <li class="nav-item" role="presentation">\n' +
-            '    <button class="nav-link" id="pills-practica-tab" data-bs-toggle="pill" data-bs-target="#pills-practica" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Grupos Practica</button>\n' +
-            '  </li>\n' +
-            '</ul>\n' +
-            '<div class="tab-content" id="pills-tabContent" >\n' +
-            '  <div class="tab-pane fade show active" id="pills-teoria" role="tabpanel" aria-labelledby="pills-home-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "T" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Teoria</button></div></div>' +
-            '    <div class="divGrupos">'+
-            '               <table id="tablaTeoriaMatricial" class="table table-bordered  dt-responsive tablaTeoria" style="width: 100%" >' +
-            '                    <thead>' +
-            '                    <th>#</th>' +
-            '                    <th>IdPersona</th>' +
-            '                    <th>Nombre Docente</th>' +
-            '                    <th>Grupo</th>' +
-            '                    <th>Hrs.Teo</th>' +
-            '                    <th>Prog.</th>' +
-            '                    <th>Aprobados</th>' +
-            '                    <th>Reprobados</th>' +
-            '                    <th>Abandonos</th>' +
-            '                    <th>Proy.</th>' +
-            '                    <th>Accion</th>' +
-            '                    </thead>\n' +
-            '                </table>' +
-            '     </div>' +
-            '   </div>' +
-            '  <div class="tab-pane fade" id="pills-laboratorio" role="tabpanel" aria-labelledby="pills-profile-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "L" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Laboratorio</button></div></div>' +
-            '    <div class="divGrupos">'+
-            '            <table id="tablaLaboratorioMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >' +
-            '                    <thead>' +
-            '                    <th>#</th>' +
-            '                    <th>IdPersona</th>' +
-            '                    <th>Nombre Docente</th>' +
-            '                    <th>Grupo</th>' +
-            '                    <th>Hrs.Lab</th>' +
-            '                    <th>Prog.</th>' +
-            '                    <th>Aprobados</th>' +
-            '                    <th>Reprobados</th>' +
-            '                    <th>Abandonos</th>' +
-            '                    <th>Proy.</th>' +
-            '                    <th>Accion</th>' +
-            '                    </thead>\n' +
-            '            </table>' +
-            '     </div>' +
-            '</div>' +
-            '  <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">' +
-            '  <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Practica</button></div></div>' +
-            '    <div class="divGrupos">'+
-            '           <table id="tablaPracticaMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >' +
-            '                    <thead>' +
-            '                    <th>#</th>' +
-            '                    <th>IdPersona</th>' +
-            '                    <th>Nombre Docente</th>' +
-            '                    <th>Grupo</th>' +
-            '                    <th>Hrs.Prac</th>' +
-            '                    <th>Prog.</th>' +
-            '                    <th>Aprobados</th>' +
-            '                    <th>Reprobados</th>' +
-            '                    <th>Abandonos</th>' +
-            '                    <th>Proy.</th>' +
-            '                    <th>Accion</th>' +
-            '                    </thead>\n' +
-            '            </table>' +
-            '     </div>' +
-            '</div>' +
-            '</div>'+
-            '</div>'
-        );
-    }
 
     $(document).on('click','#tablaMateriasMatriciales tbody td.details-control', function () {
         var tr = $(this).closest('tr');
@@ -160,6 +84,7 @@ $(document).ready(function () {
                 DetenerSpiner(objectBtn)
             }
         }).done(function (){
+            console.log('entra')
             dataGruposMatricial.gestion = $("#gestion").val()
             dataGruposMatricial.carrera = $("#carreras").val()
             dataGruposMatricial.curso = $("#cursos").val()
@@ -168,34 +93,47 @@ $(document).ready(function () {
             dataGruposMatricial.sigla = sigla
 
             dataGruposMatricial.tipoGrupo = 'T'
-            tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
+            $("#tablaTeoriaMatricial").DataTable().ajax.reload()
+            /*tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
                 layout: layoutGruposMatricial,
-                pageLength : 50,
+                fixedHeader: true,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '500px',
                 ajax: ajaxGruposMatricial,
                 columns: columnsGruposMatricial,
                 createdRow: createdRowsMatricial,
                 initComplete: initCompleteMatricial,
-            })
+            })*/
 
             dataGruposMatricial.tipoGrupo = 'L'
-            tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
+            $("#tablaLaboratorioMatricial").DataTable().ajax.reload()
+            /*tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
                 layout: layoutGruposMatricial,
-                pageLength : 50,
+                fixedHeader: true,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '500px',
                 ajax: ajaxGruposMatricial,
                 columns: columnsGruposMatricial,
                 createdRow: createdRowsMatricial,
                 initComplete: initCompleteMatricial,
-            })
+            })*/
 
             dataGruposMatricial.tipoGrupo = 'P'
-            tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
+            $("#tablaPracticaMatricial").DataTable().ajax.reload()
+
+            /*tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
                 layout: layoutGruposMatricial,
-                pageLength : 50,
+                fixedHeader: true,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '500px',
                 ajax: ajaxGruposMatricial,
                 columns: columnsGruposMatricial,
                 createdRow: createdRowsMatricial,
                 initComplete: initCompleteMatricial,
-            })
+            })*/
         })
 
     }
@@ -456,7 +394,7 @@ $(document).ready(function () {
 
     $(document).on('click', '.btnCrear', function(){
         let objectBtn = $(this)
-        dataGrupos.tipoGrupo = objectBtn.attr('grupo')
+        dataGruposMatricial.tipoGrupo = objectBtn.attr('grupo')
         $('#modalPlanificar').modal('show')
     })
 

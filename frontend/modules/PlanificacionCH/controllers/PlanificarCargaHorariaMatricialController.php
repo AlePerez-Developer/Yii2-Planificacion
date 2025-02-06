@@ -2,6 +2,7 @@
 
 namespace app\modules\PlanificacionCH\controllers;
 
+use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
 use app\modules\PlanificacionCH\models\Carrera;
 use app\modules\PlanificacionCH\models\Materia;
 use common\models\Estado;
@@ -93,36 +94,47 @@ class PlanificarCargaHorariaMatricialController extends Controller
         $gestion = intval($_SESSION['gestion']);
 
         $grupos = (new Query)
-            ->select(['Md.GestionAcademica as MGA','Chp.gestionAcademica as CGA',
-                'M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
-                'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
-                'Chp.Grupo','Chp.TipoGrupo','Chp.IdPersona',"isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
-                'isnull(Chp.Programados,0) as Programados',
-                'isnull(Chp.Aprobados,0) as Aprobados','isnull(Chp.Reprobados,0) as Reprobados','isnull(Chp.Abandonos,0) as Abandonos',
-                'isnull(Chp.ProyectadosGeneral,0) as CantidadProyeccion' ,'chp.CodigoEstado','Chp.Observaciones',
-                "case [[chp.TipoGrupo]] when 'T' THEN [[HorasTeoria]]
+            ->select(['v.gestionAcademica as CGA','v.CodigoCarreraCH as CodigoCarrera','v.NumeroPlanEstudiosCH as NumeroPlanEstudios','M.Curso',
+                      'v.SiglaMateriaCH as SiglaMateria','v.CodigoModalidadCursoCH as CodigoModalidadCurso',
+                      'isnull(M.HorasTeoria,0) as HorasTeoria', 'isnull(M.HorasPractica,0) as HorasPractica', 'isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
+                      'v.GrupoCH as Grupo','v.CodigoTipoGrupoMateriaCH as TipoGrupo','chpP.IdPersona',"isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
+                      'sum(isnull(Chp.Programados,0)) as Programados','sum(isnull(Chp.Aprobados,0)) as Aprobados','sum(isnull(Chp.Reprobados,0)) as Reprobados',
+                      'sum(isnull(Chp.Abandonos,0)) as Abandonos','sum(isnull(Chp.ProyectadosGeneral,0)) as CantidadProyeccion',
+                      'chpP.CodigoEstado','chpP.Observaciones',
+                      "case [[chpP.TipoGrupo]] when 'T' THEN [[HorasTeoria]]
                                             when 'L' THEN [[HorasLaboratorio]]
                                             when 'P' THEN [[HorasPractica]]
-                      end as HorasSemana"])
-            ->from(['Materias M'])
-            ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
-            ->join('left JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo /*and Md.Grupo = Chp.Grupo*/')
-            ->join('INNER JOIN', 'MateriasMatriciales mm','Chp.CodigoCarrera = mm.CodigoCarrera and Chp.NumeroPlanEstudios = mm.NumeroPlanEstudios and Chp.SiglaMateria = mm.SiglaMateria and chp.TipoGrupo = mm.CodigoTipoGrupoMateria and Chp.grupo = mm.grupo')
-            ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
-            ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])->andWhere(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
-            ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
-            ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
-            ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
-            ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,chp.GestionAcademica,  
-                               M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,
-                               M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,
-                               Chp.Grupo,Chp.TipoGrupo,Chp.IdPersona,P.Paterno,P.Materno,P.Nombres, 
-                               Chp.Programados, Chp.Aprobados, Chp.reprobados, Chp.abandonos, Chp.proyectadosgeneral, chp.CodigoEstado,Chp.Observaciones')
-            ->orderBy("M.SiglaMateria,
-case when (ISNUMERIC([Chp].[Grupo])) between 1 and 100 then  CONVERT(int,[Chp].[grupo]) end,
-case when ([Chp].[Grupo]) between 'A' and 'Z' then  [Chp].[grupo] end,
-case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
+                      end as HorasSemana",'C.NombreCortoCarrera'])
+            ->from(['vmateriasmatriciales v'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta chpP', 'ChpP.GestionAcademica = V.GestionAcademicaCH and 
+                                                                              chpP.CodigoCarrera = V.CodigoCarreraCH and 
+																			  chpP.NumeroPlanEstudios = V.NumeroPlanEstudiosCH and
+																			  chpP.SiglaMateria = V.SiglaMateriaCH and
+																			  chpP.TipoGrupo = v.CodigoTipoGrupoMateriaCH and 
+																			  chpP.Grupo = v.GrupoCH')
+            ->join('INNER JOIN','Carreras C','C.CodigoCarrera = v.CodigoCarreraCH')
+            ->join('INNER JOIN','Personas P','P.IdPersona = chpP.IdPersona')
+            ->join('INNER JOIN','Materias M', 'M.CodigoCarrera = v.CodigoCarreraCH and M.NumeroPlanEstudios = v.NumeroPlanEstudiosCH and 
+                                                             M.SiglaMateria = v.SiglaMateriaCH')
+            ->join('INNER JOIN', 'CargaHorariaPropuesta chp','--Chp.GestionAcademica = V.GestionAcademica and 
+                                                                              chp.CodigoCarrera = V.CodigoCarrera and 
+																			  chp.NumeroPlanEstudios = V.NumeroPlanEstudios and
+																			  chp.SiglaMateria = V.SiglaMateria and
+																			  chp.TipoGrupo = v.CodigoTipoGrupoMateria and 
+																			  chp.Grupo = v.Grupo')
+            ->join('INNER JOIN','Carreras Ch', 'Ch.CodigoCarrera = v.CodigoCarrera')
+            ->where(['in','v.GestionAcademicaCH',[(string)$gestion,'1/'.$gestion]])
+            ->andWhere("v.CodigoModalidadCursoCH in ('NS','NA')")
+            ->andWhere(['v.SiglaMateriaCH' => $_POST["sigla"]])
+            ->andWhere(['v.CodigoTipoGrupoMateriaCH' => $_POST['tipoGrupo']])
+            ->groupBy(' v.GestionAcademica,v.CodigoCarreraCH,v.NumeroPlanEstudiosCH,M.Curso,v.SiglaMateriaCH,v.CodigoModalidadCursoCH,
+                                M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,
+                                v.GrupoCH,v.CodigoTipoGrupoMateriaCH, chpP.IdPersona,P.Paterno,P.Materno,P.Nombres,
+                                chpP.CodigoEstado,chpP.Observaciones,chpP.TipoGrupo,C.NombreCortoCarrera,chp.grupo')
+            ->orderBy("v.SiglaMateriaCH,
+                               case when (ISNUMERIC([Chp].[Grupo])) between 1 and 100 then  CONVERT(int,[Chp].[grupo]) end,
+                               case when ([Chp].[Grupo]) between 'A' and 'Z' then  [Chp].[grupo] end,
+                               case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end,C.NombreCortoCarrera
             ")->all(Yii::$app->dbAcademica);
 
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'grupos' => $grupos]);

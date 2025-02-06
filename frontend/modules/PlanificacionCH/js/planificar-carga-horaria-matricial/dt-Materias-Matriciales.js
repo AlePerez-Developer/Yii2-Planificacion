@@ -11,7 +11,6 @@ $(document).ready(function () {
             bottomStart: null,
             bottomEnd: null
         },
-        pageLength : 50,
         ajax: {
             method: "POST",
             data: function ( d ) {

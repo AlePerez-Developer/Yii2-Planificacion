@@ -229,21 +229,6 @@ class PlanificarCargaHorariaController extends Controller
 
         Yii::$app->session->set('curso', $_POST['curso']);
         Yii::$app->session->set('sede', $_POST['sede']);
-        /*$Materias = Materia::find()->alias('M')
-            ->select(['Md.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
-                'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
-                'SUM(Chp.Programados) AS [Programados]', 'SUM(Chp.Aprobados) AS [Aprobados]', 'SUM(chp.Reprobados) AS [Reprobados]', 'SUM(Chp.Abandonos) AS [Abandonos]',
-                'chp.ProyectadosGeneral as CantidadProyeccion'])
-            ->join('INNER JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = M.CodigoCarrera and Md.NumeroPlanEstudios = M.NumeroPlanEstudios and Md.SiglaMateria = M.SiglaMateria')
-            ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo and Md.Grupo = Chp.Grupo')
-            ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])
-            ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])
-            ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Md.CodigoSede' => $_POST["sede"]])
-            ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio, chp.ProyectadosGeneral')
-            ->orderBy('M.SiglaMateria')
-            ->asArray()
-            ->all();*/
 
         $Materias = Materia::find()->alias('M')
             ->select(['Chp.GestionAcademica','M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria',
@@ -255,7 +240,13 @@ class PlanificarCargaHorariaController extends Controller
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])
             ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Chp.CodigoSede' => $_POST["sede"]])
-            //->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
+            ->andWhere("Chp.TipoGrupo =
+                                                  case 
+                                                      when M.HorasTeoria != 0 then 'T' 
+                                                      when M.HorasPractica != 0 then 'P' 
+                                                      when M.HorasLaboratorio != 0 then 'L' 
+                                                      else 'T'
+                                                  end ")
             ->groupBy('Chp.GestionAcademica,M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio, chp.ProyectadosGeneral')
             ->orderBy('M.SiglaMateria')
             ->asArray()
@@ -272,8 +263,8 @@ class PlanificarCargaHorariaController extends Controller
         $gestion = intval($_POST['gestion']);
 
         $grupos = (new Query)
-            ->select(['Md.GestionAcademica as MGA','Chp.gestionAcademica as CGA',
-                      'M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria','Md.CodigoModalidadCurso',
+            ->select(['Chp.GestionAcademica as MGA','Chp.gestionAcademica as CGA',
+                      'M.CodigoCarrera','M.NumeroPlanEstudios','M.Curso','M.SiglaMateria','M.NombreMateria',//'Md.CodigoModalidadCurso',
                       'isnull(M.HorasTeoria,0) as HorasTeoria','isnull(M.HorasPractica,0) as HorasPractica','isnull(M.HorasLaboratorio,0) as HorasLaboratorio',
                       'Chp.Grupo','Chp.TipoGrupo','Chp.IdPersona',"isnull(P.Paterno,'') + ' ' + isnull(P.Materno,'') + ' ' + isnull(P.Nombres,'') as Nombre",
                       'isnull(Chp.Programados,0) as Programados',
@@ -285,16 +276,17 @@ class PlanificarCargaHorariaController extends Controller
                       end as HorasSemana"])
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
-            ->join('left JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo /*and Md.Grupo = Chp.Grupo*/')
+            //->join('left JOIN','MateriasDocentes Md', 'Md.CodigoCarrera = Chp.CodigoCarrera and Md.NumeroPlanEstudios = Chp.NumeroPlanEstudios and Md.SiglaMateria = Chp.SiglaMateria and Md.CodigoTipoGrupoMateria = Chp.TipoGrupo /*and Md.Grupo = Chp.Grupo*/')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
-            ->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])->andWhere(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
+            //->where(['in','Md.GestionAcademica',[(string)$gestion,'1/'.$gestion]])
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
             ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
             ->andWhere(['Chp.CodigoSede' => $_POST['sede']])
-            ->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
-            ->groupBy('Md.GestionAcademica,chp.GestionAcademica,  
-                               M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,Md.CodigoModalidadCurso,
+            //->andWhere("Md.CodigoModalidadCurso in ('NS','NA')")
+            ->groupBy('  Chp.GestionAcademica,
+                               M.CodigoCarrera,M.NumeroPlanEstudios,M.Curso,M.SiglaMateria,M.NombreMateria,
                                M.HorasTeoria,M.HorasPractica,M.HorasLaboratorio,
                                Chp.Grupo,Chp.TipoGrupo,Chp.IdPersona,P.Paterno,P.Materno,P.Nombres, 
                                Chp.Programados, Chp.Aprobados, Chp.reprobados, Chp.abandonos, Chp.proyectadosgeneral, chp.CodigoEstado,Chp.Observaciones')
@@ -735,7 +727,7 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
         $gestion = intval($_POST['gestion']);
 
         $vigente = (new Query)
-            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona','M.CodigoCarrera as codigo','c.NombreCortoCarrera as carrera',"sum(case Chp.TipoGrupo
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona','M.CodigoCarrera as codigo','c.NombreCortoCarrera as carrera','Chp.siglaMateria as materia','M.nombremateria',"sum(case Chp.TipoGrupo
                                                                      when 'T' THEN m.HorasTeoria *4
                                                                      when 'L' THEN m.HorasLaboratorio *4
                                                                      when 'P' THEN m.HorasPractica *4
@@ -745,7 +737,7 @@ case when ([Chp].[Grupo]) between 'a' and 'z' then  [Chp].[grupo] end
             ->join('INNER JOIN', 'Carreras c','M.CodigoCarrera = c.CodigoCarrera')
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
             ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'V'])
-            ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera')
+            ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera,Chp.SiglaMateria, M.nombremateria')
             ->all(Yii::$app->dbAcademica);
 
         $eliminada = (new Query)
