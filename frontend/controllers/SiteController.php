@@ -95,7 +95,7 @@ class SiteController extends Controller
             throw new \Exception('No se recibieron todos los datos del usuario');
 
 
-        $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one();
+        $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one(Yii::$app->dbAcademica);
 
         if ($usuario == null){
             throw new \Exception('Los datos no coinciden con un usuario registrado');

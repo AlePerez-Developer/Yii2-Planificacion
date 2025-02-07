@@ -57,18 +57,22 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6" id="divCarreras" >
-                                <label for="carreras" class="lblTitulo">Seleccione la carrera</label>
-                                <select id="carreras" name="carreras" class="form-control">
-                                    <option></option>
-                                </select>
+                            <div class="row"">
+                                <div class="col-sm-6">
+                                    <label for="carreras" style="font-size: 12px">Seleccione la carrera</label>
+                                    <select id="carreras" name="carreras" style="width: 95%">
+                                        <option></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-6" id="divPlanes" hidden>
+                                    <label for="planes" style="font-size: 12px">Seleccione la materia</label>
+                                    <select id="planes" name="planes" class="form-control" style="width: 95%">
+                                        <option></option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-sm-4  mt-2" id="divPlanes" hidden>
-                                <label for="planes" class="lblTitulo">Seleccione el plan de estudios</label>
-                                <select id="planes" name="planes" class="form-control">
-                                    <option></option>
-                                </select>
-                            </div>
+
                             <div class="row">
                                 <div class="col-sm-12">
                                     <label for="grupo" class="control-label">Grupo</label>

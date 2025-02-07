@@ -6,7 +6,7 @@ $(document).ready(function(){
         ajax: {
             method: "POST",
             dataType: 'json',
-            delay: 500,
+            delay: 800,
             data: function (params) {
                 return {
                     q: params.term,

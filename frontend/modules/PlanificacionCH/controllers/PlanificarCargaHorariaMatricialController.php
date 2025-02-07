@@ -2,6 +2,7 @@
 
 namespace app\modules\PlanificacionCH\controllers;
 
+use app\modules\PlanificacionCH\models\MateriaMatricial;
 use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
 use app\modules\PlanificacionCH\models\Carrera;
 use app\modules\PlanificacionCH\models\Materia;
@@ -16,7 +17,8 @@ class PlanificarCargaHorariaMatricialController extends Controller
     public function actionIndex()
     {
         Yii::$app->session->set('gestion', date('Y')-1);
-        Yii::$app->session->set('gestion', 2021);
+
+        //Yii::$app->session->set('gestion',2021);
         return $this->render('planificarcargahorariamatriciales');
     }
 
@@ -71,7 +73,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
                                             when 'P' THEN [[HorasPractica]]
                       end as HorasSemana",'C.NombreCortoCarrera'])
             ->from(['vmateriasmatriciales v'])
-            ->join('INNER JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('". (string)($gestion+1)."','" . '1/'.($gestion+1) . "','2/2021')  and 
+            ->join('INNER JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('2025','1/2025')  and 
                                                                               chpP.CodigoCarrera = V.CodigoCarreraCH and 
 																			  chpP.NumeroPlanEstudios = V.NumeroPlanEstudiosCH and
 																			  chpP.SiglaMateria = V.SiglaMateriaCH and
@@ -81,15 +83,15 @@ class PlanificarCargaHorariaMatricialController extends Controller
             ->join('INNER JOIN','Personas P','P.IdPersona = chpP.IdPersona')
             ->join('INNER JOIN','Materias M', 'M.CodigoCarrera = v.CodigoCarreraCH and M.NumeroPlanEstudios = v.NumeroPlanEstudiosCH and 
                                                              M.SiglaMateria = v.SiglaMateriaCH')
-            ->join('INNER JOIN', 'CargaHorariaPropuesta chp',"Chp.GestionAcademica in ('". (string)($gestion+1)."','" . '1/'.($gestion+1) . "','2/2021') and 
+            ->join('INNER JOIN', 'CargaHorariaPropuesta chp',"Chp.GestionAcademica in ('2025','1/2025') and 
                                                                               chp.CodigoCarrera = V.CodigoCarrera and 
 																			  chp.NumeroPlanEstudios = V.NumeroPlanEstudios and
 																			  chp.SiglaMateria = V.SiglaMateria and
 																			  chp.TipoGrupo = v.CodigoTipoGrupoMateria and 
 																			  chp.Grupo = v.Grupo")
             ->join('INNER JOIN','Carreras Ch', 'Ch.CodigoCarrera = v.CodigoCarrera')
-            ->where(['in','v.GestionAcademicaCH',[(string)$gestion,'1/'.$gestion]])
-            ->andWhere("v.CodigoModalidadCursoCH in ('NS','NA')")
+            ->where(['v.GestionAcademicaCH' => '2/2024'])
+            ->andWhere("v.CodigoModalidadCursoCH in ('NS','NA') AND C.CODIGOFACULTAD='TE'")
             ->andWhere(['v.SiglaMateriaCH' => $_POST["sigla"]])
             ->andWhere(['v.CodigoTipoGrupoMateriaCH' => $_POST['tipoGrupo']])
             ->groupBy(' v.GestionAcademica,v.CodigoCarreraCH,v.NumeroPlanEstudiosCH,M.Curso,v.SiglaMateriaCH,v.CodigoModalidadCursoCH,
@@ -215,7 +217,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
             return false;
         }
 
-        $gestion = intval($_POST['gestion']);
+        $gestion = intval($_SESSION['gestion']);
 
         $grupo = CargaHorariaPropuesta::find()
             ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
@@ -274,6 +276,35 @@ class PlanificarCargaHorariaMatricialController extends Controller
                 break;
         }
 
+        $matriz = new MateriaMatricial();
+        ($materiaDocente->CodigoModalidadCurso == 'NS')?$matriz->GestionAcademica = '1/'.($gestion):$matriz->GestionAcademica=(string)($gestion);
+        ($materiaDocente->CodigoModalidadCurso == 'NS')?$matriz->GestionAcademicaCH = '1/'.($gestion):$matriz->GestionAcademicaCH=(string)($gestion);
+
+
+    $matriz->CodigoModalidadCurso = $materiaDocente->CodigoModalidadCurso;
+    $matriz->CodigoCarrera = $_POST["carrera"];
+    $matriz->SiglaMateria = $_POST["sigla"];
+    $matriz->NumeroPlanEstudios = $_POST["plan"];
+    $matriz->Grupo = $_POST["grupo"];
+    $matriz->CodigoTipoGrupoMateria = $_POST["tipoGrupo"];
+    $matriz->CodigoModalidadCursoCH = $materiaDocente->CodigoModalidadCurso;
+    $matriz->CodigoCarreraCH = $_POST["carrera"];
+    $matriz->SiglaMateriaCH = $_POST["sigla"];
+    $matriz->NumeroPlanEstudiosCH = $_POST["plan"];
+    $matriz->GrupoCH = $_POST["grupo"];
+    $matriz->CodigoTipoGrupoMateriaCH = $_POST["tipoGrupo"];
+    $matriz->ProgramacionAgrupada = 0;
+    $matriz->FechaHoraRegistro = '06/02/2025';
+    $matriz->Observaciones = 'Insertado por planificacion cargahoraria';
+
+    //$matriz->save();
+        if (!$matriz->save()) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL'], 'eerores'=>$matriz->errors]);
+        }
+
+
+
+
         $grupo = new CargaHorariaPropuesta();
         ($materiaDocente->CodigoModalidadCurso == 'NS')?$grupo->GestionAcademica = '1/'.($gestion+1):$grupo->GestionAcademica=(string)($gestion+1);
         $grupo->CodigoCarrera = $_POST["carrera"];
@@ -287,6 +318,8 @@ class PlanificarCargaHorariaMatricialController extends Controller
         $grupo->Observaciones = '';
         $grupo->CodigoEstado = 'A';
         $grupo->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+
+
 
         if ($grupo->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
@@ -530,10 +563,10 @@ class PlanificarCargaHorariaMatricialController extends Controller
 
     public function actionMostrar(){
 
-        $gestion = intval($_POST['gestion']);
+        $gestion = intval($_SESSION['gestion']);
 
         $vigente = (new Query)
-            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona','M.CodigoCarrera as codigo','c.NombreCortoCarrera as carrera',"sum(case Chp.TipoGrupo
+            ->select(['ltrim(rtrim(Chp.IdPersona)) as IdPersona','M.CodigoCarrera as codigo','c.NombreCortoCarrera as carrera','Chp.siglaMateria as materia','M.nombremateria',"sum(case Chp.TipoGrupo
                                                                      when 'T' THEN m.HorasTeoria *4
                                                                      when 'L' THEN m.HorasLaboratorio *4
                                                                      when 'P' THEN m.HorasPractica *4
@@ -543,7 +576,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
             ->join('INNER JOIN', 'Carreras c','M.CodigoCarrera = c.CodigoCarrera')
             ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.$gestion+1]])
             ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'V'])
-            ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera')
+            ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera,Chp.SiglaMateria, M.nombremateria')
             ->all(Yii::$app->dbAcademica);
 
         $eliminada = (new Query)
@@ -574,6 +607,36 @@ class PlanificarCargaHorariaMatricialController extends Controller
             ->all(Yii::$app->dbAcademica);
 
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'vigente' =>  $vigente, 'eliminada' =>  $eliminada, 'agregada' =>  $agregada] );
+
+    }
+
+
+    public function actionTotales(){
+
+        $gestion = intval($_SESSION['gestion']);
+        $sigla = $_POST['sigla'];
+        $tipogrupo = $_POST['tipogrupo'];
+
+        $totales = (new Query)
+            ->select(['SUM(c.Programados) as programado',
+                    'SUM(c.Aprobados) as aprobado',
+                    'SUM(c.Reprobados) as reprobado',
+                    'SUM(c.Abandonos) as abandono',
+                    'SUM(c.ProyectadosGeneral) as proyectado'])
+            ->from(['MateriasMatriciales v'])
+            ->join('INNER JOIN', 'CargaHorariaPropuesta c', "c.GestionAcademica = '1/2025' and
+																		  v.NumeroPlanEstudiosCH = c.NumeroPlanEstudios and
+                                                                          v.CodigoCarreraCH = c.CodigoCarrera and 
+																		  v.SiglaMateriaCH = c.SiglaMateria and 
+																		  v.CodigoTipoGrupoMateriaCH = c.TipoGrupo and 
+																		  v.GrupoCH = c.Grupo")
+            ->where(['v.GestionAcademicaCH'=>'2/2024'])
+            ->andWhere(['v.CodigoModalidadCursoCH' => 'NS'])->andWhere(['v.SiglaMateriaCH' => $sigla])
+            ->andWhere(['v.CodigoTipoGrupoMateriaCH' => $tipogrupo])
+            ->one(Yii::$app->dbAcademica);
+
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'totales' =>  $totales] );
 
     }
 

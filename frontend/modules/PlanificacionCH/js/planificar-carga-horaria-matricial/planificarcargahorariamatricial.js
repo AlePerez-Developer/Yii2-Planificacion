@@ -1,3 +1,7 @@
+var proyT = 0
+var proyL = 0
+var proyP = 0
+
 $(document).ready(function () {
     $('#facultades').change(function () {
         $('#divMaterias').attr('hidden',true)
@@ -76,6 +80,11 @@ $(document).ready(function () {
 
         let datos = new FormData();
         datos.append("gestion", $('#gestion').val());
+
+        var otrosdatos = new FormData();
+        otrosdatos.append('sigla',sigla)
+
+
         $.ajax({
             url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/mostrar",
             method: "POST",
@@ -102,29 +111,134 @@ $(document).ready(function () {
             dataGruposMatricial.flag = 1
             dataGruposMatricial.sigla = sigla
 
-            dataGruposMatricial.tipoGrupo = 'T'
-            $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
-                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
-                    .forEach(popover => {
-                        new bootstrap.Popover(popover)
-                    })
-            });
+            otrosdatos.append('tipogrupo','T')
+            $.ajax({
+                url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/totales",
+                method: "POST",
+                data: otrosdatos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                success: function (data) {
+                    if (!(data.respuesta === RTA_CORRECTO)) {
+                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
 
-            dataGruposMatricial.tipoGrupo = 'L'
-            $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
-                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
-                    .forEach(popover => {
-                        new bootstrap.Popover(popover)
-                    })
-            });
+                }
+            }).done(function (data){
+                let totales = JSON.parse(JSON.stringify(data.totales));
+                let programado = (totales.programado !== null)?totales.programado:0
+                let reprobado = (totales.reprobado !== null)?totales.reprobado:0
+                let aprobado = (totales.aprobado !== null)?totales.aprobado:0
+                let abandono = (totales.abandono !== null)?totales.abandono:0
+                let proyectado = (totales.proyectado !== null)?totales.proyectado:0
 
-            dataGruposMatricial.tipoGrupo = 'P'
-            $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
-                document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
-                    .forEach(popover => {
-                        new bootstrap.Popover(popover)
-                    })
-            });
+                proyT = proyectado
+
+                dataGruposMatricial.tipoGrupo = 'T'
+                $("#tablaTeoriaMatricial").DataTable().ajax.reload(function (){
+                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                        .forEach(popover => {
+                            new bootstrap.Popover(popover)
+                        })
+                    $(tableTeoriaMatricial.column(5).header()).text('Prog.(' + programado + ')');
+                    $(tableTeoriaMatricial.column(6).header()).text('Aprob.(' + aprobado + ')');
+                    $(tableTeoriaMatricial.column(7).header()).text('Reprob(' + reprobado + ')');
+                    $(tableTeoriaMatricial.column(8).header()).text('Aband(' + abandono + ')');
+                    $(tableTeoriaMatricial.column(9).header()).text('Proy.(' + proyectado + ')');
+                })
+            })
+
+            otrosdatos.append('tipogrupo','L')
+            $.ajax({
+                url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/totales",
+                method: "POST",
+                data: otrosdatos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data.respuesta === RTA_CORRECTO) {
+
+
+                    } else {
+                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                }
+            }).done(function (data){
+                let totales = JSON.parse(JSON.stringify(data.totales));
+                let programado = (totales.programado !== null)?totales.programado:0
+                let reprobado = (totales.reprobado !== null)?totales.reprobado:0
+                let aprobado = (totales.aprobado !== null)?totales.aprobado:0
+                let abandono = (totales.abandono !== null)?totales.abandono:0
+                let proyectado = (totales.proyectado !== null)?totales.proyectado:0
+
+                proyL = proyectado
+                dataGruposMatricial.tipoGrupo = 'L'
+                $("#tablaLaboratorioMatricial").DataTable().ajax.reload(function (){
+                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                        .forEach(popover => {
+                            new bootstrap.Popover(popover)
+                        })
+                    $(tableLaboratorioMatricial.column(5).header()).text('Prog.(' + programado + ')');
+                    $(tableLaboratorioMatricial.column(6).header()).text('Aprob.(' + aprobado + ')');
+                    $(tableLaboratorioMatricial.column(7).header()).text('Reprob(' + reprobado + ')');
+                    $(tableLaboratorioMatricial.column(8).header()).text('Aband(' + abandono + ')');
+                    $(tableLaboratorioMatricial.column(9).header()).text('Proy.(' + proyectado + ')');
+                });
+            })
+            otrosdatos.append('tipogrupo','P')
+            $.ajax({
+                url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/totales",
+                method: "POST",
+                data: otrosdatos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                success: function (data) {
+                    if (data.respuesta === RTA_CORRECTO) {
+
+
+                    } else {
+                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+
+                }
+            }).done(function (data){
+                let totales = JSON.parse(JSON.stringify(data.totales));
+                let programado = (totales.programado !== null)?totales.programado:0
+                let reprobado = (totales.reprobado !== null)?totales.reprobado:0
+                let aprobado = (totales.aprobado !== null)?totales.aprobado:0
+                let abandono = (totales.abandono !== null)?totales.abandono:0
+                let proyectado = (totales.proyectado !== null)?totales.proyectado:0
+
+                proyP = proyectado
+                dataGruposMatricial.tipoGrupo = 'P'
+                $("#tablaPracticaMatricial").DataTable().ajax.reload(function (){
+                    document.querySelectorAll('table tbody [data-bs-toggle="popover"]')
+                        .forEach(popover => {
+                            new bootstrap.Popover(popover)
+                        })
+                    $(tablePracticaMatricial.column(5).header()).text('Prog.(' + programado + ')');
+                    $(tablePracticaMatricial.column(6).header()).text('Aprob.(' + aprobado + ')');
+                    $(tablePracticaMatricial.column(7).header()).text('Reprob(' + reprobado + ')');
+                    $(tablePracticaMatricial.column(8).header()).text('Aband(' + abandono + ')');
+                    $(tablePracticaMatricial.column(9).header()).text('Proy.(' + proyectado + ')');
+                });
+            })
         })
     }
 
@@ -402,5 +516,18 @@ $(document).ready(function () {
         $('#carreras').val(null).trigger('change')
     }
 
+
+
+    $('#ll').click(function (){
+
+        $('#tprog').text('asdasdasdasdasdasd')
+
+        /*
+        $('#tablaTeoriaMatricial th').eq(5).text(programado);
+        $('#tablaTeoriaMatricial th').eq(6).text(aprobado);
+        $('#tablaTeoriaMatricial th').eq(7).text(reprobado);
+        $('#tablaTeoriaMatricial th').eq(8).text(abandono);
+        $('#tablaTeoriaMatricial th').eq(9).text(proyectado);*/
+    })
 
 })

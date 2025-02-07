@@ -140,6 +140,20 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matri
         width: 100%
     }
 
+    .r{
+        border: none;
+        width: 400px;
+    }
+    .c{
+        font-size: 12px;
+        border: none;
+        width: 300px;
+    }
+
+    .list-group-item {
+        padding: 3px 10px
+    }
+
 
 </style>
 
@@ -211,7 +225,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matri
                                     <th>Accion</th>
                                 </thead>
                             </table>
-                        </div>
+                    </div>
                     <div class="tab-pane fade" id="pills-practica" role="tabpanel" aria-labelledby="pills-contact-tab">
                         <div class="row"><div class="col-10"></div><div class="col-2"><button type="button" grupo = "P" class="form-control btn-xs btn-info btnCrear">Crear Grupo de Practica</button></div></div>
                             <table id="tablaPracticaMatricial" class="table table-bordered  dt-responsive" style="width: 100%" >
@@ -222,18 +236,17 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H. Matri
                                     <th>Grupo</th>
                                     <th>Hrs.Prac</th>
                                     <th>Prog.</th>
-                                    <th>Aprobados</th>
-                                    <th>Reprobados</th>
-                                    <th>Abandonos</th>
+                                    <th>Aprob.</th>
+                                    <th>Reprob.</th>
+                                    <th>Aband.</th>
                                     <th>Proy.</th>
                                     <th>Accion</th>
                                 </thead>
                             </table>
-                        </div>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
-</div>
 
 <?php include_once "modalPlanificar.php"; ?>

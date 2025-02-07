@@ -30,11 +30,6 @@ $(document).ready(function () {
         url: 'index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/listar-grupos',
         dataSrc: 'grupos',
         error: function (xhr, ajaxOptions, thrownError) {
-            console.log(ajaxOptions)
-            console.log('**********************************************************************')
-            console.log(xhr)
-            console.log('**********************************************************************')
-            console.log(thrownError)
             MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
         }
     }
@@ -200,8 +195,7 @@ $(document).ready(function () {
             className: 'dt-small dt-center',
             orderable: false,
             searchable: false,
-            data: 'CGA',
-            width: 30
+            data: 'CGA'
         },
         {
             className: 'dt-small dt-center',
@@ -254,11 +248,38 @@ $(document).ready(function () {
         },
         {
             className: 'dt-small dt-center',
-            data: 'Abandonos'
+            data: 'Abandonos',
         },
         {
             className: 'dt-small dt-center',
-            data: 'CantidadProyeccion'
+            data: 'CantidadProyeccion',
+            render: function (data, type, row) {
+                let eliminados = 0
+                let table
+                let proyectado
+
+                switch(row.TipoGrupo) {
+                    case 'T':
+                        eliminados = $('#tablaTeoriaMatricial tbody tr.eliminado').length
+                        table = $('#tablaTeoriaMatricial').DataTable();
+                        proyectado = proyT
+                        break;
+                    case 'P':
+                        eliminados = $('#tablaPracticaMatricial tbody tr.eliminado').length
+                        table = $('#tablaPracticaMatricial').DataTable();
+                        proyectado = proyP
+                        break;
+                    case 'L':
+                        eliminados = $('#tablaLaboratorioMatricial tbody tr.eliminado').length
+                        table = $('#tablaLaboratorioMatricial').DataTable();
+                        proyectado = proyL
+                        break;
+                    default:
+                    // code block
+                }
+                var table_length = table.data().count();
+                return (proyectado/(table_length-eliminados)).toFixed(2)
+            }
         },
         {
             className: 'dt-small dt-acciones dt-center',
@@ -270,17 +291,17 @@ $(document).ready(function () {
                 let button
                 switch  (row.CodigoEstado){
                     case 'V':
-                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                        button =/*'<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +*/
                             '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'E':
                         button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     case 'A':
-                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'C':
-                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     default: button = ''
                 }
@@ -297,8 +318,10 @@ $(document).ready(function () {
     dataGruposMatricial.flag = 0
 
     dataGruposMatricial.tipoGrupo = 'T'
-    tableTeoriaMatricial = $('#tablaTeoriaMatricial').dataTable({
+    tableTeoriaMatricial = $('#tablaTeoriaMatricial').DataTable({
         layout: layoutGruposMatricial,
+        fixedColumns: true,
+        autoWidth: false,
         fixedHeader: true,
         paging: false,
         scrollCollapse: true,
@@ -310,8 +333,10 @@ $(document).ready(function () {
     })
 
     dataGruposMatricial.tipoGrupo = 'L'
-    tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').dataTable({
+    tableLaboratorioMatricial = $('#tablaLaboratorioMatricial').DataTable({
         layout: layoutGruposMatricial,
+        fixedColumns: true,
+        autoWidth: false,
         fixedHeader: true,
         paging: false,
         scrollCollapse: true,
@@ -323,8 +348,10 @@ $(document).ready(function () {
     })
 
     dataGruposMatricial.tipoGrupo = 'P'
-    tablePracticaMatricial = $('#tablaPracticaMatricial').dataTable({
+    tablePracticaMatricial = $('#tablaPracticaMatricial').DataTable({
         layout: layoutGruposMatricial,
+        fixedColumns: true,
+        autoWidth: false,
         fixedHeader: true,
         paging: false,
         scrollCollapse: true,
@@ -334,6 +361,4 @@ $(document).ready(function () {
         createdRow: createdRowsMatricial,
         initComplete: initCompleteMatricial,
     })
-
-
 })
