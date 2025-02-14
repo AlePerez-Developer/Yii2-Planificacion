@@ -1,11 +1,7 @@
 <style>
-    .docNombreList{
-        font-size: 14px;
-        font-family: bold;
-    }
-    .docNombre{
-        font-size: 14px;
-        font-family: bold;
+    form label{
+        font-size: 13px;
+        font-weight: bold;
     }
     img {
         width: 100px;
@@ -29,11 +25,9 @@
 
                         <form id="formCargaHorariaPropuesta" action="" method="post">
 
-
                             <div class="form-row">
-
                                 <div class="form-group col-sm-2" >
-                                    <img id="docImage" class="form-control" src="img/logo.jpg" alt="Imagen de perfil Docente" style="height: 100%" >
+                                    <img id="docImage" lass="form-control" src="img/logo.jpg" alt="Imagen de perfil Docente" style="height: 100%" >
                                 </div>
 
                                 <div class="form-group col-sm-10">
@@ -48,12 +42,12 @@
 
                                     <div class="form-row">
                                         <div class="form-group col-2"> <label class="form-label">Ci: </label> </div>
-                                        <div class="form-group col-10"><label id="lblCi">5493446 Ch</label></div>
+                                        <div class="form-group col-10"><label id="lblCi"></label></div>
                                     </div>
 
                                     <div class="form-row">
                                         <div class="form-group col-2"> <label class="form-label">Condicion: </label></div>
-                                        <div class="form-group col-10"><label id="lblCondicion">docente contrato</label></div>
+                                        <div class="form-group col-10"><label id="lblCondicion"></label></div>
                                     </div>
                                 </div>
                             </div>
@@ -63,8 +57,6 @@
                                     <input type="text" class="form-control input-sm" style="width:20%" id="grupo" name="grupo">
                                 </div>
                             </div>
-
-
 
                         </form>
                     </div>

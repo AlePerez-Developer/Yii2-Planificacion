@@ -27,6 +27,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         vertical-align: middle; !important;
         background-color: #2d4b73; !important;
         color: white;
+        font-size: 12px; !important;
     }
 
     #tablaMaterias tr td{
@@ -178,6 +179,19 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         padding: 3px 10px
     }
 
+    #dt-search-0 {
+        width: 280px; !important;
+    }
+
+    table{
+        margin: 0 auto;
+        width: 100%;
+        clear: both;
+        border-collapse: collapse;
+        table-layout: fixed; // ***********add this
+    word-wrap:break-word; // ***********and this
+    }
+
 </style>
 <div>
     <div hidden >
@@ -203,7 +217,6 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                     <option></option>
                 </select>
             </div>
-
         </div>
         <div id="rowDos" class="row" hidden>
             <div class="col-sm-4 mt-2" id="divSedes" hidden>
@@ -219,6 +232,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                     <option></option>
                 </select>
             </div>
+
             <div class="col-sm-4  mt-2" id="divCursos" hidden>
                 <label for="cursos" class="lblTitulo">Seleccione el curso</label>
                 <select id="cursos" name="cursos" class="form-control">
@@ -235,22 +249,38 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                     <button id="enviarPlanificacion" class="btn btn-info form-control btn-xs" >Enviar Carrera</button>
                 </div>
             </div>
-            <table id="tablaMaterias" class="table table-bordered  dt-responsive tablaMateriass" style="width: 100%" >
+            <table id="tablaMaterias" class="table table-bordered  dt-responsive" >
                 <thead>
-                <th>#</th>
-                <th>Sigla</th>
-                <th>Materia</th>
-                <th>Hrs.Teo</th>
-                <th>Hrs.Pra</th>
-                <th>Hrs.Lab</th>
-                <th>Prog.</th>
-                <th>Apro.</th>
-                <th>Repro.</th>
-                <th>Abandonos</th>
-                <th>Proy.</th>
+                    <th>#</th>
+                    <th>Sigla</th>
+                    <th>Materia</th>
+
+                    <th>Hrs.T</th>
+                    <th>Hrs.P</th>
+                    <th>Hrs.L</th>
+
+                    <th>Prog.T</th>
+                    <th>Prog.L</th>
+                    <th>Prog.P</th>
+
+                    <th>Apro.T</th>
+                    <th>Apro.L</th>
+                    <th>Apro.P</th>
+
+                    <th>Repro.T</th>
+                    <th>Repro.L</th>
+                    <th>Repro.P</th>
+
+                    <th>Aban.T</th>
+                    <th>Aban.L</th>
+                    <th>Aban.P</th>
+
+                    <th>Proy.</th>
                 </thead>
             </table>
         </div>
+        <button id="jijo">prueba</button>
+
     </div>
 </div>
 

@@ -1,15 +1,14 @@
 <?php
-
 namespace app\modules\PlanificacionCH\controllers;
 
-use app\modules\PlanificacionCH\models\MateriaMatricial;
 use app\modules\PlanificacionCH\models\CargaHorariaPropuesta;
+use app\modules\PlanificacionCH\models\MateriaMatricial;
+use app\modules\PlanificacionCH\models\MateriaDocente;
 use app\modules\PlanificacionCH\models\Carrera;
 use app\modules\PlanificacionCH\models\Materia;
-use app\modules\PlanificacionCH\models\MateriaDocente;
 use common\models\Estado;
-use yii\db\Query;
 use yii\web\Controller;
+use yii\db\Query;
 use Yii;
 
 class PlanificarCargaHorariaMatricialController extends Controller
@@ -18,37 +17,46 @@ class PlanificarCargaHorariaMatricialController extends Controller
     {
         Yii::$app->session->set('gestion', date('Y')-1);
 
-        //Yii::$app->session->set('gestion',2021);
+        Yii::$app->session->set('gestion',2021);
         return $this->render('planificarcargahorariamatriciales');
     }
 
     public function actionListarMateriasSelect(){
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA'], 'materias' => '']);
+        }
+
+        if (!(isset($_POST["facultad"]) && $_POST["facultad"] != "")) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'], 'materias' =>  '']);
         }
 
         $gestion = intval($_SESSION['gestion']);
 
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
 
-        $materias = Carrera::find()->select(['Mm.SiglaMateriaCH AS id','[M].[NombreMateria] COLLATE SQL_Latin1_General_Cp1251_CS_AS AS text','M.Curso'])->alias('C')
+        $materias = Carrera::find()->alias('C')
             ->distinct(true)
+            ->select(['[Mm].[SiglaMateriaCH] AS id','[M].[NombreMateria] COLLATE SQL_Latin1_General_Cp1251_CS_AS AS text','[M].[Curso]'])
             ->join('INNER JOIN','MateriasMatriciales Mm','Mm.CodigoCarreraCH = C.CodigoCarrera')
             ->join('INNER JOIN', 'PlanesEstudios P', 'P.CodigoCarrera = Mm.CodigoCarreraCH ')
             ->join('INNER JOIN', 'Materias M', 'M.CodigoCarrera = Mm.CodigoCarreraCH and M.NumeroPlanEstudios = Mm.NumeroPlanEstudiosCH and M.SiglaMateria = Mm.SiglaMateriaCH')
             ->where(['in','Mm.GestionAcademica',[(string)($gestion),'1/'.$gestion]])
+            ->andWhere(['like', "[M].[NombreMateria] + ' ' + [M].[SiglaMateria]", $search, false])
             ->andWhere(['C.CodigoEstadoCarrera' => Estado::ESTADO_VIGENTE])->andWhere(['P.CodigoEstadoPlanEstudios' => Estado::ESTADO_VIGENTE])
-            ->andWhere(['Mm.CodigoTipoGrupoMateriaCH' => 'T'])->andWhere(['C.CodigoFacultad' => $_POST['facultad']])
-            ->andWhere(['like', 'M.NombreMateria', $search, false])
+            ->andWhere(['C.CodigoFacultad' => $_POST['facultad']])
             ->orderBy('M.Curso,Mm.SiglaMateriaCH')
             ->asArray()->all();
 
         if (!$materias) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'], 'materias' => '']);
         }
 
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'materias' =>  $materias]);
     }
+
+
+
+
 
     public function actionListarGrupos(){
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
@@ -73,7 +81,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
                                             when 'P' THEN [[HorasPractica]]
                       end as HorasSemana",'C.NombreCortoCarrera'])
             ->from(['vmateriasmatriciales v'])
-            ->join('INNER JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('2025','1/2025')  and 
+            ->join('LEFT JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('2025','1/2025')  and 
                                                                               chpP.CodigoCarrera = V.CodigoCarreraCH and 
 																			  chpP.NumeroPlanEstudios = V.NumeroPlanEstudiosCH and
 																			  chpP.SiglaMateria = V.SiglaMateriaCH and
@@ -91,6 +99,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
 																			  chp.Grupo = v.Grupo")
             ->join('INNER JOIN','Carreras Ch', 'Ch.CodigoCarrera = v.CodigoCarrera')
             ->where(['v.GestionAcademicaCH' => '2/2024'])
+            //->where(['v.GestionAcademicaCH' => '1/2021'])
             ->andWhere("v.CodigoModalidadCursoCH in ('NS','NA') AND C.CODIGOFACULTAD='TE'")
             ->andWhere(['v.SiglaMateriaCH' => $_POST["sigla"]])
             ->andWhere(['v.CodigoTipoGrupoMateriaCH' => $_POST['tipoGrupo']])
@@ -339,25 +348,26 @@ class PlanificarCargaHorariaMatricialController extends Controller
             return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
         }
 
-        if (!(isset($_POST["gestion"]) && ($_POST["gestion"] != "") &&
+        if (!(isset($_SESSION["gestion"]) && ($_SESSION["gestion"] != "") &&
             isset($_POST["carrera"]) && isset($_POST["sede"]) && isset($_POST["plan"]) &&
             isset($_POST["grupo"]) && isset($_POST["tipoGrupo"])
         )) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
-        $gestion = intval($_POST['gestion']);
+        $gestion = intval($_SESSION['gestion']);
 
         $row = CargaHorariaPropuesta::find()->alias('chp')
-            ->select('chp.*,P.*')
+            ->select('chp.*,P.*,C.*')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = chp.IdPersona')
+            ->join('INNER JOIN','Carreras C', 'C.CodigoCarrera = chp.CodigoCarrera')
             ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
-            ->andWhere(['CodigoCarrera' => $_POST["carrera"]])
-            ->andWhere(['CodigoSede' => $_POST['sede']])
-            ->andWhere(['NumeroPlanEstudios' => $_POST["plan"]])
-            ->andWhere(['SiglaMateria' => $_POST["sigla"]])
-            ->andWhere(['Grupo' => $_POST["grupo"]])
-            ->andWhere(['TipoGrupo' => $_POST["tipoGrupo"]])
+            ->andWhere(['chp.CodigoCarrera' => $_POST["carrera"]])
+            ->andWhere(['chp.CodigoSede' => $_POST['sede']])
+            ->andWhere(['chp.NumeroPlanEstudios' => $_POST["plan"]])
+            ->andWhere(['chp.SiglaMateria' => $_POST["sigla"]])
+            ->andWhere(['chp.Grupo' => $_POST["grupo"]])
+            ->andWhere(['chp.TipoGrupo' => $_POST["tipoGrupo"]])
             ->asArray()
             ->one();
 
@@ -380,7 +390,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
             return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
         }
 
-        $gestion = intval($_POST['gestion']);
+        $gestion = intval($_SESSION['gestion']);
 
         $row = CargaHorariaPropuesta::find()
             ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
@@ -400,6 +410,8 @@ class PlanificarCargaHorariaMatricialController extends Controller
         $row->IdPersona = trim($_POST['idPersonaN']);
         $row->Grupo = trim($_POST['grupoN']);
         $row->CodigoEstado = "C";
+        $row->CodigoCarrera = trim($_POST['carreraN']);
+        $row->NumeroPlanEstudios = trim($_POST['planN']);
 
         if ($row->update() === false) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);

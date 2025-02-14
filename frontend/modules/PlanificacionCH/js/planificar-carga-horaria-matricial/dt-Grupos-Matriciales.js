@@ -291,7 +291,7 @@ $(document).ready(function () {
                 let button
                 switch  (row.CodigoEstado){
                     case 'V':
-                        button =/*'<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +*/
+                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
                             '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" carrera="' + row.CodigoCarrera + '" plan="' + row.NumeroPlanEstudios + '" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'E':

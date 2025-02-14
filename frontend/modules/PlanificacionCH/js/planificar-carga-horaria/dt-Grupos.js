@@ -54,6 +54,7 @@ $(document).ready(function () {
         let chv = 0
         let che = 0
         let cha = 0
+        let real = 0
 
         let subtotalMateria = 0
         let group = '<ul class="list-group">'
@@ -120,6 +121,10 @@ $(document).ready(function () {
             if (persona.IdPersona === $.trim(data.IdPersona))
                 che = persona.Ch
         });
+        realCH.forEach(function (persona, index) {
+            if (persona.IdPersona === $.trim(data.IdPersona))
+                real = persona.Ch
+        });
         $(row).find('td:eq(2)')
             .attr('data-bs-toggle', 'popover')
             .attr('data-bs-trigger', 'focus')
@@ -137,7 +142,7 @@ $(document).ready(function () {
                 '      </div>' +
                 '      <div class="ml-3 w-100"> ' +
                 '        <h4 class="mb-0 mt-0">' + data.Nombre + '</h4> ' +
-                '        <span>Docente</span> ' +
+                '        <span>Docente</span> <span>Carga Horaria Real</span> ' + real +
                 '        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats"> ' +
                 '          <div class="d-flex flex-column"> ' +
                 '            <span class="rating">Ch. vigente</span> ' +

@@ -1,107 +1,104 @@
+let CodigoGlobal = false
+
 var vigente
 var eliminada
 var agregada
+var realCH
 
 $(document).ready(function () {
+    let divCarreras = $('#divCarreras')
+    let rowDos = $('#rowDos')
+    let divSedes = $('#divSedes')
+    let divPlanes = $('#divPlanes')
+    let divCursos = $('#divCursos')
+    let divTabla = $('#divTabla')
+    
     $('#facultades').change(function () {
-        $('#divCarreras').attr('hidden',true)
-        $('#rowDos').attr('hidden',true)
-        $('#divSedes').attr('hidden',true)
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
+        divCarreras.attr('hidden',true)
+        rowDos.attr('hidden',true)
+        divSedes.attr('hidden',true)
+        divPlanes.attr('hidden',true)
+        divCursos.attr('hidden',true)
+        divTabla.attr('hidden',true)
 
-        if ($(this).val() != '') {
+        if ($(this).val() !== '') {
             $('#carreras').val(null).trigger('change')
-            $('#divCarreras').attr('hidden',false)
+            divCarreras.attr('hidden',false)
         }
     })
 
     $('#carreras').change(function () {
-        $('#rowDos').attr('hidden',true)
-        $('#divSedes').attr('hidden',true)
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
+        rowDos.attr('hidden',true)
+        divSedes.attr('hidden',true)
+        divPlanes.attr('hidden',true)
+        divCursos.attr('hidden',true)
+        divTabla.attr('hidden',true)
 
-        if ($(this).val() != ''){
+        if ($(this).val() !== ''){
             $('#sedes').val(null).trigger('change')
-            $('#divSedes').attr('hidden',false)
-            $('#rowDos').attr('hidden',false)
+            divSedes.attr('hidden',false)
+            rowDos.attr('hidden',false)
         }
     })
 
     $("#sedes").change(function () {
-        $('#divPlanes').attr('hidden',true)
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
+        divPlanes.attr('hidden',true)
+        divCursos.attr('hidden',true)
+        divTabla.attr('hidden',true)
 
-        if ($(this).val() != ''){
+        if ($(this).val() !== ''){
             $('#planes').val(null).trigger('change')
-            $('#divPlanes').attr('hidden',false)
+            divPlanes.attr('hidden',false)
         }
     });
 
     $("#planes").change(function () {
-        $('#divCursos').attr('hidden',true)
-        $('#divTabla').attr('hidden',true)
-        $('#divConfiguracion').attr('hidden',true)
+        divCursos.attr('hidden',true)
+        divTabla.attr('hidden',true)
 
-        if ($(this).val() != ''){
+        if ($(this).val() !== ''){
             $('#cursos').val(null).trigger('change')
-            $('#divCursos').attr('hidden',false)
+            divCursos.attr('hidden',false)
         }
     });
 
     $('#cursos').change(function () {
-        $('#divTabla').attr('hidden',true)
+        divTabla.attr('hidden',true)
 
-        if ($(this).val() != ''){
-            $('#divTabla').attr('hidden',false)
+        if ($(this).val() !== ''){
+            divTabla.attr('hidden',false)
 
+            let carrera  = $('#carreras').select2('data')
+            let curso  = $('#cursos').select2('data')
+            let plan  = $('#planes').select2('data')
+            let sede  = $('#sedes').select2('data')
 
-            dataMaterias.gestion = $('#gestion').val()
-            dataMaterias.carrera = $("#carreras").val()
-            dataMaterias.curso = $("#cursos").val()
-            dataMaterias.plan = $("#planes").val()
-            dataMaterias.sede = $("#sedes").val()
+            dataMaterias.carrera = carrera[0].id
+            dataMaterias.curso = curso[0].id
+            dataMaterias.plan = plan[0].id
+            dataMaterias.sede = sede[0].id
             dataMaterias.flag = 1
-
-            let datos = new FormData();
-            datos.append("gestion", $('#gestion').val());
-            datos.append("carrera", $('#carreras').val());
-            datos.append("sede", $('#sedes').val());
-            datos.append("plan", $('#planes').val());
-
-
 
             $.ajax({
                 url: "index.php?r=PlanificacionCH/planificar-carga-horaria/obtener-estado-envio",
                 method: "POST",
-                data: datos,
+                data: dataMaterias,
                 cache: false,
-                contentType: false,
-                processData: false,
                 dataType: "json",
                 success: function (data) {
-                    if (data.respuesta === RTA_CORRECTO) {
-                        $('#envio').val(data.estado)
-                        if (data.estado == '1'){
+                    if (data['respuesta'] === RTA_CORRECTO) {
+                        if (data['estado'] === '1'){
                             $('#enviarPlanificacion').hide()
                         }
                     }
                     else {
-                        MostrarMensaje('error',GenerarMensajeError(data.respuesta))
+                        MostrarMensaje('error',GenerarMensajeError(data['respuesta']))
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
-                    MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                    MostrarMensaje('error',GenerarMensajeError( thrownError + '(' + ajaxOptions + ') ' + ' > ' + xhr.responseText))
                 }
             });
-
             tableMaterias.ajax.reload()
         }
     })
@@ -240,7 +237,8 @@ $(document).ready(function () {
             tdi.first().removeClass('fa-plus-square');
             tdi.first().addClass('fa-minus-square');
             row.child(format(row.data())).show();
-
+            dataGrupos.curso = row.data().Curso
+            console.log(dataGrupos.curso)
             llenarTablas(row.data().SiglaMateria)
         }
     })
@@ -262,6 +260,7 @@ $(document).ready(function () {
                     vigente = data.vigente
                     agregada = data.agregada
                     eliminada = data.eliminada
+                    realCH = data.real
                 } else {
                     MostrarMensaje('error',GenerarMensajeError(data.respuesta))
                     DetenerSpiner(objectBtn)
@@ -274,7 +273,7 @@ $(document).ready(function () {
         }).done(function (){
             dataGrupos.gestion = $("#gestion").val()
             dataGrupos.carrera = $("#carreras").val()
-            dataGrupos.curso = $("#cursos").val()
+            //dataGrupos.curso = $("#cursos").val()
             dataGrupos.plan = $("#planes").val()
             dataGrupos.sede = $("#sedes").val()
             dataGrupos.sigla = sigla
@@ -584,6 +583,20 @@ $(document).ready(function () {
         $('#formCargaHorariaPropuesta').trigger("reset");
         $('#docentes').val(null).trigger('change')
     }
+
+    $('#jijo').click(function (){
+        let fac = $('#facultades')
+         console.log(fac.val())
+        let rta = fac.find(':selected').attr('value')
+        console.log(rta)
+        let rta2 =fac.select2('data')
+        console.log(rta2[0].id)
+        if (rta2[0].id === ''){
+            console.log('vacio')
+        }
+        $('#modalPlanificar').modal('show')
+
+    })
 });
 
 

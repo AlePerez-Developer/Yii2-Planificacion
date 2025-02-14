@@ -389,19 +389,26 @@ $(document).ready(function () {
 
     $(document).on('click', 'tbody .btnEditar', function() {
         let objectBtn = $(this);
-        let grupo = objectBtn.attr("grupo");
+        let carrera = objectBtn.attr("carrera");
+        let plan = objectBtn.attr("plan");
         let tipoGrupo = objectBtn.attr("tipogrupo");
+        let grupo = objectBtn.attr("grupo");
         let estado = objectBtn.attr("estado");
-        let datos = new FormData();
-        datos.append("gestion", dataGruposMatricial.gestion);
-        datos.append("carrera", dataGruposMatricial.carrera);
-        datos.append("sede", dataGruposMatricial.sede);
-        datos.append("plan", dataGruposMatricial.plan);
-        datos.append("sigla", dataGruposMatricial.sigla);
-        datos.append("grupo", grupo);
-        datos.append("tipoGrupo", tipoGrupo);
+
+        dataGruposMatricial.carrera = carrera
+        dataGruposMatricial.sede = 'SU'
+        dataGruposMatricial.plan = plan
+        dataGruposMatricial.sigla  = $('#materias').val()
         dataGruposMatricial.grupo = grupo
         dataGruposMatricial.tipoGrupo = tipoGrupo
+
+        let datos = new FormData();
+        datos.append("carrera", carrera);
+        datos.append("sede", 'SU');
+        datos.append("plan", plan);
+        datos.append("sigla",  $('#materias').val());
+        datos.append("grupo", grupo);
+        datos.append("tipoGrupo", tipoGrupo);
         IniciarSpiner(objectBtn)
         $.ajax({
             url: "index.php?r=PlanificacionCH/planificar-carga-horaria-matricial/buscar-grupo",
@@ -419,6 +426,13 @@ $(document).ready(function () {
                         data: { id: $.trim(grupo.IdPersona), text: $.trim(grupo.Paterno).toUpperCase() + ' ' + $.trim(grupo.Materno).toUpperCase() + ' ' + $.trim(grupo.Nombres).toUpperCase(), condicion: 'Docente' }
                     });
 
+                    $("#carreras").select2("trigger", "select", {
+                        data: { id: grupo.CodigoCarrera, text: grupo.NombreCarrera }
+                    });
+
+                    $("#planes").select2("trigger", "select", {
+                        data: { id: grupo.NumeroPlanEstudios, text: grupo.NumeroPlanEstudios }
+                    });
 
                     $("#grupo").val(grupo.Grupo);
                     $('#grupo').attr('p',$.trim(grupo.IdPersona))
@@ -446,6 +460,8 @@ $(document).ready(function () {
         datos.append("sigla", dataGruposMatricial.sigla);
         datos.append("grupo", dataGruposMatricial.grupo);
         datos.append("tipoGrupo", dataGruposMatricial.tipoGrupo);
+        datos.append("carreraN", $('#carreras').val());
+        datos.append("planN", $('#planes').val());
         datos.append("grupoN", $('#grupo').val());
         datos.append("idPersonaN", $('#docentes').val());
         $.ajax({

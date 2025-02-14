@@ -1,7 +1,7 @@
 let dataMaterias = {};
+let tableMaterias
 $(document).ready(function () {
     dataMaterias.flag = 0
-    dataMaterias.gestion = ''
     dataMaterias.carrera = ''
     dataMaterias.sede = ''
     dataMaterias.curso = ''
@@ -9,12 +9,16 @@ $(document).ready(function () {
 
     tableMaterias = $("#tablaMaterias").DataTable({
         layout: {
-            topStart: null,
-            topEnd: null ,
-            bottomStart: null,
-            bottomEnd: null
+            topStart: {
+                search: {
+                    placeholder: 'Buscar registros..',
+                }
+            },
+            topEnd:'pageLength',
+            bottomStart: 'info',
+            bottomEnd: 'paging'
         },
-        pageLength : 50,
+        pageLength : 30,
         ajax: {
             method: "POST",
             data: function ( d ) {
@@ -25,7 +29,7 @@ $(document).ready(function () {
             url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-materias',
             dataSrc: '',
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+                MostrarMensaje('error',GenerarMensajeError( thrownError + '(' + ajaxOptions + ') ' + ' > ' + xhr.responseText))
             }
         },
         columns: [
@@ -35,14 +39,15 @@ $(document).ready(function () {
                 searchable: false,
                 data: null,
                 defaultContent: '',
-                "render": function () {
+                render: function () {
                     return '<i class="fa fa-plus-square" aria-hidden="true"></i>';
                 },
-                width: 30,
+                width: 50,
             },
             {
                 className: 'dt-small',
-                data: 'SiglaMateria'
+                data: 'SiglaMateria',
+                width: 120
             },
             {
                 className: 'dt-small',
@@ -50,35 +55,95 @@ $(document).ready(function () {
             },
             {
                 className: 'dt-small dt-center',
-                data: 'HorasTeoria'
+                data: 'HorasTeoria',
+                width: 80
             },
             {
                 className: 'dt-small dt-center',
-                data: 'HorasPractica'
+                data: 'HorasPractica',
+                width: 80
             },
             {
                 className: 'dt-small dt-center',
-                data: 'HorasLaboratorio'
+                data: 'HorasLaboratorio',
+                width: 80
+            },
+
+            {
+                className: 'dt-small dt-center',
+                data: 'ProgT',
+                width: 80
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Programados'
+                data: 'ProgL',
+                width: 90,
+                visible: false
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Aprobados'
+                data: 'ProgP',
+                width: 90,
+                visible: false
+            },
+
+            {
+                className: 'dt-small dt-center',
+                data: 'AproT',
+                width: 90
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Reprobados'
+                data: 'AproL',
+                width: 90,
+                visible: false
             },
             {
                 className: 'dt-small dt-center',
-                data: 'Abandonos'
+                data: 'AproP',
+                width: 90,
+                visible: false
+            },
+
+            {
+                className: 'dt-small dt-center',
+                data: 'ReproT',
+                width: 90
             },
             {
                 className: 'dt-small dt-center',
-                data: 'CantidadProyeccion'
+                data: 'ReproL',
+                width: 90,
+                visible: false
+            },{
+                className: 'dt-small dt-center',
+                data: 'ReproP',
+                width: 90,
+                visible: false
+            },
+
+            {
+                className: 'dt-small dt-center',
+                data: 'AbanT',
+                width: 90
+            },
+            {
+                className: 'dt-small dt-center',
+                data: 'AbanL',
+                width: 90,
+                visible: false
+            },
+            {
+                className: 'dt-small dt-center',
+                data: 'AbanP',
+                width: 90,
+                visible: false
+            },
+
+            {
+                className: 'dt-small dt-center',
+                data: 'CantidadProyeccion',
+                width: 90
             },
         ],
     });
