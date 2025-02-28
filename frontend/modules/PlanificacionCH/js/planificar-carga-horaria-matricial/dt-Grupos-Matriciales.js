@@ -34,7 +34,7 @@ $(document).ready(function () {
         }
     }
 
-    initCompleteMatricial = function initComplete(settings, json){
+    /*initCompleteMatricial = function initComplete(settings, json){
         $(this).DataTable().on('order.dt search.dt', function () {
             var i = 1;
             $(this).DataTable()
@@ -48,9 +48,9 @@ $(document).ready(function () {
             .forEach(popover => {
                 new bootstrap.Popover(popover)
             })
-    }
+    }*/
 
-    createdRowsMatricial = function createdRow(row, data, rowIndex) {
+    /*createdRowsMatricial = function createdRow(row, data, rowIndex) {
         let chv = 0
         let che = 0
         let cha = 0
@@ -188,7 +188,7 @@ $(document).ready(function () {
                 $(row).removeClass('eliminado');
                 break
         }
-    }
+    }*/
 
     columnsGruposMatricial = [
         {

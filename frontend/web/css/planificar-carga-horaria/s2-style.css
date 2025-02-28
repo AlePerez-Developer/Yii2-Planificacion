@@ -1,0 +1,9 @@
+.select2-results__option{
+    font-size: 12px;
+    font-weight: bold;
+}
+.select2-selection{
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #1C005A; !important;
+}

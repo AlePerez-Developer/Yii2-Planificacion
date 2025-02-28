@@ -2,6 +2,8 @@ const RTA_CORRECTO = "ok"
 const ESTADO_VIGENTE = 'V'
 const ESTADO_CADUCO = 'C'
 const ESTADO_ELIMINADO = 'E'
+const ESTADO_ENVIADA = '1'
+const ESTADO_NO_ENVIADA = '0'
 
 $.extend($.fn.dataTable.defaults, {
     layout: {

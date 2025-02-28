@@ -1,0 +1,47 @@
+#tablaMaterias td.details-control {
+    text-align:center;
+    color:forestgreen; !important;
+    cursor: pointer;
+}
+
+#tablaMaterias tr.shown td.details-control {
+    text-align:center;
+    color:red;
+}
+
+#tablaMaterias thead th{
+    text-align: center;
+    vertical-align: middle;
+    background-color: #2d4b73;
+    color: white;
+    font-size: 12px;
+}
+
+#tablaMaterias {
+    margin: 0 auto;
+    width: 100%;
+    clear: both;
+    display: table;
+    table-layout: fixed;
+    word-wrap:break-word;
+}
+
+#tablaMaterias tr td{
+    background-color:  #EAF3FA;
+}
+
+#tablaMaterias .divGrupos {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 440px;
+    width: 100%;
+    padding: 0 0.7em;
+}
+
+#tablaMaterias .btn-crear {
+    padding: 0 1em;
+}
+
+#dt-search-0 {
+    width: 280px;
+}

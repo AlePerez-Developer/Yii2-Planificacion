@@ -1,0 +1,36 @@
+#tablaTeoria thead th{
+    text-align: center; !important;
+    vertical-align: middle; !important;
+    background-color:  #99ab69; !important;
+    color: white;
+}
+
+#tablaLaboratorio thead th{
+    text-align: center; !important;
+    vertical-align: middle; !important;
+    background-color:  #99ab69; !important;
+    color: white;
+}
+
+#tablaPractica thead th{
+    text-align: center; !important;
+    vertical-align: middle; !important;
+    background-color:  #99ab69; !important;
+    color: white;
+}
+
+table tbody tr.vigente td {
+    background-color: whitesmoke !important;
+}
+
+table tbody tr.editado td {
+    background-color: #FFEAAF !important;
+}
+
+table tbody tr.eliminado td {
+    background-color: #FFB9B9 !important;
+}
+
+table tbody tr.agregado td {
+    background-color: #CFE4C2 !important;
+}

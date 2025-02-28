@@ -18,7 +18,7 @@ $(document).ready(function () {
             bottomStart: 'info',
             bottomEnd: 'paging'
         },
-        pageLength : 30,
+        pageLength : 50,
         ajax: {
             method: "POST",
             data: function ( d ) {

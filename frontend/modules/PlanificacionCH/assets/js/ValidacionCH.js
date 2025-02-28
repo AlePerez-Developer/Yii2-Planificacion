@@ -29,13 +29,12 @@ $(document).ready(function() {
     $.validator.addMethod("DiferenteQue",
         function (value, element, param) {
             return value !== param;
-        });
+    });
 
     $.validator.addMethod("GrupoUnico",
         function(value, element, param) {
             let result = false;
             let datos = new FormData()
-            datos.append("gestion", dataGrupos.gestion)
             datos.append("carrera", dataGrupos.carrera)
             datos.append("sede", dataGrupos.sede)
             datos.append("plan", dataGrupos.plan)

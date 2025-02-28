@@ -6,88 +6,32 @@ use app\modules\PlanificacionCH\assets\PlanificacionChjs;
 PlanificacionCHAsset::register($this);
 PlanificacionChjs::register($this);
 
+$this->registerCssFile('@web/css/planificar-carga-horaria/view.css');
+$this->registerCssFile('@web/css/planificar-carga-horaria/s2-style.css');
+$this->registerCssFile('@web/css/planificar-carga-horaria/dt-materias.css');
+$this->registerCssFile('@web/css/planificar-carga-horaria/dt-grupos.css');
+
 $this->title = 'Administración Planificación C.H.';
 $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
 ?>
 
 <style>
-
-    td.details-control {
-        text-align:center;
-        color:forestgreen; !important;
-        cursor: pointer;
-    }
-    tr.shown td.details-control {
-        text-align:center;
-        color:red;
-    }
-
-    #tablaMaterias thead th{
-        text-align: center; !important;
-        vertical-align: middle; !important;
-        background-color: #2d4b73; !important;
-        color: white;
-        font-size: 12px; !important;
-    }
-
-    #tablaMaterias tr td{
-        background-color:  #EAF3FA; !important;
-    }
-
-    #tablaTeoria thead th{
-        text-align: center; !important;
-        vertical-align: middle; !important;
-        background-color:  #99ab69; !important;
-        color: white;
-    }
-
-    #tablaLaboratorio thead th{
-        text-align: center; !important;
-        vertical-align: middle; !important;
-        background-color:  #99ab69; !important;
-        color: white;
-    }
-
-    #tablaPractica thead th{
-        text-align: center; !important;
-        vertical-align: middle; !important;
-        background-color:  #99ab69; !important;
-        color: white;
-    }
-
-    table tbody tr.vigente td {
-        background-color: whitesmoke !important;
-    }
-
-    table tbody tr.editado td {
-        background-color: #FFEAAF !important;
-    }
-
-    table tbody tr.eliminado td {
-        background-color: #FFB9B9 !important;
-    }
-
-    table tbody tr.agregado td {
-        background-color: #CFE4C2 !important;
-    }
-
-    .flex-container {
-        display: flex;
-    }
-    .flex-child {
-        flex: 1;
-        border: 2px solid yellow;
-        width: 20px;
-        height: 20px;
-    }
-    .flex-child:first-child {
-        margin-right: 20px;
-    }
-
-
-
     .popover{
         max-width: 100%; /* Max Width of the popover (depending on the container!) */
+    }
+
+    .btnClose{
+        cursor: pointer;
+    }
+
+    .popover span {
+        font-size: 12px;
+        color: black;
+    }
+
+    .image span {
+        color: black;
+        font-size: 11px;
     }
 
     .card2 {
@@ -102,94 +46,32 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
         color: #000 !important
     }
 
-    .articles {
-        font-size: 10px;
-        color: #a1aab9
-    }
-
-    .number1 {
+    .chValue {
         font-weight: 500
     }
 
-    .followers {
+    .chTitle {
         font-size: 10px;
         color: #a1aab9
-    }
-
-    .number2 {
-        font-weight: 500
-    }
-
-    .rating {
-        font-size: 10px;
-        color: #a1aab9
-    }
-
-    .number3 {
-        font-weight: 500
-    }
-
-    .divGrupos {
-        overflow-y: auto;
-        overflow-x: hidden;
-        height: 360px;
-        width: 100%
-    }
-
-
-    #rowUno{
-        background-color: #f8bb86;
-        height: 90px;
-    }
-
-    #rowDos{
-        background-color: peachpuff;
-        height: 90px;
-    }
-
-    .select2-results__option{
-        font-size: 12px;
-        font-weight: bold;
-    }
-    .select2-selection{
-        font-size: 12px;
-        font-weight: bold;
-        background-color: #1C005A; !important;
-    }
-
-    .lblTitulo {
-        font-size: 12px;
     }
 
     .list-group{
         font-size: 12px;
     }
 
-    .r{
-        border: none;
-        width: 400px;
+    .list-group-item {
+        padding: 3px 10px
     }
+
     .c{
         font-size: 12px;
         border: none;
         width: 300px;
     }
 
-    .list-group-item {
-        padding: 3px 10px
-    }
-
-    #dt-search-0 {
-        width: 280px; !important;
-    }
-
-    table{
-        margin: 0 auto;
-        width: 100%;
-        clear: both;
-        border-collapse: collapse;
-        table-layout: fixed; // ***********add this
-    word-wrap:break-word; // ***********and this
+    .badge {
+        color: whitesmoke !important;
+        font-size: 11px !important;
     }
 
 </style>
@@ -279,8 +161,7 @@ $this->params['breadcrumbs'] = [['label' => ' / Admin. Planificación C.H.']];
                 </thead>
             </table>
         </div>
-        <button id="jijo">prueba</button>
-
+        <button id="jijo" data-columns="3" data-index-number="12314" data-parent="cars">prueba</button>
     </div>
 </div>
 

@@ -11,7 +11,6 @@ let columnsGrupos
 let createdRows
 let initComplete
 
-var chDocente
 $(document).ready(function () {
     layoutGrupos = {
         topStart: null,
@@ -30,16 +29,16 @@ $(document).ready(function () {
         url: 'index.php?r=PlanificacionCH/planificar-carga-horaria/listar-grupos',
         dataSrc: 'grupos',
         error: function (xhr, ajaxOptions, thrownError) {
-            MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+            MostrarMensaje('error',GenerarMensajeError( thrownError + '(' + ajaxOptions + ') ' + ' > ' + xhr.responseText))
         }
     }
 
-    initComplete = function initComplete(settings, json){
+    initComplete = function initComplete(){
         $(this).DataTable().on('order.dt search.dt', function () {
-            var i = 1;
+            let i = 1;
             $(this).DataTable()
                 .cells(null, 0, { search: 'applied', order: 'applied' })
-                .every(function (cell) {
+                .every(function () {
                     this.data(i++);
                 });
         }).draw();
@@ -50,128 +49,53 @@ $(document).ready(function () {
             })
     }
 
-    createdRows = function createdRow(row, data, rowIndex) {
-        let chv = 0
-        let che = 0
-        let cha = 0
-        let real = 0
+    createdRows = function createdRow(row, data) {
+        let edad = (new Date()).getFullYear() - (new Date(data['FechaNacimiento'])).getFullYear();
 
-        let subtotalMateria = 0
-        let group = '<ul class="list-group">'
-
-        let grupocarreras = ''
-        let grupomaterias = ''
-
-        let carrera = ''
-        let flag = false
-        vigente.forEach(function (persona, index) {
-            flag = true
-            if (persona.IdPersona === $.trim(data.IdPersona))
-            {
-                if (carrera === '') {
-                    carrera = persona.carrera
-                    subtotalMateria = subtotalMateria + parseInt(persona.Ch)
-                    grupomaterias = '<ul class="list-group">'
-                    grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
-                        '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                        '        </li>'
-                } else {
-                    if (carrera !== persona.carrera ){
-                        grupomaterias += '</ul>'
-                        grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
-                                         '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
-                            grupomaterias +
-                            '</li>'
-                        grupomaterias = '<ul class="list-group">'
-                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
-                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                            '        </li>'
-                        subtotalMateria =  parseInt(persona.Ch)
-                    } else {
-                        subtotalMateria = subtotalMateria + parseInt(persona.Ch)
-                        grupomaterias += '<li class="list-group-item d-flex justify-content-between align-items-center c">'+ persona.materia + ' - ' + persona.nombremateria +
-                            '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                            '        </li>'
-
-                    }
-                }
-
-                chv = chv + parseInt(persona.Ch)
-                /*
-                group += '<li class="list-group-item d-flex justify-content-between align-items-center">'+ persona.carrera +
-                    '        <span class="badge text-bg-primary rounded-pill">'+persona.Ch+'</span>' +
-                    '        </li>'*/
-            }
-        });
-        if (flag){
-            grupomaterias += '</ul>'
-            grupocarreras += '<li class="list-group-item   justify-content-between align-items-center">'+ carrera +
-                '<span class="badge badge-primary badge-pill">'+subtotalMateria+'</span>'+
-                grupomaterias +
-                '</li></ul>'
-        }
-
-        group += grupocarreras + '</ul>'
-
-        agregada.forEach(function (persona, index) {
-            if (persona.IdPersona === $.trim(data.IdPersona))
-                cha = persona.Ch
-        });
-        eliminada.forEach(function (persona, index) {
-            if (persona.IdPersona === $.trim(data.IdPersona))
-                che = persona.Ch
-        });
-        realCH.forEach(function (persona, index) {
-            if (persona.IdPersona === $.trim(data.IdPersona))
-                real = persona.Ch
-        });
         $(row).find('td:eq(2)')
             .attr('data-bs-toggle', 'popover')
             .attr('data-bs-trigger', 'focus')
             .attr('data-bs-placement', 'top')
             .attr('data-bs-html', true)
-            //.attr('data-bs-container', 'body')
-            .attr('data-bs-title', data.NombreMateria + '<a  class="close" data-dismiss="alert">&times;</a>')
+            .attr('data-bs-title', data["NombreMateria"] + '<a  class="close btnClose" data-dismiss="alert">&times;</a>')
             .attr('data-html', true)
             .attr('data-bs-content', '' +
                 '<div class="container mt-1 d-flex justify-content-center"> ' +
                 '  <div class="card card2 p-3"> ' +
-                '    <div class="d-flex align-items-center"> ' +
+                '    <div class="d-flex align-items-center aver"> ' +
                 '      <div class="image"> ' +
-                '        <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(data.IdPersona) + '.jpg" class="rounded" width="155"> ' +
+                '        <img src="http://201.131.45.4/declaracionjurada/archivos/fotografias/F_A_' + $.trim(data["IdPersona"]) + '.jpg" class="rounded" width="155" alt="Persona Image"> ' +
+                '        <span>Edad: </span><span>'+edad+'</span></br>' +
+                '        <span>Antiguedad: </span><span id="chAntiguedad"></span>' +
                 '      </div>' +
                 '      <div class="ml-3 w-100"> ' +
-                '        <h4 class="mb-0 mt-0">' + data.Nombre + '</h4> ' +
-                '        <span>Docente</span> <span>Carga Horaria Real</span> ' + real +
+                '        <h5 class="mb-0 mt-0">' + data["Nombre"] + '</h5> ' +
+                '        <span>Condicion Laboral: </span><span id="docCondicion" class="docCondicion"></span> </br> ' +
+                '        <span>Carga Horario Real: </span><span id="chReal"></span> '  +
                 '        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats"> ' +
                 '          <div class="d-flex flex-column"> ' +
-                '            <span class="rating">Ch. vigente</span> ' +
-                '            <span class="number3">' + chv + '</span> ' +
+                '            <span class="chTitle">Ch. vigente</span> ' +
+                '            <span class="chValue" id="chVigente">0</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
-                '            <span class="followers">Ch. Eliminada</span> ' +
-                '            <span class="number2">' + che + '</span> ' +
+                '            <span class="chTitle">Ch. Eliminada</span> ' +
+                '            <span class="chValue" id="chEliminada">0</span> ' +
                 '          </div>' +
                 '          <div class="d-flex flex-column"> ' +
-                '            <span class="rating">Ch. Agregada</span> ' +
-                '            <span class="number3">' + cha + '</span> ' +
+                '            <span class="chTitle">Ch. Agregada</span> ' +
+                '            <span class="chValue" id="chAgregada">0</span> ' +
                 '          </div>' +
-                '        </div>' +
-                '        <div class="button mt-2 d-flex flex-row align-items-center"> ' +
-                '          <button class="btn btn-sm btn-outline-primary w-100">Chat</button> ' +
-                '          <button class="btn btn-sm btn-primary w-100 ml-2">Follow</button> ' +
                 '        </div>' +
                 '      </div>' +
                 '    </div>' +
 
-                group+
-
+                '    <div id="chDetallada"></div>'+
 
                 '  </div>' +
                 '</div>')
             .attr('tabindex', 0)
 
-        switch (data.CodigoEstado) {
+        switch (data["CodigoEstado"]) {
             case 'E':
                 $(row).addClass('eliminado');
                 $(row).removeClass('agregado');
@@ -211,25 +135,24 @@ $(document).ready(function () {
             className: 'dt-small dt-center',
             data: 'IdPersona',
             render: function (data, type, row) {
-                if (row.CodigoEstado == 'C') {
-                    let texto = row.Observaciones.split(',')
+                if (row["CodigoEstado"] === 'C') {
+                    let texto = row["Observaciones"].split(',')
                     return texto[1] + ' -> ' + data
                 } else {
                     return data
                 }
-
             }
         },
         {
             className: 'dt-small',
-            data: 'Nombre'
+            data: 'Nombre',
         },
         {
             className: 'dt-small dt-center',
             data: 'Grupo',
             render: function (data, type, row) {
-                if (row.CodigoEstado == 'C') {
-                    let texto = row.Observaciones.split(',')
+                if (row["CodigoEstado"] === 'C') {
+                    let texto = row["Observaciones"].split(',')
                     return texto[0] + ' -> ' + data
                 } else {
                     return data
@@ -261,50 +184,56 @@ $(document).ready(function () {
             className: 'dt-small dt-center',
             data: 'CantidadProyeccion',
             render: function (data, type, row) {
-                let eliminados = 0
-                let table
-
-                switch(row.TipoGrupo) {
-                    case 'T':
-                        eliminados = $('#tablaTeoria tbody tr.eliminado').length
-                        table = $('#tablaTeoria').DataTable();
-                        break;
-                    case 'P':
-                        eliminados = $('#tablaPractica tbody tr.eliminado').length
-                        table = $('#tablaPractica').DataTable();
-                        break;
-                    case 'L':
-                        eliminados = $('#tablaLaboratorio tbody tr.eliminado').length
-                        table = $('#tablaLaboratorio').DataTable();
-                        break;
-                    default:
-                    // code block
+                let rta
+                console.log('inicio------------------------------------------------------------')
+                console.log(row['Grupo'] + ' ' + row['TipoGrupo'] + ' ' + type)
+                if (type === 'display') {
+                    console.log('display:_  ' + type)
+                    /*let eliminados = 0
+                    let table
+                    switch(row["TipoGrupo"]) {
+                        case 'T':
+                            //eliminados = $('#tablaPractica tbody tr.eliminado').length
+                            //table = $('#tablaPractica').DataTable();
+                            break;
+                        case 'P':
+                            //eliminados = $('#tablaPractica tbody tr.eliminado').length
+                            //table = $('#tablaPractica').DataTable();
+                            break;
+                        case 'L':
+                            eliminados = $('#tablaLaboratorio tbody tr.eliminado').length
+                            table = $('#tablaLaboratorio').DataTable();
+                            break;
+                        default:
+                    }*/
+                    //let table_length = table.data().count();
+                   //return (data/(table_length-eliminados)).toFixed(2)
                 }
-                var table_length = table.data().count();
-                return (data/(table_length-eliminados)).toFixed(2)
+                console.log('fin------------------------------------------------------------')
+                return data
             }
         },
         {
             className: 'dt-small dt-acciones dt-center',
             orderable: false,
             searchable: false,
-            visible: ( ($('#nivel').val() === "1") && ($('#envio').val() === "0")) ? true : false,
+            visible: (($('#nivel').val() === "1") && ($('#envio').val() === "0")),
             data: 'CodigoCarrera',
             render: function (data, type, row) {
                 let button
-                switch  (row.CodigoEstado){
+                switch  (row["CodigoEstado"]){
                     case 'V':
-                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
-                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-warning btn-sm  btnEditar"  data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
+                            '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado"  data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'E':
-                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado"  data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     case 'A':
-                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-danger btn-sm  btnEstado"  data-toggle="tooltip" title="Click! para eliminar el grupo"><i class="fa fa-trash-alt"></i></button>'
                         break
                     case 'C':
-                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado" grupo="' + row.Grupo + '" tipoGrupo="' + row.TipoGrupo + '" estado="' + row.CodigoEstado + '" data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
+                        button ='<button type="button" class="btn btn-outline-success btn-sm  btnEstado"  data-toggle="tooltip" title="Click! para habilitar el grupo"><i class="fa fa-history"></i></button>'
                         break
                     default: button = ''
                 }

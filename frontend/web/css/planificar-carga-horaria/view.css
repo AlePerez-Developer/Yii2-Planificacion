@@ -1,0 +1,13 @@
+#rowUno{
+    background-color: #f8bb86;
+    height: 90px;
+}
+
+#rowDos{
+    background-color: peachpuff;
+    height: 90px;
+}
+
+.lblTitulo {
+    font-size: 12px;
+}
