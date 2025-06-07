@@ -16,8 +16,8 @@ class PlanificarCargaHorariaMatricialController extends Controller
     public function actionIndex()
     {
         Yii::$app->session->set('gestion', date('Y')-1);
-
         Yii::$app->session->set('gestion',2021);
+        //Yii::$app->session->set('gestion',2021);
         return $this->render('planificarcargahorariamatriciales');
     }
 
@@ -54,10 +54,6 @@ class PlanificarCargaHorariaMatricialController extends Controller
         return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'materias' =>  $materias]);
     }
 
-
-
-
-
     public function actionListarGrupos(){
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
             return 'ERROR_CABECERA';
@@ -81,7 +77,7 @@ class PlanificarCargaHorariaMatricialController extends Controller
                                             when 'P' THEN [[HorasPractica]]
                       end as HorasSemana",'C.NombreCortoCarrera'])
             ->from(['vmateriasmatriciales v'])
-            ->join('LEFT JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('2025','1/2025')  and 
+            ->join('LEFT JOIN', 'CargaHorariaPropuesta chpP', "ChpP.GestionAcademica in ('2022','1/2022')  and 
                                                                               chpP.CodigoCarrera = V.CodigoCarreraCH and 
 																			  chpP.NumeroPlanEstudios = V.NumeroPlanEstudiosCH and
 																			  chpP.SiglaMateria = V.SiglaMateriaCH and
@@ -91,14 +87,14 @@ class PlanificarCargaHorariaMatricialController extends Controller
             ->join('INNER JOIN','Personas P','P.IdPersona = chpP.IdPersona')
             ->join('INNER JOIN','Materias M', 'M.CodigoCarrera = v.CodigoCarreraCH and M.NumeroPlanEstudios = v.NumeroPlanEstudiosCH and 
                                                              M.SiglaMateria = v.SiglaMateriaCH')
-            ->join('INNER JOIN', 'CargaHorariaPropuesta chp',"Chp.GestionAcademica in ('2025','1/2025') and 
+            ->join('INNER JOIN', 'CargaHorariaPropuesta chp',"Chp.GestionAcademica in ('2022','1/2022') and 
                                                                               chp.CodigoCarrera = V.CodigoCarrera and 
 																			  chp.NumeroPlanEstudios = V.NumeroPlanEstudios and
 																			  chp.SiglaMateria = V.SiglaMateria and
 																			  chp.TipoGrupo = v.CodigoTipoGrupoMateria and 
 																			  chp.Grupo = v.Grupo")
             ->join('INNER JOIN','Carreras Ch', 'Ch.CodigoCarrera = v.CodigoCarrera')
-            ->where(['v.GestionAcademicaCH' => '2/2024'])
+            ->where(['v.GestionAcademicaCH' => '2/2021'])
             //->where(['v.GestionAcademicaCH' => '1/2021'])
             ->andWhere("v.CodigoModalidadCursoCH in ('NS','NA') AND C.CODIGOFACULTAD='TE'")
             ->andWhere(['v.SiglaMateriaCH' => $_POST["sigla"]])

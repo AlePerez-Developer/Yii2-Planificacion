@@ -35,7 +35,7 @@
             <?php
             echo \hail812\adminlte\widgets\Menu::widget([
                 'items' => [
-                    /*[
+                    [
                         'label' => 'Planificacion',
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',
@@ -52,7 +52,7 @@
                             ['label' => 'Actividades', 'url' => ['/Planificacion/actividad/index'], 'iconStyle' => 'far'],
                             ['label' => 'Aperturas Programaticas', 'url' => ['/Planificacion/apertura-programatica/index'], 'iconStyle' => 'far'],
                         ]
-                    ],*/
+                    ],
                     [
                         'label' => 'Planificacion CH',
                         'icon' => 'th',

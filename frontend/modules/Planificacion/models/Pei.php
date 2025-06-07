@@ -29,7 +29,7 @@ class Pei extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'PEIs';
     }
@@ -37,7 +37,7 @@ class Pei extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['CodigoPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
@@ -55,7 +55,7 @@ class Pei extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'CodigoPei' => 'Codigo pei',
@@ -74,9 +74,9 @@ class Pei extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getObjetivosEstrategicos()
+    public function getObjetivosEstrategicos(): ActiveQuery
     {
-        return $this->hasMany(ObjetivoEstrategico::className(), ['CodigoPei' => 'CodigoPei']);
+        return $this->hasMany(ObjetivoEstrategico::classname(), ['CodigoPei' => 'CodigoPei']);
     }
 
     /**
@@ -84,7 +84,7 @@ class Pei extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCodigoEstado()
+    public function getCodigoEstado(): ActiveQuery
     {
         return $this->hasOne(Estado::className(), ['CodigoEstado' => 'CodigoEstado']);
     }
@@ -94,7 +94,7 @@ class Pei extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCodigoUsuario()
+    public function getCodigoUsuario(): ActiveQuery
     {
         return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
     }

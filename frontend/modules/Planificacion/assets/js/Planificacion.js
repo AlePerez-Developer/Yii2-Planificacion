@@ -73,14 +73,16 @@ function GenerarMensajeError(Mensaje){
 }
 
 function IniciarSpiner(Btn){
-    Btn.append('<span class="spinner-grow spinner-grow-sm"></span>')
+    Btn.append('<span class="loader"> <span class="loader-spinner"></span> </span>')
     Btn.find('i').css("display", "none")
+    Btn.find('.btn_text').css("display", "none")
     Btn.prop( "disabled", true );
 }
 
 function DetenerSpiner(Btn){
-    Btn.find('span').remove()
+    Btn.find('.loader').remove()
     Btn.find('i').removeAttr("style")
+    Btn.find('.btn_text').removeAttr("style")
     Btn.prop( "disabled", false );
 }
 

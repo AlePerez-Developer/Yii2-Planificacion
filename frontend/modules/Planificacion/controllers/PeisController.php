@@ -2,6 +2,7 @@
 
 namespace app\modules\Planificacion\controllers;
 
+use app\modules\Planificacion\formModels\PeiForm;
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
@@ -15,10 +16,11 @@ use Mpdf\MpdfException;
 use Mpdf\Mpdf;
 use Throwable;
 use Yii;
+use yii\web\Response;
 
 class PeisController extends Controller
 {
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -63,46 +65,63 @@ class PeisController extends Controller
 
     public function actionListarPeis()
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $peis = Pei::find()->select(['CodigoPei','DescripcionPei','FechaAprobacion','GestionInicio','GestionFin','CodigoEstado','CodigoUsuario'])
-                ->where(['!=','CodigoEstado',Estado::ESTADO_ELIMINADO])
-                ->orderBy('CodigoPei')
-                ->asArray()
-                ->all();
-            return json_encode($peis);
-        } else
-            return 'ERROR_CABECERA';
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA'], 'peis' =>  '']);
+        }
+
+        $peis = Pei::find()->select(['CodigoPei','DescripcionPei','FechaAprobacion','GestionInicio','GestionFin','CodigoEstado','CodigoUsuario'])
+            ->where(['!=','CodigoEstado',Estado::ESTADO_ELIMINADO])
+            ->orderBy('CodigoPei')
+            ->asArray()
+            ->all();
+
+        if (!$peis) {
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'], 'facultades' => '']);
+        }
+
+        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'peis' =>  $peis]);
     }
 
+    /**
+     * @throws Throwable
+     * @throws StaleObjectException
+     */
     public function actionGuardarPei()
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["descripcionPei"]) && isset($_POST["fechaAprobacion"]) && isset($_POST["gestionInicio"]) && isset($_POST["gestionFin"]))) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $request = Yii::$app->request;
+
+        if (!($request->isAjax && $request->isPost)) {
+            return ['respuesta' => Yii::$app->params['ERROR_CABECERA']];
         }
 
-        $pei = new Pei();
-        $pei->CodigoPei = PeiDao::generarCodigoPei();
-        $pei->DescripcionPei = mb_strtoupper(trim($_POST["descripcionPei"]),'utf-8');
-        $pei->FechaAprobacion = date("d/m/Y", strtotime($_POST["fechaAprobacion"]));
-        $pei->GestionInicio = trim($_POST["gestionInicio"]);
-        $pei->GestionFin = trim($_POST["gestionFin"]);
-        $pei->CodigoEstado = Estado::ESTADO_VIGENTE;
-        $pei->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+        $form = new PeiForm();
 
-        if ($pei->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$pei->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if (!$pei->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
+        if ($form->load($request->post(), '') && $form->validate()) {
+            $pei = new Pei();
+            $pei->CodigoPei       = PeiDao::generarCodigoPei();
+            $pei->DescripcionPei  = mb_strtoupper(trim($form->descripcionPei), 'UTF-8');
+            $pei->FechaAprobacion = date("d/m/Y", strtotime($form->fechaAprobacion));
+            $pei->GestionInicio   = $form->gestionInicio;
+            $pei->GestionFin      = $form->gestionFin;
+            $pei->CodigoEstado    = Estado::ESTADO_VIGENTE;
+            $pei->CodigoUsuario   = Yii::$app->user->identity->CodigoUsuario;
+
+            if ($pei->exist()) {
+                return ['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']];
+            }
+
+            if (!$pei->save(false)) {
+                return ['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']];
+            }
+
+            return ['respuesta' => Yii::$app->params['PROCESO_CORRECTO']];
         }
 
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return [
+            'respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
+            'errors' => $form->getErrors(),
+        ];
     }
 
     /**
@@ -112,25 +131,25 @@ class PeisController extends Controller
     public function actionCambiarEstadoPei()
     {
         if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA'], 'estado' => '']);
         }
         if (!isset($_POST["codigoPei"])) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'], 'estado' => '']);
         }
 
         $pei = Pei::findOne($_POST["codigoPei"]);
 
         if (!$pei) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'], 'estado' => '']);
         }
 
         ($pei->CodigoEstado == Estado::ESTADO_VIGENTE)?$pei->CodigoEstado = Estado::ESTADO_CADUCO:$pei->CodigoEstado = Estado::ESTADO_VIGENTE;
 
         if ($pei->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
+            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL'], 'estado' => '']);
         }
 
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'estado' => $pei->CodigoEstado]);
     }
 
     /**

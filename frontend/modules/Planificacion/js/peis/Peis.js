@@ -1,76 +1,5 @@
 $(document).ready(function () {
-    let table = $("#tablaListaPeis").DataTable({
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
-            url: 'index.php?r=Planificacion/peis/listar-peis',
-            dataSrc: '',
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
-            }
-        },
-        columns: [
-            {
-                className: 'dt-small dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoUsuario',
-                width: 30
-            },
-            {
-                className: 'dt-small',
-                data: 'DescripcionPei'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'FechaAprobacion'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'GestionInicio'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'GestionFin'
-            },
-            {
-                className: 'dt-small dt-estado dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoEstado',
-                render: function (data, type, row) {
-                    return ( (type === 'display') && (row.CodigoEstado === ESTADO_VIGENTE))
-                        ? '<button type="button" class="btn btn-outline-success btn-sm btnEstado" codigo="' + row.CodigoPei + '" estado =  "' + ESTADO_VIGENTE + '" >Vigente</button>'
-                        : '<button type="button" class="btn btn-outline-danger btn-sm  btnEstado" codigo="' + row.CodigoPei + '" estado =  "' + ESTADO_CADUCO + '" >Caducado</button>' ;
-                },
-            },
-            {
-                className: 'dt-small dt-acciones dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoPei',
-                render: function (data, type) {
-                    return type === 'display'
-                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button type="button" class="btn btn-outline-warning btn-sm  btnEditar" codigo="' + data + '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
-                        '<button type="button" class="btn btn-outline-danger btn-sm  btnEliminar" codigo="' + data + '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
-                        '</div>'
-                        : data;
-                },
-            },
-        ],
-    });
-
-    table.on('order.dt search.dt', function () {
-        let i = 1;
-        table.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
-            this.data(i++);
-        });
-    }).draw();
-
+    let codigoPei = 0
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
@@ -98,13 +27,27 @@ $(document).ready(function () {
         $("#divTabla").show(500);
     });
 
-    $("#btnGuardar").click(function () {
-        if ($("#formPei").valid()) {
-            if ($("#codigoPei").val() === '') {
-                guardarPei();
-            } else {
-                actualizarPei();
+    $("#btnGuardar").click(async function () {
+        const $btn = $(this);
+        IniciarSpiner($btn);
+        try {
+            if ($("#formPei").valid()) {
+                const hasCode =  codigoPei !== 0;
+                const response = hasCode ? await actualizarPei() : await guardarPei();
+
+                if (response["respuesta"] === RTA_CORRECTO) {
+                    MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.');
+                    $("#tablaListaPeis").DataTable().ajax.reload(() => {
+                        $("#btnCancelar").click();
+                    });
+                } else {
+                    MostrarMensaje('error', GenerarMensajeError(response["respuesta"]));
+                }
             }
+        } catch (err) {
+            MostrarMensaje('error', GenerarMensajeError(err));
+        } finally {
+            DetenerSpiner($btn);
         }
     });
 
@@ -119,76 +62,64 @@ $(document).ready(function () {
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO DE PEI
     =============================================*/
-    function guardarPei() {
-        let descripcionPei = $("#descripcionPei").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
-        let datos = new FormData();
-        datos.append("descripcionPei", descripcionPei);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("gestionFin", gestionFin);
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/guardar-pei",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function (data) {
-                if (data.respuesta === RTA_CORRECTO) {
-                    MostrarMensaje('success','Los datos del nuevo PEI se guardaron correctamente.')
-                    $("#tablaListaPeis").DataTable().ajax.reload(async () => {
-                        $("#btnCancelar").click()
-                    })
-                }
-                else {
-                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
-            }
-        });
+    async function  guardarPei()   {
+        try {
+            let descripcionPei = $("#descripcionPei").val();
+            let fechaAprobacion = $("#fechaAprobacion").val();
+            let gestionInicio = $("#gestionInicio").val();
+            let gestionFin = $("#gestionFin").val();
+            let datos = new FormData();
+            datos.append("descripcionPei", descripcionPei);
+            datos.append("fechaAprobacion", fechaAprobacion);
+            datos.append("gestionInicio", gestionInicio);
+            datos.append("gestionFin", gestionFin);
+            return await $.ajax({
+                url: "index.php?r=Planificacion/peis/guardar-pei",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+            });
+        } catch (error) {
+            throw error;
+        }
     }
 
-    /*=============================================
-    CAMBIA EL ESTADO DEL REGISTRO
-    =============================================*/
-    $("#tablaListaPeis tbody").on("click", ".btnEstado", function () {
+    /**
+     * =============================================
+     * CAMBIA EL ESTADO DEL REGISTRO
+     * =============================================
+     */
+    $(document).on('click', 'tbody .btnEstado', function(){
         let objectBtn = $(this);
-        let codigoPei = objectBtn.attr("codigo");
-        let estadoPei = objectBtn.attr("estado");
-        let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
+        const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
+        let codigoPei = dt_row["CodigoPei"];
         IniciarSpiner(objectBtn)
+
         $.ajax({
             url: "index.php?r=Planificacion/peis/cambiar-estado-pei",
             method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
+            data : {
+                codigoPei: codigoPei,
+            },
             dataType: "json",
             success: function (data) {
-                if (data.respuesta === RTA_CORRECTO) {
-                    if (estadoPei === ESTADO_VIGENTE) {
-                        objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
-                        objectBtn.html('Caducado')
-                        objectBtn.attr('estado', ESTADO_CADUCO);
-                    } else {
+                if (data["respuesta"] === RTA_CORRECTO) {
+                    console.log(data["estado"],ESTADO_VIGENTE)
+                    if (data["estado"] === ESTADO_VIGENTE) {
                         objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
-                        objectBtn.html('Vigente')
-                        objectBtn.attr('estado', ESTADO_VIGENTE);
+                        objectBtn.find('.btn_text').html('Vigente')
+                    } else {
+                        objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
+                        objectBtn.find('.btn_text').html('Caducado')
                     }
-                    DetenerSpiner(objectBtn)
                 }
                 else {
-                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                    DetenerSpiner(objectBtn)
+                    MostrarMensaje('error',GenerarMensajeError(data["respuesta"]))
                 }
+                DetenerSpiner(objectBtn)
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
@@ -287,40 +218,31 @@ $(document).ready(function () {
     /*=============================================
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-    function actualizarPei() {
-        let codigoPei = $("#codigoPei").val();
-        let descripcionPei = $("#descripcionPei").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
-        let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
-        datos.append("descripcionPei", descripcionPei);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionFin", gestionFin);
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/actualizar-pei",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function (data) {
-                if (data.respuesta === RTA_CORRECTO) {
-                    MostrarMensaje('success','El PEI se actualizó correctamente.')
-                    $("#tablaListaPeis").DataTable().ajax.reload(async () => {
-                        $("#btnCancelar").click()
-                    })
-                }
-                else {
-                    MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
-            }
-        });
+    async function actualizarPei() {
+        try{
+            let descripcionPei = $("#descripcionPei").val();
+            let fechaAprobacion = $("#fechaAprobacion").val();
+            let gestionInicio = $("#gestionInicio").val();
+            let gestionFin = $("#gestionFin").val();
+            let datos = new FormData();
+            datos.append("codigoPei", codigoPei.toString());
+            datos.append("descripcionPei", descripcionPei);
+            datos.append("gestionInicio", gestionInicio);
+            datos.append("fechaAprobacion", fechaAprobacion);
+            datos.append("gestionFin", gestionFin);
+
+            return await $.ajax({
+                url: "index.php?r=Planificacion/peis/actualizar-pei",
+                method: "POST",
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+            });
+        } catch (error){
+            throw error
+        }
+
     }
 })

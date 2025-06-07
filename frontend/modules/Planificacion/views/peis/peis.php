@@ -9,6 +9,14 @@ $this->registerJsFile("@planificacionModule/js/peis/Peis.js", [
         JqueryAsset::className()
     ]
 ]);
+
+$this->registerJsFile("@planificacionModule/js/peis/dt-declaration.js", [
+    'depends' => [
+        JqueryAsset::className()
+    ]
+]);
+
+
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Peis']];
 
@@ -28,7 +36,7 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
                 </button>
             </div>
             <div class="col-6" style="text-align: right;">
-                <?= Html::a('Reporte Pei', ['reporte'], ['class' => 'btn btn-success', 'target' => '_Blank']) ?>
+                <?= Html::a('Report Pei', ['reporte'], ['class' => 'btn btn-success', 'target' => '_Blank']) ?>
             </div>
         </div>
     </div>
@@ -68,7 +76,7 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><span class='fa fa-check-circle'></span> Guardar </button>
+                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
                     <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
             </div>

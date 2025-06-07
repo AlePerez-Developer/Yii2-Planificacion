@@ -32,6 +32,12 @@ $(document).ready(function() {
             return parseInt(value, 10) > parseInt($otherElement.val(), 10);
         });
 
+    $.validator.addMethod("MenorQue",
+        function (value, element, param) {
+            let $otherElement = $(param);
+            return parseInt(value, 10) < parseInt($otherElement.val(), 10);
+        });
+
     $.validator.addMethod("FechaMayor",
         function (value, element, param){
             let d1 = new Date(value);
@@ -122,7 +128,8 @@ $(document).ready(function() {
             gestionInicio:{
                 required: true,
                 digits: true,
-                min:2001
+                min:2001,
+                MenorQue: "#gestionFin"
             },
             gestionFin:{
                 required: true,
@@ -144,7 +151,8 @@ $(document).ready(function() {
             gestionInicio: {
                 required: "Debe ingresar la gestion de inicio del PEI",
                 digits: "Solo debe ingresar el numero de año",
-                min:"Debe ingresar un año valido mayor al 2000"
+                min:"Debe ingresar un año valido mayor al 2000",
+                MenorQue: "La gestion de incio debe ser menor que la gestion de fin"
             },
             gestionFin: {
                 required: "Debe ingresar la gestion final del PEI",
