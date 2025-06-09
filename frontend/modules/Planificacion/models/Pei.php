@@ -7,6 +7,7 @@ use yii\db\ActiveRecord;
 
 use common\models\Estado;
 use common\models\Usuario;
+use yii\db\Exception;
 
 /**
  * This is the model class for table "PEIs".
@@ -67,6 +68,37 @@ class Pei extends ActiveRecord
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
+    }
+    public static function listAll()
+    {
+        return self::find()
+            ->select([
+                'CodigoPei',
+                'DescripcionPei',
+                'FechaAprobacion',
+                'GestionInicio',
+                'GestionFin',
+                'CodigoEstado',
+                'CodigoUsuario'
+            ])
+            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->orderBy(['CodigoPei' => SORT_ASC])
+            ->asArray()
+            ->all();
+    }
+
+    public static function listOne($codigo)
+    {
+        return self::findOne($codigo);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function eliminar()
+    {
+        $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
+        return $this->save(false);
     }
 
     /**

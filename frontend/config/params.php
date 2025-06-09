@@ -9,6 +9,8 @@ return [
     'ERROR_REGISTRO_EN_USO' => 'errorEnUso',
     'ERROR_EJECUCION_SQL' => 'errorSql',
     'ERROR_REGISTRO_NO_ENCONTRADO' => 'errorNoEncontrado',
+    'ERROR_DB' => 'errorDB',
+    'ERROR_GENERAL' => 'errorGeneral',
     'ROL_ES_DIRECTOR' => '1',
     'ROL_ES_DECANO' => '46',
     'ROL_ES_RECTOR' => '34',

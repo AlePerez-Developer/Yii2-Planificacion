@@ -10,7 +10,7 @@ $(document).ready(function () {
             url: 'index.php?r=Planificacion/peis/listar-peis',
             dataSrc: 'peis',
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' +xhr.responseText))
+                MostrarMensaje('error',GenerarMensajeError( thrownError + ' >' + GenerarMensajeError(JSON.parse(xhr.responseText)["respuesta"])))
             }
         },
         columns: [
