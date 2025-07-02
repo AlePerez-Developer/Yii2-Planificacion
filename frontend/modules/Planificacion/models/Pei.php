@@ -48,6 +48,8 @@ class Pei extends ActiveRecord
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['CodigoPei'], 'unique'],
+            [['GestionInicio'], 'unique', 'message' => 'Gestion inicio debe ser unico'],
+            [['GestionFin'], 'unique', 'message' => 'Gestion fin debe ser unico'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -69,33 +71,24 @@ class Pei extends ActiveRecord
             'CodigoUsuario' => 'Codigo Usuario',
         ];
     }
-    public static function listAll()
-    {
-        return self::find()
-            ->select([
-                'CodigoPei',
-                'DescripcionPei',
-                'FechaAprobacion',
-                'GestionInicio',
-                'GestionFin',
-                'CodigoEstado',
-                'CodigoUsuario'
-            ])
-            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['CodigoPei' => SORT_ASC])
-            ->asArray()
-            ->all();
-    }
 
-    public static function listOne($codigo)
+
+    public static function listOne($codigo): ?Pei
     {
         return self::findOne($codigo);
+    }
+
+    public function cambiarEstado()
+    {
+        $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
+            ? Estado::ESTADO_CADUCO
+            : Estado::ESTADO_VIGENTE;
     }
 
     /**
      * @throws Exception
      */
-    public function eliminar()
+    public function eliminar(): bool
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
         return $this->save(false);

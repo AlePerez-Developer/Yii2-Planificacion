@@ -8,18 +8,6 @@ $(document).ready(function () {
         $('#formPei').trigger("reset");
     }
 
-    $("#btnMostrarCrear").click(function () {
-        let icono = $('.icon');
-        icono.toggleClass('opened');
-        if (icono.hasClass("opened")) {
-            $("#divDatos").show(500);
-            $("#divTabla").hide(500);
-        } else {
-            $("#divDatos").hide(500);
-            $("#divTabla").show(500);
-        }
-    });
-
     $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');
         reiniciarCampos();
@@ -28,63 +16,64 @@ $(document).ready(function () {
     });
 
     $("#btnGuardar").click(async function () {
-        const $btn = $(this);
-        IniciarSpiner($btn);
+        const btn = $(this);
+        const btnCancel = $('#btnCancelar')
+
+        IniciarSpiner(btn);
+        btnCancel.prop('disabled', true);
         try {
             if ($("#formPei").valid()) {
                 const hasCode =  codigoPei !== 0;
-                const response = hasCode ? await actualizarPei() : await guardarPei();
-
-                if (response["respuesta"] === RTA_CORRECTO) {
-                    MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.');
-                    $("#tablaListaPeis").DataTable().ajax.reload(() => {
-                        $("#btnCancelar").click();
-                    });
-                } else {
-                    MostrarMensaje('error', GenerarMensajeError(response["respuesta"]));
-                }
+                hasCode ? await actualizarPei() : await guardarPei();
             }
         } catch (err) {
             MostrarMensaje('error', GenerarMensajeError(err));
         } finally {
-            DetenerSpiner($btn);
+            DetenerSpiner(btn);
+            btnCancel.prop('disabled', false);
         }
     });
 
-    $("#gestionInicio").on( "keypress",function(){
-        $("#formPei").validate().element('#gestionFin');
-    })
+    $('#gestionInicio').on('change keyup', function () {
+        $('#gestionFin').valid();
+    });
 
-    $("#gestionFin").on( "keypress",function(){
-        $("#formPei").validate().element('#gestionInicio');
-    })
+    $('#gestionFin').on('change keyup', function () {
+        $('#gestionInicio').valid();
+    });
 
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO DE PEI
     =============================================*/
     async function  guardarPei()   {
-        try {
-            let descripcionPei = $("#descripcionPei").val();
-            let fechaAprobacion = $("#fechaAprobacion").val();
-            let gestionInicio = $("#gestionInicio").val();
-            let gestionFin = $("#gestionFin").val();
-            let datos = new FormData();
-            datos.append("descripcionPei", descripcionPei);
-            datos.append("fechaAprobacion", fechaAprobacion);
-            datos.append("gestionInicio", gestionInicio);
-            datos.append("gestionFin", gestionFin);
-            return await $.ajax({
-                url: "index.php?r=Planificacion/peis/guardar-pei",
-                method: "POST",
-                data: datos,
-                cache: false,
-                contentType: false,
-                processData: false,
-                dataType: "json",
-            });
-        } catch (error) {
-            throw error;
-        }
+        let descripcionPei = $("#descripcionPei").val();
+        let fechaAprobacion = $("#fechaAprobacion").val();
+        let gestionInicio = $("#gestionInicio").val();
+        let gestionFin = $("#gestionFin").val();
+        let datos = new FormData();
+        datos.append("descripcionPei", descripcionPei);
+        datos.append("fechaAprobacion", fechaAprobacion);
+        datos.append("gestionInicio", gestionInicio);
+        datos.append("gestionFin", gestionFin);
+        $.ajax({
+            url: "index.php?r=Planificacion/peis/guardar-pei",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function (response) {
+                MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.', null);
+                $("#tablaListaPeis").DataTable().ajax.reload(() => {
+                    $("#btnCancelar").click();
+                });
+            },
+            error: function (xhr) {
+                const data = JSON.parse(xhr.responseText)
+                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+            }
+        });
     }
 
     /**
@@ -92,7 +81,7 @@ $(document).ready(function () {
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody .btnEstado', function(){
+    $(document).on('click', 'tbody #btnEstado', function(){
         let objectBtn = $(this);
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         let codigoPei = dt_row["CodigoPei"];
@@ -107,7 +96,6 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 if (data["respuesta"] === RTA_CORRECTO) {
-                    console.log(data["estado"],ESTADO_VIGENTE)
                     if (data["estado"] === ESTADO_VIGENTE) {
                         objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
                         objectBtn.find('.btn_text').html('Vigente')
@@ -122,7 +110,7 @@ $(document).ready(function () {
                 DetenerSpiner(objectBtn)
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                MostrarMensaje('error',thrownError + '> ' + GenerarMensajeError(JSON.parse(xhr.responseText)["respuesta"]))
                 DetenerSpiner(objectBtn)
             }
         });
@@ -131,15 +119,15 @@ $(document).ready(function () {
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO DE PEI
     =============================================*/
-    $("#tablaListaPeis tbody").on("click", ".btnEliminar", function () {
+    $(document).on('click', 'tbody #btnEliminar', function(){
         let objectBtn = $(this)
-        let codigoPei = objectBtn.attr("codigo");
-        let datos = new FormData();
-        datos.append("codigoPei", codigoPei);
+        const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
+        let codigoPei = dt_row["CodigoPei"];
+
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de borrar el pei seleccionado?",
+            text: "¿Está seguro de eliminar el pei seleccionado?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -151,24 +139,22 @@ $(document).ready(function () {
                 $.ajax({
                     url: "index.php?r=Planificacion/peis/eliminar-pei",
                     method: "POST",
-                    data: datos,
-                    cache: false,
-                    contentType: false,
-                    processData: false,
+                    data : {
+                        codigoPei: codigoPei,
+                    },
                     dataType: "json",
                     success: function (data) {
-                        if (data.respuesta === RTA_CORRECTO) {
-                            MostrarMensaje('success','El PEI ha sido borrado correctamente.')
+                        if (data["respuesta"] === RTA_CORRECTO) {
+                            MostrarMensaje('success','El PEI ha sido eliminado correctamente.')
                             $("#tablaListaPeis").DataTable().ajax.reload();
-                            DetenerSpiner(objectBtn)
                         }
                         else {
-                            MostrarMensaje('error',GenerarMensajeError(data.respuesta))
-                            DetenerSpiner(objectBtn)
+                            MostrarMensaje('error',GenerarMensajeError(data["respuesta"]))
                         }
+                        DetenerSpiner(objectBtn)
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
-                        MostrarMensaje('error',GenerarMensajeError(thrownError + ' >' + xhr.responseText))
+                        MostrarMensaje('error',thrownError + '> ' + GenerarMensajeError(JSON.parse(xhr.responseText)["respuesta"]))
                         DetenerSpiner(objectBtn)
                     }
                 });

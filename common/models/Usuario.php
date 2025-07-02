@@ -6,7 +6,6 @@ use yii\web\IdentityInterface;
 use Yii;
 
 /**
- * This is the model class for table "PEIs".
  *
  * @property string $CodigoUsuario
  */

@@ -86,7 +86,32 @@ function DetenerSpiner(Btn){
     Btn.prop( "disabled", false );
 }
 
-function MostrarMensaje(icono, mensaje){
+$("#btnMostrarCrear").click(function () {
+    let icono = $('.icon');
+    icono.toggleClass('opened');
+    if (icono.hasClass("opened")) {
+        $("#divDatos").show(500);
+        $("#divTabla").hide(500);
+    } else {
+        $("#divDatos").hide(500);
+        $("#divTabla").show(500);
+    }
+});
+
+function renderItem(key, value, ul) {
+    if (typeof value === "object" && value !== null) {
+        const li = $("<li class='error0'>").text('Campo ' + key + ":");
+        const sublist = $("<ul class='error'>");
+        $.each(value, function(subKey, subValue) {
+            renderItem(subKey, subValue, sublist);
+        });
+        li.append(sublist);
+        ul.append(li);
+    } else {
+        ul.append($("<li class='error1'>").text(/*key + ": " +*/ value));
+    }
+}
+function MostrarMensaje(icono, mensaje, errores){
     let titulo
     switch(icono) {
         case 'success':
@@ -99,20 +124,33 @@ function MostrarMensaje(icono, mensaje){
             titulo = 'Advertencia.........'
             break;
         case 'info':
-            titulo = 'Preste atencion.....'
+            titulo = 'Atencion.....'
             break;
         case 'question':
             titulo = '??????...........'
             break;
     }
+
+    const contenedor = $("<div>");
+    if (errores){
+        contenedor.append("<label class='errorl'>Errores detectados:</label>" +
+            "<ul></ul>"
+        );
+        const lista = contenedor.find("ul");
+        $.each(errores, function(key, value) {
+            renderItem(key, value, lista);
+        });
+    }
+
     Swal.fire({
         icon: icono,
         title: titulo,
         text: mensaje,
+        footer:contenedor.html(),
         showCancelButton: false,
         confirmButtonColor: "#3085d6",
         confirmButtonText: "Cerrar"
-    });
+    })
 }
 $(document).ready(function(){
 });

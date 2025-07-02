@@ -176,4 +176,25 @@ th.dt-estado, td.dt-estado  {
     overflow:auto
 }
 
+/* valores de estilo de mensaje de errores */
+.errorl {
+    font-size: 15px;
+    font-weight: normal !important;
+    color: red;
+}
+.error0 {
+    font-size: 15px;
+    color: red;
+}
+
+.error1 {
+    font-size: 14px;
+    color: black;
+}
+
+.swal2-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
 
