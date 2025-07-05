@@ -75,8 +75,25 @@ class Pei extends ActiveRecord
 
     public static function listOne($codigo): ?Pei
     {
-        return self::findOne($codigo);
+        return self::findOne(['CodigoPei' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
+
+    public static function listAll(): ActiveQuery
+    {
+        return self::find()
+            ->select([
+                'CodigoPei',
+                'DescripcionPei',
+                'FechaAprobacion',
+                'GestionInicio',
+                'GestionFin',
+                'CodigoEstado',
+                'CodigoUsuario'
+            ])
+            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->orderBy(['CodigoPei' => SORT_ASC]);
+    }
+
 
     public function cambiarEstado()
     {
@@ -85,13 +102,10 @@ class Pei extends ActiveRecord
             : Estado::ESTADO_VIGENTE;
     }
 
-    /**
-     * @throws Exception
-     */
-    public function eliminar(): bool
+
+    public function eliminarPei()
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
-        return $this->save(false);
     }
 
     /**
@@ -178,4 +192,5 @@ class Pei extends ActiveRecord
             return false;
         }
     }
+
 }

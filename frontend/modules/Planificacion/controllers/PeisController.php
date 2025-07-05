@@ -3,7 +3,6 @@ namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\formModels\PeiForm;
-use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
 use app\modules\Planificacion\services\PeiService;
 use frontend\controllers\BaseController;
@@ -11,8 +10,6 @@ use yii\web\BadRequestHttpException;
 use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\models\Estado;
-use yii\web\Controller;
 use Mpdf\MpdfException;
 use yii\web\Response;
 use yii\db\Exception;
@@ -105,22 +102,24 @@ class PeisController extends BaseController
 
             return $resultado['success'];
         });
+    }
 
+    public function actionCambiarEstadoPei(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $request = Yii::$app->request;
 
+        $codigoPei = (int)$request->post('codigoPei');
+        if (!$codigoPei) {
+            Yii::$app->response->statusCode = 400;
+            return [
+                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
+                'errors' => ['Se esperaba el campo codigoPei']
+            ];
+        }
 
-        /*try {
-            $form = new PeiForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
-                Yii::$app->response->statusCode = 400;
-                return [
-                    'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Error en el envio de datos',
-                    'errors' => $form->getErrors(),
-                ];
-            }
-
-            $service = new PeiService();
-            $resultado = $service->guardar($form);
+        return $this->withTryCatch(function() use($codigoPei) {
+            $resultado = $this->peiService->cambiarEstado($codigoPei);
 
             if (!$resultado['success']) {
                 Yii::$app->response->statusCode = $resultado['code'];
@@ -130,141 +129,38 @@ class PeisController extends BaseController
                 ];
             }
 
-            Yii::$app->response->statusCode = 200;
-            return [
-                'respuesta' => $resultado['mensaje'],
-
-            ];
-        } catch (Exception $e) {
-            Yii::error("Error en la base de datos: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_DB'] ?? 'Error en la base de datos'
-            ];
-        } catch (Throwable $e) {
-            Yii::error("Error general: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_GENERAL'] ?? 'Error inesperado'
-            ];
-        }*/
+            return $resultado['estado'];
+        }, 'estado');
     }
 
-    /**
-     * @throws Throwable
-     */
-    public function actionCambiarEstadoPei(): array
-    {
-        Yii::$app->response->format = Response::FORMAT_JSON;
-        $request = Yii::$app->request;
 
-        if (!($request->isAjax && $request->isPost)) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_CABECERA'] ?? 'Error en el envio de la cabecera',
-                'estado' => ''
-            ];
-        }
-
-        $codigoPei = (int)$request->post('codigoPei');
-
-        if (!$codigoPei) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'estado' => ''
-            ];
-        }
-
-        try {
-
-            $service= new PeiService();
-            $resultado = $service->cambiarEstado($codigoPei);
-
-            if (!$resultado['success']) {
-                Yii::$app->response->statusCode = 400;
-                return [
-                    'respuesta' => $resultado['mensaje']?? "ocurrio un error no definido en el procesado",
-                    'errors' => $resultado['errors'],
-                ];
-            }
-
-            Yii::$app->response->statusCode = 200;
-            return [
-                'respuesta' => $resultado['mensaje'],
-                'estado' => $resultado['estado'],
-            ];
-        } catch (Exception $e) {
-            Yii::error("Error en la base de datos: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_DB'] ?? 'Error en la base de datos'
-            ];
-        } catch (Throwable $e) {
-            Yii::error("Error general: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_GENERAL'] ?? 'Error inesperado'
-            ];
-        }
-    }
-
-    /**
-     * @throws Throwable
-     */
     public function actionEliminarPei(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $request = Yii::$app->request;
 
-        if (!($request->isAjax && $request->isPost)) {
-            Yii::$app->response->statusCode = 400;
-            return ['respuesta' => Yii::$app->params['ERROR_CABECERA'] ?? 'Error en el envio de la cabecera'];
-        }
-
         $codigoPei = (int)$request->post('codigoPei');
         if (!$codigoPei) {
             Yii::$app->response->statusCode = 400;
             return [
                 'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'estado' => ''
+                'errors' => ['Se esperaba el campo codigoPei']
             ];
         }
 
-        try {
-            $pei = Pei::listOne($codigoPei);
+        return $this->withTryCatch(function() use($codigoPei) {
+            $resultado = $this->peiService->eliminarPei($codigoPei);
 
-            if (!$pei) {
-                Yii::$app->response->statusCode = 404;
+            if (!$resultado['success']) {
+                Yii::$app->response->statusCode = $resultado['code'];
                 return [
-                    'respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'] ?? 'PEI no encontrado'
+                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
+                    'errors' => $resultado['errors'],
                 ];
             }
 
-            if (!$pei->eliminar()) {
-                Yii::$app->response->statusCode = 500;
-                return [
-                    'respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL'] ?? 'Error al guardar el cambio de estado'
-                ];
-            }
-
-            Yii::$app->response->statusCode = 200;
-            return [
-                'respuesta' => Yii::$app->params['PROCESO_CORRECTO'] ?? 'Registro eliminado correctamente'
-            ];
-        } catch (Exception $e) {
-            Yii::error("Error en la base de datos: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_DB'] ?? 'Error en la base de datos'
-            ];
-        } catch (Throwable $e) {
-            Yii::error("Error general: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_GENERAL'] ?? 'Error inesperado'
-            ];
-        }
+            return $resultado['success'];
+        });
     }
 
     public function actionBuscarPei(): array
@@ -272,45 +168,28 @@ class PeisController extends BaseController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $request = Yii::$app->request;
 
-        if (!($request->isAjax && $request->isPost)) {
-            return ['respuesta' => Yii::$app->params['ERROR_CABECERA']];
-        }
-
-        $codigoPei = $request->post('codigoPei',null);
-        if (!$codigoPei || !is_string($codigoPei)) {
+        $codigoPei = (int)$request->post('codigoPei');
+        if (!$codigoPei) {
             Yii::$app->response->statusCode = 400;
             return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado'
+                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
+                'errors' => ['Se esperaba el campo codigoPei']
             ];
         }
 
-        try {
-            $pei = Pei::listOne($codigoPei);
+        return $this->withTryCatch(function() use($codigoPei){
+            $pei = $this->peiService->listarPei($codigoPei);
 
             if (!$pei) {
                 Yii::$app->response->statusCode = 404;
                 return [
-                    'respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'] ?? 'PEI no encontrado'
+                    'respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'] ?? 'PEI no encontrado',
+                    'errors' => null,
                 ];
             }
 
-            return [
-                'respuesta' => Yii::$app->params['PROCESO_CORRECTO'],
-                'pei' =>  $pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin'))
-            ];
-        } catch (Exception $e) {
-            Yii::error("Error en la base de datos: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_DB'] ?? 'Error en la base de datos'
-            ];
-        } catch (Throwable $e) {
-            Yii::error("Error general: " . $e->getMessage(), __METHOD__);
-            Yii::$app->response->statusCode = 500;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_GENERAL'] ?? 'Error inesperado'
-            ];
-        }
+            return $pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin'));
+        }, 'pei');
     }
 
     /**

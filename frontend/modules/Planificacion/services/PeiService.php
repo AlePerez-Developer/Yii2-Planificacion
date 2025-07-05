@@ -10,29 +10,32 @@ use yii\db\Exception;
 use Yii;
 class PeiService
 {
+    /**
+     * lista un array de Peis no eliminados
+     * @return array of peis
+     */
     public  function listarPeis(): array
     {
-        return Pei::find()
-            ->select([
-                'CodigoPei',
-                'DescripcionPei',
-                'FechaAprobacion',
-                'GestionInicio',
-                'GestionFin',
-                'CodigoEstado',
-                'CodigoUsuario'
-            ])
-            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['CodigoPei' => SORT_ASC])
+        return Pei::listAll()
             ->asArray()
             ->all();
+    }
+
+    /**
+     * obtiene un pei en base a un codigo.
+     * @param int $codigoPei
+     * @return Pei | null
+     */
+    public  function listarPei(int $codigoPei): ?Pei
+    {
+        return Pei::listOne($codigoPei);
     }
 
     /**
      * Guarda un nuevo PEI.
      *
      * @param PeiForm $form
-     * @return array
+     * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
      * @throws Exception
      */
     public function guardarPei(PeiForm $form): array
@@ -77,17 +80,21 @@ class PeiService
     /**
      * Busca un PEI por su código y alterna su estado.
      *
-     * @param string|int $codigoPei
+     * @param int $codigoPei
      * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
-     * @throws NotFoundHttpException
      * @throws Exception
      */
-    public function cambiarEstado($codigoPei): array
+    public function cambiarEstado(int $codigoPei): array
     {
-        $pei = Pei::listOne($codigoPei);
+        $pei = $this->listarPei($codigoPei);
 
         if (!$pei) {
-            throw new NotFoundHttpException('PEI no encontrado.');
+            return [
+                'success' => false,
+                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
+                'estado' => null,
+                'errors' => null,
+            ];
         }
 
         $pei->cambiarEstado();
@@ -115,6 +122,51 @@ class PeiService
             'success' => true,
             'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
             'estado' => $pei->CodigoEstado,
+            'errors' => null,
+        ];
+    }
+
+    /**
+     * Busca un PEI por su código y y lo elimina.
+     *
+     * @param int $codigoPei
+     * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
+     * @throws Exception
+     */
+    public function eliminarPei(int $codigoPei): array
+    {
+        $pei = $this->listarPei($codigoPei);
+
+        if (!$pei) {
+            return [
+                'success' => false,
+                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
+                'errors' => null,
+            ];
+        }
+
+        $pei->eliminarPei();
+
+        if (!$pei->validate()) {
+            return [
+                'success' => false,
+                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
+                'errors' => $pei->getErrors(),
+            ];
+        }
+
+        if (!$pei->save(false)) {
+            Yii::error("Error al eliminar del PEI $pei->CodigoPei", __METHOD__);
+            return [
+                'success' => false,
+                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
+                'errors' => $pei->getErrors(),
+            ];
+        }
+
+        return [
+            'success' => true,
+            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
             'errors' => null,
         ];
     }
