@@ -4,7 +4,6 @@ namespace app\modules\Planificacion\services;
 use app\modules\Planificacion\formModels\PeiForm;
 use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
-use yii\web\NotFoundHttpException;
 use common\models\Estado;
 use yii\db\Exception;
 use Yii;
@@ -50,31 +49,28 @@ class PeiService
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        if (!$pei->validate()) {
+        return $this->validarProcesarPei($pei);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function actualizarPei(int $codigoPei, PeiForm $form): array
+    {
+        $pei = $this->listarPei($codigoPei);
+
+        if (!$pei) {
             return [
                 'success' => false,
-                'code' => 400,
-                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
-                'errors' => $pei->getErrors(),
+                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
+                'estado' => null,
+                'errors' => null,
             ];
         }
 
-        if (!$pei->save(false)) {
-            Yii::error("Error al guardar el PEI", __METHOD__);
-            return [
-                'success' => false,
-                'code' => 500,
-                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
-                'errors' => $pei->getErrors(),
-            ];
-        }
+        $pei->load($form->attributes, '');
 
-        return [
-            'success' => true,
-            'code' => 201,
-            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
-            'errors' => null,
-        ];
+        return $this->validarProcesarPei($pei);
     }
 
     /**
@@ -166,6 +162,40 @@ class PeiService
 
         return [
             'success' => true,
+            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
+            'errors' => null,
+        ];
+    }
+
+    /**
+     * @param Pei|null $pei
+     * @return array
+     * @throws Exception
+     */
+    public function validarProcesarPei(?Pei $pei): array
+    {
+        if (!$pei->validate()) {
+            return [
+                'success' => false,
+                'code' => 400,
+                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
+                'errors' => $pei->getErrors(),
+            ];
+        }
+
+        if (!$pei->save(false)) {
+            Yii::error("Error al guardar el PEI", __METHOD__);
+            return [
+                'success' => false,
+                'code' => 500,
+                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
+                'errors' => $pei->getErrors(),
+            ];
+        }
+
+        return [
+            'success' => true,
+            'code' => 201,
             'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
             'errors' => null,
         ];

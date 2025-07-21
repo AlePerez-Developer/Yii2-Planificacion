@@ -4,10 +4,8 @@ namespace app\modules\Planificacion\models;
 
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-
 use common\models\Estado;
 use common\models\Usuario;
-use yii\db\Exception;
 
 /**
  * This is the model class for table "PEIs".
@@ -119,7 +117,7 @@ class Pei extends ActiveRecord
     }
 
     /**
-     * Gets query for [[CodigoEstado]].
+     * Gets a query for [[CodigoEstado]].
      *
      * @return ActiveQuery
      */
@@ -129,7 +127,7 @@ class Pei extends ActiveRecord
     }
 
     /**
-     * Gets query for [[CodigoUsuario]].
+     * Gets a query for [[CodigoUsuario]].
      *
      * @return ActiveQuery
      */

@@ -196,15 +196,46 @@ class PeisController extends BaseController
      * @throws Throwable
      * @throws StaleObjectException
      */
-    public function actionActualizarPei()
+    public function actionActualizarPei(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $request = Yii::$app->request;
 
-        if (!($request->isAjax && $request->isPost)) {
+        $codigoPei = (int)$request->post('codigoPei');
+        if (!$codigoPei) {
             Yii::$app->response->statusCode = 400;
-            return ['respuesta' => Yii::$app->params['ERROR_CABECERA'] ?? 'Cabecera inválida'];
+            return [
+                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
+                'errors' => ['Se esperaba el campo codigoPei']
+            ];
         }
+
+        /*return $this->withTryCatch(function() use($codigoPei){
+            $request = Yii::$app->request;
+
+            $form = new PeiForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                Yii::$app->response->statusCode = 400;
+                return [
+                    'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Error en el envio de datos',
+                    'errors' => $form->getErrors(),
+                ];
+            }
+
+            $resultado = $this->peiService->actualizarPei($codigoPei,$form);
+
+            if (!$resultado['success']) {
+                Yii::$app->response->statusCode = $resultado['code'];
+                return [
+                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
+                    'errors' => $resultado['errors'],
+                ];
+            }
+
+            return $resultado['success'];
+        });*/
+
 
         try {
             $codigoPei = $request->post('codigoPei',null);
