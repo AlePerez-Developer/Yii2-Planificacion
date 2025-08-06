@@ -4,7 +4,6 @@ $(document).ready(function () {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $('#codigoPei').val('');
         $('#formPei').trigger("reset");
     }
 
@@ -56,7 +55,7 @@ $(document).ready(function () {
         datos.append("gestionInicio", gestionInicio);
         datos.append("gestionFin", gestionFin);
         $.ajax({
-            url: "index.php?r=Planificacion/peis/guardar-pei",
+            url: "index.php?r=Planificacion/peis/guardar",
             method: "POST",
             data: datos,
             cache: false,
@@ -65,7 +64,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function () {
                 MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.', null);
-                $("#tablaListaPeis").DataTable().ajax.reload(() => {
+                dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });
             },
@@ -76,8 +75,7 @@ $(document).ready(function () {
         });
     }
 
-    /**
-     * =============================================
+    /* =============================================
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
@@ -88,10 +86,10 @@ $(document).ready(function () {
         IniciarSpiner(objectBtn)
 
         $.ajax({
-            url: "index.php?r=Planificacion/peis/cambiar-estado-pei",
+            url: "index.php?r=Planificacion/peis/cambiar-estado",
             method: "POST",
             data : {
-                codigoPeis: codigoPei,
+                codigoPei: codigoPei,
             },
             dataType: "json",
             success: function (data) {
@@ -133,7 +131,7 @@ $(document).ready(function () {
             if (resultado.value) {
                 IniciarSpiner(objectBtn)
                 $.ajax({
-                    url: "index.php?r=Planificacion/peis/eliminar-pei",
+                    url: "index.php?r=Planificacion/peis/eliminar",
                     method: "POST",
                     data : {
                         codigoPei: codigoPei,
@@ -141,7 +139,7 @@ $(document).ready(function () {
                     dataType: "json",
                     success: function () {
                         MostrarMensaje('success','El PEI ha sido eliminado correctamente.','')
-                        $("#tablaListaPeis").DataTable().ajax.reload();
+                        dt_pei.ajax.reload();
                         DetenerSpiner(objectBtn)
                     },
                     error: function (xhr) {
@@ -205,7 +203,7 @@ $(document).ready(function () {
             datos.append("gestionFin", gestionFin);
 
             return await $.ajax({
-                url: "index.php?r=Planificacion/peis/actualizar-pei",
+                url: "index.php?r=Planificacion/peis/actualizar",
                 method: "POST",
                 data: datos,
                 cache: false,

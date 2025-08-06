@@ -45,7 +45,6 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
             <div class="card " style="width: 40rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigoPei" name="codigo" disabled hidden>
                     <form id="formPei" action="" method="post">
                         <div class="form-group">
                             <label for="descripcionPei" class="control-label">Descripcion del pei</label>
@@ -96,8 +95,3 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
         </table>
     </div>
 </div>
-
-<style>
-
-</style>
-

@@ -23,6 +23,8 @@ class BaseController extends Controller
             return parent::beforeAction($action);
         }
 
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
         if (!$request->isAjax || !$request->isPost) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             Yii::$app->response->statusCode = 400;

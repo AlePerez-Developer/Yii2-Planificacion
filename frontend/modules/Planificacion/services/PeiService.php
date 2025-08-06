@@ -6,7 +6,9 @@ use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
 use common\models\Estado;
 use yii\db\Exception;
+use Throwable;
 use Yii;
+
 class PeiService
 {
     /**
@@ -54,6 +56,7 @@ class PeiService
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function actualizarPei(int $codigoPei, PeiForm $form): array
     {
@@ -68,9 +71,44 @@ class PeiService
             ];
         }
 
+        if ($pei->GestionInicio < $form->gestionInicio ){
+            if (!PeiDao::validarGestionInicio($pei->CodigoPei, $form->gestionInicio)) {
+                return [
+                    'success' => false,
+                    'mensaje' => 'errorGestionInicio',
+                    'estado' => null,
+                    'errors' => 'Existen indicadores programados con meta que serian afectados por el cambio de fecha de inicio',
+                ];
+            }
+        }
+
+        if ($pei->GestionFin > $form->gestionFin ){
+            if (!PeiDao::validarGestionFin($pei->CodigoPei, $form->gestionFin)) {
+                return [
+                    'success' => false,
+                    'mensaje' => 'errorGestionFin',
+                    'estado' => null,
+                    'errors' => 'Existen indicadores programados con meta que serian afectados por el cambio de fecha de finalizacion',
+                ];
+            }
+        }
+
         $pei->load($form->attributes, '');
 
-        return $this->validarProcesarPei($pei);
+        $transaction = Pei::getDb()->beginTransaction();
+
+        PeiDao::regularizarProgramacionIndicadoresInicio($pei->CodigoPei, $form->gestionInicio, $transaction);
+        PeiDao::regularizarProgramacionIndicadoresFin($pei->CodigoPei, $form->gestionFin, $transaction);
+
+        $resultado = $this->validarProcesarPei($pei);
+
+        if (!$resultado['success']) {
+            $transaction->rollBack();
+            return $resultado;
+        }
+
+        $transaction->commit();
+        return $resultado;
     }
 
     /**
@@ -141,6 +179,14 @@ class PeiService
             ];
         }
 
+        if (PeiDao::enUso($pei->CodigoPei)){
+            return [
+                'success' => false,
+                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EN_USO'],
+                'errors' => 'El PEI se encuentra asignado a un objetivo estrategico',
+            ];
+        }
+
         $pei->eliminarPei();
 
         if (!$pei->validate()) {
@@ -172,7 +218,7 @@ class PeiService
      * @return array
      * @throws Exception
      */
-    public function validarProcesarPei(?Pei $pei): array
+    public function validarProcesarPei(Pei $pei): array
     {
         if (!$pei->validate()) {
             return [

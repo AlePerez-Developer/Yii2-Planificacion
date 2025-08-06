@@ -22,6 +22,7 @@ use Yii;
 
 class PlanificarCargaHorariaController extends Controller
 {
+    protected string $gestionSemestralizada = '1/';
     public function behaviors(): array
     {
         return [
@@ -37,7 +38,8 @@ class PlanificarCargaHorariaController extends Controller
     public function actionIndex(): string
     {
         Yii::$app->session->set('gestion', date('Y')-1);
-        Yii::$app->session->set('gestion',2021);
+        //Yii::$app->session->set('gestion',2021);
+        $this->gestionSemestralizada = '2/';
         return $this->render('planificarcargahoraria');
     }
 
@@ -246,7 +248,7 @@ class PlanificarCargaHorariaController extends Controller
 
                 'avg([chp].[ProyectadosGeneral]) as CantidadProyeccion'])
             ->join('INNER JOIN','CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.SiglaMateria = M.SiglaMateria')
-            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1), '1/' . ($gestion + 1)]])
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1), $this->gestionSemestralizada . ($gestion + 1)]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])
             ->andWhere(['like','M.Curso', '%' .  ($_POST["curso"] > 0 ? $_POST["curso"] : '')      , false])
             ->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])->andWhere(['Chp.CodigoSede' => $_POST["sede"]])
@@ -289,7 +291,7 @@ class PlanificarCargaHorariaController extends Controller
             ->from(['Materias M'])
             ->join('INNER JOIN', 'CargaHorariaPropuesta Chp', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = Chp.IdPersona')
-            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1),$this->gestionSemestralizada.($gestion+1)]])
             ->andWhere(['M.CodigoCarrera' => $_POST["carrera"]])->andWhere(['Chp.CodigoSede' => $_POST['sede']])->andWhere(['M.NumeroPlanEstudios' => $_POST["plan"]])
             ->andWhere(['M.Curso' => $_POST["curso"]])->andWhere(['M.SiglaMateria' => $_POST["sigla"]])
             ->andWhere(['Chp.TipoGrupo' => $_POST['tipoGrupo']])
@@ -355,7 +357,7 @@ class PlanificarCargaHorariaController extends Controller
                 "isnull(sum(case when [Chp].[CodigoEstado] = 'V' then HorasSemana * 4 end),0) as vigente",
                 "isnull(sum(case when [Chp].[CodigoEstado] = 'E' then HorasSemana * 4 end),0) as eliminada",
                 "isnull(sum(case when [Chp].[CodigoEstado] in ('A','C') then HorasSemana * 4 end),0) as agregada"
-            ])->where(['in','Chp.GestionAcademica',[(string)($gestion+1), '1/' . ($gestion + 1)]])
+            ])->where(['in','Chp.GestionAcademica',[(string)($gestion+1), $this->gestionSemestralizada . ($gestion + 1)]])
             ->andWhere(['Chp.Idpersona' => $_POST['persona']])
             ->asArray()->one();
 
@@ -375,7 +377,7 @@ class PlanificarCargaHorariaController extends Controller
                                                  end) as Ch"])
             ->join('INNER JOIN', 'Materias M', 'Chp.CodigoCarrera = M.CodigoCarrera and Chp.NumeroPlanEstudios = M.NumeroPlanEstudios and Chp.SiglaMateria = M.SiglaMateria ')
             ->join('INNER JOIN', 'Carreras c','M.CodigoCarrera = c.CodigoCarrera')
-            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1), '1/' . ($gestion + 1)]])
+            ->where(['in','Chp.GestionAcademica',[(string)($gestion+1), $this->gestionSemestralizada . ($gestion + 1)]])
             ->andWhere(['Chp.Idpersona' => $_POST['persona']])
             ->andWhere(['chp.TransferidoCargaHoraria' => 1])->andWhere(['Chp.CodigoEstado' => 'V'])
             ->groupBy('Chp.IdPersona,M.CodigoCarrera,c.NombreCortoCarrera,Chp.SiglaMateria, M.NombreMateria')
@@ -396,7 +398,7 @@ class PlanificarCargaHorariaController extends Controller
         $gestion = intval($_SESSION['gestion']);
 
         $row = CargaHorariaPropuesta::findOne([
-                'GestionAcademica' => [(string)($gestion+1),'1/'.($gestion+1)],
+                'GestionAcademica' => [(string)($gestion+1),$this->gestionSemestralizada.($gestion+1)],
                 'CodigoCarrera' => intval($_POST['carrera']),
                 'CodigoSede' => $_POST['sede'],
                 'NumeroPlanEstudios' => intval($_POST['plan']),
@@ -460,7 +462,7 @@ class PlanificarCargaHorariaController extends Controller
         $gestion = intval($_SESSION['gestion']);
 
         $grupo = CargaHorariaPropuesta::find()
-            ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
+            ->where(['in','GestionAcademica',[(string)($gestion+1),$this->gestionSemestralizada.($gestion+1)]])
             ->andWhere(['CodigoCarrera' => $_POST["carrera"]])
             ->andWhere(['CodigoSede' => $_POST["sede"]])
             ->andWhere(['NumeroPlanEstudios' => $_POST["plan"]])
@@ -489,7 +491,7 @@ class PlanificarCargaHorariaController extends Controller
         $gestion = intval($_SESSION['gestion']);
 
         $materiaDocente = MateriaDocente::findOne([
-            'GestionAcademica' => (string)($gestion+1),'1/'.($gestion+1),
+            'GestionAcademica' => (string)($gestion+1),$this->gestionSemestralizada.($gestion+1),
             'CodigoCarrera' => intval($_POST['carrera']),
             'CodigoSede' => $_POST['sede'],
             'NumeroPlanEstudios' => intval($_POST['plan']),
@@ -514,7 +516,7 @@ class PlanificarCargaHorariaController extends Controller
         }
 
         $grupo = new CargaHorariaPropuesta();
-        ($materiaDocente->CodigoModalidadCurso == 'NS')?$grupo->GestionAcademica = '1/'.($gestion+1):$grupo->GestionAcademica=(string)($gestion+1);
+        ($materiaDocente->CodigoModalidadCurso == 'NS')?$grupo->GestionAcademica = $this->gestionSemestralizada.($gestion+1):$grupo->GestionAcademica=(string)($gestion+1);
         $grupo->CodigoCarrera = $_POST["carrera"];
         $grupo->NumeroPlanEstudios = $_POST["plan"];
         $grupo->SiglaMateria = $_POST["sigla"];
@@ -549,7 +551,7 @@ class PlanificarCargaHorariaController extends Controller
         $row = CargaHorariaPropuesta::find()->alias('chp')
             ->select('chp.*,P.*')
             ->join('INNER JOIN','Personas P', 'P.IdPersona = chp.IdPersona')
-            ->where(['in','GestionAcademica',[(string)($gestion+1),'1/'.($gestion+1)]])
+            ->where(['in','GestionAcademica',[(string)($gestion+1),$this->gestionSemestralizada.($gestion+1)]])
             ->andWhere(['CodigoCarrera' => $_POST["carrera"]])
             ->andWhere(['CodigoSede' => $_POST['sede']])
             ->andWhere(['NumeroPlanEstudios' => $_POST["plan"]])
@@ -577,7 +579,7 @@ class PlanificarCargaHorariaController extends Controller
         $gestion = intval($_SESSION['gestion']);
 
         $row = CargaHorariaPropuesta::findOne([
-            'GestionAcademica' => [(string)($gestion+1),'1/'.($gestion+1)],
+            'GestionAcademica' => [(string)($gestion+1),$this->gestionSemestralizada.($gestion+1)],
             'CodigoCarrera' => intval($_POST['carrera']),
             'CodigoSede' => $_POST['sede'],
             'NumeroPlanEstudios' => intval($_POST['plan']),

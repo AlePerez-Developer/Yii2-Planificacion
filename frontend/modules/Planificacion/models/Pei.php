@@ -92,14 +92,12 @@ class Pei extends ActiveRecord
             ->orderBy(['CodigoPei' => SORT_ASC]);
     }
 
-
     public function cambiarEstado()
     {
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
     }
-
 
     public function eliminarPei()
     {
@@ -136,59 +134,6 @@ class Pei extends ActiveRecord
         return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    public function exist(): bool
-    {
-        $pei = Pei::find()
-            ->where('(FechaAprobacion = :FechaAprobacion) or (GestionInicio = :GestionInicio) or (GestionFin = :GestionFin)',
-                [':FechaAprobacion' => $this->FechaAprobacion, ':GestionInicio' => $this->GestionInicio, ':GestionFin' => $this->GestionFin]
-            )
-            ->andWhere(['!=','CodigoPei', $this->CodigoPei])
-            ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
-        if(!empty($pei)){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
-    public function enUso(): bool
-    {
-        $Obj = ObjetivoEstrategico::find()->where(["CodigoPei" => $this->CodigoPei])->all();
-        if(!empty($Obj)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function validarGestionInicio($inicioNuevo): bool
-    {
-        $ind = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (ig.Gestion < :Gestion) and (ig.Meta > 0) ',[':pei'=>$this->CodigoPei,':Gestion'=>$inicioNuevo])
-            ->one();
-        if (empty($ind)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function validarGestionFin($finNuevo): bool
-    {
-        $ind = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (ig.Gestion > :Gestion) and (ig.Meta > 0)',[':pei'=>$this->CodigoPei,':Gestion'=>$finNuevo])
-            ->one();
-        if (empty($ind)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 }
