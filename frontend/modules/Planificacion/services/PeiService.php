@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\services;
 use app\modules\Planificacion\formModels\PeiForm;
 use app\modules\Planificacion\dao\PeiDao;
 use app\modules\Planificacion\models\Pei;
+use yii\web\NotFoundHttpException;
 use common\models\Estado;
 use yii\db\Exception;
 use Throwable;
@@ -30,6 +31,18 @@ class PeiService
     public  function listarPei(int $codigoPei): ?Pei
     {
         return Pei::listOne($codigoPei);
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    private function obtenerPeiValidado(int $codigoPei): ?Pei
+    {
+        $pei = $this->listarPei($codigoPei);
+        if (!$pei) {
+            throw new NotFoundHttpException(Yii::$app->params['ERROR_REGISTRO_EXISTE'] ?? 'PEI no encontrado');
+        }
+        return $pei;
     }
 
     /**
@@ -60,9 +73,9 @@ class PeiService
      */
     public function actualizarPei(int $codigoPei, PeiForm $form): array
     {
-        $pei = $this->listarPei($codigoPei);
-
-        if (!$pei) {
+        try {
+            $pei = $this->obtenerPeiValidado($codigoPei);
+        } catch (NotFoundHttpException $e) {
             return [
                 'success' => false,
                 'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
@@ -93,7 +106,10 @@ class PeiService
             }
         }
 
-        $pei->load($form->attributes, '');
+        $pei->DescripcionPei = $form->descripcionPei;
+        $pei->FechaAprobacion = $form->fechaAprobacion;
+        $pei->GestionInicio = $form->gestionInicio;
+        $pei->GestionFin = $form->gestionFin;
 
         $transaction = Pei::getDb()->beginTransaction();
 
@@ -120,9 +136,9 @@ class PeiService
      */
     public function cambiarEstado(int $codigoPei): array
     {
-        $pei = $this->listarPei($codigoPei);
-
-        if (!$pei) {
+        try {
+            $pei = $this->obtenerPeiValidado($codigoPei);
+        } catch (NotFoundHttpException $e) {
             return [
                 'success' => false,
                 'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
@@ -169,12 +185,13 @@ class PeiService
      */
     public function eliminarPei(int $codigoPei): array
     {
-        $pei = $this->listarPei($codigoPei);
-
-        if (!$pei) {
+        try {
+            $pei = $this->obtenerPeiValidado($codigoPei);
+        } catch (NotFoundHttpException $e) {
             return [
                 'success' => false,
                 'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
+                'estado' => null,
                 'errors' => null,
             ];
         }

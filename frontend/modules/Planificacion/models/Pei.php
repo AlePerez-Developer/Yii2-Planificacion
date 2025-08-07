@@ -48,8 +48,8 @@ class Pei extends ActiveRecord
             [['CodigoPei'], 'unique'],
             [['GestionInicio'], 'unique', 'message' => 'Gestion inicio debe ser unico'],
             [['GestionFin'], 'unique', 'message' => 'Gestion fin debe ser unico'],
-            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
-            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
     }
 
@@ -111,7 +111,7 @@ class Pei extends ActiveRecord
      */
     public function getObjetivosEstrategicos(): ActiveQuery
     {
-        return $this->hasMany(ObjetivoEstrategico::classname(), ['CodigoPei' => 'CodigoPei']);
+        return $this->hasMany(ObjetivoEstrategico::class, ['CodigoPei' => 'CodigoPei']);
     }
 
     /**
@@ -121,7 +121,7 @@ class Pei extends ActiveRecord
      */
     public function getCodigoEstado(): ActiveQuery
     {
-        return $this->hasOne(Estado::className(), ['CodigoEstado' => 'CodigoEstado']);
+        return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
     }
 
     /**
@@ -131,9 +131,6 @@ class Pei extends ActiveRecord
      */
     public function getCodigoUsuario(): ActiveQuery
     {
-        return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
+        return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
-
-
-
 }

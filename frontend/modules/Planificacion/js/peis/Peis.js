@@ -75,6 +75,41 @@ $(document).ready(function () {
         });
     }
 
+    /*=============================================
+    ACTUALIZA EL PEI SELECCIONADO EN LA BD
+    =============================================*/
+    async function actualizarPei() {
+        let descripcionPei = $("#descripcionPei").val();
+        let fechaAprobacion = $("#fechaAprobacion").val();
+        let gestionInicio = $("#gestionInicio").val();
+        let gestionFin = $("#gestionFin").val();
+        let datos = new FormData();
+        datos.append("codigoPei", codigoPei.toString());
+        datos.append("descripcionPei", descripcionPei);
+        datos.append("gestionInicio", gestionInicio);
+        datos.append("fechaAprobacion", fechaAprobacion);
+        datos.append("gestionFin", gestionFin);
+        $.ajax({
+            url: "index.php?r=Planificacion/peis/actualizar",
+            method: "POST",
+            data: datos,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function () {
+                MostrarMensaje('success', 'Los datos del nuevo PEI se actualizaron correctamente.', null);
+                dt_pei.ajax.reload(() => {
+                    $("#btnCancelar").click();
+                });
+            },
+            error: function (xhr) {
+                const data = JSON.parse(xhr.responseText)
+                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+            }
+        });
+    }
+
     /* =============================================
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
@@ -158,11 +193,11 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEditar', function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let codigoPei = dt_row["CodigoPei"];
+        codigoPei = dt_row["CodigoPei"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
-            url: "index.php?r=Planificacion/peis/buscar-pei",
+            url: "index.php?r=Planificacion/peis/buscar",
             method: "POST",
             data : {
                 codigoPei: codigoPei,
@@ -185,35 +220,4 @@ $(document).ready(function () {
             }
         });
     });
-
-    /*=============================================
-    ACTUALIZA EL PEI SELECCIONADO EN LA BD
-    =============================================*/
-    async function actualizarPei() {
-        try{
-            let descripcionPei = $("#descripcionPei").val();
-            let fechaAprobacion = $("#fechaAprobacion").val();
-            let gestionInicio = $("#gestionInicio").val();
-            let gestionFin = $("#gestionFin").val();
-            let datos = new FormData();
-            datos.append("codigoPei", codigoPei.toString());
-            datos.append("descripcionPei", descripcionPei);
-            datos.append("gestionInicio", gestionInicio);
-            datos.append("fechaAprobacion", fechaAprobacion);
-            datos.append("gestionFin", gestionFin);
-
-            return await $.ajax({
-                url: "index.php?r=Planificacion/peis/actualizar",
-                method: "POST",
-                data: datos,
-                cache: false,
-                contentType: false,
-                processData: false,
-                dataType: "json",
-            });
-        } catch (error){
-            throw error
-        }
-
-    }
 })

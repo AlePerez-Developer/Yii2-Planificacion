@@ -1,5 +1,5 @@
 <?php
-namespace frontend\controllers;
+namespace app\controllers;
 
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
