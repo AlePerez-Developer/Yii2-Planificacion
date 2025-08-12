@@ -1,12 +1,10 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
-use app\modules\Planificacion\common\exceptions\BusinessException;
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\models\Pei;
-use yii\db\Exception;
 use yii\db\StaleObjectException;
-use yii\db\Transaction;
+use yii\db\Exception;
 use yii\db\Query;
 use Throwable;
 

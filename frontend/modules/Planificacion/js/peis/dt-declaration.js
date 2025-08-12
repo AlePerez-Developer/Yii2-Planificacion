@@ -1,6 +1,9 @@
 let dt_pei
 $(document).ready(function () {
     dt_pei = $("#tablaListaPeis").DataTable({
+        initComplete: function() {
+            $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle"></i></button>');
+        },
         ajax: {
             method: "POST",
             dataType: 'json',

@@ -6,13 +6,13 @@ app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
 $this->registerJsFile("@planificacionModule/js/peis/Peis.js", [
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
 
 $this->registerJsFile("@planificacionModule/js/peis/dt-declaration.js", [
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
 

@@ -23,7 +23,7 @@ $(document).ready(function () {
         try {
             if ($("#formPei").valid()) {
                 const hasCode =  codigoPei !== 0;
-                hasCode ? await actualizarPei() : await guardarPei();
+                hasCode ? await actualizarRegistro() : await guardarRegistro();
             }
         } catch (err) {
             MostrarMensaje('error', GenerarMensajeError(err));
@@ -41,10 +41,14 @@ $(document).ready(function () {
         $('#gestionInicio').valid();
     });
 
+    $(document).on('click', '#refresh', function(){
+        dt_pei.ajax.reload();
+    })
+
     /*=============================================
-    INSERTA EN LA BD UN NUEVO REGISTRO DE PEI
+    INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-    async function  guardarPei()   {
+    async function  guardarRegistro()   {
         let descripcionPei = $("#descripcionPei").val();
         let fechaAprobacion = $("#fechaAprobacion").val();
         let gestionInicio = $("#gestionInicio").val();
@@ -78,7 +82,7 @@ $(document).ready(function () {
     /*=============================================
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-    async function actualizarPei() {
+    async function actualizarRegistro() {
         let descripcionPei = $("#descripcionPei").val();
         let fechaAprobacion = $("#fechaAprobacion").val();
         let gestionInicio = $("#gestionInicio").val();
@@ -146,7 +150,7 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    ELIMINA DE LA BD UN REGISTRO DE PEI
+    ELIMINA DE LA BD UN REGISTRO
     =============================================*/
     $(document).on('click', 'tbody #btnEliminar', function(){
         let objectBtn = $(this)
@@ -188,7 +192,7 @@ $(document).ready(function () {
     });
 
     /*=============================================
-    BUSCA EL PEI SELECCIONADO EN LA BD
+    BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
     $(document).on('click', 'tbody #btnEditar', function(){
         let objectBtn = $(this)
