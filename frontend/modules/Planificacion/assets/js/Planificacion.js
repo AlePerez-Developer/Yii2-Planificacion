@@ -59,6 +59,10 @@ function GenerarMensajeError(Mensaje){
         return "Error: Ocurrio un error en la sentencia SQL";
     } else if (Mensaje === "errorExiste") {
         return "Error: El valor ingresado ya existe en la base de datos";
+    } else if (Mensaje === "errorDB") {
+        return "Error: Se presento un error en la base de datos del proyecto y no se puede continuar";
+    } else if (Mensaje === "errorGeneral") {
+        return "Error: Se presento un error inesperado en el proceso y no se puede continuar";
     } else if (Mensaje === "errorMeta") {
         return "Error: la meta nueva excede la cantidad total";
     } else if (Mensaje === "errorEnUso") {

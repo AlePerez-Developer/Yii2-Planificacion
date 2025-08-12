@@ -1,15 +1,15 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\services\PeiService;
+use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\PeiForm;
-use app\controllers\BaseController;
+use app\modules\Planificacion\services\PeiService;
 use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Mpdf\MpdfException;
 use Mpdf\Mpdf;
-use Throwable;
 use Yii;
 
 class PeisController extends BaseController
@@ -53,21 +53,36 @@ class PeisController extends BaseController
      */
     public function beforeAction($action): bool
     {
-        if ($action->id == "listar-peis")
+        if ($action->id == "listar-todo")
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
 
+    /**
+     * accion index.
+     *
+     * @return string
+     */
     public function actionIndex(): string
     {
         return $this->render('peis');
     }
 
-    public function actionListarPeis(): array
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->peiService->listarPeis(),'peis');
+        return $this->withTryCatch(fn() => $this->peiService->listarPeis());
     }
 
+    /**
+     * accion para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionGuardar(): array
     {
         return $this->withTryCatch( function() {
@@ -76,158 +91,92 @@ class PeisController extends BaseController
             $form = new PeiForm();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
-                Yii::$app->response->statusCode = 400;
-                return [
-                    'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Error en el envio de datos',
-                    'errors' => $form->getErrors(),
-                ];
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            $resultado = $this->peiService->guardarPei($form);
-
-            if (!$resultado['success']) {
-                Yii::$app->response->statusCode = $resultado['code'];
-                return [
-                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
-                    'errors' => $resultado['errors'],
-                ];
-            }
-
-            return $resultado['success'];
+            return $this->peiService->guardarPei($form);
         });
     }
 
     /**
-     * @throws Throwable
+     * accion para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      */
     public function actionActualizar(): array
     {
-        $request = Yii::$app->request;
-
-        $codigoPei = (int)$request->post('codigoPei');
-        if (!$codigoPei) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'errors' => ['Se esperaba el campo codigoPei']
-            ];
-        }
-
-        return $this->withTryCatch(function() use($codigoPei){
+        return $this->withTryCatch(function() {
             $request = Yii::$app->request;
 
+            $codigoPei = $this->obtenerCodigo();
             $form = new PeiForm();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
-                Yii::$app->response->statusCode = 400;
-                return [
-                    'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Error en el envio de datos',
-                    'errors' => $form->getErrors(),
-                ];
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            $resultado = $this->peiService->actualizarPei($codigoPei,$form);
-
-            if (!$resultado['success']) {
-                Yii::$app->response->statusCode = $resultado['code'];
-                return [
-                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
-                    'errors' => $resultado['errors'],
-                ];
-            }
-
-            return $resultado['success'];
+            return $this->peiService->actualizarPei($codigoPei,$form);
         });
     }
 
+    /**
+     * accion para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionCambiarEstado(): array
     {
-        $request = Yii::$app->request;
-
-        $codigoPei = (int)$request->post('codigoPei');
-        if (!$codigoPei) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'errors' => ['Se esperaba el campo codigoPei']
-            ];
-        }
-
-        return $this->withTryCatch(function() use($codigoPei) {
-            $resultado = $this->peiService->cambiarEstado($codigoPei);
-
-            if (!$resultado['success']) {
-                Yii::$app->response->statusCode = $resultado['code'];
-                return [
-                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
-                    'errors' => $resultado['errors'],
-                ];
-            }
-
-            return $resultado['estado'];
-        }, 'estado');
-    }
-
-    public function actionEliminar(): array
-    {
-        $request = Yii::$app->request;
-
-        $codigoPei = (int)$request->post('codigoPei');
-        if (!$codigoPei) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'errors' => ['Se esperaba el campo codigoPei']
-            ];
-        }
-
-        return $this->withTryCatch(function() use($codigoPei) {
-            $resultado = $this->peiService->eliminarPei($codigoPei);
-
-            if (!$resultado['success']) {
-                Yii::$app->response->statusCode = $resultado['code'];
-                return [
-                    'respuesta' => $resultado['mensaje'] ?? "ocurrio un error no definido en el procesado",
-                    'errors' => $resultado['errors'],
-                ];
-            }
-
-            return $resultado['success'];
+        return $this->withTryCatch(function() {
+            $codigoPei = $this->obtenerCodigo();
+            return $this->peiService->cambiarEstado($codigoPei);
         });
     }
 
+    /**
+     * accion para soft delete de un registro
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function() {
+            $codigoPei = $this->obtenerCodigo();
+            return $this->peiService->eliminarPei($codigoPei);
+        });
+    }
+
+    /**
+     * accion para buscar un registro en especifico
+     *
+     * @return array
+     */
     public function actionBuscar(): array
     {
-        $request = Yii::$app->request;
+        return $this->withTryCatch(function() {
+            $codigoPei = $this->obtenerCodigo();
+            return $this->peiService->obtenerModelo($codigoPei);
+        });
+    }
 
-        $codigoPei = (int)$request->post('codigoPei');
-        if (!$codigoPei) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'Código PEI no enviado',
-                'errors' => ['Se esperaba el campo codigoPei']
-            ];
+    /**
+     * obtiene y valida si se recibio el codigo por el request
+     *
+     * return int
+     * @throws ValidationException
+     */
+    private function obtenerCodigo(): int
+    {
+        $codigo = (int)Yii::$app->request->post('codigoPei');
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo Pei no enviado.',404);
         }
-
-        return $this->withTryCatch(function() use($codigoPei){
-            $pei = $this->peiService->listarPei($codigoPei);
-
-            if (!$pei) {
-                Yii::$app->response->statusCode = 404;
-                return [
-                    'respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'] ?? 'PEI no encontrado',
-                    'errors' => null,
-                ];
-            }
-
-            return $pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin'));
-        }, 'pei');
+        return $codigo;
     }
 
     /**
      * @throws MpdfException
      */
-    public function actionReporte()
+    public function actionReporte(): void
     {
         $mpdf = new Mpdf();
         $mpdf->SetMargins(0, 0,32);

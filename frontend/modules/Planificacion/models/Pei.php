@@ -48,6 +48,7 @@ class Pei extends ActiveRecord
             [['CodigoPei'], 'unique'],
             [['GestionInicio'], 'unique', 'message' => 'Gestion inicio debe ser unico'],
             [['GestionFin'], 'unique', 'message' => 'Gestion fin debe ser unico'],
+            [['GestionInicio'], 'number', 'min' => 2000, 'tooSmall' => 'la Gestion de inicio debe ser mayor al año 2000'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -92,14 +93,24 @@ class Pei extends ActiveRecord
             ->orderBy(['CodigoPei' => SORT_ASC]);
     }
 
-    public function cambiarEstado()
+    /**
+     * alterna el estado del modelo V/C.
+     *
+     * @return void
+     */
+    public function cambiarEstado(): void
     {
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
     }
 
-    public function eliminarPei()
+    /**
+     * realiza el soft delete de un registro.
+     *
+     * @return void
+     */
+    public function eliminarPei(): void
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }

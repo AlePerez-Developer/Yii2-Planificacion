@@ -1,32 +1,38 @@
 <?php
 namespace app\modules\Planificacion\services;
 
-use app\modules\Planificacion\formModels\PeiForm;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\PeiDao;
+use app\modules\Planificacion\formModels\PeiForm;
 use app\modules\Planificacion\models\Pei;
-use yii\web\NotFoundHttpException;
+use yii\db\StaleObjectException;
 use common\models\Estado;
 use yii\db\Exception;
 use Throwable;
 use Yii;
 
+
 class PeiService
 {
     /**
      * lista un array de Peis no eliminados
+     *
      * @return array of peis
      */
     public  function listarPeis(): array
     {
-        return Pei::listAll()
+        $data = Pei::listAll()
             ->asArray()
             ->all();
+        return ResponseHelper::success($data,'Listado de PEI obtenido.');
     }
 
     /**
      * obtiene un pei en base a un codigo.
+     *
      * @param int $codigoPei
-     * @return Pei | null
+     * @return Pei|null
      */
     public  function listarPei(int $codigoPei): ?Pei
     {
@@ -34,23 +40,11 @@ class PeiService
     }
 
     /**
-     * @throws NotFoundHttpException
-     */
-    private function obtenerPeiValidado(int $codigoPei): ?Pei
-    {
-        $pei = $this->listarPei($codigoPei);
-        if (!$pei) {
-            throw new NotFoundHttpException(Yii::$app->params['ERROR_REGISTRO_EXISTE'] ?? 'PEI no encontrado');
-        }
-        return $pei;
-    }
-
-    /**
      * Guarda un nuevo PEI.
      *
      * @param PeiForm $form
-     * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
-     * @throws Exception
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception|ValidationException
      */
     public function guardarPei(PeiForm $form): array
     {
@@ -64,45 +58,33 @@ class PeiService
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarPei($pei);
+        return $this->validarProcesarModelo($pei);
     }
 
     /**
+     * Actualiza la informacion de un registro en el modelo
+     *
+     * @param int $codigo
+     * @param PeiForm $form
+     * @return array
      * @throws Exception
      * @throws Throwable
+     * @throws ValidationException
+     * @throws StaleObjectException
      */
-    public function actualizarPei(int $codigoPei, PeiForm $form): array
+    public function actualizarPei(int $codigo, PeiForm $form): array
     {
-        try {
-            $pei = $this->obtenerPeiValidado($codigoPei);
-        } catch (NotFoundHttpException $e) {
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'estado' => null,
-                'errors' => null,
-            ];
-        }
+        $pei = $this->obtenerModeloValidado($codigo);
 
         if ($pei->GestionInicio < $form->gestionInicio ){
             if (!PeiDao::validarGestionInicio($pei->CodigoPei, $form->gestionInicio)) {
-                return [
-                    'success' => false,
-                    'mensaje' => 'errorGestionInicio',
-                    'estado' => null,
-                    'errors' => 'Existen indicadores programados con meta que serian afectados por el cambio de fecha de inicio',
-                ];
+                throw new ValidationException(Yii::$app->params['ERROR_GESTION_INICIO'],'Existen indicadores programados con meta que serian afectados por el cambio de fecha de inicio',400);
             }
         }
 
         if ($pei->GestionFin > $form->gestionFin ){
             if (!PeiDao::validarGestionFin($pei->CodigoPei, $form->gestionFin)) {
-                return [
-                    'success' => false,
-                    'mensaje' => 'errorGestionFin',
-                    'estado' => null,
-                    'errors' => 'Existen indicadores programados con meta que serian afectados por el cambio de fecha de finalizacion',
-                ];
+                throw new ValidationException(Yii::$app->params['ERROR_GESTION_FIN'],'Existen indicadores programados con meta que serian afectados por el cambio de fecha de fin',400);
             }
         }
 
@@ -113,154 +95,147 @@ class PeiService
 
         $transaction = Pei::getDb()->beginTransaction();
 
-        PeiDao::regularizarProgramacionIndicadoresInicio($pei->CodigoPei, $form->gestionInicio, $transaction);
-        PeiDao::regularizarProgramacionIndicadoresFin($pei->CodigoPei, $form->gestionFin, $transaction);
+        try {
+        PeiDao::regularizarProgramacionIndicadoresInicio($pei->CodigoPei, $form->gestionInicio);
+        PeiDao::regularizarProgramacionIndicadoresFin($pei->CodigoPei, $form->gestionFin);
 
-        $resultado = $this->validarProcesarPei($pei);
+        $resultado = $this->validarProcesarModelo($pei);
 
-        if (!$resultado['success']) {
+        if ($resultado['message'] != 'ok') {
             $transaction->rollBack();
             return $resultado;
         }
 
         $transaction->commit();
         return $resultado;
+        } catch (Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**
      * Busca un PEI por su código y alterna su estado.
      *
-     * @param int $codigoPei
-     * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
+     * @param int $codigo
+     * @return array ['message' => string, 'data' => string]
      * @throws Exception
+     * @throws ValidationException
      */
-    public function cambiarEstado(int $codigoPei): array
+    public function cambiarEstado(int $codigo): array
     {
-        try {
-            $pei = $this->obtenerPeiValidado($codigoPei);
-        } catch (NotFoundHttpException $e) {
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'estado' => null,
-                'errors' => null,
-            ];
-        }
+        $pei = $this->obtenerModeloValidado($codigo);
 
         $pei->cambiarEstado();
 
         if (!$pei->validate()) {
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
-                'estado' => null,
-                'errors' => $pei->getErrors(),
-            ];
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$pei->getErrors(),500);
         }
 
         if (!$pei->save(false)) {
             Yii::error("Error al guardar el cambio de estado del PEI $pei->CodigoPei", __METHOD__);
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
-                'estado' => null,
-                'errors' => $pei->getErrors(),
-            ];
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$pei->getErrors(),500);
         }
 
         return [
-            'success' => true,
-            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
-            'estado' => $pei->CodigoEstado,
-            'errors' => null,
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => $pei->CodigoEstado,
         ];
     }
 
     /**
-     * Busca un PEI por su código y y lo elimina.
+     * Busca un PEI por su código y realiza un soft delete.
      *
-     * @param int $codigoPei
-     * @return array ['success' => bool, 'mensaje' => string, 'estado' => int|null, 'errors' => array|null]
+     * @param int $codigo
+     * @return array ['message' => string, 'data' => string]
      * @throws Exception
+     * @throws ValidationException
      */
-    public function eliminarPei(int $codigoPei): array
+    public function eliminarPei(int $codigo): array
     {
-        try {
-            $pei = $this->obtenerPeiValidado($codigoPei);
-        } catch (NotFoundHttpException $e) {
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'estado' => null,
-                'errors' => null,
-            ];
-        }
+        $pei = $this->obtenerModeloValidado($codigo);
 
-        if (PeiDao::enUso($pei->CodigoPei)){
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'errors' => 'El PEI se encuentra asignado a un objetivo estrategico',
-            ];
+        if (PeiDao::enUso($pei)){
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El PEI se encuentra asignado a un objetivo estrategico',500);
         }
 
         $pei->eliminarPei();
 
         if (!$pei->validate()) {
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
-                'errors' => $pei->getErrors(),
-            ];
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$pei->getErrors(),500);
         }
 
         if (!$pei->save(false)) {
-            Yii::error("Error al eliminar del PEI $pei->CodigoPei", __METHOD__);
-            return [
-                'success' => false,
-                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
-                'errors' => $pei->getErrors(),
-            ];
+            Yii::error("Error al guardar el cambio de estado del PEI $pei->CodigoPei", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$pei->getErrors(),500);
         }
 
         return [
-            'success' => true,
-            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
-            'errors' => null,
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => '',
         ];
     }
 
     /**
-     * @param Pei|null $pei
+     * Obtiene el modelo segun el codigo enviado.
+     *
+     * @param int $codigo
      * @return array
-     * @throws Exception
+     * @throws ValidationException
      */
-    public function validarProcesarPei(Pei $pei): array
+    public function obtenerModelo(int $codigo): array
     {
-        if (!$pei->validate()) {
-            return [
-                'success' => false,
-                'code' => 400,
-                'mensaje' => Yii::$app->params['ERROR_VALIDACION_MODELO'],
-                'errors' => $pei->getErrors(),
-            ];
-        }
+        $pei = $this->listarPei($codigo);
 
-        if (!$pei->save(false)) {
-            Yii::error("Error al guardar el PEI", __METHOD__);
-            return [
-                'success' => false,
-                'code' => 500,
-                'mensaje' => Yii::$app->params['ERROR_EJECUCION_SQL'],
-                'errors' => $pei->getErrors(),
-            ];
+        if (!$pei) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
-            'success' => true,
-            'code' => 201,
-            'mensaje' => Yii::$app->params['PROCESO_CORRECTO'],
-            'errors' => null,
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => $pei->getAttributes(array('CodigoPei', 'DescripcionPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin')),
+        ];
+    }
+
+
+    /**
+     * Obtiene el modelo segun el codigo enviado y valida si existe.
+     *
+     * @param int $codigo
+     * @return Pei|null
+     * @throws ValidationException
+     */
+    private function obtenerModeloValidado(int $codigo): ?Pei
+    {
+        $model = $this->listarPei($codigo);
+        if (!$model) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
+        }
+        return $model;
+    }
+
+    /**
+     *  Recibe un modelo lo valida y realiza el guardado del mismo.
+     *
+     * @param Pei $pei
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function validarProcesarModelo(Pei $pei): array
+    {
+        if (!$pei->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$pei->getErrors(),500);
+        }
+
+        if (!$pei->save(false)) {
+            Yii::error("Error al guardar el cambio de estado del PEI $pei->CodigoPei", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$pei->getErrors(),500);
+        }
+
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => '',
         ];
     }
 }

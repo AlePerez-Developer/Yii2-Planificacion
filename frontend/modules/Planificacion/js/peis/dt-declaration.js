@@ -7,11 +7,11 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            url: 'index.php?r=Planificacion/peis/listar-peis',
-            dataSrc: 'peis',
+            url: 'index.php?r=Planificacion/peis/listar-todo',
+            dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
                 dt_pei.processing(false);
             }
         },

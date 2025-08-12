@@ -70,7 +70,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
             }
         });
     }
@@ -105,7 +105,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
             }
         });
     }
@@ -128,7 +128,7 @@ $(document).ready(function () {
             },
             dataType: "json",
             success: function (data) {
-                if (data["estado"] === ESTADO_VIGENTE) {
+                if (data["data"] === ESTADO_VIGENTE) {
                     objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
                     objectBtn.find('.btn_text').html('Vigente')
                 } else {
@@ -139,7 +139,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
                 DetenerSpiner(objectBtn)
             }
         });
@@ -179,7 +179,7 @@ $(document).ready(function () {
                     },
                     error: function (xhr) {
                         const data = JSON.parse(xhr.responseText)
-                        MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                        MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
                         DetenerSpiner(objectBtn)
                     }
                 });
@@ -204,7 +204,7 @@ $(document).ready(function () {
             },
             dataType: "json",
             success: function (data) {
-                let pei = JSON.parse(JSON.stringify(data["pei"]));
+                let pei = JSON.parse(JSON.stringify(data["data"]));
                 $("#codigoPei").val(pei["CodigoPei"]);
                 $("#descripcionPei").val(pei["DescripcionPei"]);
                 $("#fechaAprobacion").val(pei["FechaAprobacion"]);
@@ -215,7 +215,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["respuesta"]), data["errors"])
+                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
                 DetenerSpiner(objectBtn)
             }
         });
