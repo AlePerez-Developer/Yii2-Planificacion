@@ -383,4 +383,18 @@ create table AperturasProgramaticas
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+create table Gastos(
+    CodigoGasto int not null primary key identity(1,1),
+    Descripcion Varchar(450) not null,
+    EntidadTransferencia varchar(5) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Gastos_Descripcion check (Descripcion != ''),
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
 
