@@ -1,27 +1,30 @@
 <?php
-
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\models\ObjetivoEstrategico;
-use app\modules\Planificacion\dao\ObjEstrategicoDao;
-use app\modules\Planificacion\models\Pei;
-use yii\db\StaleObjectException;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\ObjetivoEstrategicoService;
+use app\modules\Planificacion\formModels\ObjetivoEstrategicoForm;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\models\Estado;
-use yii\web\Controller;
 use Mpdf\MpdfException;
-use Throwable;
 use Mpdf\Mpdf;
 use Yii;
 
-class ObjEstrategicoController extends Controller
+class ObjEstrategicoController extends BaseController
 {
+    private ObjetivoEstrategicoService $objetivoService;
+
+    public function __construct($id, $module, ObjetivoEstrategicoService $objetivoService, $config = [])
+    {
+        $this->objetivoService = $objetivoService;
+        parent::__construct($id, $module, $config);
+    }
     public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -30,14 +33,19 @@ class ObjEstrategicoController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => [],
+                        'actions' => ['index','listar-todo','verificar-codigo','guardar','eliminar','cambiar-estado','buscar'],
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function () {
+                            Yii::$app->contexto->validarPeiActivo();
+                            return true;
+                        },
+
                     ],
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -45,250 +53,142 @@ class ObjEstrategicoController extends Controller
         ];
     }
 
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
-        if ($action->id == "listar-objs")
+        if ($action->id == "listar-todo")
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
 
-    public function actionIndex()
+    /**
+     * accion index.
+     *
+     * @return string
+     */
+    public function actionIndex(): string
     {
-        $peis = Pei::find()->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])->all();
-        return $this->render('objEstrategico',['peis'=>$peis]);
-    }
-
-    public function actionListarObjs()
-    {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $objs = ObjetivoEstrategico::find()->alias('O')
-                ->select(['O.CodigoObjEstrategico','P.DescripcionPEI','P.GestionInicio','P.GestionFin','O.CodigoObjetivo','O.Objetivo','O.CodigoEstado','O.CodigoUsuario','P.FechaAprobacion'])
-                ->join('INNER JOIN','PEIs P', 'O.CodigoPei = P.CodigoPei')
-                ->where(['!=','O.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=','P.CodigoEstado', Estado::ESTADO_ELIMINADO])
-                ->orderBy('O.CodigoObjetivo')
-                ->asArray()
-                ->all();
-            return json_encode($objs);
-        } else
-            return 'ERROR_CABECERA';
-    }
-
-    public function actionGuardarObjs()
-    {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoPei"]) && isset($_POST["codigoObjetivo"]) && isset($_POST["objetivo"]))) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $obj = new ObjetivoEstrategico();
-        $obj->CodigoObjEstrategico = ObjEstrategicoDao::GenerarCodigoObjEstrategico();
-        $obj->CodigoPei = $_POST["codigoPei"];
-        $obj->CodigoObjetivo = trim($_POST["codigoObjetivo"]);
-        $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
-        $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
-        $obj->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
-
-        if ($obj->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$obj->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if (!$obj->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        yii::$app->contexto->setPei(2);
+        return $this->render('objEstrategico');
     }
 
     /**
-     * @throws StaleObjectException
-     * @throws Throwable
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      */
-    public function actionCambiarEstadoObj()
+    public function actionListarTodo(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoObjEstrategico"]))) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
-
-        if (!$obj) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-
-        ($obj->CodigoEstado == Estado::ESTADO_VIGENTE)?$obj->CodigoEstado = Estado::ESTADO_CADUCO: $obj->CodigoEstado = Estado::ESTADO_VIGENTE;
-
-        if ($obj->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $this->withTryCatch(fn() => $this->objetivoService->listarObjetivos());
     }
 
     /**
-     * @throws Throwable
-     * @throws StaleObjectException
+     * accion para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      */
-    public function actionEliminarObj()
+    public function actionGuardar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch( function() {
+            $request = Yii::$app->request;
 
-        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
+            $form = new ObjetivoEstrategicoForm();
+            $form->CodigoPei = 2;
 
-        if (!$obj) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-        if ($obj->enUso()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
-        }
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+            }
 
-        $obj->CodigoEstado = Estado::ESTADO_ELIMINADO;
-
-        if ($obj->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
-    }
-
-    public function actionBuscarObj()
-    {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoObjEstrategico"]) && $_POST["codigoObjEstrategico"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
-
-        if (!$obj) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'obj' => $obj->getAttributes(array('CodigoObjEstrategico','CodigoPei','CodigoObjetivo','Objetivo'))]);
+            return $this->objetivoService->guardarObjetivo($form);
+        });
     }
 
     /**
-     * @throws Throwable
-     * @throws StaleObjectException
+     * accion para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      */
-    public function actionActualizarObj()
+    public function actionActualizar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoPei"]) && isset($_POST["codigoObjEstrategico"]) && isset($_POST["codigoObjetivo"]) && isset($_POST["objetivo"]))) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch(function() {
+            $request = Yii::$app->request;
 
-        $obj = ObjetivoEstrategico::findOne($_POST["codigoObjEstrategico"]);
+            $codigoObjEstrategico = $this->obtenerCodigo();
+            $form = new ObjetivoEstrategicoForm();
 
-        if (!$obj) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+            }
 
-        $obj->CodigoPei = $_POST["codigoPei"];
-        $obj->CodigoObjetivo = trim($_POST["codigoObjetivo"]);
-        $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
-
-        if ($obj->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$obj->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-
-        if ($obj->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+            return $this->objetivoService->actualizarObjetivo($codigoObjEstrategico,$form);
+        });
     }
 
-    public function actionVerificarCodigo()
+    /**
+     * accion para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionCambiarEstado(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return false;
-        }
-        if (!isset($_POST["codigo"]) && !isset($_POST["pei"]) && !isset($_POST["objetivoEstrategico"]) ) {
-            return false;
-        }
+        return $this->withTryCatch(function() {
+            $codigoObjEstrategico = $this->obtenerCodigo();
+            return $this->objetivoService->cambiarEstado($codigoObjEstrategico);
+        });
+    }
 
-        $objetivoEstrategico = ObjetivoEstrategico::find()
-            ->where(['CodigoObjetivo' => $_POST["codigo"], 'CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->andWhere(['!=','CodigoObjEstrategico',$_POST["objetivoEstrategico"]])
-            ->andWhere(['CodigoPei' => $_POST["pei"]])
-            ->one();
+    /**
+     * accion para soft delete de un registro
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function() {
+            $codigoObjEstrategico = $this->obtenerCodigo();
+            return $this->objetivoService->eliminarObjetivo($codigoObjEstrategico);
+        });
+    }
 
-        if ($objetivoEstrategico) {
-            return false;
+    /**
+     * accion para buscar un registro en especifico
+     *
+     * @return array
+     */
+    public function actionBuscar(): array
+    {
+        return $this->withTryCatch(function() {
+            $codigoObjEstrategico = $this->obtenerCodigo();
+            return $this->objetivoService->obtenerModelo($codigoObjEstrategico);
+        });
+    }
+
+    /**
+     * obtiene y valida si se recibio el codigo por el request
+     *
+     * return int
+     * @throws ValidationException
+     */
+    private function obtenerCodigo(): int
+    {
+        $codigo = (int)Yii::$app->request->post('codigoObjEstrategico');
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo Pei no enviado.',404);
         }
+        return $codigo;
+    }
 
-        return true;
+    public function actionVerificarCodigo(): bool
+    {
+        return $this->objetivoService->verificarCodigo(yii::$app->contexto->getPei(), 0, $_POST["codigo"]);
     }
 
     /**
      * @throws MpdfException
      */
-    public function actionReporte()
+    public function actionReporte(): void
     {
         $mpdf = new Mpdf();
         $mpdf->SetMargins(0, 0,32);
-        /*$mpdf->SetHTMLHeader('
-            <table style="width: 100%" >
-                <tr>
-                    <td width="7%" style="border-right: 1px solid black" >
-                        <img src="img/EscudoPNG.png" width="7%">
-                    </td>
-                    <td width="25%" style="font-size: 9px">Universidad Mayor Real y Pontificia de San Francisco Xavier de Chuquisaca</td>
-                    <td width="53%" style="text-align: center; vertical-align: bottom; border-style: hidden" >Objetivos Estrategicos</td>
-                    <td width="15%" style="text-align: center" >
-                        <img src="img/logo400.png" width="15%">
-                    </td>
-                </tr>
-            </table>
-            <hr>
-        ');
-        $mpdf->SetHTMLFooter('
-            <hr>
-            <table width="100%">
-                <tr>
-                    <td width="33%"  style="font-size: 9px">'. Yii::$app->user->identity->Login .'('.Yii::$app->user->identity->CodigoUsuario.')'  .'</td>
-                    <td width="33%"  style="font-size: 9px" align="center">{PAGENO}/{nbpg}</td>
-                    <td width="33%" style="text-align: right; font-size: 9px">{DATE j-m-Y h:i:s}</td>
-                </tr>
-            </table>'
-        );
-
-        $a = '<table  width="100%" style="border: none; border-collapse: collapse "> <tr>' ;
-        $a .= '<thead >';
-        $a .=   '<tr>';
-        $a .=       '<th width="10%" style="border-bottom: 1px solid black">cabecera</th>';
-        $a .=       '<th width="50%" style="border-bottom: 1px solid black"> cabecera</th>';
-        $a .=       '<th width="40%" style="border-bottom: 1px solid black">cabecera </th>';
-        $a .=   '</tr>';
-        $a .= ' </thead>';
-        $a .= ' <tbody>';
-
-
-
-        $a .= ' </tbody>';
-        $a .= '</table>';
-
-
-        $mpdf->WriteHTML($a);*/
 
         $mpdf->Output();
     }

@@ -92,7 +92,7 @@ $(document).ready(function() {
     $.validator.addMethod("CodigoObjetivoUnico",
         function(value, element, param) {
             let result = false;
-            let pei = $('#codigoPei').val();
+            let pei = codigo
             let objetivoEstrategico = $(param).val();
             let datos = new FormData();
             datos.append("codigo", value);
@@ -178,41 +178,33 @@ $(document).ready(function() {
 
     $( "#formObjEstrategico" ).validate( {
         rules: {
-            codigoPei:{
-                required: true,
-                DiferenteQue: '0'
-            },
             codigoObjetivo: {
                 required: true,
                 digits: true,
                 max: 999,
                 largominimo: '3',
-                dependencia: '#codigoPei',
                 CodigoObjetivoUnico: '#codigoObjEstrategico'
             },
             objetivo:{
                 required: true,
                 minlength: 2,
-                maxlength: 450
+                maxlength: 450,
+                dependencia: '#codigoObjetivo',
             },
         },
         messages: {
-            codigoPei: {
-                required: "Debe seleccionar un codigo PEI",
-                DiferenteQue:"Debe seleccionar un codigo PEI"
-            },
             codigoObjetivo: {
                 required: "Debe ingresar un codigo de objetico estrategico (OE)",
                 digits: "Solo se permite numeros enteros",
                 max: "Debe ingresar un numero de 3 digitos como maximo",
                 largominimo: "Debe ingresar un numero de 3 digitos",
-                dependencia: "Debe elegir un PEI para poder validar el codigo del objetivo",
                 CodigoObjetivoUnico: "El codigo de objetivo estrategico debe ser unico"
             },
             objetivo: {
                 required: "Debe ingresar la descripcion del objetivo estrategico",
                 minlength: "El objetivo debe tener por lo menos 2 caracteres",
-                maxlength: "El objetivo debe tener maximo 450 caracteres"
+                maxlength: "El objetivo debe tener maximo 450 caracteres",
+                dependencia: "Debe ingresar un codigo valido para poder proseguir",
             },
         },
         errorElement: "div",

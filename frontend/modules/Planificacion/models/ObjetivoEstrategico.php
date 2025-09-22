@@ -2,6 +2,7 @@
 
 namespace app\modules\Planificacion\models;
 
+use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -22,6 +23,7 @@ use common\models\Usuario;
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
  * @property PEI $codigoPei
+ * @property ObjetivoInstitucional[] $objetivosInstitucionales
  */
 
 class ObjetivoEstrategico extends ActiveRecord
@@ -29,7 +31,7 @@ class ObjetivoEstrategico extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'ObjetivosEstrategicos';
     }
@@ -37,7 +39,7 @@ class ObjetivoEstrategico extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['CodigoObjEstrategico', 'CodigoObjetivo', 'Objetivo', 'CodigoPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
@@ -47,16 +49,16 @@ class ObjetivoEstrategico extends ActiveRecord
             [['Objetivo'], 'string', 'max' => 450],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoObjEstrategico'], 'unique'],
-            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
-            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::className(), 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'CodigoObjEstrategico' => 'Codigo Obj Estrategico',
@@ -69,63 +71,96 @@ class ObjetivoEstrategico extends ActiveRecord
         ];
     }
 
+    public static function listOne($codigo): ?ObjetivoEstrategico
+    {
+        return self::findOne(['CodigoObjEstrategico' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+    }
+
+    public static function listAll(): ActiveQuery
+    {
+        return self::find()->alias('O')
+            ->select([
+                'O.CodigoObjEstrategico',
+                'P.DescripcionPEI',
+                'P.GestionInicio',
+                'P.GestionFin',
+                'O.CodigoObjetivo',
+                'O.Objetivo',
+                'O.CodigoEstado',
+                'O.CodigoUsuario',
+                'P.FechaAprobacion'
+            ])
+            ->joinWith('pei P', true, 'INNER JOIN')
+            ->where(['!=', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['o.CodigoPei' => Yii::$app->contexto->getPei()])
+            ->orderBy(['CodigoObjetivo' => SORT_ASC]);
+    }
+
+    /**
+     * alterna el estado del modelo V/C.
+     *
+     * @return void
+     */
+    public function cambiarEstado(): void
+    {
+        $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
+            ? Estado::ESTADO_CADUCO
+            : Estado::ESTADO_VIGENTE;
+    }
+
+    /**
+     * realiza el soft delete de un registro.
+     *
+     * @return void
+     */
+    public function eliminarObjetivo(): void
+    {
+        $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
+    }
+
+    /**
+     * Gets query for [[ObjetivosInstitucionales]].
+     *
+     * @return ActiveQuery
+     */
+    public function getObjetivosInstitucionales(): ActiveQuery
+    {
+        return $this->hasMany(ObjetivoInstitucional::class, ['CodigoObjEstrategico' => 'CodigoObjEstrategico']);
+    }
+
     /**
      * Gets query for [[CodigoEstado]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoEstado()
+    public function getCodigoEstado(): ActiveQuery
     {
-        return $this->hasOne(Estado::className(), ['CodigoEstado' => 'CodigoEstado']);
+        return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
     }
 
     /**
      * Gets query for [[CodigoUsuario]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoUsuario()
+    public function getCodigoUsuario(): ActiveQuery
     {
-        return $this->hasOne(Usuario::className(), ['CodigoUsuario' => 'CodigoUsuario']);
+        return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
     /**
      * Gets query for [[CodigoPei]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoPei()
+    public function getPei(): ActiveQuery
     {
-        return $this->hasOne(\app\modules\Planificacion\models\Pei::className(), ['CodigoPei' => 'CodigoPei']);
+        return $this->hasOne(Pei::class, ['CodigoPei' => 'CodigoPei']);
     }
 
-    public function exist()
+    public function getCodigoPei(): ActiveQuery
     {
-        $obj = ObjetivoEstrategico::find()
-            ->where('(CodigoObjetivo = :CodigoObjetivo) or (Objetivo = :Objetivo) ',
-                [':CodigoObjetivo' => $this->CodigoObjetivo, ':Objetivo' => $this->Objetivo]
-            )
-            ->andWhere(['!=','CodigoObjEstrategico', $this->CodigoObjEstrategico])
-            ->andWhere(["CodigoPei"=> $this->CodigoPei])
-            ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
-        if(!empty($obj)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function enUso()
-    {
-        $Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
-        if(empty($Obj)){
-            $Obj = IndicadorEstrategico::find()->where(["ObjetivoEstrategico" => $this->CodigoObjEstrategico])->all();
-            if(empty($Obj))
-                return false;
-            else
-                return true;
-        }else{
-            return true;
-        }
+        return $this->hasOne(Pei::class, ['CodigoPei' => 'CodigoPei']);
     }
 }

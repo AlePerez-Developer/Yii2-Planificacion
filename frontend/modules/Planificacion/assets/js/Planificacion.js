@@ -102,6 +102,16 @@ $("#btnMostrarCrear").click(function () {
     }
 });
 
+function cambiarEstadoBtn(objectBtn, data){
+    if (data === ESTADO_VIGENTE) {
+        objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
+        objectBtn.find('.btn_text').html('Vigente')
+    } else {
+        objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
+        objectBtn.find('.btn_text').html('Caducado')
+    }
+}
+
 function renderItem(key, value, ul) {
     if (typeof value === "object" && value !== null) {
         const li = $("<li class='error0'>").text('Campo ' + key + ":");
