@@ -161,19 +161,7 @@ class PeiService
 
         $pei->eliminarPei();
 
-        if (!$pei->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$pei->getErrors(),500);
-        }
-
-        if (!$pei->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del PEI $pei->CodigoPei", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$pei->getErrors(),500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
+        return $this->validarProcesarModelo($pei);
     }
 
     /**

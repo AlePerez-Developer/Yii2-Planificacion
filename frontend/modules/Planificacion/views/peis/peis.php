@@ -16,11 +16,10 @@ $this->registerJsFile("@planificacionModule/js/peis/dt-declaration.js", [
     ]
 ]);
 
-
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Peis']];
-
 ?>
+
 <div class="card ">
     <div class="card-header">
         <div class="row">

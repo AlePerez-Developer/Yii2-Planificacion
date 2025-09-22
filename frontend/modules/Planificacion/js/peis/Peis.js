@@ -132,13 +132,7 @@ $(document).ready(function () {
             },
             dataType: "json",
             success: function (data) {
-                if (data["data"] === ESTADO_VIGENTE) {
-                    objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
-                    objectBtn.find('.btn_text').html('Vigente')
-                } else {
-                    objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
-                    objectBtn.find('.btn_text').html('Caducado')
-                }
+                cambiarEstadoBtn(objectBtn, data["data"]);
                 DetenerSpiner(objectBtn)
             },
             error: function (xhr) {
@@ -209,7 +203,6 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 let pei = JSON.parse(JSON.stringify(data["data"]));
-                $("#codigoPei").val(pei["CodigoPei"]);
                 $("#descripcionPei").val(pei["DescripcionPei"]);
                 $("#fechaAprobacion").val(pei["FechaAprobacion"]);
                 $("#gestionInicio").val(pei["GestionInicio"]);

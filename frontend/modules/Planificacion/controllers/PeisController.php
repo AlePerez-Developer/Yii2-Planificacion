@@ -65,6 +65,7 @@ class PeisController extends BaseController
      */
     public function actionIndex(): string
     {
+        Yii::$app->contexto->setPei(1);
         return $this->render('peis');
     }
 
