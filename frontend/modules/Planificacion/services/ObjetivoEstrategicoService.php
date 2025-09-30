@@ -75,7 +75,7 @@ class ObjetivoEstrategicoService
         $objetivo = $this->obtenerModeloValidado($codigo);
 
         $objetivo->CodigoObjetivo = $form->codigoObjetivo;
-        $objetivo->Objetivo = $form->objetivo;
+        $objetivo->Objetivo = mb_strtoupper(trim($form->objetivo), 'UTF-8');
         $objetivo->CodigoPei = $form->CodigoPei;
 
         return $this->validarProcesarModelo($objetivo);

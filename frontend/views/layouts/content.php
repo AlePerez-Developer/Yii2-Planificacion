@@ -2,6 +2,8 @@
 /* @var $content string */
 
 //use yii\bootstrap4\Breadcrumbs;
+use yii\helpers\Html;
+use yii\helpers\Inflector;
 use yii\widgets\Breadcrumbs;
 ?>
 <div class="content-wrapper">
@@ -13,21 +15,25 @@ use yii\widgets\Breadcrumbs;
                     <h1 class="m-0">
                         <?php
                         if (!is_null($this->title)) {
-                            echo \yii\helpers\Html::encode($this->title);
+                            echo Html::encode($this->title);
                         } else {
-                            echo \yii\helpers\Inflector::camelize($this->context->id);
+                            echo Inflector::camelize($this->context->id);
                         }
                         ?>
                     </h1>
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <?php
-                    echo Breadcrumbs::widget([
-                        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-                        'options' => [
-                            'class' => 'breadcrumb float-sm-right'
-                        ]
-                    ]);
+                    try {
+                        echo Breadcrumbs::widget([
+                            'links' => $this->params['breadcrumbs'] ?? [],
+                            'options' => [
+                                'class' => 'breadcrumb float-sm-right'
+                            ]
+                        ]);
+                    } catch (Throwable $e) {
+
+                    }
                     ?>
                 </div><!-- /.col -->
             </div><!-- /.row -->

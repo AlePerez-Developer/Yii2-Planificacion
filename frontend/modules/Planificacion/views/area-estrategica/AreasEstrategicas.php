@@ -4,13 +4,19 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/actividad/Actividad.js", [
+$this->registerJsFile("@planificacionModule/js/area-estrategica/dt-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/area-estrategica/areaEstrategica.js", [
     'depends' => [
         JqueryAsset::className()
     ]
 ]);
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Actividades']];
+$this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
 ?>
 
 <div class="card ">
@@ -21,36 +27,36 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
                     <div class="horizontal"></div>
                     <div class="vertical"></div>
                 </div>
-                Agregar Actividad
+                Agregar Área Estratégica
             </div>
         </button>
     </div>
-    <div id="divDatos" class="card-body">
+    <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigo" name="codigo" disabled hidden>
-                    <form id="formActividades" action="" method="post">
+                    <input type="text" id="codigoAreaEstrategica" name="codigoAreaEstrategica" disabled hidden>
+                    <form id="formAreaEstrategica" action="" method="post">
 
                         <div class="form-group">
-                            <label for="CodigoPrograma">Seleccione un programa</label>
-                            <select class="form-control programa" id="CodigoPrograma" name="CodigoPrograma" >
+                            <label for="codigoPei">Seleccione un PEI</label>
+                            <select class="form-control pei" id="codigoPei" name="codigoPei" >
                                 <option></option>
-                                <?php foreach ($programas as $programa){ ?>
-                                    <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
+                                <?php foreach ($peis as $pei){ ?>
+                                    <option value="<?= $pei->CodigoPei ?>"><?= '(' .  $pei->CodigoPei .') - ' . ($pei->DescripcionPei ?? '')  ?></option>
                                 <?php } ?>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="Codigo" class="control-label">Codigo de actividad</label>
-                            <input id="Codigo" name="Codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
+                            <label for="codigo" class="control-label">Código de Área</label>
+                            <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
                         </div>
 
                         <div class="form-group">
-                            <label for="Descripcion">Descripcion de la actividad</label>
-                            <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="Descripcion" placeholder="Descripcion"></textarea>
+                            <label for="descripcion">Descripción</label>
+                            <textarea class="form-control input-sm txt" rows="4" id="descripcion" name="descripcion" placeholder="Descripcion"></textarea>
                         </div>
 
                     </form>
@@ -64,20 +70,16 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
         </div>
     </div>
     <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaActividades" name="tablaListaActividades" class="table table-bordered table-striped dt-responsive"
+        <table id="tablaListaAreas" name="tablaListaAreas" class="table table-bordered table-striped dt-responsive"
                style="width: 100%">
             <thead>
             <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Programa</th>
+            <th style="text-align: center; vertical-align: middle;">PEI</th>
             <th style="text-align: center; vertical-align: middle;">Codigo</th>
             <th style="text-align: center; vertical-align: middle;">Descripcion</th>
-            <th style="text-align: center; vertical-align: middle;">Estado</th>
             <th style="text-align: center; vertical-align: middle;">Acciones</th>
             </thead>
         </table>
     </div>
 
 </div>
-
-
-

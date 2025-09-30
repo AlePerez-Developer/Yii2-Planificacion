@@ -137,7 +137,7 @@ $(document).ready(function () {
         $('#formUnidad').trigger("reset");
     }
 
-    $("#btnMostrarCrear").click(function () {
+    /*$("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
         icono.toggleClass('opened');
         if (icono.hasClass("opened")) {
@@ -147,7 +147,7 @@ $(document).ready(function () {
             $("#divDatos").hide(500);
             $("#divTabla").show(500);
         }
-    });
+    });*/
 
     $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');

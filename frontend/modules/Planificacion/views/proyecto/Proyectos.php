@@ -25,7 +25,7 @@ $this->params['breadcrumbs'] = [['label' => 'Proyectos']];
             </div>
         </button>
     </div>
-    <div id="ingresoDatos" class="card-body">
+    <div id="divDatos" class="card-body">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>

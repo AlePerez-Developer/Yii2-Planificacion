@@ -212,9 +212,11 @@ $(document).ready(function(){
         $('#formIndicadorEstrategico').trigger('reset');
     }
 
-    $("#btnMostrarCrear").click(function () {
+    /*$("#btnMostrarCrear").click(function () {
         let icono = $('.icon');
+        alert(icono.hasClass("closed"))
         icono.toggleClass('opened');
+        alert(icono.hasClass("closed"))
         if (icono.hasClass("opened")){
             $("#IngresoDatos").show(500);
             $("#Divtabla").hide(500);
@@ -222,7 +224,7 @@ $(document).ready(function(){
             $("#IngresoDatos").hide(500);
             $("#Divtabla").show(500);
         }
-    });
+    });*/
 
     $("#btnCancelar").click(function () {
         formReset = true;

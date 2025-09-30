@@ -29,7 +29,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         <div class="row">
             <div class="col-6">
                 <button id="btnMostrarCrear" name="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-                    <div class="icon closed">
+                    <div class="icon">
                         <div class="circle">
                             <div class="horizontal"></div>
                             <div class="vertical"></div>
@@ -43,7 +43,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </div>
         </div>
     </div>
-    <div id="IngresoDatos" class="card-body" style="display: none" >
+    <div id="divDatos" class="card-body" style="display: none" >
         <div class="row justify-content-center">
             <div class="col-11">
                 <div class="card">
@@ -143,7 +143,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </div>
         </div>
     </div>
-    <div id="Divtabla" class="card-body">
+    <div id="divtabla" class="card-body">
         <table id="tablaListaIndicadoresEstrategicos" class="table-bordered table-striped dt-responsive table-sm tablaListaIndicadoresEstrategicos" style="width: 100%" >
             <thead>
                 <th>#</th>
