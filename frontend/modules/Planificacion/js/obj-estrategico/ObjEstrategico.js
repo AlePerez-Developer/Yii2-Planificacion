@@ -14,7 +14,7 @@ $(document).ready(function(){
         $("#divTabla").show(500);
     });
 
-    $("#btnGuardar").click(async function () {
+    $("#btnGuardar").click(function () {
         const btn = $(this);
         const btnCancel = $('#btnCancelar')
 
@@ -23,7 +23,7 @@ $(document).ready(function(){
         try {
             if ($("#formObjEstrategico").valid()) {
                 const hasCode =  codigoObjEstrategico !== 0;
-                hasCode ? await actualizarRegistro() : await guardarRegistro();
+                hasCode ? actualizarRegistro() : guardarRegistro();
             }
         } catch (err) {
             MostrarMensaje('error', GenerarMensajeError(err));
@@ -40,7 +40,7 @@ $(document).ready(function(){
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-    async function  guardarRegistro()   {
+    function  guardarRegistro()   {
         let codigoObjetivo = $("#codigoObjetivo").val();
         let objetivo = $("#objetivo").val();
         let datos = new FormData();
@@ -70,7 +70,7 @@ $(document).ready(function(){
     /*=============================================
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-    async function actualizarRegistro() {
+    function actualizarRegistro() {
         let CodigoObjetivo = $("#codigoObjetivo").val();
         let objetivo = $("#objetivo").val();
         let datos = new FormData();

@@ -92,11 +92,9 @@ $(document).ready(function() {
     $.validator.addMethod("CodigoObjetivoUnico",
         function(value, element, param) {
             let result = false;
-            let pei = codigo
             let objetivoEstrategico = $(param).val();
             let datos = new FormData();
             datos.append("codigo", value);
-            datos.append("pei", pei);
             datos.append("objetivoEstrategico", objetivoEstrategico);
             $.ajax({
                 url: "index.php?r=Planificacion/obj-estrategico/verificar-codigo",
@@ -175,6 +173,47 @@ $(document).ready(function() {
         }
 
     } );
+
+    $( "#formPrograma" ).validate({
+        rules: {
+            codigo: {
+                required: true,
+                digits: true,
+                minlength: 3,
+                maxlength: 3
+            },
+            descripcion:{
+                required: true,
+                minlength: 5,
+                maxlength: 250
+            },
+        },
+        messages: {
+            codigo: {
+                required: "Debe ingresar un codigo para el programa",
+                digits: "Solo debe ingresar numeros",
+                minlength: "El codigo debe tener almenos 3 numeros",
+                maxlength: "El codigo debe tener maximo 3 numeros"
+            },
+            descripcion: {
+                required: "Debe ingresar una descripcion para el programa",
+                minlength: "La descripcion debe tener almenos 5 letras",
+                maxlength: "la descripcion debe tener maximo 250 letras"
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    });
 
     $( "#formObjEstrategico" ).validate( {
         rules: {
@@ -318,6 +357,11 @@ $(document).ready(function() {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
     } );
+
+
+
+
+
 
     $( "#formUnidad" ).validate( {
         rules: {

@@ -40,6 +40,7 @@ class AreaEstrategica extends ActiveRecord
             [['CodigoAreaEstrategica', 'CodigoPei', 'Codigo'], 'integer'],
             [['Descripcion'], 'string', 'max' => 500],
             [['CodigoAreaEstrategica'], 'unique'],
+            [['Codigo','CodigoPei'], 'unique'],
             [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
         ];
     }

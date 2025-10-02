@@ -89,7 +89,9 @@ class AreaEstrategicaController extends BaseController
             $request = Yii::$app->request;
 
             $form = new AreaEstrategicaForm();
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            $form->load($request->post(), '');
+            $form->codigoPei = Yii::$app->contexto->getPei();
+            if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
             return $this->service->guardar($form);
@@ -109,7 +111,9 @@ class AreaEstrategicaController extends BaseController
             $codigo = $this->obtenerCodigo();
             $form = new AreaEstrategicaForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            $form->load($request->post(), '');
+            $form->codigoPei = Yii::$app->contexto->getPei();
+            if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 

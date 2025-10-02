@@ -14,8 +14,8 @@ class AreaEstrategicaForm extends Model
     {
         return [
             [['codigoPei', 'codigo', 'descripcion'], 'required'],
-            [['codigoAreaEstrategica', 'pei_id', 'codigo'], 'integer'],
-            [['descripcion'], 'string', 'max' => 500],
+            [['codigoPei', 'codigo'], 'integer'],
+            [['descripcion'], 'string', 'max' => 250],
             [['codigo', 'descripcion'], 'trim'],
         ];
     }

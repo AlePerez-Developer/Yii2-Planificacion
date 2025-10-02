@@ -147,6 +147,26 @@ CREATE UNIQUE INDEX [UQ_Codigo]
     ON [dbo].Programas(Codigo)
     WHERE   ([CodigoEstado] = 'V');
 
+create table LlavePresupuestaria(
+                                    CodigoUnidad int not null,
+                                    CodigoPrograma int not null,
+                                    CodigoProyecto int not null,
+                                    CodigoActividad int not null,
+                                    Descripcion Varchar(250) not null,
+                                    TechoPresupuestario float not null,
+                                    FechaInicio Datetime not null,
+                                    FechaFin Datetime,
+                                    CodigoEstado char(1) not null,
+                                    FechaHoraRegistro datetime not null default getdate(),
+                                    CodigoUsuario char(3) not null,
+
+                                    constraint chk_LlaveFechas check (FechaInicio > FechaFin),
+
+                                    primary key (CodigoUnidad,CodigoPrograma,CodigoProyecto,CodigoActividad),
+                                    foreign key (CodigoEstado) references Estados(CodigoEstado),
+                                    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
 
 
 

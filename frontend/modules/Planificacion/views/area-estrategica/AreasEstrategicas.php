@@ -12,7 +12,7 @@ $this->registerJsFile("@planificacionModule/js/area-estrategica/dt-declaration.j
 
 $this->registerJsFile("@planificacionModule/js/area-estrategica/areaEstrategica.js", [
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
 $this->title = 'Planificacion';
@@ -36,19 +36,7 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigoAreaEstrategica" name="codigoAreaEstrategica" disabled hidden>
                     <form id="formAreaEstrategica" action="" method="post">
-
-                        <div class="form-group">
-                            <label for="codigoPei">Seleccione un PEI</label>
-                            <select class="form-control pei" id="codigoPei" name="codigoPei" >
-                                <option></option>
-                                <?php foreach ($peis as $pei){ ?>
-                                    <option value="<?= $pei->CodigoPei ?>"><?= '(' .  $pei->CodigoPei .') - ' . ($pei->DescripcionPei ?? '')  ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-
                         <div class="form-group">
                             <label for="codigo" class="control-label">Código de Área</label>
                             <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">

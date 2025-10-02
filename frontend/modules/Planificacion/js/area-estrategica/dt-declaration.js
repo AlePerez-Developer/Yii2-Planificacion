@@ -67,13 +67,13 @@ $(document).ready(function () {
                 width: 30
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'Codigo',
                 width: 100
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-left',
                 data: 'Descripcion'
             },
             {
