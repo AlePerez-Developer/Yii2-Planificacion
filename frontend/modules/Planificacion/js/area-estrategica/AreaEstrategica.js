@@ -7,6 +7,7 @@ $(document).ready(function () {
       $(this).removeClass('is-invalid is-valid');
     });
     $('#formAreaEstrategica').trigger("reset");
+    codigoAreaEstrategica = 0;
   }
 
   $("#btnCancelar").click(function () {

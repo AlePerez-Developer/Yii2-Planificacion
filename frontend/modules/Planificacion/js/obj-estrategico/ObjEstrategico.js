@@ -5,6 +5,7 @@ $(document).ready(function(){
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formObjEstrategico').trigger("reset");
+        codigoObjEstrategico = 0
     }
 
     $("#btnCancelar").click(function () {

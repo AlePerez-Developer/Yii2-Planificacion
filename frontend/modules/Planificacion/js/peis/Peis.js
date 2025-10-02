@@ -5,6 +5,7 @@ $(document).ready(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPei').trigger("reset");
+        codigoPei = 0
     }
 
     $("#btnCancelar").click(function () {
