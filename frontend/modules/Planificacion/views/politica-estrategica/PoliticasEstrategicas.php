@@ -1,22 +1,28 @@
 <?php
-
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/area-estrategica/dt-declaration.js", [
+$this->registerJsFile("@planificacionModule/js/PoliticaEstrategica/politicaEstrategica.js", [
     'depends' => [
         JqueryAsset::class
     ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/area-estrategica/areaEstrategica.js", [
+$this->registerJsFile("@planificacionModule/js/PoliticaEstrategica/dt-declaration.js", [
     'depends' => [
         JqueryAsset::class
     ]
 ]);
+
+$this->registerJsFile("@planificacionModule/js/PoliticaEstrategica/s2-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
+$this->params['breadcrumbs'] = [['label' => '/Politicas Estrategicas']];
 ?>
 
 <div class="card ">
@@ -27,7 +33,7 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
                     <div class="horizontal"></div>
                     <div class="vertical"></div>
                 </div>
-                Agregar Área Estratégica
+                Agregar Política Estratégica
             </div>
         </button>
     </div>
@@ -36,9 +42,17 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <form id="formAreaEstrategica" action="" method="post">
+                    <form id="formPoliticaEstrategica" action="" method="post">
+
                         <div class="form-group">
-                            <label for="codigo" class="control-label">Código de Área</label>
+                            <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
+                            <select id="areasEstrategicas" name="areasEstrategicas" class="form-control">
+                                <option></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="codigo" class="control-label">Código</label>
                             <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num" maxlength="1">
                         </div>
 
@@ -58,13 +72,14 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
         </div>
     </div>
     <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaAreas" name="tablaListaAreas" class="table table-bordered table-striped dt-responsive"
+        <table id="tablaListaPoliticas" name="tablaListaPoliticas" class="table table-bordered table-striped dt-responsive"
                style="width: 100%">
             <thead>
             <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">PEI</th>
-            <th style="text-align: center; vertical-align: middle;">Codigo</th>
-            <th style="text-align: center; vertical-align: middle;">Descripcion</th>
+            <th style="text-align: center; vertical-align: middle;">Área Estratégica</th>
+            <th style="text-align: center; vertical-align: middle;">Area</th>
+            <th style="text-align: center; vertical-align: middle;">Código</th>
+            <th style="text-align: center; vertical-align: middle;">Descripción</th>
             <th style="text-align: center; vertical-align: middle;">Acciones</th>
             </thead>
         </table>

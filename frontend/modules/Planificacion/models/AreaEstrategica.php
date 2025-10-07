@@ -57,10 +57,10 @@ class AreaEstrategica extends ActiveRecord
 
     public static function listOne($codigo): ?AreaEstrategica
     {
-        return self::findOne(['CodigoPei' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['CodigoAreaEstrategica' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll(): ActiveQuery
+    public static function listAll($search = '%%'): ActiveQuery
     {
         return self::find()->alias('A')
             ->select([
@@ -77,6 +77,7 @@ class AreaEstrategica extends ActiveRecord
             ])
             ->joinWith('pei P', true, 'INNER JOIN')
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'A.Descripcion', $search,false])
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['A.CodigoPei' => Yii::$app->contexto->getPei()])
             ->orderBy(['A.Codigo' => SORT_ASC]);

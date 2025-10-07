@@ -3,19 +3,20 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\PoliticaEstrategicaService;
+use app\modules\Planificacion\formModels\PoliticaEstrategicaForm;
 use app\modules\Planificacion\services\AreaEstrategicaService;
-use app\modules\Planificacion\formModels\AreaEstrategicaForm;
 use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
 
-class AreaEstrategicaController extends BaseController
+class PoliticaEstrategicaController extends BaseController
 {
-    private AreaEstrategicaService $service;
+    private PoliticaEstrategicaService $service;
 
-    public function __construct($id, $module, AreaEstrategicaService $service, $config = [])
+    public function __construct($id, $module, PoliticaEstrategicaService $service, $config = [])
     {
         $this->service = $service;
         parent::__construct($id, $module, $config);
@@ -60,8 +61,7 @@ class AreaEstrategicaController extends BaseController
 
     public function actionIndex(): string
     {
-        Yii::$app->contexto->setPei(2);
-        return $this->render('AreasEstrategicas');
+        return $this->render('PoliticasEstrategicas');
     }
 
     /**
@@ -71,7 +71,21 @@ class AreaEstrategicaController extends BaseController
      */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->service->listarAreas());
+        return $this->withTryCatch(fn() => $this->service->listarPoliticas());
+    }
+
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionListarAreasEstrategicas(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+
+        $serviceAreaEstrategica = new AreaEstrategicaService();
+
+        return $this->withTryCatch(fn() => $serviceAreaEstrategica->listarAreasRaw($search));
     }
 
     /**
@@ -84,10 +98,8 @@ class AreaEstrategicaController extends BaseController
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $form = new AreaEstrategicaForm();
-            $form->load($request->post(), '');
-            $form->codigoPei = Yii::$app->contexto->getPei();
-            if (!$form->validate()) {
+            $form = new PoliticaEstrategicaForm();
+            if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
             return $this->service->guardar($form);
@@ -105,11 +117,9 @@ class AreaEstrategicaController extends BaseController
             $request = Yii::$app->request;
 
             $codigo = $this->obtenerCodigo();
-            $form = new AreaEstrategicaForm();
+            $form = new PoliticaEstrategicaForm();
 
-            $form->load($request->post(), '');
-            $form->codigoPei = Yii::$app->contexto->getPei();
-            if (!$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
@@ -165,7 +175,7 @@ class AreaEstrategicaController extends BaseController
     private function obtenerCodigo(): int
     {
         $request = Yii::$app->request->post();
-        $codigo = (int)($request['codigoAreaEstrategica'] ?? $request['CodigoAreaEstrategica'] ?? $request['codigo'] ?? $request['Codigo'] ?? 0);
+        $codigo = (int)($request['codigoPoliticaEstrategica'] ?? $request['CodigopoliticaEstrategica'] ?? $request['codigo'] ?? $request['Codigo'] ?? 0);
         if (!$codigo) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Área Estratégica no enviado.', 404);
         }
