@@ -117,6 +117,9 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
             <th>PEI</th>
             <th>Codigo</th>
             <th>Objetivo</th>
+            <th>Producto Esperado</th>
+            <th>Ind. Descripcion</th>
+            <th>Ind. Formula</th>
             <th>Estado</th>
             <th>Acciones</th>
             </thead>

@@ -122,7 +122,7 @@ class ObjEstrategicoController extends BaseController
             $request = Yii::$app->request;
 
             $form = new ObjetivoEstrategicoForm();
-            $form->CodigoPei = 2;
+            $form->pei = Yii::$app->contexto->getPei();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
@@ -223,6 +223,7 @@ class ObjEstrategicoController extends BaseController
 
     public function actionVerificarCodigo(): bool
     {
+        return true;
         return $this->objetivoService->verificarCodigo(yii::$app->contexto->getPei(), 0, $_POST["codigo"]);
     }
 

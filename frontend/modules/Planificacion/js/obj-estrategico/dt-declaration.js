@@ -2,34 +2,31 @@ let dt_obj
 $(document).ready(function () {
     function format(d) {
         return (
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="titulosmall">Plan estrategico institucional</div>' +
-            '   </div>' +
-            '</div>' +
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Desc: </div>' +
-            '           </div>' +
-            '           <div class="col-8">' +
-            '               <div class="little">' + d["DescripcionPEI"] + '</div>' +
-            '           </div>' +
-            '       </div>' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Fechas</div>' +
-            '           </div>' +
-            '           <div class="col-4">' +
-            '               <div class="little">' +
-            '                   Vigencia: ' + d["GestionInicio"] +  ' - ' + d["GestionFin"] + '<br>' +
-            '                   Aprobacion: ' + d["FechaAprobacion"] +
-            '               </div>' +
-            '           </div>' +
-            '       </div>' +
-            '   </div>' +
-            '</div>'
+            '            <div class="row">' +
+            '                <div class="col-4 titulosmall" style="padding-left: 50px">Plan Estrategico Institucional</div>' +
+            '                <div class="col-4 titulosmall" style="padding-left: 50px">Area Estrategica</div>' +
+            '                <div class="col-4 titulosmall" style="padding-left: 50px">Politica Estrategica</div>' +
+            '            </div>' +
+            '            <div class="row">' +
+            '                <div class="col-1 subsmall">Desc:</div>' +
+            '                <div class="col-3 little">' + d["pei"]["DescripcionPei"] + '</div>' +
+            '                <div class="col-1 subsmall">Codigo</div>' +
+            '                <div class="col-3 little"> - ' + d["areaEstrategica"]["Codigo"] + ' - </div>' +
+            '                <div class="col-1 subsmall">Codigo</div>' +
+            '                <div class="col-3 little"> - ' + d["politicaEstrategica"]["Codigo"] + ' - </div>' +
+            '            </div>' +
+            '            <div class="row">' +
+            '                <div class="col-1 subsmall">Fechas</div>' +
+            '                <div class="col-3 little">Vigencia: ' + d["pei"]["GestionInicio"] + ' - ' + d["pei"]["GestionFin"] + '</div>' +
+            '                <div class="col-1 subsmall">Desc:</div>' +
+            '                <div class="col-3 little">' + d["areaEstrategica"]["Descripcion"] + '</div>' +
+            '                <div class="col-1 subsmall">Desc:</div>' +
+            '                <div class="col-3 little">' + d["politicaEstrategica"]["Descripcion"] + '</div>' +
+            '            </div>' +
+            '            <div class="row">' +
+            '                <div class="col-1"></div>' +
+            '                <div class="col-3 little">Aprobacion: ' + d["pei"]["FechaAprobacion"] + '</div>' +
+            '            </div>'
         );
     }
     dt_obj = $("#tablaListaObjEstrategicos").DataTable({
@@ -69,22 +66,34 @@ $(document).ready(function () {
             {
                 className: 'dt-small',
                 orderable: false,
-                data: 'DescripcionPEI',
+                data: 'CodigoObjetivo',
                 render: function (data, type, row){
                     return (type === 'display')
-                        ?  ' (' + row["GestionInicio"] + ' - ' + row["GestionFin"] + ')'
+                        ?  ' (' + row["pei"]["GestionInicio"] + ' - ' + row["pei"]["GestionFin"] + ')'
                         :data;
                 },
                 width: 100
             },
             {
                 className: 'dt-small dt-center',
-                data: 'CodigoObjetivo',
+                data: 'Compuesto',
                 width: 100
             },
             {
                 className: 'dt-small',
                 data: 'Objetivo'
+            },
+            {
+                className: 'dt-small',
+                data: 'Producto'
+            },
+            {
+                className: 'dt-small',
+                data: 'Indicador_Descripcion'
+            },
+            {
+                className: 'dt-small',
+                data: 'Indicador_Formula'
             },
             {
                 className: 'dt-small dt-estado dt-center',
@@ -100,7 +109,7 @@ $(document).ready(function () {
                         '    <span class="btn_text">Caducado</span>' +
                         '  </button>' ;
                 },
-                visible: false
+                visible: true
             },
             {
                 className: 'dt-small dt-acciones dt-center',
@@ -138,6 +147,7 @@ $(document).ready(function () {
             row["child"].hide();
         }
         else {
+            console.log(row.data()['pei']['DescripcionPei'])
             row["child"](format(row.data())).show();
         }
     });

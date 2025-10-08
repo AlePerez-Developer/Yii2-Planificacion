@@ -49,9 +49,14 @@ class ObjetivoEstrategicoService
     {
         $objetivo = new ObjetivoEstrategico([
             'CodigoObjEstrategico' => ObjEstrategicoDao::GenerarCodigoObjEstrategico(),
+            'AreaEstrategica' => $form->areaEstrategica,
+            'PoliticaEstrategica' => $form->politicaEstrategica,
             'CodigoObjetivo'  => $form->codigoObjetivo,
             'Objetivo'  => mb_strtoupper(trim($form->objetivo), 'UTF-8'),
-            'CodigoPei' => $form->CodigoPei,
+            'Producto'  => mb_strtoupper(trim($form->producto), 'UTF-8'),
+            'Indicador_Descripcion'  => mb_strtoupper(trim($form->indicadorDescripcion), 'UTF-8'),
+            'Indicador_Formula'  => mb_strtoupper(trim($form->indicadorFormula), 'UTF-8'),
+            'Pei' => $form->pei,
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);

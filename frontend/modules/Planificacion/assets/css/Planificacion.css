@@ -57,7 +57,7 @@
 .titulosmall{
     font-size: 13px;
     font-weight: bold;
-    text-align: center;
+    padding-left: 50px; !important;
 }
 
 .subsmall{

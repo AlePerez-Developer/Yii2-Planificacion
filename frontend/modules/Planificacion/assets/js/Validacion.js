@@ -217,11 +217,17 @@ $(document).ready(function() {
 
     $( "#formObjEstrategico" ).validate( {
         rules: {
+            areasEstrategicas: {
+                required: true,
+            },
+            politicasEstrategicas: {
+                required: true,
+            },
             codigoObjetivo: {
                 required: true,
                 digits: true,
-                max: 999,
-                largominimo: '3',
+                max: 9,
+                largominimo: '1',
                 CodigoObjetivoUnico: '#codigoObjEstrategico'
             },
             objetivo:{
@@ -230,8 +236,32 @@ $(document).ready(function() {
                 maxlength: 450,
                 dependencia: '#codigoObjetivo',
             },
+            producto:{
+                required: true,
+                minlength: 2,
+                maxlength: 450,
+                dependencia: '#codigoObjetivo',
+            },
+            descripcion:{
+                required: true,
+                minlength: 2,
+                maxlength: 450,
+                dependencia: '#codigoObjetivo',
+            },
+            formula:{
+                required: true,
+                minlength: 2,
+                maxlength: 450,
+                dependencia: '#codigoObjetivo',
+            },
         },
         messages: {
+            areasEstrategicas: {
+                required: "Debe seleccionar una opcion de area estrategica",
+            },
+            politicasEstrategicas: {
+                required: "Debe seleccionar una opcion de politica estrategica",
+            },
             codigoObjetivo: {
                 required: "Debe ingresar un codigo de objetico estrategico (OE)",
                 digits: "Solo se permite numeros enteros",
@@ -243,6 +273,24 @@ $(document).ready(function() {
                 required: "Debe ingresar la descripcion del objetivo estrategico",
                 minlength: "El objetivo debe tener por lo menos 2 caracteres",
                 maxlength: "El objetivo debe tener maximo 450 caracteres",
+                dependencia: "Debe ingresar un codigo valido para poder proseguir",
+            },
+            producto: {
+                required: "Debe ingresar el resultado esperado del objetivo estrategico",
+                minlength: "El resultado debe tener por lo menos 2 caracteres",
+                maxlength: "El resultad debe tener maximo 450 caracteres",
+                dependencia: "Debe ingresar un codigo valido para poder proseguir",
+            },
+            descripcion: {
+                required: "Debe ingresar la descripcion del indicador del objetivo estrategico",
+                minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion del indicador debe tener maximo 450 caracteres",
+                dependencia: "Debe ingresar un codigo valido para poder proseguir",
+            },
+            formula: {
+                required: "Debe ingresar la formula del indicador del objetivo estrategico",
+                minlength: "La formula del indicador debe tener por lo menos 2 caracteres",
+                maxlength: "La formula del indicador debe tener maximo 450 caracteres",
                 dependencia: "Debe ingresar un codigo valido para poder proseguir",
             },
         },

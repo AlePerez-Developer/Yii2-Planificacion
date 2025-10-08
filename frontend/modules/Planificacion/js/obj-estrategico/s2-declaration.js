@@ -54,7 +54,7 @@ $(document).ready(function() {
             url: 'index.php?r=Planificacion/obj-estrategico/listar-politicas-estrategicas',
             processResults: function (data) {
                 let mappedData = $.map(data.data, function (obj) {
-                    obj.id = obj["CodigoAreaEstrategica"];
+                    obj.id = obj["CodigoPoliticaEstrategica"];
                     obj.text = '(' + obj['Codigo'] + ') - ' + obj['Descripcion'];
                     return obj;
                 });

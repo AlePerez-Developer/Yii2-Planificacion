@@ -52,11 +52,21 @@ $(document).ready(function(){
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
     function  guardarRegistro()   {
+        let areaEstrategica = $('#areasEstrategicas').select2('data')
+        let politicaEstrategica = $('#politicasEstrategicas').select2('data')
         let codigoObjetivo = $("#codigoObjetivo").val();
         let objetivo = $("#objetivo").val();
+        let producto = $("#producto").val();
+        let indicadorDescripcion = $("#descripcion").val();
+        let indicadorFormula = $("#formula").val();
         let datos = new FormData();
+        datos.append("areaEstrategica", areaEstrategica[0].id);
+        datos.append("politicaEstrategica", politicaEstrategica[0].id);
         datos.append("codigoObjetivo", codigoObjetivo);
         datos.append("objetivo", objetivo);
+        datos.append("producto", producto);
+        datos.append("indicadorDescripcion", indicadorDescripcion);
+        datos.append("indicadorFormula", indicadorFormula);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/guardar",
             method: "POST",
