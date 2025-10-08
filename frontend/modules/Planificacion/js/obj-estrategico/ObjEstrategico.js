@@ -1,5 +1,6 @@
 $(document).ready(function(){
     let codigoObjEstrategico = 0
+    let s2Politicas = $('#politicasEstrategicas')
     function ReiniciarCampos(){
         $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
@@ -14,6 +15,15 @@ $(document).ready(function(){
         $("#divDatos").hide(500);
         $("#divTabla").show(500);
     });
+
+    $('#areasEstrategicas').change(function () {
+        if ($(this).val() !== null) {
+            s2Politicas.prop("disabled", false);
+        } else {
+            s2Politicas.val(null).trigger('change')
+            s2Politicas.prop("disabled", true);
+        }
+    })
 
     $("#btnGuardar").click(function () {
         const btn = $(this);
@@ -113,7 +123,7 @@ $(document).ready(function(){
             url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado",
             method: "POST",
             data : {
-                codigoObjEstrategico: codigoObjEstrategico,
+                codigoObjEstrategicos: codigoObjEstrategico,
             },
             dataType: "json",
             success: function (data) {

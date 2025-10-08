@@ -33,7 +33,7 @@ class AreaEstrategicaService
      *
      * @return array of Areas
      */
-    public function listarAreasRaw($search): array
+    public function listarAreasS2($search): array
     {
         $data = AreaEstrategica::listAll($search)
             ->orderBy(['Codigo' => SORT_ASC])

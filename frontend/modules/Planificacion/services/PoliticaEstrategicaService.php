@@ -30,6 +30,20 @@ class PoliticaEstrategicaService
     }
 
     /**
+     * lista un array de Politicas Estrategicas no eliminados
+     *
+     * @return array of Areas
+     */
+    public function listarPoliticasByArea($area,$search): array
+    {
+        $data = PoliticaEstrategica::listAllByArea($area,$search)
+            ->orderBy(['P.Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Politicas Estratégicas obtenido.');
+    }
+
+    /**
      * obtiene una Politica Estrategico en base a un codigo.
      *
      * @param int $codigo

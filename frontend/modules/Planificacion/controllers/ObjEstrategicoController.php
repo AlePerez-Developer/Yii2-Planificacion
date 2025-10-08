@@ -2,9 +2,11 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\AreaEstrategicaService;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
 use app\modules\Planificacion\formModels\ObjetivoEstrategicoForm;
 use app\controllers\BaseController;
+use app\modules\Planificacion\services\PoliticaEstrategicaService;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Mpdf\MpdfException;
@@ -33,7 +35,10 @@ class ObjEstrategicoController extends BaseController
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','listar-todo','verificar-codigo','guardar','eliminar','cambiar-estado','buscar'],
+                        'actions' => [
+                            'index','listar-todo','verificar-codigo','guardar','eliminar','cambiar-estado','buscar',
+                            'listar-areas-estrategicas','listar-politicas-estrategicas'
+                        ],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function () {
@@ -69,6 +74,31 @@ class ObjEstrategicoController extends BaseController
     {
         yii::$app->contexto->setPei(2);
         return $this->render('objEstrategico');
+    }
+
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionListarAreasEstrategicas(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        $serviceAreaEstrategica = new AreaEstrategicaService();
+        return $this->withTryCatch(fn() => $serviceAreaEstrategica->listarAreasS2($search));
+    }
+
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionListarPoliticasEstrategicas(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        $area = $this->obtenerCodigoArea();
+        $servicePoliticaEstrategica = new PoliticaEstrategicaService();
+        return $this->withTryCatch(fn() => $servicePoliticaEstrategica->listarPoliticasByArea($area,$search));
     }
 
     /**
@@ -172,7 +202,21 @@ class ObjEstrategicoController extends BaseController
     {
         $codigo = (int)Yii::$app->request->post('codigoObjEstrategico');
         if (!$codigo) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo Pei no enviado.',404);
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de objetivo no enviado.',404);
+        }
+        return $codigo;
+    }
+
+    /**
+     * obtiene y valida si se recibio el codigo de are por el request
+     *
+     * return int
+     */
+    private function obtenerCodigoArea(): int
+    {
+        $codigo = (int)Yii::$app->request->post('area');
+        if (!$codigo) {
+            return 0;
         }
         return $codigo;
     }

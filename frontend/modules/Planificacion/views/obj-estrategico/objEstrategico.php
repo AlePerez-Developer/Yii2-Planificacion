@@ -16,17 +16,15 @@ $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js
     ]
 ]);
 
+$this->registerJsFile("@planificacionModule/js/obj-estrategico/s2-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
 ?>
-
-<style>
-    hr {
-        width: 50%; /* La línea ocupará el 50% del ancho de su contenedor */
-        color: red; /* El color de la línea será azul */
-        height: 2px; /* El grosor de la línea será de 2 píxeles */
-    }
-</style>
 
 <div class="card ">
     <div class="card-header">
@@ -58,13 +56,11 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                             <div class="col-4">
                                 <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
                                 <select id="areasEstrategicas" name="areasEstrategicas" class="form-control">
-                                    <option></option>
                                 </select>
                             </div>
                             <div class="col-4">
                                 <label for="politicasEstrategicas" class="lblTitulo">Seleccione una Politica Estrategica</label>
                                 <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control">
-                                    <option></option>
                                 </select>
                             </div>
                             <div class="col-4">
@@ -88,19 +84,17 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                             </div>
                         </div>
 
-
-
-                        <div class="container">
-                            <div class="ltc">Datos indicador del objetivo</div>
+                        <div class="contenedor">
+                            <div class="ltc">Datos del indicador del objetivo</div>
                             <div class="square">
                                 <div class="row">
                                     <div class="col-6">
-                                        <label for="descripcion" class="control-label">Descripcion del indicador</label>
+                                        <label for="descripcion" class="control-label">Descripcion</label>
                                         <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
                                     </div>
                                     <div class="col-6">
                                         <label for="formula" class="control-label">Formula</label>
-                                        <textarea class="form-control input-sm txt" id="formula" name="formula" rows="3" placeholder="Formula"></textarea>
+                                        <textarea class="form-control input-sm txt" id="formula" name="formula" rows="3" placeholder="Formula del indicador"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -129,6 +123,8 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         </table>
     </div>
 </div>
+
+
 <style>
     :root {
         --border-color: #007BFF; /* azul */
@@ -136,12 +132,12 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         --padding: 14px;
     }
 
-    .container {
+    .contenedor {
+        width: 100%; !important;
         position: relative;
         display: inline-block;
     }
 
-    /* cuadrado principal */
     .square {
         width: auto;
         height: auto;
@@ -152,7 +148,6 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         gap: 10px;
     }
 
-    /* etiqueta flotante que corta la línea */
     .ltc {
         position: absolute;
         top: -0.8em;       /* sube el texto para que corte la línea */
@@ -169,11 +164,11 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         margin-bottom: 6px;
     }
 
-    @media (max-width: 500px) {
-        .square {
+    .mio {
+        color: green;
+    }
 
-            height: auto;
-            width: auto;
-        }
+    .tuyo {
+        color: red;
     }
 </style>

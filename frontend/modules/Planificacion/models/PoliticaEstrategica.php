@@ -76,6 +76,23 @@ class PoliticaEstrategica extends ActiveRecord
             ->orderBy(['P.Codigo' => SORT_ASC]);
     }
 
+    public static function listAllByArea(int $area, string $search = '%%'): ActiveQuery
+    {
+        return self::find()->alias('P')
+            ->select([
+                'P.CodigoPoliticaEstrategica',
+                'A.CodigoAreaEstrategica',
+                'P.Codigo',
+                'P.Descripcion',
+                'P.CodigoUsuario',
+                'P.CodigoEstado',
+            ])
+            ->joinWith('areaEstrategica A', true, 'INNER JOIN')
+            ->Where(['A.CodigoAreaEstrategica' => $area])
+            ->andwhere(['like', 'P.Descripcion', $search,false])
+            ->orderBy(['P.Codigo' => SORT_ASC]);
+    }
+
     /**
      * alterna el estado del modelo V/C.
      *
