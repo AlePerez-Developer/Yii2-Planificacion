@@ -1,21 +1,31 @@
 <?php
+
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\dao\ProgramaDao;
-use app\modules\Planificacion\models\Programa;
+use app\controllers\BaseController;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\formModels\ProgramaForm;
+use app\modules\Planificacion\services\ProgramaService;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\models\Estado;
-use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use Yii;
 
-class ProgramaController extends Controller
+class ProgramaController extends BaseController
 {
-    public function behaviors()
+    private ProgramaService $programaService;
+
+    public function __construct($id, $module, ProgramaService $programaService, $config = [])
+    {
+        $this->programaService = $programaService;
+        parent::__construct($id, $module, $config);
+    }
+
+    public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -31,158 +41,144 @@ class ProgramaController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    // Soporte nuevo y legacy
+                    'listar-todo' => ['get', 'post'],
+                    'guardar' => ['post'],
+                    'actualizar' => ['post'],
+                    'cambiar-estado' => ['post'],
+                    'eliminar' => ['post'],
+                    'buscar' => ['post'],
                 ],
             ],
         ];
     }
 
-    public function actionIndex()
+    /**
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
+    {
+        if ($action->id == 'listar-todo' || $action->id == 'listar-programas') {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
+    }
+
+    /**
+     * Acción index.
+     *
+     * @return string
+     */
+    public function actionIndex(): string
     {
         return $this->render('programa');
     }
 
-    public function actionListarProgramas()
+    /**
+     * Acción para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionListarTodo(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $programas = Programa::find()->select(['CodigoPrograma','Codigo','Descripcion','CodigoEstado','CodigoUsuario'])
-                ->where(['!=','CodigoEstado','E'])
-                ->orderBy('Codigo')
-                ->asArray()
-                ->all();
-            return json_encode($programas);
-        } else
-            return 'ERROR_CABECERA';
+        return $this->withTryCatch(fn() => $this->programaService->listarProgramas());
     }
 
-    public function actionGuardarPrograma()
+
+    /**
+     * Acción para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionGuardar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigo"]) && isset($_POST["descripcion"]))) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
 
-        $programa = new Programa();
-        $programa->CodigoPrograma = ProgramaDao::GenerarCodigoPrograma();
-        $programa->Codigo = trim($_POST["codigo"]);
-        $programa->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-        $programa->CodigoEstado = Estado::ESTADO_VIGENTE;;
-        $programa->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
+            $form = new ProgramaForm();
 
-        if (!$programa->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if ($programa->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$programa->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
+            }
 
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+            return $this->programaService->guardarPrograma($form);
+        });
     }
 
-    public function actionCambiarEstadoPrograma()
+    /**
+     * Acción para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionActualizar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!isset($_POST["codigoPrograma"])) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
 
-        $programa = Programa::findOne($_POST["codigoPrograma"]);
+            $codigoPrograma = $this->obtenerCodigo();
+            $form = new ProgramaForm();
 
-        if (!$programa) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
+            }
 
-        ($programa->CodigoEstado == Estado::ESTADO_VIGENTE)?$programa->CodigoEstado = Estado::ESTADO_CADUCO:$programa->CodigoEstado = Estado::ESTADO_VIGENTE;
-
-        if ($programa->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+            return $this->programaService->actualizarPrograma($codigoPrograma, $form);
+        });
     }
 
-    public function actionEliminarPrograma()
+    /**
+     * Acción para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionCambiarEstado(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoPrograma"]) && $_POST["codigoPrograma"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $programa = Programa::findOne($_POST["codigoPrograma"]);
-
-        if (!$programa) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-        if ($programa->enUso()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
-        }
-
-        $programa->CodigoEstado = Estado::ESTADO_ELIMINADO;
-
-        if ($programa->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $this->withTryCatch(function () {
+            $codigoPrograma = $this->obtenerCodigo();
+            return $this->programaService->cambiarEstado($codigoPrograma);
+        });
     }
 
-    public function actionBuscarPrograma()
+    /**
+     * Acción para soft delete de un registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionEliminar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoPrograma"]) && $_POST["codigoPrograma"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $programa = Programa::findOne($_POST["codigoPrograma"]);
-
-        if (!$programa) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-
-        return json_encode( ['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'programa' =>  $programa->getAttributes(array('CodigoPrograma','Codigo','Descripcion'))]);
+        return $this->withTryCatch(function () {
+            $codigoPrograma = $this->obtenerCodigo();
+            return $this->programaService->eliminarPrograma($codigoPrograma);
+        });
     }
 
-    public function actionActualizarPrograma()
+    /**
+     * Acción para buscar un registro en específico.
+     *
+     * @return array
+     */
+    public function actionBuscar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoPrograma"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"]))){
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch(function () {
+            $codigoPrograma = $this->obtenerCodigo();
+            return $this->programaService->obtenerModelo($codigoPrograma);
+        });
+    }
 
-        $programa = Programa::findOne($_POST["codigoPrograma"]);
-
-        if (!$programa) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+    /**
+     * Obtiene y valida si se recibió el código por el request.
+     *
+     * @return int
+     * @throws ValidationException
+     */
+    private function obtenerCodigo(): int
+    {
+        $codigo = (int)Yii::$app->request->post('codigoPrograma');
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Programa no enviado.', 404);
         }
-
-        $programa->Codigo = trim($_POST["codigo"]);
-        $programa->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-
-        if ($programa->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$programa->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if (!$programa->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $codigo;
     }
 }

@@ -4,7 +4,7 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/actividad/Actividad.js", [
+$this->registerJsFile("@planificacionModule/js/Actividad/actividad.js", [
     'depends' => [
         JqueryAsset::className()
     ]
@@ -25,17 +25,17 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
             </div>
         </button>
     </div>
-    <div id="divDatos" class="card-body">
+    <div id="ingresoDatos" class="card-body">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigo" name="codigo" disabled hidden>
+                    <input type="text" id="codigoActividad" name="codigoActividad" disabled hidden>
                     <form id="formActividades" action="" method="post">
 
                         <div class="form-group">
-                            <label for="CodigoPrograma">Seleccione un programa</label>
-                            <select class="form-control programa" id="CodigoPrograma" name="CodigoPrograma" >
+                            <label for="codigoPrograma">Seleccione un programa</label>
+                            <select class="form-control programa" id="codigoPrograma" name="codigoPrograma" >
                                 <option></option>
                                 <?php foreach ($programas as $programa){ ?>
                                     <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
@@ -45,12 +45,12 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
 
                         <div class="form-group">
                             <label for="Codigo" class="control-label">Codigo de actividad</label>
-                            <input id="Codigo" name="Codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
+                            <input id="Codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
                         </div>
 
                         <div class="form-group">
                             <label for="Descripcion">Descripcion de la actividad</label>
-                            <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="Descripcion" placeholder="Descripcion"></textarea>
+                            <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="descripcion" placeholder="Descripcion"></textarea>
                         </div>
 
                     </form>

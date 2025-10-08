@@ -99,12 +99,11 @@ class Actividad extends \yii\db\ActiveRecord
 
     public function exist()
     {
-        $data = Actividad::find()->where(["Codigo" => $this->Codigo])->andWhere(["CodigoEstado"=>"E"])->all();
-        if(!empty($data)){
-            return true;
-        }else{
-            return false;
-        }
+        return self::find()
+            ->where(['Codigo' => $this->Codigo])
+            ->andWhere(['!=', 'CodigoActividad', $this->CodigoActividad])
+            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->exists();
     }
 
     public function isUsed()

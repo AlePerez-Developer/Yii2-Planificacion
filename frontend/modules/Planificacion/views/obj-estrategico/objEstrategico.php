@@ -20,6 +20,14 @@ $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
 ?>
 
+<style>
+    hr {
+        width: 50%; /* La línea ocupará el 50% del ancho de su contenedor */
+        color: red; /* El color de la línea será azul */
+        height: 2px; /* El grosor de la línea será de 2 píxeles */
+    }
+</style>
+
 <div class="card ">
     <div class="card-header">
         <div class="row">
@@ -41,18 +49,63 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
     </div>
     <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 40rem;" >
+            <div class="card " style="width: 80rem;" >
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
                     <form id="formObjEstrategico" action="" method="post">
-                        <div class="form-group">
-                            <label for="codigoObjetivo">Codigo de Objetivo Estrategico (OE)</label>
-                            <input type="text" class="form-control input-sm num" id="codigoObjetivo" name="codigoObjetivo" maxlength="3"  placeholder="Codigo" style="width: 100px" >
+
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
+                                <select id="areasEstrategicas" name="areasEstrategicas" class="form-control">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label for="politicasEstrategicas" class="lblTitulo">Seleccione una Politica Estrategica</label>
+                                <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control">
+                                    <option></option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label for="codigoObjetivo">Codigo de Objetivo Estrategico (OE)</label>
+                                <input type="text" class="form-control input-sm num" id="codigoObjetivo" name="codigoObjetivo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="objetivo" class="control-label">Descripcion del objetivo estrategico</label>
-                            <textarea class="form-control input-sm txt" id="objetivo" name="objetivo" rows="4" placeholder="Descripcion del objetivo estrategico"></textarea>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="objetivo" class="control-label">Descripcion del objetivo estrategico</label>
+                                    <textarea class="form-control input-sm txt" id="objetivo" name="objetivo" rows="3" placeholder="Descripcion del objetivo estrategico"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="producto" class="control-label">Resultado/Producto esperado</label>
+                                    <textarea class="form-control input-sm txt" id="producto" name="producto" rows="3" placeholder="Resultado/Producto esperado"></textarea>
+                                </div>
+                            </div>
                         </div>
+
+
+
+                        <div class="container">
+                            <div class="ltc">Datos indicador del objetivo</div>
+                            <div class="square">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="descripcion" class="control-label">Descripcion del indicador</label>
+                                        <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="formula" class="control-label">Formula</label>
+                                        <textarea class="form-control input-sm txt" id="formula" name="formula" rows="3" placeholder="Formula"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </form>
                 </div>
                 <div class="card-footer text-center">
@@ -76,3 +129,51 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         </table>
     </div>
 </div>
+<style>
+    :root {
+        --border-color: #007BFF; /* azul */
+        --border-width: 1px;
+        --padding: 14px;
+    }
+
+    .container {
+        position: relative;
+        display: inline-block;
+    }
+
+    /* cuadrado principal */
+    .square {
+        width: auto;
+        height: auto;
+        border: var(--border-width) solid var(--border-color);
+        border-radius: 8px;
+        padding: var(--padding);
+        box-sizing: border-box;
+        gap: 10px;
+    }
+
+    /* etiqueta flotante que corta la línea */
+    .ltc {
+        position: absolute;
+        top: -0.8em;       /* sube el texto para que corte la línea */
+        left: 16px;        /* margen interno desde la izquierda */
+        background: white; /* fondo blanco para "romper" el borde */
+        padding: 0 8px;    /* espacio horizontal */
+        color: var(--border-color);
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 4px;
+    }
+
+    .ltc {
+        margin-bottom: 6px;
+    }
+
+    @media (max-width: 500px) {
+        .square {
+
+            height: auto;
+            width: auto;
+        }
+    }
+</style>

@@ -1,21 +1,29 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\dao\UnidadDao;
-use app\modules\Planificacion\models\Unidad;
-use common\models\Estado;
+use app\controllers\BaseController;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\UnidadService;
+use yii\web\BadRequestHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\Controller;
 use Yii;
 
-class UnidadController extends Controller
+class UnidadController extends BaseController
 {
-    public function behaviors()
+    private UnidadService $unidadService;
+
+    public function __construct($id, $module, UnidadService $unidadService, $config = [])
+    {
+        $this->unidadService = $unidadService;
+        parent::__construct($id, $module, $config);
+    }
+
+    public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -31,177 +39,93 @@ class UnidadController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    'listar-todo' => ['get', 'post'],
+                    'guardar' => ['post'],
+                    'actualizar' => ['post'],
+                    'cambiar-estado' => ['post'],
+                    'eliminar' => ['post'],
+                    'buscar' => ['post'],
                 ],
             ],
         ];
     }
 
-    public function beforeAction($action)
+    /**
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
     {
-        if ($action->id == "listar-unidades")
+        if ($action->id == 'listar-todo') {
             $this->enableCsrfValidation = false;
+        }
         return parent::beforeAction($action);
     }
 
-    public function actionIndex()
+    public function actionIndex(): string
     {
         return $this->render('unidad');
     }
 
-    public function actionListarUnidades()
+    public function actionListarTodo(): array
     {
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $unidades = Unidad::find()
-                ->select(['CodigoUnidad','Da','Ue', 'Descripcion','Organizacional','FechaInicio','FechaFin','CodigoEstado','CodigoUsuario'])
-                ->where(['!=','CodigoEstado','E'])
-                ->orderBy('Da,Ue')
-                ->asArray()->all();
-            return json_encode($unidades);
-        } else
-            return 'ERROR_CABECERA';
+        return $this->withTryCatch(fn() => $this->unidadService->listar());
     }
 
-    public function actionGuardarUnidad()
+    
+
+    public function actionGuardar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["da"]) && isset($_POST["ue"])  &&
-            isset($_POST["descripcion"]) && isset($_POST["organizacional"]) &&
-            isset($_POST["fechaInicio"]) && isset($_POST["fechaFin"]))){
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $unidad = new Unidad();
-        $unidad->CodigoUnidad = UnidadDao::GenerarCodigoUnidad();
-        $unidad->Da = $_POST["da"];
-        $unidad->Ue = $_POST["ue"];
-        $unidad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-        $unidad->Organizacional = intval($_POST["organizacional"]);
-        $unidad->FechaInicio = date("d/m/Y", strtotime($_POST["fechaInicio"]));
-        $unidad->FechaFin = date("d/m/Y", strtotime($_POST["fechaFin"]));
-        $unidad->CodigoEstado = Estado::ESTADO_VIGENTE;
-        $unidad->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
-
-        if ($unidad->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$unidad->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if (!$unidad->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $this->withTryCatch(function () {
+            $post = Yii::$app->request->post();
+            return $this->unidadService->guardar($post);
+        });
     }
 
-    public function actionCambiarEstadoUnidad()
+    public function actionActualizar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!isset($_POST["codigoUnidad"])) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $unidad = Unidad::findOne($_POST["codigoUnidad"]);
-
-        if (!$unidad) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-
-        ($unidad->CodigoEstado == Estado::ESTADO_VIGENTE)?$unidad->CodigoEstado = Estado::ESTADO_CADUCO:$unidad->CodigoEstado = Estado::ESTADO_VIGENTE;
-
-        if ($unidad->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $this->withTryCatch(function () {
+            $post = Yii::$app->request->post();
+            return $this->unidadService->actualizar($post);
+        });
     }
 
-    public function actionEliminarUnidad()
+    public function actionCambiarEstado(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoUnidad"]) && $_POST["codigoUnidad"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $unidad = Unidad::findOne($_POST["codigoUnidad"]);
-
-        if (!$unidad) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-        if ($unidad->enUso()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EN_USO']]);
-        }
-
-        $unidad->CodigoEstado = Estado::ESTADO_ELIMINADO;
-
-        if ($unidad->update() === false) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $this->withTryCatch(function () {
+            $codigo = $this->obtenerCodigo();
+            return $this->unidadService->cambiarEstado($codigo);
+        });
     }
 
-    public function actionBuscarUnidad()
+    public function actionEliminar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["codigoUnidad"]) && $_POST["codigoUnidad"] != "")) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
-
-        $unidad = Unidad::findOne($_POST["codigoUnidad"]);
-
-        if (!$unidad) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO'], 'unidad' => $unidad->getAttributes(array('CodigoUnidad','Da','Ue','Descripcion','Organizacional','FechaInicio','FechaFin'))]);
+        return $this->withTryCatch(function () {
+            $codigo = $this->obtenerCodigo();
+            return $this->unidadService->eliminar($codigo);
+        });
     }
 
-    public function actionActualizarUnidad()
+    public function actionBuscar(): array
     {
-        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_CABECERA']]);
-        }
-        if (!(isset($_POST["da"]) && isset($_POST["ue"])  &&
-            isset($_POST["descripcion"]) && isset($_POST["organizacional"]) &&
-            isset($_POST["fechaInicio"]) && isset($_POST["fechaFin"]))){
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_ENVIO_DATOS']]);
-        }
+        return $this->withTryCatch(function () {
+            $codigo = $this->obtenerCodigo();
+            return $this->unidadService->buscar($codigo);
+        });
+    }
 
-        $unidad = Unidad::findOne($_POST["codigoUnidad"]);
+    
 
-        if (!$unidad) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO']]);
+    /**
+     * @throws ValidationException
+     */
+    private function obtenerCodigo(): int
+    {
+        $codigo = (int)Yii::$app->request->post('codigoUnidad');
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo Unidad no enviado.', 404);
         }
-
-        $unidad->Da = $_POST["da"];
-        $unidad->Ue = $_POST["ue"];
-        $unidad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-        $unidad->Organizacional = intval($_POST["organizacional"]);
-        $unidad->FechaInicio = date("d/m/Y", strtotime($_POST["fechaInicio"]));
-        $unidad->FechaFin = date("d/m/Y", strtotime($_POST["fechaFin"]));
-
-        if ($unidad->exist()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
-        }
-        if (!$unidad->validate()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_VALIDACION_MODELO']]);
-        }
-        if (!$unidad->save()) {
-            return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
-        }
-
-        return json_encode(['respuesta' => Yii::$app->params['PROCESO_CORRECTO']]);
+        return $codigo;
     }
 }

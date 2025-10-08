@@ -1,25 +1,32 @@
 <?php
 
-
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\dao\ProyectoDao;
-use app\modules\Planificacion\models\AperturaProgramatica;
+use app\controllers\BaseController;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\formModels\ProyectoForm;
 use app\modules\Planificacion\models\Programa;
-use app\modules\Planificacion\models\Proyecto;
+use app\modules\Planificacion\services\ProyectoService;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\base\BaseObject;
-use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use Yii;
 
-class ProyectoController extends Controller
+class ProyectoController extends BaseController
 {
-    public function behaviors()
+    private ProyectoService $proyectoService;
+
+    public function __construct($id, $module, ProyectoService $proyectoService, $config = [])
+    {
+        $this->proyectoService = $proyectoService;
+        parent::__construct($id, $module, $config);
+    }
+
+    public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -35,182 +42,110 @@ class ProyectoController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    'listar-todo' => ['get', 'post'],
+                    'guardar' => ['post'],
+                    'actualizar' => ['post'],
+                    'cambiar-estado' => ['post'],
+                    'eliminar' => ['post'],
+                    'buscar' => ['post'],
                 ],
             ],
         ];
     }
 
-    public function beforeAction($action)
+    /**
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
     {
-        if ($action->id == "listar-proyectos")
+        if ($action->id == 'listar-todo') {
             $this->enableCsrfValidation = false;
+        }
         return parent::beforeAction($action);
     }
 
-    public function actionIndex()
+    public function actionIndex(): string
     {
-        $programas = Programa::find()->where(['CodigoEstado'=>'V'])->all();
-        return $this->render('Proyectos',[
-            'programas' => $programas
-            ]);
+        $programas = Programa::find()->where(['CodigoEstado' => 'V'])->all();
+        return $this->render('Proyectos', [
+            'programas' => $programas,
+        ]);
     }
 
-    public function actionListarProyectos()
+    public function actionListarTodo(): array
     {
-        $Data = array();
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $proyectos = Proyecto::find()->alias('proy')
-                ->select(['proy.CodigoProyecto','p.Codigo as Programa', 'proy.Codigo','proy.Descripcion','proy.CodigoEstado','proy.CodigoUsuario'])
-                ->join('Inner Join','Programas p','proy.Programa = p.CodigoPrograma')
-                ->where(['!=','proy.CodigoEstado','E'])->andWhere(['!=','p.CodigoEstado','E'])
-                ->orderBy('proy.Codigo')->asArray()->all();
-            foreach($proyectos as  $proyecto) {
-                array_push($Data, $proyecto);
-            }
-        }
-        return json_encode($Data);
+        return $this->withTryCatch(fn() => $this->proyectoService->listarProyectos());
     }
 
-    public function actionGuardarProyecto()
+    public function actionGuardar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if ( isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"]))
-            {
-                $proyecto = new Proyecto();
-                $proyecto->CodigoProyecto = ProyectoDao::GenerarCodigoProyecto();
-                $proyecto->Programa = $_POST["programa"];
-                $proyecto->Codigo = $_POST["codigo"];
-                $proyecto->Descripcion =mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                $proyecto->CodigoEstado = 'V';
-                $proyecto->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
-                if ($proyecto->validate()){
-                    if (!$proyecto->exist()){
-                        if ($proyecto->save())
-                        {
-                            return "ok";
-                        } else
-                        {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorExiste";
-                    }
-                } else {
-                    return  'errorValidacion';
-                }
-            } else {
-                return 'errorEnvio';
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
+
+            $form = new ProyectoForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabezera";
-        }
+
+            return $this->proyectoService->guardarProyecto($form);
+        });
     }
 
-    public function actionCambiarEstadoProyecto()
+    public function actionActualizar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"])) {
-                $proyecto = Proyecto::findOne($_POST["codigo"]);
-                if ($proyecto){
-                    if ($proyecto->CodigoEstado == "V") {
-                        $proyecto->CodigoEstado = "C";
-                    } else {
-                        $proyecto->CodigoEstado = "V";
-                    }
-                    if ($proyecto->update()){
-                        return "ok";
-                    } else {
-                        return "errorSql";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
+
+            $codigoProyecto = $this->obtenerCodigo();
+            $form = new ProyectoForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabecera";
-        }
+
+            return $this->proyectoService->actualizarProyecto($codigoProyecto, $form);
+        });
     }
 
-    public function actionEliminarProyecto()
+    public function actionCambiarEstado(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $proyecto = Proyecto::findOne($_POST["codigo"]);
-                if ($proyecto){
-                    if (!$proyecto->isUsed()) {
-                        $proyecto->CodigoEstado = 'E';
-                        if ($proyecto->update()) {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorEnUso";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->withTryCatch(function () {
+            $codigoProyecto = $this->obtenerCodigo();
+            return $this->proyectoService->cambiarEstado($codigoProyecto);
+        });
     }
 
-    public function actionBuscarProyecto()
+    public function actionEliminar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $proyecto = Proyecto::findOne($_POST["codigo"]);
-                if ($proyecto){
-                    return json_encode($proyecto->getAttributes(array('CodigoProyecto','Programa', 'Codigo','Descripcion')));
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->withTryCatch(function () {
+            $codigoProyecto = $this->obtenerCodigo();
+            return $this->proyectoService->eliminarProyecto($codigoProyecto);
+        });
     }
 
-    public function actionActualizarProyecto()
+    public function actionBuscar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoproyecto"]) && isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
-                $proyecto = Proyecto::findOne($_POST["codigoproyecto"]);
-                if ($proyecto){
-                    $proyecto->Programa = $_POST["programa"];
-                    $proyecto->Codigo = $_POST["codigo"];
-                    $proyecto->Descripcion = strtoupper(trim($_POST["descripcion"]));
-                    if ($proyecto->validate()){
-                        if (!$proyecto->exist()){
-                            if ($proyecto->update() !== false) {
-                                return "ok";
-                            } else {
-                                return "errorSql";
-                            }
-                        } else {
-                            return "errorExiste";
-                        }
-                    } else {
-                        return 'errorValidacion';
-                    }
-                } else {
-                    return "errorNoEncontrado";
-                }
-            } else {
-                return 'errorEnvio';
-            }
-        } else {
-            return "errorCabecera";
+        return $this->withTryCatch(function () {
+            $codigoProyecto = $this->obtenerCodigo();
+            return $this->proyectoService->obtenerModelo($codigoProyecto);
+        });
+    }
+
+    /**
+     * Obtiene y valida si se recibió el código por el request
+     * 
+     * @return int
+     * @throws ValidationException
+     */
+    private function obtenerCodigo(): int
+    {
+        $codigo = (int)Yii::$app->request->post('codigoProyecto');
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Proyecto no enviado.', 404);
         }
+        return $codigo;
     }
 }

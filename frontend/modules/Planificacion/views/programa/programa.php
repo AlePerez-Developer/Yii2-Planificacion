@@ -6,11 +6,11 @@ app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
 $this->registerJsFile("@planificacionModule/js/programa/Programa.js", [
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Programas']];
+$this->params['breadcrumbs'] = [['label' => '/Programas']];
 ?>
 
 <div class="card ">

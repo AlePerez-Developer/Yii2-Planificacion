@@ -36,7 +36,8 @@ class Proyecto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoProyecto', 'Programa', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            // En creación no debe exigirse CodigoProyecto (PK). Lo elimina de 'required'.
+            [['Programa', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['CodigoProyecto', 'Programa'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['Codigo'], 'string', 'max' => 20],
@@ -95,14 +96,13 @@ class Proyecto extends \yii\db\ActiveRecord
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    public function exist()
+    public function exist(): bool
     {
-        $data = Proyecto::find()->where(["Codigo" => $this->Codigo])->andWhere(["CodigoEstado"=>"E"])->all();
-        if(!empty($data)){
-            return true;
-        }else{
-            return false;
-        }
+        return self::find()
+            ->where(['Codigo' => $this->Codigo])
+            ->andWhere(['!=', 'CodigoProyecto', $this->CodigoProyecto])
+            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->exists();
     }
 
     public function isUsed()

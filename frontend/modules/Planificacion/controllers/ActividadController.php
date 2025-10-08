@@ -1,21 +1,31 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\modules\Planificacion\dao\ActividadDao;
-use app\modules\Planificacion\models\Actividad;
+use app\controllers\BaseController;
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\formModels\ActividadForm;
 use app\modules\Planificacion\models\Programa;
+use app\modules\Planificacion\services\ActividadService;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use Yii;
 
-class ActividadController extends Controller
+class ActividadController extends BaseController
 {
-    public function behaviors()
+    private ActividadService $actividadService;
+
+    public function __construct($id, $module, ActividadService $actividadService, $config = [])
+    {
+        $this->actividadService = $actividadService;
+        parent::__construct($id, $module, $config);
+    }
+
+    public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -31,176 +41,103 @@ class ActividadController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    'listar-todo' => ['get', 'post'],
+                    'guardar' => ['post'],
+                    'actualizar' => ['post'],
+                    'cambiar-estado' => ['post'],
+                    'eliminar' => ['post'],
+                    'buscar' => ['post'],
                 ],
             ],
         ];
     }
 
-    public function actionIndex()
+    /**
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
     {
-        $programas = Programa::find()->where(['CodigoEstado'=>'V'])->all();
-        return $this->render('Actividades',[
-            'programas' => $programas
+        if ($action->id == 'listar-todo') {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
+    }
+
+    public function actionIndex(): string
+    {
+        $programas = Programa::find()->where(['CodigoEstado' => 'V'])->all();
+        return $this->render('Actividades', [
+            'programas' => $programas,
         ]);
     }
 
-    public function actionListarActividades()
+    public function actionListarTodo(): array
     {
-        $Data = array();
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $actividades = Actividad::find()->alias('a')
-                ->select(['a.CodigoActividad','p.Codigo as Programa','a.Codigo','a.Descripcion','a.CodigoEstado','a.CodigoUsuario'])
-                ->join('Inner Join','Programas p','a.Programa = p.CodigoPrograma')
-                ->where(['!=','a.CodigoEstado','E'])->andWhere(['!=','p.CodigoEstado','E'])
-                ->orderBy('a.Codigo')->asArray()->all();
-            foreach($actividades as  $actividad) {
-                array_push($Data, $actividad);
-            }
-        }
-        return json_encode($Data);
+        return $this->withTryCatch(fn() => $this->actividadService->listarActividades());
     }
 
-    public function actionGuardarActividad()
+    public function actionGuardar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if ( isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"]))
-            {
-                $actividad = new Actividad();
-                $actividad->CodigoActividad = ActividadDao::GenerarCodigoActividad();
-                $actividad->Programa = $_POST["programa"];
-                $actividad->Codigo = $_POST["codigo"];
-                $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                $actividad->CodigoEstado = 'V';
-                $actividad->CodigoUsuario = 'BGC'; //Yii::$app->user->identity->CodigoUsuario;
-                if ($actividad->validate()){
-                    if (!$actividad->exist()){
-                        if ($actividad->save())
-                        {
-                            return "ok";
-                        } else
-                        {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorExiste";
-                    }
-                } else {
-                    return  'errorValidacion';
-                }
-            } else {
-                return 'errorEnvio';
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
+            $form = new ActividadForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabezera";
-        }
+
+            return $this->actividadService->guardarActividad($form);
+        });
     }
 
-    public function actionCambiarEstadoActividad()
+    public function actionActualizar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"])) {
-                $actividad = Actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    if ($actividad->CodigoEstado == "V") {
-                        $actividad->CodigoEstado = "C";
-                    } else {
-                        $actividad->CodigoEstado = "V";
-                    }
-                    if ($actividad->update()){
-                        return "ok";
-                    } else {
-                        return "errorSql";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
+            $codigoActividad = $this->obtenerCodigo();
+            $form = new ActividadForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabecera";
-        }
+
+            return $this->actividadService->actualizarActividad($codigoActividad, $form);
+        });
     }
 
-    public function actionEliminarActividad()
+    public function actionCambiarEstado(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $actividad = Actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    if (!$actividad->isUsed()) {
-                        $actividad->CodigoEstado = 'E';
-                        if ($actividad->update()) {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorEnUso";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->withTryCatch(function () {
+            $codigoActividad = $this->obtenerCodigo();
+            return $this->actividadService->cambiarEstado($codigoActividad);
+        });
     }
 
-    public function actionBuscarActividad()
+    public function actionEliminar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigo"]) && $_POST["codigo"] != "") {
-                $actividad = actividad::findOne($_POST["codigo"]);
-                if ($actividad){
-                    return json_encode($actividad->getAttributes(array('CodigoActividad','Programa','Codigo','Descripcion')));
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->withTryCatch(function () {
+            $codigoActividad = $this->obtenerCodigo();
+            return $this->actividadService->eliminarActividad($codigoActividad);
+        });
     }
 
-    public function actionActualizarActividad()
+    public function actionBuscar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoactividad"]) && isset($_POST["programa"]) && isset($_POST["codigo"]) && isset($_POST["descripcion"])){
-                $actividad = Actividad::findOne($_POST["codigoactividad"]);
-                if ($actividad){
-                    $actividad->Programa = $_POST["programa"];
-                    $actividad->Codigo = $_POST["codigo"];
-                    $actividad->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-                    if ($actividad->validate()){
-                        if (!$actividad->exist()){
-                            if ($actividad->update() !== false) {
-                                return "ok";
-                            } else {
-                                return "errorSql";
-                            }
-                        } else {
-                            return "errorExiste";
-                        }
-                    } else {
-                        var_dump($ac);
-                        return 'errorValidacion';
-                    }
-                } else {
-                    return "errorNoEncontrado";
-                }
-            } else {
-                return 'errorEnvio';
-            }
-        } else {
-            return "errorCabecera";
+        return $this->withTryCatch(function () {
+            $codigoActividad = $this->obtenerCodigo();
+            return $this->actividadService->obtenerModelo($codigoActividad);
+        });
+    }
+
+    private function obtenerCodigo(): int
+    {
+        $req = Yii::$app->request->post();
+        $codigo = (int)($req['codigoActividad'] ?? $req['CodigoActividad'] ?? $req['codigo'] ?? $req['Codigo'] ?? 0);
+        if (!$codigo) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Actividad no enviado.', 404);
         }
+        return $codigo;
     }
 }
