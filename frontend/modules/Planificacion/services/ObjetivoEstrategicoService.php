@@ -79,9 +79,14 @@ class ObjetivoEstrategicoService
     {
         $objetivo = $this->obtenerModeloValidado($codigo);
 
+        $objetivo->AreaEstrategica = $form->areaEstrategica;
+        $objetivo->PoliticaEstrategica = $form->politicaEstrategica;
         $objetivo->CodigoObjetivo = $form->codigoObjetivo;
         $objetivo->Objetivo = mb_strtoupper(trim($form->objetivo), 'UTF-8');
-        $objetivo->CodigoPei = $form->CodigoPei;
+        $objetivo->Producto = mb_strtoupper(trim($form->producto), 'UTF-8');
+        $objetivo->Indicador_Descripcion = mb_strtoupper(trim($form->indicadorDescripcion), 'UTF-8');
+        $objetivo->Indicador_Formula = mb_strtoupper(trim($form->indicadorFormula), 'UTF-8');
+        $objetivo->Pei = $form->pei;
 
         return $this->validarProcesarModelo($objetivo);
     }
@@ -163,7 +168,7 @@ class ObjetivoEstrategicoService
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $objetivo->getAttributes(array('CodigoObjEstrategico', 'CodigoObjetivo', 'Objetivo', 'CodigoPei',)),
+            'data' => $objetivo->getAttributes(array('AreaEstrategica', 'PoliticaEstrategica', 'CodigoObjEstrategico', 'CodigoObjetivo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'Pei',)),
         ];
     }
 

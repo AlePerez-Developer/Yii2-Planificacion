@@ -85,7 +85,7 @@ class PoliticaEstrategicaController extends BaseController
 
         $serviceAreaEstrategica = new AreaEstrategicaService();
 
-        return $this->withTryCatch(fn() => $serviceAreaEstrategica->listarAreasRaw($search));
+        return $this->withTryCatch(fn() => $serviceAreaEstrategica->listarAreasS2($search));
     }
 
     /**

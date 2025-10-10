@@ -109,7 +109,7 @@ $(document).ready(function () {
                         '    <span class="btn_text">Caducado</span>' +
                         '  </button>' ;
                 },
-                visible: true
+                visible: false
             },
             {
                 className: 'dt-small dt-acciones dt-center',

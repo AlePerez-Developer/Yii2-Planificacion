@@ -96,7 +96,7 @@ class ObjetivoEstrategico extends ActiveRecord
         return self::find()->alias('O')
             ->select([
                 'O.CodigoObjEstrategico',
-                'CONCAT(A.Codigo, O.CodigoObjetivo, Pe.Codigo) AS Compuesto',
+                'CONCAT(A.Codigo,Pe.Codigo,O.CodigoObjetivo) AS Compuesto',
                 'O.CodigoObjetivo',
                 'O.Objetivo',
                 'O.Producto',

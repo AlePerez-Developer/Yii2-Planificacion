@@ -92,12 +92,22 @@ $(document).ready(function(){
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
     function actualizarRegistro() {
-        let CodigoObjetivo = $("#codigoObjetivo").val();
+        let areaEstrategica = $('#areasEstrategicas').select2('data')
+        let politicaEstrategica = $('#politicasEstrategicas').select2('data')
+        let codigoObjetivo = $("#codigoObjetivo").val();
         let objetivo = $("#objetivo").val();
+        let producto = $("#producto").val();
+        let indicadorDescripcion = $("#descripcion").val();
+        let indicadorFormula = $("#formula").val();
         let datos = new FormData();
         datos.append("codigoObjEstrategico", codigoObjEstrategico.toString());
-        datos.append("CodigoObjetivo", CodigoObjetivo);
+        datos.append("areaEstrategica", areaEstrategica[0].id);
+        datos.append("politicaEstrategica", politicaEstrategica[0].id);
+        datos.append("codigoObjetivo", codigoObjetivo);
         datos.append("objetivo", objetivo);
+        datos.append("producto", producto);
+        datos.append("indicadorDescripcion", indicadorDescripcion);
+        datos.append("indicadorFormula", indicadorFormula);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/actualizar",
             method: "POST",
@@ -133,7 +143,7 @@ $(document).ready(function(){
             url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado",
             method: "POST",
             data : {
-                codigoObjEstrategicos: codigoObjEstrategico,
+                codigoObjEstrategico: codigoObjEstrategico,
             },
             dataType: "json",
             success: function (data) {
@@ -194,9 +204,9 @@ $(document).ready(function(){
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
     $(document).on('click', 'tbody #btnEditar', function(){
-        let objectBtn = $(this)
+        let objectBtn = $(this);
         const dt_row = dt_obj.row(objectBtn.closest('tr')).data()
-        codigoObjEstrategico = dt_row["codigoObjEstrategico"];
+        codigoObjEstrategico = dt_row["CodigoObjEstrategico"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
@@ -208,8 +218,13 @@ $(document).ready(function(){
             dataType: "json",
             success: function (data) {
                 let obj = JSON.parse(JSON.stringify(data["data"]));
+                $("#areasEstrategicas").val(obj["AreaEstrategica"]).trigger('change');
+                $("#politicasEstrategicas").val(obj["PoliticaEstrategica"]).trigger('change');
                 $("#codigoObjetivo").val(obj["CodigoObjetivo"]);
                 $("#objetivo").val(obj["Objetivo"]);
+                $("#producto").val(obj["Producto"]);
+                $("#descripcion").val(obj["Indicador_Descripcion"]);
+                $("#formula").val(obj["Indicador_Formula"]);
                 DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
             },

@@ -113,7 +113,7 @@ th.dt-center, td.dt-center { text-align: center !important; }
 
 td.dt-left { text-align: left !important; }
 
-th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 13px; !important; }
+th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 12px; !important; }
 
 th.dt-acciones, td.dt-acciones  {
     width: 130px; !important;

@@ -36,7 +36,7 @@ class ObjEstrategicoController extends BaseController
                     ],
                     [
                         'actions' => [
-                            'index','listar-todo','verificar-codigo','guardar','eliminar','cambiar-estado','buscar',
+                            'index','listar-todo','verificar-codigo','guardar', 'actualizar', 'eliminar','cambiar-estado','buscar',
                             'listar-areas-estrategicas','listar-politicas-estrategicas'
                         ],
                         'allow' => true,
@@ -144,6 +144,7 @@ class ObjEstrategicoController extends BaseController
 
             $codigoObjEstrategico = $this->obtenerCodigo();
             $form = new ObjetivoEstrategicoForm();
+            $form->pei = yii::$app->contexto->getPei();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
