@@ -178,8 +178,8 @@ class IndicadorEstrategico extends ActiveRecord
 
     public function generarProgramacion(): bool
     {
-        $inicio = $this->objetivoEstrategico->codigoPei->GestionInicio;
-        $fin = $this->objetivoEstrategico->codigoPei->GestionFin;
+        $inicio = $this->objetivoEstrategico->pei->GestionInicio;
+        $fin = $this->objetivoEstrategico->pei->GestionFin;
         for ($i = $inicio; $i<=$fin; $i++ )
         {
             $flag = false;

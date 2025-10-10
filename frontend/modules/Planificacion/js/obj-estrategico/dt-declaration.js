@@ -44,7 +44,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
                 MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_pei.processing(false);
+                dt_obj.processing(false);
             }
         },
         columns: [

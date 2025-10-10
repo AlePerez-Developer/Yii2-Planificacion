@@ -1,10 +1,13 @@
 $(document).ready(function(){
     let codigoObjEstrategico = 0
+    let s2Areas = $('#areasEstrategicas')
     let s2Politicas = $('#politicasEstrategicas')
+
     function ReiniciarCampos(){
         $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        $('#areasEstrategicas').val('').trigger('change');
         $('#formObjEstrategico').trigger("reset");
         codigoObjEstrategico = 0
     }
@@ -16,11 +19,12 @@ $(document).ready(function(){
         $("#divTabla").show(500);
     });
 
-    $('#areasEstrategicas').change(function () {
+    s2Areas.change(function () {
+        s2Politicas.val(null).trigger('change');
         if ($(this).val() !== null) {
             s2Politicas.prop("disabled", false);
+            populateS2Politicas($(this).val())
         } else {
-            s2Politicas.val(null).trigger('change')
             s2Politicas.prop("disabled", true);
         }
     })
@@ -48,25 +52,31 @@ $(document).ready(function(){
         dt_obj.ajax.reload();
     })
 
-    /*=============================================
-    INSERTA EN LA BD UN NUEVO REGISTRO
-    =============================================*/
-    function  guardarRegistro()   {
-        let areaEstrategica = $('#areasEstrategicas').select2('data')
-        let politicaEstrategica = $('#politicasEstrategicas').select2('data')
+    function getDomData()
+    {
+        let areaEstrategica = s2Areas.select2('data')[0].id
+        let politicaEstrategica = s2Politicas.select2('data')[0].id
         let codigoObjetivo = $("#codigoObjetivo").val();
         let objetivo = $("#objetivo").val();
         let producto = $("#producto").val();
         let indicadorDescripcion = $("#descripcion").val();
         let indicadorFormula = $("#formula").val();
         let datos = new FormData();
-        datos.append("areaEstrategica", areaEstrategica[0].id);
-        datos.append("politicaEstrategica", politicaEstrategica[0].id);
+        datos.append("areaEstrategica", areaEstrategica);
+        datos.append("politicaEstrategica", politicaEstrategica);
         datos.append("codigoObjetivo", codigoObjetivo);
         datos.append("objetivo", objetivo);
         datos.append("producto", producto);
         datos.append("indicadorDescripcion", indicadorDescripcion);
         datos.append("indicadorFormula", indicadorFormula);
+        return datos
+    }
+
+    /*=============================================
+    INSERTA EN LA BD UN NUEVO REGISTRO
+    =============================================*/
+    function  guardarRegistro()   {
+        let datos = getDomData();
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/guardar",
             method: "POST",
@@ -92,22 +102,8 @@ $(document).ready(function(){
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
     function actualizarRegistro() {
-        let areaEstrategica = $('#areasEstrategicas').select2('data')
-        let politicaEstrategica = $('#politicasEstrategicas').select2('data')
-        let codigoObjetivo = $("#codigoObjetivo").val();
-        let objetivo = $("#objetivo").val();
-        let producto = $("#producto").val();
-        let indicadorDescripcion = $("#descripcion").val();
-        let indicadorFormula = $("#formula").val();
-        let datos = new FormData();
+        let datos = getDomData();
         datos.append("codigoObjEstrategico", codigoObjEstrategico.toString());
-        datos.append("areaEstrategica", areaEstrategica[0].id);
-        datos.append("politicaEstrategica", politicaEstrategica[0].id);
-        datos.append("codigoObjetivo", codigoObjetivo);
-        datos.append("objetivo", objetivo);
-        datos.append("producto", producto);
-        datos.append("indicadorDescripcion", indicadorDescripcion);
-        datos.append("indicadorFormula", indicadorFormula);
         $.ajax({
             url: "index.php?r=Planificacion/obj-estrategico/actualizar",
             method: "POST",

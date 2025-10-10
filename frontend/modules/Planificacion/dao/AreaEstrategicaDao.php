@@ -9,4 +9,9 @@ class AreaEstrategicaDao
     {
         return $model->getPoliticasEstrategicas()->exists();
     }
+
+    static function validarCodigoArea(int $codigo): bool
+    {
+        return $existe = AreaEstrategica::find()->where(['CodigoAreaEstrategica' => $codigo])->exists();
+    }
 }

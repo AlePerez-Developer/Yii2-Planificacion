@@ -85,7 +85,7 @@ class IndicadorEstrategicoController extends Controller
                 'I.Meta - (sum(isnull(ig.Meta,0))) as Diff'
             ])
                 ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.CodigoObjEstrategico')
-                ->join('INNER JOIN','PEIs p', 'oe.CodigoPei = p.CodigoPei')
+                ->join('INNER JOIN','PEIs p', 'oe.Pei = p.CodigoPei')
                 ->join('INNER JOIN','TiposResultados Tr', 'I.Resultado = Tr.CodigoTipo')
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
@@ -94,7 +94,7 @@ class IndicadorEstrategicoController extends Controller
                 ->where(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'Oe.CodigoEstado', Estado::ESTADO_ELIMINADO])
                 ->andWhere(['!=', 'Tr.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'Ti.CodigoEstado', Estado::ESTADO_ELIMINADO])
                 ->andWhere(['!=', 'Ci.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO])
-                ->andWhere(['p.CodigoPei'=>1/*por ahora!!!*/])
+                ->andWhere(['p.CodigoPei'=> yii::$app->contexto->getPei()])
                 ->groupBy('I.CodigoIndicador, I.Codigo, I.Meta, I.Descripcion, I.ObjetivoEstrategico, I.Resultado,I.TipoIndicador, I.Categoria, I.Unidad,I.CodigoEstado,I.FechaHoraRegistro,I.CodigoUsuario,
                                    Oe.CodigoObjetivo, Oe.Objetivo,
                                    Tr.Descripcion, Ti.Descripcion, Ci.Descripcion, U.Descripcion')
@@ -129,7 +129,6 @@ class IndicadorEstrategicoController extends Controller
         $indicador->Unidad = intval($_POST["tipoUnidad"]);
         $indicador->CodigoEstado = Estado::ESTADO_VIGENTE;
         $indicador->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
-
         if ($indicador->exist()) {
             return json_encode(['respuesta' => Yii::$app->params['ERROR_REGISTRO_EXISTE']]);
         }
@@ -141,10 +140,12 @@ class IndicadorEstrategicoController extends Controller
         try {
             if (!$indicador->save()){
                 $transaction->rollBack();
+                dd('1');
                 return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
             }
             if (!$indicador->generarProgramacion()){
                 $transaction->rollBack();
+                dd('2');
                 return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
             }
 
@@ -153,6 +154,7 @@ class IndicadorEstrategicoController extends Controller
 
         } catch(\Exception|Throwable $e) {
             $transaction->rollBack();
+            dd($e->getMessage());
             return json_encode(['respuesta' => Yii::$app->params['ERROR_EJECUCION_SQL']]);
         }
     }

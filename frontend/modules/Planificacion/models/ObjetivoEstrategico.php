@@ -191,7 +191,7 @@ class ObjetivoEstrategico extends ActiveRecord
     }
 
     /**
-     * Gets query for [[CodigoPei]].
+     * Gets a query for [[Pei]].
      *
      * @return ActiveQuery
      */

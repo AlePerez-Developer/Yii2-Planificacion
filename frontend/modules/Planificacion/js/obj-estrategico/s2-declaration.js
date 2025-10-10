@@ -1,74 +1,78 @@
+let s2Areas = $('#areasEstrategicas')
+let s2Politicas = $('#politicasEstrategicas')
 $(document).ready(function() {
 
-    $('#areasEstrategicas').select2({
+    populateS2Areas()
+    s2Areas.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una area estrategica",
         allowClear: true,
-        selectionCssClass: 'mio',
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 100,
-            data: function (params) {
-                return {
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: true,
-            url: 'index.php?r=Planificacion/obj-estrategico/listar-areas-estrategicas',
-            processResults: function (data) {
-                let mappedData = $.map(data.data, function (obj) {
-                    obj.id = obj["CodigoAreaEstrategica"];
-                    obj.text = '(' + obj['Codigo'] + ') - ' + obj['Descripcion'];
-                    return obj;
-                });
-                return {
-                    results: mappedData
-                };
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            },
-        },
     })
-
-    $('#politicasEstrategicas').select2({
+    s2Politicas.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una politica estrategica",
         allowClear: true,
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            delay: 100,
-            data: function (params) {
-                let area  = $('#areasEstrategicas').select2('data')
-                return {
-                    area: area[0].id,
-                    q: params.term,
-                    page: params.page
-                };
-            },
-            cache: true,
-            url: 'index.php?r=Planificacion/obj-estrategico/listar-politicas-estrategicas',
-            processResults: function (data) {
-                let mappedData = $.map(data.data, function (obj) {
-                    obj.id = obj["CodigoPoliticaEstrategica"];
-                    obj.text = '(' + obj['Codigo'] + ') - ' + obj['Descripcion'];
-                    return obj;
-                });
-                return {
-                    results: mappedData
-                };
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            },
-        },
     })
 
-    $("#politicasEstrategicas").prop("disabled", true);
-
+    s2Politicas.prop("disabled", true);
 });
+
+function populateS2Areas() {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-estrategico/listar-areas-estrategicas',
+        success: function(data){
+            s2Areas.empty();
+
+            $.each(data["data"], function(index, item) {
+                s2Areas.append(
+                    $('<option>', {
+                        value: item["CodigoAreaEstrategica"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            s2Areas.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2Politicas(codigoArea)
+{
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        data: {
+            area: codigoArea
+        },
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-estrategico/listar-politicas-estrategicas',
+        success: function(data){
+            s2Politicas.empty();
+
+            $.each(data["data"], function(index, item) {
+                s2Politicas.append(
+                    $('<option>', {
+                        value: item["CodigoPoliticaEstrategica"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            s2Politicas.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    })
+}

@@ -7,7 +7,11 @@ class PoliticaEstrategicaDao
 {
     static function enUso(PoliticaEstrategica $model): bool
     {
-        return false;
         return $model->getObjetivoEstrategico()->exists();
+    }
+
+    static function verificarCodigoPolitica(int $codigoArea, int $codigoPolitica): bool
+    {
+        return PoliticaEstrategica::find()->where(['CodigoAreaEstrategica' => $codigoArea, 'CodigoPoliticaEstrategica' => $codigoPolitica])->exists();
     }
 }
