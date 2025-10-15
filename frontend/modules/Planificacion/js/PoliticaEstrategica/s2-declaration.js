@@ -1,5 +1,7 @@
+let s2AreasEstrategicas = $('#areasEstrategicas')
+
 $(document).ready(function() {
-    $('#areasEstrategicas').select2({
+    s2AreasEstrategicas.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una area estrategica",
         allowClear: true,

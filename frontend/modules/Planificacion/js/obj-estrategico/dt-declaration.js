@@ -147,7 +147,6 @@ $(document).ready(function () {
             row["child"].hide();
         }
         else {
-            console.log(row.data()['pei']['DescripcionPei'])
             row["child"](format(row.data())).show();
         }
     });

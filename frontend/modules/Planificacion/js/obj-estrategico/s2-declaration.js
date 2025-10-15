@@ -3,11 +3,13 @@ let s2Politicas = $('#politicasEstrategicas')
 $(document).ready(function() {
 
     populateS2Areas()
+
     s2Areas.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una area estrategica",
         allowClear: true,
     })
+
     s2Politicas.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una politica estrategica",
@@ -45,7 +47,7 @@ function populateS2Areas() {
     });
 }
 
-function populateS2Politicas(codigoArea)
+function populateS2Politicas(codigoArea,codigoPolitica)
 {
     $.ajax({
         method: "POST",
@@ -67,12 +69,13 @@ function populateS2Politicas(codigoArea)
                     })
                 );
             });
-
             s2Politicas.val(null).trigger('change');
         },
         error: function (xhr) {
             const data = JSON.parse(xhr.responseText)
             MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
         },
+    }).then(function () {
+        $("#politicasEstrategicas").val(codigoPolitica).trigger('change');
     })
 }

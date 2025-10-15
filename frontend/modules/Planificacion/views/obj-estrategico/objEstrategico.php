@@ -103,6 +103,7 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                     </form>
                 </div>
                 <div class="card-footer text-center">
+                    <button type="button" id="mio">mio mio</button>
                     <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
                     <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>

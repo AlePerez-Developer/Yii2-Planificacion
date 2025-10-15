@@ -25,13 +25,13 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
         <div class="row">
             <div class="col-6">
                 <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-                    <div class="icon closed">
-                        <div class="circle">
-                            <div class="horizontal"></div>
-                            <div class="vertical"></div>
-                        </div>
+                    <span class="icon closed">
+                        <span class="circle">
+                            <span class="horizontal"></span>
+                            <span class="vertical"></span>
+                        </span>
                         Agregar Pei
-                    </div>
+                    </span>
                 </button>
             </div>
             <div class="col-6" style="text-align: right;">
@@ -46,9 +46,9 @@ $this->params['breadcrumbs'] = [['label' => '/Peis']];
                 <div class="card-body">
                     <form id="formPei" action="" method="post">
                         <div class="form-group">
-                            <label for="descripcionPei" class="control-label">Descripcion del pei</label>
-                            <textarea class="form-control input-sm txt" id="descripcionPei"
-                                      name="descripcionPei" rows="3" placeholder="descripcion del pei"></textarea>
+                            <label for="descripcion" class="control-label">Descripcion del pei</label>
+                            <textarea class="form-control input-sm txt" id="descripcion"
+                                      name="descripcion" rows="3" placeholder="descripcion del pei"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="fechaAprobacion" class="control-label">Fecha de aprobacion</label>

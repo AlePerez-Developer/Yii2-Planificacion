@@ -355,7 +355,7 @@ class IndicadorEstrategicoController extends Controller
     {
         $mpdf = new Mpdf();
         $mpdf->SetMargins(0, 0,32);
-        /*$mpdf->SetHTMLHeader('
+        $mpdf->SetHTMLHeader('
             <table style="width: 100%" >
                 <tr>
                     <td width="7%" style="border-right: 1px solid black" >
@@ -397,7 +397,7 @@ class IndicadorEstrategicoController extends Controller
         $a .= '</table>';
 
 
-        $mpdf->WriteHTML($a);*/
+        $mpdf->WriteHTML($a);
 
         $mpdf->Output();
     }

@@ -5,29 +5,10 @@ use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\models\Pei;
 use yii\db\StaleObjectException;
 use yii\db\Exception;
-use yii\db\Query;
 use Throwable;
 
 class PeiDao
 {
-    /**
-     * Genera un nuevo codigo.
-     *
-     * @return int
-     */
-    static public function generarCodigoPei(): int
-    {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoPei) as CodigoPei')
-            ->from('PEIs')
-            ->one();
-        if ($codigo['CodigoPei']){
-            return  $codigo['CodigoPei'] + 1;
-        } else {
-            return 1;
-        }
-    }
-
     static function enUso(Pei $pei): bool
     {
         return $pei->getObjetivosEstrategicos()->exists();

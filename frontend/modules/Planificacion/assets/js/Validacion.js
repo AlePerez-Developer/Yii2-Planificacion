@@ -117,7 +117,7 @@ $(document).ready(function() {
             descripcionPei: {
                 required: true,
                 minlength: 2,
-                maxlength: 250
+                maxlength: 500
             },
             fechaAprobacion:{
                 required: true,
@@ -132,7 +132,7 @@ $(document).ready(function() {
             gestionFin:{
                 required: true,
                 digits: true,
-                min:2000,
+                min:2002,
                 MayorQue: "#gestionInicio"
             }
         },
@@ -140,7 +140,7 @@ $(document).ready(function() {
             descripcionPei: {
                 required: "Debe ingresar una descripcion para el PEI",
                 minlength: "La descripcion debe tener almenos 2 letras",
-                maxlength: "La descripcion debe tener maximo 250 letras"
+                maxlength: "La descripcion debe tener maximo 500 letras"
             },
             fechaAprobacion: {
                 required: "Debe ingresar la fecha de aprobacion del PEI",

@@ -10,8 +10,8 @@ use common\models\Usuario;
 /**
  * This is the model class for table "PEIs".
  *
- * @property int $CodigoPei
- * @property string|null $DescripcionPei
+ * @property string $IdPei
+ * @property string|null $Descripcion
  * @property string $FechaAprobacion
  * @property int $GestionInicio
  * @property int $GestionFin
@@ -39,13 +39,15 @@ class Pei extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['CodigoPei', 'FechaAprobacion', 'GestionInicio', 'GestionFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoPei', 'GestionInicio', 'GestionFin'], 'integer'],
+            [['FechaAprobacion', 'GestionInicio', 'GestionFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['GestionInicio', 'GestionFin'], 'integer'],
+            [['IdPei'], 'safe'],
             [['FechaHoraRegistro','FechaAprobacion'], 'safe'],
-            [['DescripcionPei'], 'string', 'max' => 250],
+            [['IdPei'], 'string', 'max' => 36],
+            [['Descripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['CodigoPei'], 'unique'],
+            [['IdPei'], 'unique'],
             [['GestionInicio'], 'unique', 'message' => 'Gestion inicio debe ser unico'],
             [['GestionFin'], 'unique', 'message' => 'Gestion fin debe ser unico'],
             [['GestionInicio'], 'number', 'min' => 2000, 'tooSmall' => 'la Gestion de inicio debe ser mayor al año 2000'],
@@ -60,8 +62,8 @@ class Pei extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'CodigoPei' => 'Codigo pei',
-            'DescripcionPei' => 'Descripcion pei',
+            'IdPei' => 'Identificador de pei',
+            'Descripcion' => 'Descripcion pei',
             'FechaAprobacion' => 'Fecha Aprobacion',
             'GestionInicio' => 'Gestion Inicio',
             'GestionFin' => 'Gestion Fin',
@@ -72,17 +74,17 @@ class Pei extends ActiveRecord
     }
 
 
-    public static function listOne($codigo): ?Pei
+    public static function listOne(string $id): ?Pei
     {
-        return self::findOne(['CodigoPei' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdPei' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listAll(): ActiveQuery
     {
         return self::find()
             ->select([
-                'CodigoPei',
-                'DescripcionPei',
+                'IdPei',
+                'Descripcion',
                 'FechaAprobacion',
                 'GestionInicio',
                 'GestionFin',
@@ -90,7 +92,7 @@ class Pei extends ActiveRecord
                 'CodigoUsuario'
             ])
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['CodigoPei' => SORT_ASC]);
+            ->orderBy(['IdPei' => SORT_ASC]);
     }
 
     /**
@@ -110,7 +112,7 @@ class Pei extends ActiveRecord
      *
      * @return void
      */
-    public function eliminarPei(): void
+    public function eliminar(): void
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }
@@ -122,7 +124,7 @@ class Pei extends ActiveRecord
      */
     public function getObjetivosEstrategicos(): ActiveQuery
     {
-        return $this->hasMany(ObjetivoEstrategico::class, ['CodigoPei' => 'CodigoPei']);
+        return $this->hasMany(ObjetivoEstrategico::class, ['pei_id' => 'IdPei']);
     }
 
     /**

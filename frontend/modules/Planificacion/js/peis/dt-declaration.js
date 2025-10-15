@@ -28,7 +28,7 @@ $(document).ready(function () {
             },
             {
                 className: 'dt-small',
-                data: 'DescripcionPei'
+                data: 'Descripcion'
             },
             {
                 className: 'dt-small dt-center',
@@ -61,7 +61,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoPei',
+                data: 'IdPei',
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +

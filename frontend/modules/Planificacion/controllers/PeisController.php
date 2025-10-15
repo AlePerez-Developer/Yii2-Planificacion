@@ -12,12 +12,15 @@ use Mpdf\MpdfException;
 use Mpdf\Mpdf;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class PeisController extends BaseController
 {
-    private PeiService $peiService;
-    public function __construct($id, $module, PeiService $peiService, $config = [])
+    private PeiService $service;
+    public function __construct($id, $module, PeiService $service, $config = [])
     {
-        $this->peiService = $peiService;
+        $this->service = $service;
         parent::__construct($id, $module, $config);
     }
     public function behaviors(): array
@@ -73,16 +76,18 @@ class PeisController extends BaseController
      * accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->peiService->listarPeis());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
     /**
      * accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionGuardar(): array
     {
@@ -95,7 +100,7 @@ class PeisController extends BaseController
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            return $this->peiService->guardarPei($form);
+            return $this->service->guardar($form);
         });
     }
 
@@ -103,20 +108,21 @@ class PeisController extends BaseController
      * accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function() {
             $request = Yii::$app->request;
 
-            $codigoPei = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new PeiForm();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            return $this->peiService->actualizarPei($codigoPei,$form);
+            return $this->service->actualizar($id,$form);
         });
     }
 
@@ -124,12 +130,13 @@ class PeisController extends BaseController
      * accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function() {
-            $codigoPei = $this->obtenerCodigo();
-            return $this->peiService->cambiarEstado($codigoPei);
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
         });
     }
 
@@ -137,12 +144,13 @@ class PeisController extends BaseController
      * accion para soft delete de un registro
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function() {
-            $codigoPei = $this->obtenerCodigo();
-            return $this->peiService->eliminarPei($codigoPei);
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
         });
     }
 
@@ -150,32 +158,34 @@ class PeisController extends BaseController
      * accion para buscar un registro en especifico
      *
      * @return array
+     * @noinspection PhpUnused
      */
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function() {
-            $codigoPei = $this->obtenerCodigo();
-            return $this->peiService->obtenerModelo($codigoPei);
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
         });
     }
 
     /**
      * obtiene y valida si se recibio el codigo por el request
      *
-     * return int
+     * return string
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerId(): string
     {
-        $codigo = (int)Yii::$app->request->post('codigoPei');
-        if (!$codigo) {
+        $id = Yii::$app->request->post('idPei');
+        if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo Pei no enviado.',404);
         }
-        return $codigo;
+        return $id;
     }
 
     /**
      * @throws MpdfException
+     * @noinspection PhpUnused
      */
     public function actionReporte(): void
     {

@@ -1,11 +1,11 @@
 $(document).ready(function () {
-    let codigoPei = 0
+    let idPei = 0
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPei').trigger("reset");
-        codigoPei = 0
+        idPei = 0
     }
 
     $("#btnCancelar").click(function () {
@@ -23,7 +23,7 @@ $(document).ready(function () {
         btnCancel.prop('disabled', true);
         try {
             if ($("#formPei").valid()) {
-                const hasCode =  codigoPei !== 0;
+                const hasCode =  idPei !== 0;
                 hasCode ? actualizarRegistro() : guardarRegistro();
             }
         } catch (err) {
@@ -50,12 +50,12 @@ $(document).ready(function () {
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
      function  guardarRegistro()   {
-        let descripcionPei = $("#descripcionPei").val();
+        let descripcion = $("#descripcion").val();
         let fechaAprobacion = $("#fechaAprobacion").val();
         let gestionInicio = $("#gestionInicio").val();
         let gestionFin = $("#gestionFin").val();
         let datos = new FormData();
-        datos.append("descripcionPei", descripcionPei);
+        datos.append("descripcion", descripcion);
         datos.append("fechaAprobacion", fechaAprobacion);
         datos.append("gestionInicio", gestionInicio);
         datos.append("gestionFin", gestionFin);
@@ -84,13 +84,13 @@ $(document).ready(function () {
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
      function actualizarRegistro() {
-        let descripcionPei = $("#descripcionPei").val();
+        let descripcion = $("#descripcion").val();
         let fechaAprobacion = $("#fechaAprobacion").val();
         let gestionInicio = $("#gestionInicio").val();
         let gestionFin = $("#gestionFin").val();
         let datos = new FormData();
-        datos.append("codigoPei", codigoPei.toString());
-        datos.append("descripcionPei", descripcionPei);
+        datos.append("idPei", idPei.toString());
+        datos.append("descripcion", descripcion);
         datos.append("gestionInicio", gestionInicio);
         datos.append("fechaAprobacion", fechaAprobacion);
         datos.append("gestionFin", gestionFin);
@@ -103,7 +103,7 @@ $(document).ready(function () {
             processData: false,
             dataType: "json",
             success: function () {
-                MostrarMensaje('success', 'Los datos del nuevo PEI se actualizaron correctamente.', null);
+                MostrarMensaje('success', 'Los datos del PEI se actualizaron correctamente.', null);
                 dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });
@@ -122,14 +122,14 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEstado', function(){
         let objectBtn = $(this);
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let codigoPei = dt_row["CodigoPei"];
+        let idPei = dt_row["IdPei"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
             url: "index.php?r=Planificacion/peis/cambiar-estado",
             method: "POST",
             data : {
-                codigoPei: codigoPei,
+                idPei: idPei,
             },
             dataType: "json",
             success: function (data) {
@@ -150,12 +150,12 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEliminar', function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let codigoPei = dt_row["CodigoPei"];
+        let idPei = dt_row["IdPei"];
 
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar el pei seleccionado?",
+            text: "¿Está seguro de eliminar el PEI seleccionado?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -168,7 +168,7 @@ $(document).ready(function () {
                     url: "index.php?r=Planificacion/peis/eliminar",
                     method: "POST",
                     data : {
-                        codigoPei: codigoPei,
+                        idPei: idPei,
                     },
                     dataType: "json",
                     success: function () {
@@ -192,19 +192,19 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEditar', function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        codigoPei = dt_row["CodigoPei"];
+        idPei = dt_row["IdPei"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
             url: "index.php?r=Planificacion/peis/buscar",
             method: "POST",
             data : {
-                codigoPei: codigoPei,
+                idPei: idPei,
             },
             dataType: "json",
             success: function (data) {
                 let pei = JSON.parse(JSON.stringify(data["data"]));
-                $("#descripcionPei").val(pei["DescripcionPei"]);
+                $("#descripcion").val(pei["Descripcion"]);
                 $("#fechaAprobacion").val(pei["FechaAprobacion"]);
                 $("#gestionInicio").val(pei["GestionInicio"]);
                 $("#gestionFin").val(pei["GestionFin"]);

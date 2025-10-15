@@ -6,7 +6,7 @@ $(document).ready(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPoliticaEstrategica').trigger("reset");
-        $('#areasEstrategicas').val('').trigger('change')
+        s2AreasEstrategicas.val('').trigger('change')
         codigoPoliticaEstrategica = 0;
     }
 
@@ -193,9 +193,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function (data) {
                 let politica = JSON.parse(JSON.stringify(data["data"]));
-                let t = politica['CodigoAreaEstrategica']
-                console.log(t)
-                $('#areasEstrategicas').val(t).trigger('change');
+                s2AreasEstrategicas.val(politica['CodigoAreaEstrategica']).trigger('change');
                 $("#codigo").val(politica["Codigo"]);
                 $("#descripcion").val(politica["Descripcion"]);
                 DetenerSpiner(objectBtn)

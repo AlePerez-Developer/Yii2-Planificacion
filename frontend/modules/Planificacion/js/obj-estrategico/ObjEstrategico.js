@@ -1,14 +1,12 @@
 $(document).ready(function(){
     let codigoObjEstrategico = 0
-    let s2Areas = $('#areasEstrategicas')
-    let s2Politicas = $('#politicasEstrategicas')
 
     function ReiniciarCampos(){
         $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $('#areasEstrategicas').val('').trigger('change');
         $('#formObjEstrategico').trigger("reset");
+        s2Areas.val(null).trigger('change');
         codigoObjEstrategico = 0
     }
 
@@ -23,7 +21,7 @@ $(document).ready(function(){
         s2Politicas.val(null).trigger('change');
         if ($(this).val() !== null) {
             s2Politicas.prop("disabled", false);
-            populateS2Politicas($(this).val())
+            populateS2Politicas($(this).val(),null)
         } else {
             s2Politicas.prop("disabled", true);
         }
@@ -214,8 +212,7 @@ $(document).ready(function(){
             dataType: "json",
             success: function (data) {
                 let obj = JSON.parse(JSON.stringify(data["data"]));
-                $("#areasEstrategicas").val(obj["AreaEstrategica"]).trigger('change');
-                $("#politicasEstrategicas").val(obj["PoliticaEstrategica"]).trigger('change');
+                s2Areas.val(obj["AreaEstrategica"]).trigger('change')
                 $("#codigoObjetivo").val(obj["CodigoObjetivo"]);
                 $("#objetivo").val(obj["Objetivo"]);
                 $("#producto").val(obj["Producto"]);
@@ -229,6 +226,8 @@ $(document).ready(function(){
                 MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
                 DetenerSpiner(objectBtn)
             }
+        }).then(function (resultado) {
+            populateS2Politicas(resultado["data"]["AreaEstrategica"],resultado["data"]["PoliticaEstrategica"])
         });
     });
 })
