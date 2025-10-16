@@ -221,4 +221,82 @@ $(document).ready(function () {
             }
         });
     });
+
+    /**
+     * Validacion del form
+     */
+
+    $( "#formPei" ).validate( {
+        rules: {
+            descripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 500
+            },
+            fechaAprobacion:{
+                required: true,
+                date: true
+            },
+            gestionInicio:{
+                required: true,
+                digits: true,
+                min:2001,
+                MenorQue: "#gestionFin"
+            },
+            gestionFin:{
+                required: true,
+                digits: true,
+                min:2002,
+                MayorQue: "#gestionInicio"
+            }
+        },
+        messages: {
+            descripcion: {
+                required: "Debe ingresar una descripcion para el PEI",
+                minlength: "La descripcion debe tener almenos 2 letras",
+                maxlength: "La descripcion debe tener maximo 500 letras"
+            },
+            fechaAprobacion: {
+                required: "Debe ingresar la fecha de aprobacion del PEI",
+                date: "Debe ingresar una fecha valida"
+            },
+            gestionInicio: {
+                required: "Debe ingresar la gestion de inicio del PEI",
+                digits: "Solo debe ingresar el numero de año",
+                min:"Debe ingresar un año valido mayor al 2000",
+                MenorQue: "La gestion de incio debe ser menor que la gestion de fin"
+            },
+            gestionFin: {
+                required: "Debe ingresar la gestion final del PEI",
+                digits: "Solo debe ingresar el numero de año",
+                min:"Debe ingresar un año valido mayor al 2000",
+                MayorQue:"La gestion final debe ser mayor que la gestion de inicio"
+            }
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    });
+
+    $.validator.addMethod("MayorQue",
+        function (value, element, param) {
+            let $otherElement = $(param);
+            return parseInt(value, 10) > parseInt($otherElement.val(), 10);
+        });
+
+    $.validator.addMethod("MenorQue",
+        function (value, element, param) {
+            let $otherElement = $(param);
+            return parseInt(value, 10) < parseInt($otherElement.val(), 10);
+        });
+
 })
