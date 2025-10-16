@@ -11,6 +11,9 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class AreaEstrategicaController extends BaseController
 {
     private AreaEstrategicaService $service;
@@ -60,7 +63,6 @@ class AreaEstrategicaController extends BaseController
 
     public function actionIndex(): string
     {
-        Yii::$app->contexto->setPei(2);
         return $this->render('AreasEstrategicas');
     }
 
@@ -68,16 +70,19 @@ class AreaEstrategicaController extends BaseController
      * accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
      */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->service->listarAreas());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
     /**
      * accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionGuardar(): array
     {
@@ -86,7 +91,7 @@ class AreaEstrategicaController extends BaseController
 
             $form = new AreaEstrategicaForm();
             $form->load($request->post(), '');
-            $form->codigoPei = Yii::$app->contexto->getPei();
+            $form->idPei = Yii::$app->contexto->getPei();
             if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
@@ -98,22 +103,23 @@ class AreaEstrategicaController extends BaseController
      * accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $codigo = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new AreaEstrategicaForm();
 
             $form->load($request->post(), '');
-            $form->codigoPei = Yii::$app->contexto->getPei();
+            $form->idPei = Yii::$app->contexto->getPei();
             if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->service->actualizar($codigo, $form);
+            return $this->service->actualizar($id, $form);
         });
     }
 
@@ -121,12 +127,13 @@ class AreaEstrategicaController extends BaseController
      * accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function() {
-            $codigo = $this->obtenerCodigo();
-            return $this->service->cambiarEstado($codigo);
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
         });
     }
 
@@ -134,12 +141,13 @@ class AreaEstrategicaController extends BaseController
      * accion para soft delete de un registro
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function () {
-            $codigo = $this->obtenerCodigo();
-            return $this->service->eliminar($codigo);
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
         });
     }
 
@@ -147,28 +155,49 @@ class AreaEstrategicaController extends BaseController
      * accion para buscar un registro en especifico
      *
      * @return array
+     * @noinspection PhpUnused
      */
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function () {
-            $codigo = $this->obtenerCodigo();
-            return $this->service->obtenerModelo($codigo);
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
         });
     }
 
     /**
      * obtiene y valida si se recibio el codigo por el request
      *
-     * return int
+     * return string
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerId(): string
     {
-        $request = Yii::$app->request->post();
-        $codigo = (int)($request['codigoAreaEstrategica'] ?? $request['CodigoAreaEstrategica'] ?? $request['codigo'] ?? $request['Codigo'] ?? 0);
-        if (!$codigo) {
+        $id = Yii::$app->request->post('idAreaEstrategica');
+        if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Área Estratégica no enviado.', 404);
         }
-        return $codigo;
+        return $id;
+    }
+
+    /**
+     * accion para buscar un registro en especifico
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
+    {
+        $id = Yii::$app->request->post('idAreaEstrategica');
+        if (!isset($id)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id,$codigo);
     }
 }

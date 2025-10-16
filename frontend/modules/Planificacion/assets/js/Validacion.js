@@ -66,6 +66,8 @@ $(document).ready(function() {
             return value !== param;
         });
 
+
+
     $.validator.addMethod("CodigoIndicadorUnico",
         function(value, element, param) {
             let result = false;
@@ -114,7 +116,7 @@ $(document).ready(function() {
 
     $( "#formPei" ).validate( {
         rules: {
-            descripcionPei: {
+            descripcion: {
                 required: true,
                 minlength: 2,
                 maxlength: 500
@@ -137,7 +139,7 @@ $(document).ready(function() {
             }
         },
         messages: {
-            descripcionPei: {
+            descripcion: {
                 required: "Debe ingresar una descripcion para el PEI",
                 minlength: "La descripcion debe tener almenos 2 letras",
                 maxlength: "La descripcion debe tener maximo 500 letras"
@@ -172,8 +174,11 @@ $(document).ready(function() {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
 
-    } );
+    });
 
+
+
+    /*
     $( "#formPrograma" ).validate({
         rules: {
             codigo: {
@@ -1043,7 +1048,7 @@ $(document).ready(function() {
 
     } );
 
-
+*/
 
 
 

@@ -7,9 +7,7 @@ use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\AreaEstrategicaDao;
 use app\modules\Planificacion\models\AreaEstrategica;
 use common\models\Estado;
-use yii\db\StaleObjectException;
 use yii\db\Exception;
-use Throwable;
 use Yii;
 
 class AreaEstrategicaService
@@ -19,7 +17,7 @@ class AreaEstrategicaService
      *
      * @return array of Areas
      */
-    public function listarAreas(): array
+    public function listarTodo(): array
     {
         $data = AreaEstrategica::listAll()
             ->orderBy(['Codigo' => SORT_ASC])
@@ -45,12 +43,12 @@ class AreaEstrategicaService
     /**
      * obtiene un Objetivo Estrategico en base a un codigo.
      *
-     * @param int $codigo
+     * @param string $id
      * @return AreaEstrategica|null
      */
-    public function listarArea(int $codigo): ?AreaEstrategica
+    public function listarUno(string $id): ?AreaEstrategica
     {
-        return AreaEstrategica::listOne($codigo);
+        return AreaEstrategica::listOne($id);
     }
 
     /**
@@ -63,7 +61,7 @@ class AreaEstrategicaService
     public function guardar(AreaEstrategicaForm $form): array
     {
         $model = new AreaEstrategica([
-            'CodigoPei' => $form->codigoPei,
+            'IdPei' => $form->idPei,
             'Codigo' => $form->codigo,
             'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
@@ -76,18 +74,17 @@ class AreaEstrategicaService
     /**
      * Actualiza la informacion de un registro en el modelo
      *
-     * @param int $codigo
+     * @param string $id
      * @param AreaEstrategicaForm $form
      * @return array
-     * @throws Throwable
+     * @throws Exception
      * @throws ValidationException
-     * @throws StaleObjectException
      */
-    public function actualizar(int $codigo, AreaEstrategicaForm $form): array
+    public function actualizar(string $id, AreaEstrategicaForm $form): array
     {
-        $model = $this->obtenerModeloValidado($codigo);
+        $model = $this->obtenerModeloValidado($id);
 
-        $model->CodigoPei = $form->codigoPei;
+        $model->IdPei = $form->idPei;
         $model->Codigo = $form->codigo;
         $model->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
@@ -97,14 +94,14 @@ class AreaEstrategicaService
     /**
      * Busca un Objetivo por su código y alterna su estado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $modelo = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
         $modelo->cambiarEstado();
 
@@ -126,14 +123,14 @@ class AreaEstrategicaService
     /**
      * Busca un Objetivo por su código y realiza un soft delete.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function eliminar(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $model = $this->obtenerModeloValidado($codigo);
+        $model = $this->obtenerModeloValidado($id);
 
         if (AreaEstrategicaDao::enUso($model)){
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El Area estrategica se encuentra asignada a una Politica estrategica',500);
@@ -146,13 +143,13 @@ class AreaEstrategicaService
     /**
      * Obtiene el modelo segun el codigo enviado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $model = $this->listarArea($codigo);
+        $model = $this->listarUno($id);
 
         if (!$model) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
@@ -160,20 +157,20 @@ class AreaEstrategicaService
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $model->getAttributes(array('CodigoAreaEstrategica', 'CodigoPei', 'Codigo', 'Descripcion')),
+            'data' => $model->getAttributes(array('IdAreaEstrategica', 'IdPei', 'Codigo', 'Descripcion')),
         ];
     }
 
     /**
      * Obtiene el modelo segun el codigo enviado y valida si existe.
      *
-     * @param int $codigo
+     * @param string $id
      * @return AreaEstrategica|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(int $codigo): ?AreaEstrategica
+    private function obtenerModeloValidado(string $id): ?AreaEstrategica
     {
-        $model = $this->listarArea($codigo);
+        $model = $this->listarUno($id);
         if (!$model) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
@@ -203,5 +200,10 @@ class AreaEstrategicaService
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => '',
         ];
+    }
+
+    public function verificarCodigo(string $id, int $codigo): bool
+    {
+        return AreaEstrategicaDao::verificarCodigo($id, $codigo);
     }
 }

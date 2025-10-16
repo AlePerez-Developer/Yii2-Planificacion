@@ -22,11 +22,11 @@ class ContextoAplicacion extends Component
     /**
      * Establece el codigo del Pei activo
      *
-     * @param $codigoPei int
+     * @param $id string
      */
-    public function setPei(int $codigoPei): void
+    public function setPei(string $id): void
     {
-        Yii::$app->session->set(self::CLAVE_PEI, $codigoPei);
+        Yii::$app->session->set(self::CLAVE_PEI, $id);
     }
 
     /**

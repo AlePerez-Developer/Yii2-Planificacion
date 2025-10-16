@@ -42,8 +42,9 @@ $(document).ready(function () {
         $('#gestionInicio').valid();
     });
 
+
     $(document).on('click', '#refresh', function(){
-        dt_pei.ajax.reload();
+        dt_pei.ajax.reload()
     })
 
     /*=============================================
@@ -69,6 +70,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function () {
                 MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.', null);
+                // noinspection JSCheckFunctionSignatures
                 dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });
@@ -104,6 +106,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function () {
                 MostrarMensaje('success', 'Los datos del PEI se actualizaron correctamente.', null);
+                // noinspection JSCheckFunctionSignatures
                 dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });

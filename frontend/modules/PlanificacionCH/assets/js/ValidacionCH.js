@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function() {/*
     $('input.txt[type=text]').on('keypress', function (event) {
         let regex = new RegExp("^[\\w ]+$");
         let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
@@ -169,6 +169,6 @@ $(document).ready(function() {
         unhighlight: function (element) {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
-    } );
+    } );*/
 
 });

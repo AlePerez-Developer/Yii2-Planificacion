@@ -11,8 +11,8 @@ use Yii;
 /**
  * Modelo para la tabla "AreasEstrategicas".
  *
- * @property int $CodigoAreaEstrategica
- * @property int $CodigoPei
+ * @property string $IdAreaEstrategica
+ * @property string $IdPei
  * @property int $Codigo
  * @property string $Descripcion
  *
@@ -22,10 +22,11 @@ use Yii;
  *
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
- * @property Pei $pei
+ * @property Pei $idPei
  *
  * @property PoliticaEstrategica[] $politicasEstrategicas
  */
+
 class AreaEstrategica extends ActiveRecord
 {
     public static function tableName(): string
@@ -36,42 +37,47 @@ class AreaEstrategica extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['CodigoPei', 'Codigo', 'Descripcion'], 'required'],
-            [['CodigoAreaEstrategica', 'CodigoPei', 'Codigo'], 'integer'],
+            [['IdAreaEstrategica', 'IdPei'], 'string'],
+            [['IdPei', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Codigo'], 'integer'],
+            [['FechaHoraRegistro'], 'safe'],
+            [['IdPei'], 'string', 'max' => 36],
             [['Descripcion'], 'string', 'max' => 500],
-            [['CodigoAreaEstrategica'], 'unique'],
-            //[['Codigo'], 'unique'],
-            [['CodigoPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['CodigoPei' => 'CodigoPei']],
+            [['CodigoEstado'], 'string', 'max' => 1],
+            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['IdAreaEstrategica'], 'unique'],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => PeI::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
         ];
     }
 
     public function attributeLabels(): array
     {
         return [
-            'CodigoAreaEstrategica' => 'Codigo Área Estratégica',
-            'CodigoPei' => 'PEI',
-            'Codigo' => 'Código',
-            'Descripcion' => 'Descripción',
+            'IdAreaEstrategica' => 'Id Area Estrategica',
+            'IdPei' => 'Id Pei',
+            'Codigo' => 'Codigo',
+            'Descripcion' => 'Descripcion',
+            'CodigoEstado' => 'Codigo Estado',
+            'FechaHoraRegistro' => 'Fecha Hora Registro',
+            'CodigoUsuario' => 'Codigo Usuario',
         ];
     }
 
-    public static function listOne($codigo): ?AreaEstrategica
+    public static function listOne(string $id): ?AreaEstrategica
     {
-        return self::findOne(['CodigoAreaEstrategica' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdAreaEstrategica' => $id, ['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listAll($search = '%%'): ActiveQuery
     {
         return self::find()->alias('A')
             ->select([
-                'A.CodigoAreaEstrategica',
-                'P.CodigoPei',
+                'A.IdAreaEstrategica',
+                'P.IdPei',
                 'A.Codigo',
                 'A.Descripcion',
-                'P.DescripcionPEI',
-                'P.GestionInicio',
-                'P.GestionFin',
-                'P.FechaAprobacion',
                 'A.CodigoUsuario',
                 'A.CodigoEstado',
             ])
@@ -79,7 +85,7 @@ class AreaEstrategica extends ActiveRecord
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'A.Descripcion', $search,false])
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['A.CodigoPei' => Yii::$app->contexto->getPei()])
+            ->andWhere(['A.IdPei' => Yii::$app->contexto->getPei()])
             ->orderBy(['A.Codigo' => SORT_ASC]);
     }
 
@@ -112,12 +118,19 @@ class AreaEstrategica extends ActiveRecord
      */
     public function getPoliticasEstrategicas(): ActiveQuery
     {
-        return $this->hasMany(PoliticaEstrategica::class, ['CodigoAreaEstrategica' => 'CodigoAreaEstrategica']);
+        return $this->hasMany(PoliticaEstrategica::class, ['IdAreaEstrategica' => 'IdAreaEstrategica']);
     }
 
+    /**
+     * Gets query for [[IdPei]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     * /
+     */
     public function getPei(): ActiveQuery
     {
-        return $this->hasOne(Pei::class, ['CodigoPei' => 'CodigoPei']);
+        return $this->hasOne(Pei::class, ['IdPei' => 'IdPei']);
     }
 
     /**

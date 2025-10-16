@@ -22,13 +22,13 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
+            <span class="icon closed">
+                <span class="circle">
+                    <span class="horizontal"></span>
+                    <span class="vertical"></span>
+                </span>
                 Agregar Área Estratégica
-            </div>
+            </span>
         </button>
     </div>
     <div id="divDatos" class="card-body" style="display: none">
@@ -36,7 +36,7 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <form id="formAreaEstrategica" action="" method="post">
+                    <form id="formAreaEstrategica" action="" method="post" data-id-area-estrategica="0">
                         <div class="form-group">
                             <label for="codigo" class="control-label">Código de Área</label>
                             <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num" maxlength="1">
@@ -69,5 +69,4 @@ $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
             </thead>
         </table>
     </div>
-
 </div>

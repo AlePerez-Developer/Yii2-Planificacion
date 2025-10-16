@@ -14,7 +14,7 @@ $(document).ready(function () {
             '               <div class="subsmall">Desc: </div>' +
             '           </div>' +
             '           <div class="col-8">' +
-            '               <div class="little">' + d["DescripcionPEI"] + '</div>' +
+            '               <div class="little">' + d["Descripcion"] + '</div>' +
             '           </div>' +
             '       </div>' +
             '       <div class="row">' +
@@ -96,7 +96,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoAreaEstrategica',
+                data: 'IdAreaEstrategica',
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -128,7 +128,7 @@ $(document).ready(function () {
             row["child"].hide();
         }
         else {
-            row["child"](format(row.data())).show();
+            row["child"](format(row.data()['pei'])).show();
         }
     });
 })

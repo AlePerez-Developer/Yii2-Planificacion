@@ -1,13 +1,11 @@
 $(document).ready(function () {
-  let codigoAreaEstrategica = 0;
-  let tableBody = $("#tablaListaAreas tbody")
-
+  let idAreaEstrategica = '00000000-0000-0000-0000-000000000000';
   function reiniciarCampos() {
     $('#formAreaEstrategica *').filter(':input').each(function () {
       $(this).removeClass('is-invalid is-valid');
     });
     $('#formAreaEstrategica').trigger("reset");
-    codigoAreaEstrategica = 0;
+    idAreaEstrategica = '00000000-0000-0000-0000-000000000000';
   }
 
   $("#btnCancelar").click(function () {
@@ -25,8 +23,8 @@ $(document).ready(function () {
     btnCancel.prop('disabled', true);
     try {
       if ($("#formAreaEstrategica").valid()) {
-        const hasCode =  codigoAreaEstrategica !== 0;
-        hasCode ? actualizarArea() : guardarArea();
+        const hasCode =  idAreaEstrategica !== '00000000-0000-0000-0000-000000000000';
+        hasCode ? actualizar() : guardar();
       }
     } catch (err) {
       MostrarMensaje('error', GenerarMensajeError(err));
@@ -43,7 +41,7 @@ $(document).ready(function () {
   /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-  function  guardarArea()   {
+  function  guardar()   {
     let codigo = $("#codigo").val();
     let descripcion = $("#descripcion").val();
     let datos = new FormData();
@@ -59,6 +57,7 @@ $(document).ready(function () {
       dataType: "json",
       success: function () {
         MostrarMensaje('success', 'Los datos de la nueva Area Estrategica se guardaron correctamente.', null);
+        // noinspection JSCheckFunctionSignatures
         dt_area.ajax.reload(() => {
           $("#btnCancelar").click();
         });
@@ -73,12 +72,12 @@ $(document).ready(function () {
   /*=============================================
     ACTUALIZA EL PEI SELECCIONADO EN LA BD
     =============================================*/
-  function actualizarArea() {
-    let Codigo = $("#codigo").val();
+  function actualizar() {
+    let codigo = $("#codigo").val();
     let descripcion = $("#descripcion").val();
     let datos = new FormData();
-    datos.append("codigoAreaEstrategica", codigoAreaEstrategica);
-    datos.append("codigo", Codigo);
+    datos.append("idAreaEstrategica", idAreaEstrategica);
+    datos.append("codigo", codigo);
     datos.append("descripcion", descripcion);
     $.ajax({
       url: "index.php?r=Planificacion/area-estrategica/actualizar",
@@ -90,6 +89,7 @@ $(document).ready(function () {
       dataType: "json",
       success: function () {
         MostrarMensaje('success', 'Los datos de la Area Estrategica se actualizaron correctamente.', null);
+        // noinspection JSCheckFunctionSignatures
         dt_area.ajax.reload(() => {
           $("#btnCancelar").click();
         });
@@ -104,17 +104,17 @@ $(document).ready(function () {
   /* =============================================
           CAMBIA EL ESTADO DEL REGISTRO
   ===============================================*/
-  tableBody.on('click', '#btnEstado', function(){
+  $(document).on('click', 'tbody #btnEstado', function(){
     let objectBtn = $(this);
     const dt_row = dt_area.row(objectBtn.closest('tr')).data()
-    let codigoAreaEstrategica = dt_row["CodigoAreaEstrategica"];
+    let idAreaEstrategica = dt_row["IdAreaEstrategica"];
     IniciarSpiner(objectBtn)
 
     $.ajax({
       url: "index.php?r=Planificacion/area-estrategica/cambiar-estado",
       method: "POST",
       data : {
-        codigoAreaEstrategica: codigoAreaEstrategica,
+        idAreaEstrategica: idAreaEstrategica,
       },
       dataType: "json",
       success: function (data) {
@@ -132,10 +132,10 @@ $(document).ready(function () {
   /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-  tableBody.on('click', '#btnEliminar', function(){
+  $(document).on('click', 'tbody #btnEliminar', function(){
     let objectBtn = $(this)
     const dt_row = dt_area.row(objectBtn.closest('tr')).data()
-    let codigoAreaEstrategica = dt_row["CodigoAreaEstrategica"];
+    let idAreaEstrategica = dt_row["IdAreaEstrategica"];
 
     Swal.fire({
       icon: "warning",
@@ -153,7 +153,7 @@ $(document).ready(function () {
           url: "index.php?r=Planificacion/area-estrategica/eliminar",
           method: "POST",
           data : {
-            codigoAreaEstrategica: codigoAreaEstrategica,
+            idAreaEstrategica: idAreaEstrategica,
           },
           dataType: "json",
           success: function () {
@@ -174,17 +174,17 @@ $(document).ready(function () {
   /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-  tableBody.on("click", ".btnEditar", function () {
+  $(document).on("click", "tbody #btnEditar", function () {
     let objectBtn = $(this)
     const dt_row = dt_area.row(objectBtn.closest('tr')).data()
-    codigoAreaEstrategica = dt_row["CodigoAreaEstrategica"];
+    idAreaEstrategica = dt_row["IdAreaEstrategica"];
     IniciarSpiner(objectBtn)
 
     $.ajax({
       url: "index.php?r=Planificacion/area-estrategica/buscar",
       method: "POST",
       data : {
-        codigoAreaEstrategica: codigoAreaEstrategica,
+        idAreaEstrategica: idAreaEstrategica,
       },
       dataType: "json",
       success: function (data) {
@@ -201,4 +201,71 @@ $(document).ready(function () {
       }
     });
   });
+
+  /*
+  * Validacion del form
+  */
+  $( "#formAreaEstrategica" ).validate( {
+    rules: {
+      codigo: {
+        required: true,
+        digits: true,
+        range: [1, 100],
+        verificarCodigoArea: ''
+      },
+      descripcion: {
+        required: true,
+        minlength: 2,
+        maxlength: 500
+      },
+    },
+    messages: {
+      codigo: {
+        required: "Debe ingresar un codigo de area estrategica",
+        digits: "El codigo solo debe ser numerico",
+        range: "El codigo debe estar comprendido entre 1 y 9",
+        verificarCodigoArea: "El codigo ingresado ya se encuentra en uso"
+      },
+      descripcion: {
+        required: "Debe ingresar una descripcion del area estrategica",
+        minlength: "La descripcion debe tener almenos 2 letras",
+        maxlength: "La descripcion debe tener maximo 500 letras"
+      }
+    },
+    errorElement: "div",
+
+    errorPlacement: function ( error, element ) {
+      error.addClass( "invalid-feedback" );
+      error.insertAfter(element);
+    },
+    highlight: function ( element  ) {
+      $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+    },
+    unhighlight: function (element) {
+      $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+    }
+  });
+
+  $.validator.addMethod("verificarCodigoArea",
+      function(value) {
+        let result = false;
+        let datos = new FormData();
+        datos.append("codigo", value);
+        datos.append("idAreaEstrategica", idAreaEstrategica);
+        $.ajax({
+          url: "index.php?r=Planificacion/area-estrategica/verificar-codigo",
+          method: "POST",
+          async: false,
+          data: datos,
+          cache: false,
+          contentType: false,
+          processData: false,
+          success: function(data) {
+            result = !!(data);
+          }
+        });
+        return result;
+      }
+  );
+
 });

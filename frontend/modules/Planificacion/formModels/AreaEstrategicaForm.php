@@ -6,16 +6,17 @@ use yii\base\Model;
 
 class AreaEstrategicaForm extends Model
 {
-    public int $codigoPei;      // CodigoPei
+    public string $idPei;
     public int $codigo;
     public string $descripcion;
 
     public function rules(): array
     {
         return [
-            [['codigoPei', 'codigo', 'descripcion'], 'required'],
-            [['codigoPei', 'codigo'], 'integer'],
-            [['descripcion'], 'string', 'max' => 250],
+            [['idPei', 'codigo', 'descripcion'], 'required'],
+            [['codigo'], 'integer'],
+            [['idPei'], 'string', 'max' => 36],
+            [['descripcion'], 'string', 'max' => 500],
             [['codigo', 'descripcion'], 'trim'],
         ];
     }
