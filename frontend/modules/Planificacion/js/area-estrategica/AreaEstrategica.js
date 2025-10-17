@@ -210,7 +210,7 @@ $(document).ready(function () {
       codigo: {
         required: true,
         digits: true,
-        range: [1, 100],
+        range: [1, 9],
         verificarCodigoArea: ''
       },
       descripcion: {

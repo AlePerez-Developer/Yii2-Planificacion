@@ -5,15 +5,16 @@ use yii\base\Model;
 
 class PoliticaEstrategicaForm extends Model
 {
-    public int $codigoAreaEstrategica;
+    public string $idAreaEstrategica;
     public int $codigo;
     public string $descripcion;
 
     public function rules(): array
     {
         return [
-            [['codigoAreaEstrategica', 'codigo', 'descripcion'], 'required'],
-            [['codigoAreaEstrategica', 'codigo'], 'integer'],
+            [['idAreaEstrategica', 'codigo', 'descripcion'], 'required'],
+            [['codigo'], 'integer'],
+            [['idAreaEstrategica'], 'string', 'max' => 36],
             [['descripcion'], 'string', 'max' => 500],
             [['codigo', 'descripcion'], 'trim'],
         ];

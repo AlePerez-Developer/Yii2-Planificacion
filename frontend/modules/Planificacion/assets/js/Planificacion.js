@@ -166,5 +166,33 @@ function MostrarMensaje(icono, mensaje, errores){
         confirmButtonText: "Cerrar"
     })
 }
+
+function populateS2Areas(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-estrategico/listar-areas-estrategicas',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdAreaEstrategica"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
 $(document).ready(function(){
 });

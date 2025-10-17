@@ -28,10 +28,10 @@ class AreaEstrategicaService
 
     /**
      * lista un array de Areas Estrategicas no eliminados
-     *
+     * @param string $search
      * @return array of Areas
      */
-    public function listarAreasS2($search): array
+    public function listarAreasS2(string $search): array
     {
         $data = AreaEstrategica::listAll($search)
             ->orderBy(['Codigo' => SORT_ASC])
@@ -82,13 +82,13 @@ class AreaEstrategicaService
      */
     public function actualizar(string $id, AreaEstrategicaForm $form): array
     {
-        $model = $this->obtenerModeloValidado($id);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $model->IdPei = $form->idPei;
-        $model->Codigo = $form->codigo;
-        $model->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->IdPei = $form->idPei;
+        $modelo->Codigo = $form->codigo;
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
-        return $this->validarProcesarModelo($model);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
@@ -130,14 +130,14 @@ class AreaEstrategicaService
      */
     public function eliminar(string $id): array
     {
-        $model = $this->obtenerModeloValidado($id);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if (AreaEstrategicaDao::enUso($model)){
+        if (AreaEstrategicaDao::enUso($modelo)){
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El Area estrategica se encuentra asignada a una Politica estrategica',500);
         }
 
-        $model->eliminar();
-        return $this->validarProcesarModelo($model);
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
@@ -149,15 +149,15 @@ class AreaEstrategicaService
      */
     public function obtenerModelo(string $id): array
     {
-        $model = $this->listarUno($id);
+        $modelo = $this->listarUno($id);
 
-        if (!$model) {
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $model->getAttributes(array('IdAreaEstrategica', 'IdPei', 'Codigo', 'Descripcion')),
+            'data' => $modelo->getAttributes(array('IdAreaEstrategica', 'IdPei', 'Codigo', 'Descripcion')),
         ];
     }
 
@@ -170,30 +170,30 @@ class AreaEstrategicaService
      */
     private function obtenerModeloValidado(string $id): ?AreaEstrategica
     {
-        $model = $this->listarUno($id);
-        if (!$model) {
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
-        return $model;
+        return $modelo;
     }
 
     /**
      *  Recibe un modelo lo valida y realiza el guardado del mismo.
      *
-     * @param AreaEstrategica $model
+     * @param AreaEstrategica $modelo
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function validarProcesarModelo(AreaEstrategica $model): array
+    public function validarProcesarModelo(AreaEstrategica $modelo): array
     {
-        if (!$model->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$model->getErrors(),500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$model->save(false)) {
-            Yii::error("Error al guardar los datos del area estrategica $model->Descripcion", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$model->getErrors(),500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar los datos del area estrategica $modelo->Descripcion", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
@@ -202,8 +202,26 @@ class AreaEstrategicaService
         ];
     }
 
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param int $codigo
+     * @return bool
+     */
     public function verificarCodigo(string $id, int $codigo): bool
     {
         return AreaEstrategicaDao::verificarCodigo($id, $codigo);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
+    {
+        return AreaEstrategicaDao::validarId($id);
     }
 }

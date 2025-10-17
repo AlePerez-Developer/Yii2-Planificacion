@@ -27,12 +27,13 @@ class AreaEstrategicaDao
         return true;
     }
 
-    /*
-    static function validarCodigoArea(string $id): bool
+
+    static function validarId(string $id): bool
     {
-        return AreaEstrategica::find()->where(['IdAreaEstrategica' => $id])->exists();
+        return AreaEstrategica::find()->where(['IdAreaEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 
+    /*
     static function obtenerPei(AreaEstrategica $model): array
     {
         return $model->getPei()->asArray()->all();

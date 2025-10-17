@@ -14,7 +14,7 @@ $(document).ready(function () {
             '               <div class="subsmall">Codigo: </div>' +
             '           </div>' +
             '           <div class="col-8">' +
-            '               <div class="little">' + d["areaEstrategica"]['Codigo'] + '</div>' +
+            '               <div class="little">' + d['Codigo'] + '</div>' +
             '           </div>' +
             '       </div>' +
             '       <div class="row">' +
@@ -23,7 +23,7 @@ $(document).ready(function () {
             '           </div>' +
             '           <div class="col-4">' +
             '               <div class="little">' +
-            '                   ' + d["areaEstrategica"]['Descripcion'] +
+            '                   ' + d['Descripcion'] +
             '               </div>' +
             '           </div>' +
             '       </div>' +
@@ -101,7 +101,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoPoliticaEstrategica',
+                data: 'IdPoliticaEstrategica',
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -133,7 +133,7 @@ $(document).ready(function () {
             row["child"].hide();
         }
         else {
-            row["child"](format(row.data())).show();
+            row["child"](format(row.data()["areaEstrategica"])).show();
         }
     });
 })

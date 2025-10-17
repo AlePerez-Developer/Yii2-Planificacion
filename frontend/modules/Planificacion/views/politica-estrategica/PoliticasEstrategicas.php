@@ -28,13 +28,13 @@ $this->params['breadcrumbs'] = [['label' => '/Politicas Estrategicas']];
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
+            <span class="icon closed">
+                <span class="circle">
+                    <span class="horizontal"></span>
+                    <span class="vertical"></span>
+                </span>
                 Agregar Política Estratégica
-            </div>
+            </span>
         </button>
     </div>
     <div id="divDatos" class="card-body" style="display: none">
@@ -84,5 +84,4 @@ $this->params['breadcrumbs'] = [['label' => '/Politicas Estrategicas']];
             </thead>
         </table>
     </div>
-
 </div>

@@ -19,33 +19,7 @@ $(document).ready(function() {
     s2Politicas.prop("disabled", true);
 });
 
-function populateS2Areas() {
-    $.ajax({
-        method: "POST",
-        dataType: 'json',
-        delay: 100,
-        cache: true,
-        url: 'index.php?r=Planificacion/obj-estrategico/listar-areas-estrategicas',
-        success: function(data){
-            s2Areas.empty();
 
-            $.each(data["data"], function(index, item) {
-                s2Areas.append(
-                    $('<option>', {
-                        value: item["CodigoAreaEstrategica"],
-                        text: item["Descripcion"]
-                    })
-                );
-            });
-
-            s2Areas.val(null).trigger('change');
-        },
-        error: function (xhr) {
-            const data = JSON.parse(xhr.responseText)
-            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-        },
-    });
-}
 
 function populateS2Politicas(codigoArea,codigoPolitica)
 {

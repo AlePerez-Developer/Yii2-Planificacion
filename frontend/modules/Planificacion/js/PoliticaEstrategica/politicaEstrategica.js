@@ -1,13 +1,13 @@
 $(document).ready(function () {
-    let codigoPoliticaEstrategica = 0;
+    let idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
 
     function reiniciarCampos() {
         $('#formPoliticaEstrategica *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPoliticaEstrategica').trigger("reset");
-        s2AreasEstrategicas.val('').trigger('change')
-        codigoPoliticaEstrategica = 0;
+        politicas_s2AreasEstrategicas.val('').trigger('change')
+        idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
     }
 
     $("#btnCancelar").click(function () {
@@ -25,8 +25,8 @@ $(document).ready(function () {
         btnCancel.prop('disabled', true);
         try {
             if ($("#formPoliticaEstrategica").valid()) {
-                const hasCode =  codigoPoliticaEstrategica !== 0;
-                hasCode ? actualizarPolitica() : guardarPolitica();
+                const hasCode =  idPoliticaEstrategica !== '00000000-0000-0000-0000-000000000000';
+                hasCode ? actualizar() : guardar();
             }
         } catch (err) {
             MostrarMensaje('error', GenerarMensajeError(err));
@@ -43,12 +43,12 @@ $(document).ready(function () {
     /*=============================================
     INSERTA EN LA BD UN NUEVO REGISTRO
     =============================================*/
-    function  guardarPolitica()   {
-        let codigoArea = $('#areasEstrategicas').select2('data')
+    function  guardar()   {
+        let idAreaEstrategica = $('#areasEstrategicas').select2('data')
         let codigo = $("#codigo").val();
         let descripcion = $("#descripcion").val();
         let datos = new FormData();
-        datos.append("codigoAreaEstrategica", codigoArea[0].id);
+        datos.append("idAreaEstrategica", idAreaEstrategica[0].id);
         datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
@@ -61,6 +61,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function () {
                 MostrarMensaje('success', 'Los datos de la nueva Politica Estrategica se guardaron correctamente.', null);
+                // noinspection JSCheckFunctionSignatures
                 dt_politica.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });
@@ -75,14 +76,14 @@ $(document).ready(function () {
     /*=============================================
     ACTUALIZA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    function actualizarPolitica() {
-        let codigoArea = $('#areasEstrategicas').select2('data')
-        let Codigo = $("#codigo").val();
+    function actualizar() {
+        let idAreaEstrategica = $('#areasEstrategicas').select2('data')
+        let codigo = $("#codigo").val();
         let descripcion = $("#descripcion").val();
         let datos = new FormData();
-        datos.append("codigoPoliticaEstrategica", codigoPoliticaEstrategica);
-        datos.append("codigoAreaEstrategica", codigoArea[0].id);
-        datos.append("codigo", Codigo);
+        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+        datos.append("idAreaEstrategica", idAreaEstrategica[0].id);
+        datos.append("codigo", codigo);
         datos.append("descripcion", descripcion);
         $.ajax({
             url: "index.php?r=Planificacion/politica-estrategica/actualizar",
@@ -94,6 +95,7 @@ $(document).ready(function () {
             dataType: "json",
             success: function () {
                 MostrarMensaje('success', 'Los datos de la Politica Estrategica se actualizaron correctamente.', null);
+                // noinspection JSCheckFunctionSignatures
                 dt_politica.ajax.reload(() => {
                     $("#btnCancelar").click();
                 });
@@ -111,14 +113,14 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEstado', function(){
         let objectBtn = $(this);
         const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        let codigoPoliticaEstrategica = dt_row["CodigoPoliticaEstrategica"];
+        let idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
             url: "index.php?r=Planificacion/politica-estrategica/cambiar-estado",
             method: "POST",
             data : {
-                codigoPoliticaEstrategica: codigoPoliticaEstrategica,
+                idPoliticaEstrategica: idPoliticaEstrategica,
             },
             dataType: "json",
             success: function (data) {
@@ -139,7 +141,7 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEliminar', function(){
         let objectBtn = $(this)
         const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        let codigoPoliticaEstrategica = dt_row["CodigoPoliticaEstrategica"];
+        let idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
 
         Swal.fire({
             icon: "warning",
@@ -157,7 +159,7 @@ $(document).ready(function () {
                     url: "index.php?r=Planificacion/politica-estrategica/eliminar",
                     method: "POST",
                     data : {
-                        codigoPoliticaEstrategica: codigoPoliticaEstrategica,
+                        idPoliticaEstrategica: idPoliticaEstrategica,
                     },
                     dataType: "json",
                     success: function () {
@@ -181,19 +183,19 @@ $(document).ready(function () {
     $(document).on('click', 'tbody #btnEditar', function(){
         let objectBtn = $(this)
         const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        codigoPoliticaEstrategica = dt_row["CodigoPoliticaEstrategica"];
+        idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
         IniciarSpiner(objectBtn)
 
         $.ajax({
             url: "index.php?r=Planificacion/politica-estrategica/buscar",
             method: "POST",
             data : {
-                codigoPoliticaEstrategica: codigoPoliticaEstrategica,
+                idPoliticaEstrategica: idPoliticaEstrategica,
             },
             dataType: "json",
             success: function (data) {
                 let politica = JSON.parse(JSON.stringify(data["data"]));
-                s2AreasEstrategicas.val(politica['CodigoAreaEstrategica']).trigger('change');
+                politicas_s2AreasEstrategicas.val(politica['IdAreaEstrategica']).trigger('change');
                 $("#codigo").val(politica["Codigo"]);
                 $("#descripcion").val(politica["Descripcion"]);
                 DetenerSpiner(objectBtn)
@@ -206,4 +208,83 @@ $(document).ready(function () {
             }
         });
     });
+
+    /**
+    * Validacion del form
+    */
+    $( "#formPoliticaEstrategica" ).validate( {
+        rules: {
+            areasEstrategicas: {
+                required: true,
+            },
+            codigo: {
+                required: true,
+                digits: true,
+                range: [1, 9],
+                verificarCodigoPolitica: {
+                    depends: function() {
+                        return $('#areasEstrategicas').valid();
+                    }
+                }
+            },
+            descripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 500
+            },
+        },
+        messages: {
+            areasEstrategicas: {
+                required: "Debe seleccionar una area estrategica",
+            },
+            codigo: {
+                required: "Debe ingresar un codigo de politica estrategica",
+                digits: "El codigo solo debe ser numerico",
+                range: "El codigo debe estar comprendido entre 1 y 9",
+                verificarCodigoPolitica: "El codigo ingresado ya se encuentra en uso"
+            },
+            descripcion: {
+                required: "Debe ingresar una descripcion del area estrategica",
+                minlength: "La descripcion debe tener almenos 2 letras",
+                maxlength: "La descripcion debe tener maximo 500 letras"
+            }
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    });
+
+    $.validator.addMethod("verificarCodigoPolitica",
+        function(value) {
+            let result = false;
+            let idAreaEstrategica = politicas_s2AreasEstrategicas.select2('data')
+            let datos = new FormData();
+            datos.append("codigo", value);
+            datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+            datos.append("idAreaEstrategica", idAreaEstrategica[0].id);
+            $.ajax({
+                url: "index.php?r=Planificacion/politica-estrategica/verificar-codigo",
+                method: "POST",
+                async: false,
+                data: datos,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    result = !!(data);
+                }
+            });
+            return result;
+        }
+    );
+
 });

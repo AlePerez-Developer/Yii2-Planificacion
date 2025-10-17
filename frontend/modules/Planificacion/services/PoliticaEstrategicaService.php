@@ -20,7 +20,7 @@ class PoliticaEstrategicaService
      *
      * @return array of Areas
      */
-    public function listarPoliticas(): array
+    public function listarTodo(): array
     {
         $data = PoliticaEstrategica::listAll()
             ->orderBy(['P.Codigo' => SORT_ASC])
@@ -30,28 +30,30 @@ class PoliticaEstrategicaService
     }
 
     /**
-     * lista un array de Politicas Estrategicas no eliminados
+     * lista un array de Areas Estrategicas no eliminados
+     * @param string $idAreaEstrategica
+     * @param string $search
      *
-     * @return array of Areas
+     * @return array of Politicas
      */
-    public function listarPoliticasByArea($area,$search): array
+    public function listarPoliticasS2(string $idAreaEstrategica, string $search): array
     {
-        $data = PoliticaEstrategica::listAllByArea($area,$search)
-            ->orderBy(['P.Codigo' => SORT_ASC])
+        $data = PoliticaEstrategica::listAllByArea($idAreaEstrategica,$search)
+            ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 
-        return ResponseHelper::success($data, 'Listado de Politicas Estratégicas obtenido.');
+        return ResponseHelper::success($data, 'Listado de Áreas Estratégicas obtenido.');
     }
 
     /**
      * obtiene una Politica Estrategico en base a un codigo.
      *
-     * @param int $codigo
+     * @param string $id
      * @return PoliticaEstrategica|null
      */
-    public function listarPolitica(int $codigo): ?PoliticaEstrategica
+    public function listarUno(string $id): ?PoliticaEstrategica
     {
-        return PoliticaEstrategica::listOne($codigo);
+        return PoliticaEstrategica::listOne($id);
     }
 
     /**
@@ -64,7 +66,7 @@ class PoliticaEstrategicaService
     public function guardar(PoliticaEstrategicaForm $form): array
     {
         $model = new PoliticaEstrategica([
-            'CodigoAreaEstrategica' => $form->codigoAreaEstrategica,
+            'IdAreaEstrategica' => $form->idAreaEstrategica,
             'Codigo' => $form->codigo,
             'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
@@ -77,35 +79,35 @@ class PoliticaEstrategicaService
     /**
      * Actualiza la informacion de un registro en el modelo
      *
-     * @param int $codigo
+     * @param string $id
      * @param PoliticaEstrategicaForm $form
      * @return array
      * @throws Throwable
      * @throws ValidationException
      * @throws StaleObjectException
      */
-    public function actualizar(int $codigo, PoliticaEstrategicaForm $form): array
+    public function actualizar(string $id, PoliticaEstrategicaForm $form): array
     {
-        $model = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $model->CodigoAreaEstrategica = $form->codigoAreaEstrategica;
-        $model->Codigo = $form->codigo;
-        $model->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->IdAreaEstrategica = $form->idAreaEstrategica;
+        $modelo->Codigo = $form->codigo;
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
-        return $this->validarProcesarModelo($model);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Busca una Politica Estrategica por su código y alterna su estado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $modelo = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
         $modelo->cambiarEstado();
 
@@ -127,82 +129,95 @@ class PoliticaEstrategicaService
     /**
      * Busca una Politica Estrategica por su código y realiza un soft delete.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function eliminar(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $model = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if (PoliticaEstrategicaDao::enUso($model)){
+        if (PoliticaEstrategicaDao::enUso($modelo)){
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'La Politica estrategica se encuentra asignada a un objetivo estrategico',500);
         }
 
-        $model->eliminar();
-        return $this->validarProcesarModelo($model);
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Obtiene el modelo segun el codigo enviado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $model = $this->listarPolitica($codigo);
+        $modelo = $this->listarUno($id);
 
-        if (!$model) {
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $model->getAttributes(array('CodigoPoliticaEstrategica', 'CodigoAreaEstrategica', 'Codigo', 'Descripcion')),
+            'data' => $modelo->getAttributes(array('IdPoliticaEstrategica', 'IdAreaEstrategica', 'Codigo', 'Descripcion')),
         ];
     }
 
     /**
      * Obtiene el modelo segun el codigo enviado y valida si existe.
      *
-     * @param int $codigo
+     * @param string $id
      * @return PoliticaEstrategica|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(int $codigo): ?PoliticaEstrategica
+    private function obtenerModeloValidado(string $id): ?PoliticaEstrategica
     {
-        $model = $this->listarPolitica($codigo);
-        if (!$model) {
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
-        return $model;
+        return $modelo;
     }
 
     /**
      *  Recibe un modelo lo valida y realiza el guardado del mismo.
      *
-     * @param PoliticaEstrategica $model
+     * @param PoliticaEstrategica $modelo
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function validarProcesarModelo(PoliticaEstrategica $model): array
+    public function validarProcesarModelo(PoliticaEstrategica $modelo): array
     {
-        if (!$model->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$model->getErrors(),500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$model->save(false)) {
-            Yii::error("Error al guardar los datos del area estrategica $model->Descripcion", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$model->getErrors(),500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar los datos del area estrategica $modelo->Descripcion", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => '',
         ];
+    }
+
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param string $idAreaEstrategica
+     * @param int $codigo
+     * @return bool
+     */
+    public function verificarCodigo(string $id, string $idAreaEstrategica, int $codigo): bool
+    {
+        return PoliticaEstrategicaDao::verificarCodigo($id, $idAreaEstrategica, $codigo);
     }
 }

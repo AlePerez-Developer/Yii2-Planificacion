@@ -2,17 +2,17 @@
 
 namespace app\modules\Planificacion\models;
 
-use common\models\Estado;
 use common\models\Usuario;
-use Yii;
-use yii\db\ActiveQuery;
+use common\models\Estado;
 use yii\db\ActiveRecord;
+use yii\db\ActiveQuery;
+use Yii;
 
 /**
  * Modelo para la tabla "PoliticasEstrategicas".
  *
- * @property int $CodigoPoliticaEstrategica
- * @property int $CodigoAreaEstrategica
+ * @property string $IdPoliticaEstrategica
+ * @property string $IdAreaEstrategica
  * @property int $Codigo
  * @property string $Descripcion
  *
@@ -23,7 +23,7 @@ use yii\db\ActiveRecord;
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
  *
- * @property AreaEstrategica $area
+ * @property AreaEstrategica $idAreaEstrategica
  */
 class PoliticaEstrategica extends ActiveRecord
 {
@@ -35,35 +35,48 @@ class PoliticaEstrategica extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['CodigoAreaEstrategica', 'Codigo', 'Descripcion'], 'required'],
-            [['CodigoPoliticaEstrategica', 'CodigoAreaEstrategica', 'Codigo'], 'integer'],
+            [['IdPoliticaEstrategica', 'IdAreaEstrategica'], 'string'],
+            [['IdAreaEstrategica', 'Codigo', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Codigo'], 'integer'],
+            [['FechaHoraRegistro'], 'safe'],
+            [['IdAreaEstrategica','IdPoliticaEstrategica'], 'string', 'max' => 36],
             [['Descripcion'], 'string', 'max' => 500],
-            [['CodigoPoliticaEstrategica'], 'unique'],
-            [['CodigoAreaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['CodigoAreaEstrategica' => 'CodigoAreaEstrategica']],
+            [['CodigoEstado'], 'string', 'max' => 1],
+            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['IdPoliticaEstrategica'], 'unique'],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['IdAreaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['IdAreaEstrategica' => 'IdAreaEstrategica']],
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels(): array
     {
         return [
-            'CodigoPoliticaEstrategica' => 'Código Política',
-            'CodigoAreaEstrategica' => 'Área Estratégica',
-            'Codigo' => 'Código',
-            'Descripcion' => 'Descripción',
+            'IdPoliticaEstrategica' => 'Id Politica Estrategica',
+            'IdAreaEstrategica' => 'Id Area Estrategica',
+            'Codigo' => 'Codigo',
+            'Descripcion' => 'Descripcion',
+            'CodigoEstado' => 'Codigo Estado',
+            'FechaHoraRegistro' => 'Fecha Hora Registro',
+            'CodigoUsuario' => 'Codigo Usuario',
         ];
     }
 
-    public static function listOne($codigo): ?PoliticaEstrategica
+    public static function listOne($id): ?PoliticaEstrategica
     {
-        return self::findOne(['CodigoPoliticaEstrategica' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdPoliticaEstrategica' => $id, ['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listAll(): ActiveQuery
     {
         return self::find()->alias('P')
             ->select([
-                'P.CodigoPoliticaEstrategica',
-                'A.CodigoAreaEstrategica',
+                'P.IdPoliticaEstrategica',
+                'A.IdAreaEstrategica',
                 'P.Codigo',
                 'P.Descripcion',
                 'P.CodigoUsuario',
@@ -72,23 +85,23 @@ class PoliticaEstrategica extends ActiveRecord
             ->joinWith('areaEstrategica A', true, 'INNER JOIN')
             ->where(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['A.CodigoPei' => Yii::$app->contexto->getPei()])
+            ->andWhere(['A.IdPei' => Yii::$app->contexto->getPei()])
             ->orderBy(['P.Codigo' => SORT_ASC]);
     }
 
-    public static function listAllByArea(int $area, string $search = '%%'): ActiveQuery
+    public static function listAllByArea(int $idAreaEstrategica, string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('P')
             ->select([
-                'P.CodigoPoliticaEstrategica',
-                'A.CodigoAreaEstrategica',
+                'P.IdPoliticaEstrategica',
+                'A.IdAreaEstrategica',
                 'P.Codigo',
                 'P.Descripcion',
                 'P.CodigoUsuario',
                 'P.CodigoEstado',
             ])
             ->joinWith('areaEstrategica A', true, 'INNER JOIN')
-            ->Where(['A.CodigoAreaEstrategica' => $area])
+            ->Where(['A.IdAreaEstrategica' => $idAreaEstrategica])
             ->andwhere(['like', 'P.Descripcion', $search,false])
             ->orderBy(['P.Codigo' => SORT_ASC]);
     }
@@ -115,14 +128,25 @@ class PoliticaEstrategica extends ActiveRecord
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }
 
+    /**
+     * Gets a query for [[IdAreaEstrategica]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
     public function getAreaEstrategica(): ActiveQuery
     {
-        return $this->hasOne(AreaEstrategica::class, ['CodigoAreaEstrategica' => 'CodigoAreaEstrategica']);
+        return $this->hasOne(AreaEstrategica::class, ['IdAreaEstrategica' => 'IdAreaEstrategica']);
     }
 
-    public function getObjetivoEstrategico(): ActiveQuery
+    /**
+     * Gets a query for [[ObjetivoEstrategico]].
+     *
+     * @return ActiveQuery
+     */
+    public function getObjetivosEstrategicos(): ActiveQuery
     {
-        return $this->hasOne(ObjetivoEstrategico::class, ['CodigoPoliticaEstrategica' => 'CodigoPoliticaEstrategica']);
+        return $this->hasMany(ObjetivoEstrategico::class, ['IdPoliticaEstrategica' => 'IdPoliticaEstrategica']);
     }
 
     /**
