@@ -34,6 +34,26 @@ $(document).ready(function () {
     dt_politica = $("#tablaListaPoliticas").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
+            this.api()
+                .columns([2])
+                .every(function () {
+                    let column = this;
+                    let select = $('</br><select><option value="">Buscar...</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            let val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+
+                    column
+                        .data()
+                        .unique()
+                        .sort()
+                        .each(function (d) {
+                            select.append('<option value="' + d + '">' + d + '</option>');
+                        });
+                });
         },
         ajax: {
             method: "POST",

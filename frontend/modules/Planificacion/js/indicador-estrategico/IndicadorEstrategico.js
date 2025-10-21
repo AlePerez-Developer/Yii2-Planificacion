@@ -33,7 +33,7 @@ $(document).ready(function(){
 
     let table = $(".tablaListaIndicadoresEstrategicos").DataTable({
         initComplete: function () {
-            this.api()
+            /*this.api()
                 .columns([6,7,8,9])
                 .every(function () {
                     let column = this;
@@ -52,7 +52,7 @@ $(document).ready(function(){
                         .each(function (d) {
                             select.append('<option value="' + d + '">' + d + '</option>');
                         });
-                });
+                });*/
         },
         ajax: {
             method: "POST",

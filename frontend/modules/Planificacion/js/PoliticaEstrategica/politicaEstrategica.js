@@ -221,11 +221,7 @@ $(document).ready(function () {
                 required: true,
                 digits: true,
                 range: [1, 9],
-                verificarCodigoPolitica: {
-                    depends: function() {
-                        return $('#areasEstrategicas').valid();
-                    }
-                }
+                verificarCodigoPolitica: true
             },
             descripcion: {
                 required: true,
@@ -238,10 +234,10 @@ $(document).ready(function () {
                 required: "Debe seleccionar una area estrategica",
             },
             codigo: {
-                required: "Debe ingresar un codigo de politica estrategica",
+                required: "Debe ingresar un codigo de politica estrategica jeje",
                 digits: "El codigo solo debe ser numerico",
                 range: "El codigo debe estar comprendido entre 1 y 9",
-                verificarCodigoPolitica: "El codigo ingresado ya se encuentra en uso"
+                verificarCodigoPolitica: "El codigo ingresado ya se encuentra en uso o no esta area"
             },
             descripcion: {
                 required: "Debe ingresar una descripcion del area estrategica",
@@ -265,6 +261,11 @@ $(document).ready(function () {
 
     $.validator.addMethod("verificarCodigoPolitica",
         function(value) {
+            let area = $('#areasEstrategicas').valid(); // ejecuta validación de campo1
+            if (!area) {
+                return false;
+            }
+
             let result = false;
             let idAreaEstrategica = politicas_s2AreasEstrategicas.select2('data')
             let datos = new FormData();
@@ -281,10 +282,13 @@ $(document).ready(function () {
                 processData: false,
                 success: function(data) {
                     result = !!(data);
+                },
+                complete:function(){
+                    return result
                 }
             });
-            return result;
+
+            //return result;
         }
     );
-
 });
