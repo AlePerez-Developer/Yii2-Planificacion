@@ -167,6 +167,23 @@ function MostrarMensaje(icono, mensaje, errores){
     })
 }
 
+let glbToast = toastr
+glbToast.options = {
+    "title": "carajo",
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "500",
+    "timeOut": "4000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"}
+
 function populateS2Areas(select2) {
     $.ajax({
         method: "POST",
@@ -181,7 +198,7 @@ function populateS2Areas(select2) {
                 select2.append(
                     $('<option>', {
                         value: item["IdAreaEstrategica"],
-                        text: item["Descripcion"]
+                        text: '(' + item['Codigo'] + ') - ' + item["Descripcion"]
                     })
                 );
             });
