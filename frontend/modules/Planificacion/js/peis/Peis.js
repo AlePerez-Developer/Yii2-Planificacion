@@ -69,7 +69,7 @@ $(document).ready(function () {
             processData: false,
             dataType: "json",
             success: function () {
-                MostrarMensaje('success', 'Los datos del nuevo PEI se guardaron correctamente.', null);
+                glbToast.success('Los datos del nuevo PEI se guardaron correctamente.');
                 // noinspection JSCheckFunctionSignatures
                 dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();
@@ -105,7 +105,7 @@ $(document).ready(function () {
             processData: false,
             dataType: "json",
             success: function () {
-                MostrarMensaje('success', 'Los datos del PEI se actualizaron correctamente.', null);
+                glbToast.success('Los datos del PEI se actualizaron correctamente.')
                 // noinspection JSCheckFunctionSignatures
                 dt_pei.ajax.reload(() => {
                     $("#btnCancelar").click();

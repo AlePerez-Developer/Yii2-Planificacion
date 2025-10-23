@@ -56,7 +56,7 @@ $(document).ready(function () {
       processData: false,
       dataType: "json",
       success: function () {
-        MostrarMensaje('success', 'Los datos de la nueva Area Estrategica se guardaron correctamente.', null);
+        glbToast.success('Los datos de la nueva Area Estrategica se guardaron correctamente.');
         // noinspection JSCheckFunctionSignatures
         dt_area.ajax.reload(() => {
           $("#btnCancelar").click();
@@ -88,7 +88,7 @@ $(document).ready(function () {
       processData: false,
       dataType: "json",
       success: function () {
-        MostrarMensaje('success', 'Los datos de la Area Estrategica se actualizaron correctamente.', null);
+        glbToast.success('Los datos de la nueva Area Estrategica se actualizaron correctamente.');
         // noinspection JSCheckFunctionSignatures
         dt_area.ajax.reload(() => {
           $("#btnCancelar").click();
@@ -157,7 +157,7 @@ $(document).ready(function () {
           },
           dataType: "json",
           success: function () {
-            MostrarMensaje('success','El area estrategica ha sido eliminado correctamente.','')
+            glbToast.success('El Area Estrategica se elimino correctamente');
             dt_area.ajax.reload();
             DetenerSpiner(objectBtn)
           },
@@ -211,7 +211,19 @@ $(document).ready(function () {
         required: true,
         digits: true,
         range: [1, 9],
-        verificarCodigoArea: ''
+        remote: {
+          url: "index.php?r=Planificacion/area-estrategica/verificar-codigo",
+          type: "post",
+          dataType: "json",
+          data: {
+            codigo: function() {
+              return $('#codigo').val(); // valor actual del campo
+            },
+            idAreaEstrategica: function (){
+              return idAreaEstrategica
+            },
+          }
+        }
       },
       descripcion: {
         required: true,
@@ -224,7 +236,7 @@ $(document).ready(function () {
         required: "Debe ingresar un codigo de area estrategica",
         digits: "El codigo solo debe ser numerico",
         range: "El codigo debe estar comprendido entre 1 y 9",
-        verificarCodigoArea: "El codigo ingresado ya se encuentra en uso"
+        remote: "El codigo ingresado ya se encuentra en uso"
       },
       descripcion: {
         required: "Debe ingresar una descripcion del area estrategica",
@@ -245,27 +257,4 @@ $(document).ready(function () {
       $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
     }
   });
-
-  $.validator.addMethod("verificarCodigoArea",
-      function(value) {
-        let result = false;
-        let datos = new FormData();
-        datos.append("codigo", value);
-        datos.append("idAreaEstrategica", idAreaEstrategica);
-        $.ajax({
-          url: "index.php?r=Planificacion/area-estrategica/verificar-codigo",
-          method: "POST",
-          async: false,
-          data: datos,
-          cache: false,
-          contentType: false,
-          processData: false,
-          success: function(data) {
-            result = !!(data);
-          }
-        });
-        return result;
-      }
-  );
-
 });

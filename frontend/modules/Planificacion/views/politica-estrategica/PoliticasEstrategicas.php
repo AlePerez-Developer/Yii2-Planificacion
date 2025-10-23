@@ -46,14 +46,14 @@ $this->params['breadcrumbs'] = [['label' => '/Politicas Estrategicas']];
 
                         <div class="form-group">
                             <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
-                            <select id="areasEstrategicas" name="areasEstrategicas" class="form-control">
+                            <select id="areasEstrategicas" name="areasEstrategicas" class="form-control codigo_group">
                                 <option></option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="codigo" class="control-label">Código</label>
-                            <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num" maxlength="1">
+                            <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num codigo_group" maxlength="1">
                         </div>
 
                         <div class="form-group">

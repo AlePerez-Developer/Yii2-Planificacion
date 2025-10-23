@@ -18,7 +18,6 @@ $this->registerJsFile("@planificacionModule/js/area-estrategica/areaEstrategica.
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Areas Estrategicas']];
 ?>
-
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">

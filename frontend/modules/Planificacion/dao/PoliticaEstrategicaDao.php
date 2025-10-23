@@ -17,13 +17,9 @@ class PoliticaEstrategicaDao
             ->where(['codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['!=','IdPoliticaEstrategica',$id])
             ->andWhere(['IdAreaEstrategica' => $idAreaEstrategica])
-            ->one();
+            ->exists();
 
-        if ($model) {
-            return false;
-        }
-
-        return true;
+        return !$model;
     }
 
     /*static function verificarCodigoPolitica(int $idAreaEstrategica, int $codigoPolitica): bool

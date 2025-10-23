@@ -60,7 +60,7 @@ $(document).ready(function () {
             processData: false,
             dataType: "json",
             success: function () {
-                MostrarMensaje('success', 'Los datos de la nueva Politica Estrategica se guardaron correctamente.', null);
+                glbToast.success('Los datos de la nueva Politica Estrategica se guardaron correctamente.')
                 // noinspection JSCheckFunctionSignatures
                 dt_politica.ajax.reload(() => {
                     $("#btnCancelar").click();
@@ -94,7 +94,7 @@ $(document).ready(function () {
             processData: false,
             dataType: "json",
             success: function () {
-                MostrarMensaje('success', 'Los datos de la Politica Estrategica se actualizaron correctamente.', null);
+                glbToast.success('Los datos de la Politica Estrategica se actualizaron correctamente.')
                 // noinspection JSCheckFunctionSignatures
                 dt_politica.ajax.reload(() => {
                     $("#btnCancelar").click();
@@ -163,7 +163,7 @@ $(document).ready(function () {
                     },
                     dataType: "json",
                     success: function () {
-                        MostrarMensaje('success','La politic estrategica ha sido eliminado correctamente.','')
+                        glbToast.success('La Politica Estrategica ha sido eliminada correctamente.')
                         dt_politica.ajax.reload();
                         DetenerSpiner(objectBtn)
                     },
@@ -221,7 +221,24 @@ $(document).ready(function () {
                 required: true,
                 digits: true,
                 range: [1, 9],
-                verificarCodigoPolitica: true
+                require_from_group: [2, ".codigo_group"],
+                remote: {
+                    url: "index.php?r=Planificacion/politica-estrategica/verificar-codigo",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        codigo: function() {
+                            return $('#codigo').val(); // valor actual del campo
+                        },
+                        idAreaEstrategica: function (){
+                            let area = $('#areasEstrategicas').select2('data')
+                            return area[0].id
+                        },
+                        idPoliticaEstrategica: function (){
+                            return idPoliticaEstrategica
+                        }
+                    }
+                }
             },
             descripcion: {
                 required: true,
@@ -237,7 +254,8 @@ $(document).ready(function () {
                 required: "Debe ingresar un codigo de politica estrategica jeje",
                 digits: "El codigo solo debe ser numerico",
                 range: "El codigo debe estar comprendido entre 1 y 9",
-                verificarCodigoPolitica: "El codigo ingresado ya se encuentra en uso o no esta area"
+                require_from_group: "Debe seleccionar un area estrategica antes de validar el codigo de politica",
+                remote: "El codigo ingresado ya se encuentra en uso o no esta area"
             },
             descripcion: {
                 required: "Debe ingresar una descripcion del area estrategica",
@@ -258,37 +276,4 @@ $(document).ready(function () {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
     });
-
-    $.validator.addMethod("verificarCodigoPolitica",
-        function(value) {
-            let area = $('#areasEstrategicas').valid(); // ejecuta validación de campo1
-            if (!area) {
-                return false;
-            }
-
-            let result = false;
-            let idAreaEstrategica = politicas_s2AreasEstrategicas.select2('data')
-            let datos = new FormData();
-            datos.append("codigo", value);
-            datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
-            datos.append("idAreaEstrategica", idAreaEstrategica[0].id);
-            $.ajax({
-                url: "index.php?r=Planificacion/politica-estrategica/verificar-codigo",
-                method: "POST",
-                async: false,
-                data: datos,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function(data) {
-                    result = !!(data);
-                },
-                complete:function(){
-                    return result
-                }
-            });
-
-            //return result;
-        }
-    );
 });

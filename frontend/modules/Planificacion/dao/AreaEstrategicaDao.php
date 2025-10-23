@@ -18,13 +18,10 @@ class AreaEstrategicaDao
             ->where(['codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['!=','IdAreaEstrategica',$id])
             ->andWhere(['IdPei' => yii::$app->contexto->getPei()])
-            ->one();
+            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->exists();
 
-        if ($model) {
-            return false;
-        }
-
-        return true;
+        return !$model;
     }
 
 
