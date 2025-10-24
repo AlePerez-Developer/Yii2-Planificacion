@@ -44,11 +44,42 @@ class PoliticaEstrategica extends ActiveRecord
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdPoliticaEstrategica'], 'unique'],
+            [['Codigo'], 'validateUniqueActiva', 'skipOnError' => true],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['IdAreaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['IdAreaEstrategica' => 'IdAreaEstrategica']],
         ];
     }
+
+    /**
+     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     *
+     * @param string $attribute
+     * @used-by rules()
+     * @noinspection PhpUnused
+     */
+    public function validateUniqueActiva(string $attribute): void
+    {
+        if ($this->CodigoEstado !== 'V') {
+            return;
+        }
+
+        $id = $this->IdPoliticaEstrategica == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdPoliticaEstrategica;
+
+        $exists = self::find()
+            ->where([
+                'Codigo' => $this->Codigo,
+                'IdAreaEstrategica' => $this->IdAreaEstrategica,
+                'CodigoEstado' => 'V',
+            ])
+            ->andWhere(['<>', 'IdPoliticaEstrategica', $id]) // Evita conflicto consigo mismo en update
+            ->exists();
+
+        if ($exists) {
+            $this->addError($attribute, 'El Codigo  de Politica Estraetgica ya existe con el  Área Estratégica seleccionada.');
+        }
+    }
+
 
     /**
      * {@inheritdoc}

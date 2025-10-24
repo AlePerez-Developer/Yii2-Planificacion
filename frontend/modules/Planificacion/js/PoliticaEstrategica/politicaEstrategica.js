@@ -1,12 +1,11 @@
 $(document).ready(function () {
     let idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
-
     function reiniciarCampos() {
         $('#formPoliticaEstrategica *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPoliticaEstrategica').trigger("reset");
-        politicas_s2AreasEstrategicas.val('').trigger('change')
+        politicas_s2AreasEstrategicas.val(null).trigger('change')
         idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
     }
 

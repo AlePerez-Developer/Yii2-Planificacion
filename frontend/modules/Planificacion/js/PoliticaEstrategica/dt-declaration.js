@@ -1,5 +1,27 @@
 let dt_politica
 $(document).ready(function () {
+    function actualizarFiltroColumna(columnIndex) {
+        let column = dt_politica.column(columnIndex);
+        let header = $(column.header());
+
+        header.find('select').remove();
+
+        let select = $('<select><option value="">Buscar...</option></select>')
+            .appendTo(header)
+            .on('change', function () {
+                let val = $.fn.dataTable.util.escapeRegex($(this).val());
+                column.search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+        column
+            .data()
+            .unique()
+            .sort()
+            .each(function (d) {
+                select.append('<option value="' + d + '">' + d + '</option>');
+            });
+    }
+
     function format(d) {
         return (
             '<div class="row">' +
@@ -34,26 +56,7 @@ $(document).ready(function () {
     dt_politica = $("#tablaListaPoliticas").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
-            this.api()
-                .columns([2])
-                .every(function () {
-                    let column = this;
-                    let select = $('</br><select><option value="">Buscar...</option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function () {
-                            let val = $.fn.dataTable.util.escapeRegex($(this).val());
-
-                            column.search(val ? '^' + val + '$' : '', true, false).draw();
-                        });
-
-                    column
-                        .data()
-                        .unique()
-                        .sort()
-                        .each(function (d) {
-                            select.append('<option value="' + d + '">' + d + '</option>');
-                        });
-                });
+            actualizarFiltroColumna(2);
         },
         ajax: {
             method: "POST",
@@ -156,4 +159,10 @@ $(document).ready(function () {
             row["child"](format(row.data()["areaEstrategica"])).show();
         }
     });
+
+    $('#tablaListaPoliticas').on('draw.dt', function () {
+        actualizarFiltroColumna(2);
+    });
+
+
 })
