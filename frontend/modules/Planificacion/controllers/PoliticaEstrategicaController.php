@@ -104,7 +104,7 @@ class PoliticaEstrategicaController extends BaseController
             $request = Yii::$app->request;
 
             $form = new PoliticaEstrategicaForm();
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate() || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 

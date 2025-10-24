@@ -27,12 +27,6 @@ class AreaEstrategicaDao
 
     static function validarId(string $id): bool
     {
-        return AreaEstrategica::find()->where(['IdAreaEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
+        return AreaEstrategica::find()->where(['IdPei'=> yii::$app->contexto->getPei() ,'IdAreaEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
-
-    /*
-    static function obtenerPei(AreaEstrategica $model): array
-    {
-        return $model->getPei()->asArray()->all();
-    }*/
 }
