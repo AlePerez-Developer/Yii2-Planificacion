@@ -55,17 +55,17 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                         <div class="row mb-3">
                             <div class="col-4">
                                 <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
-                                <select id="areasEstrategicas" name="areasEstrategicas" class="form-control">
+                                <select id="areasEstrategicas" name="areasEstrategicas" class="form-control codigo_group">
                                 </select>
                             </div>
                             <div class="col-4">
                                 <label for="politicasEstrategicas" class="lblTitulo">Seleccione una Politica Estrategica</label>
-                                <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control">
+                                <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control codigo_group">
                                 </select>
                             </div>
                             <div class="col-4">
                                 <label for="codigo">Codigo de Objetivo Estrategico (OE)</label>
-                                <input type="text" class="form-control input-sm num" id="codigo" name="codigo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
+                                <input type="text" class="form-control input-sm num codigo_group" id="codigo" name="codigo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
                             </div>
                         </div>
 

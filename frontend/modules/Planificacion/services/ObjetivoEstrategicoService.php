@@ -202,4 +202,18 @@ class ObjetivoEstrategicoService
             'data' => '',
         ];
     }
+
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param string $idAreaEstrategica
+     * @param string $idPoliticaEstrategica
+     * @param int $codigo
+     * @return bool
+     */
+    public function verificarCodigo(string $id, string $idAreaEstrategica, string $idPoliticaEstrategica, int $codigo): bool
+    {
+        return ObjEstrategicoDao::verificarCodigo($id, $idAreaEstrategica, $idPoliticaEstrategica, $codigo);
+    }
 }

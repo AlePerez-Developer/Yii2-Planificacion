@@ -239,11 +239,36 @@ class ObjEstrategicoController extends BaseController
         return $codigo;
     }
 
-    /*public function actionVerificarCodigo(): bool
+    /**
+     * accion para verificar un codigo ingresado
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
     {
-        return true;
+        $id = Yii::$app->request->post('idObjEstrategico');
+        if (!isset($id)) {
+            return false;
+        }
 
-    }*/
+        $idPoliticaEstrategica = Yii::$app->request->post('idPoliticaEstrategica');
+        if (!isset($idPoliticaEstrategica)) {
+            return false;
+        }
+
+        $idAreaEstrategica = Yii::$app->request->post('idAreaEstrategica');
+        if (!isset($idAreaEstrategica)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id, $idAreaEstrategica, $idPoliticaEstrategica, $codigo);
+    }
 
     /**
      * @throws MpdfException

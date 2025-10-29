@@ -3,6 +3,7 @@ namespace app\modules\Planificacion\dao;
 
 use app\modules\Planificacion\models\ObjetivoEstrategico;
 use common\models\Estado;
+use Yii;
 
 class ObjEstrategicoDao
 {
@@ -13,23 +14,22 @@ class ObjEstrategicoDao
     }
 
     /**
-     * @param int $codigoPei
-     * @param int $codigoObjEstrategico
-     * @param string $codigoObjetivo
+     * @param string $id
+     * @param string $idAreaEstrategica
+     * @param string $idPoliticaEstrategica
+     * @param int $codigo
      * @return bool
      */
-    static function verificarCodigo(int $codigoPei, int $codigoObjEstrategico, string $codigoObjetivo): bool
+    static function verificarCodigo(string $id, string $idAreaEstrategica, string $idPoliticaEstrategica, int $codigo): bool
     {
-        $objetivoEstrategico = ObjetivoEstrategico::find()
-            ->where(['CodigoObjetivo' => $codigoObjetivo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->andWhere(['!=','CodigoObjEstrategico',$codigoObjEstrategico])
-            ->andWhere(['CodigoPei' => $codigoPei])
+        $model = ObjetivoEstrategico::find()
+            ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','IdObjEstrategico',$id])
+            ->andWhere(['IdPei' => yii::$app->contexto->getPei()])
+            ->andWhere(['IdAreaEstrategica' => $idAreaEstrategica])
+            ->andWhere(['IdPoliticaEstrategica' => $idPoliticaEstrategica])
             ->one();
 
-        if ($objetivoEstrategico) {
-            return false;
-        }
-
-        return true;
+        return !$model;
     }
 }

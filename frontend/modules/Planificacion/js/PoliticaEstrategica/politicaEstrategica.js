@@ -192,7 +192,7 @@ $(document).ready(function () {
                 digits: "El codigo solo debe ser numerico",
                 range: "El codigo debe estar comprendido entre 1 y 9",
                 require_from_group: "Debe seleccionar un area estrategica antes de validar el codigo de politica",
-                remote: "El codigo ingresado ya se encuentra en uso o no esta area"
+                remote: "El codigo ingresado ya se encuentra en uso con el area estrategica seleccionada"
             },
             descripcion: {
                 required: "Debe ingresar una descripcion del area estrategica",

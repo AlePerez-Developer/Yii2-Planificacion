@@ -174,4 +174,114 @@ $(document).ready(function(){
             console.error("Error al procesar:", err);
         }
     });
+
+
+    /**
+     * Validacion del form
+     */
+    $( "#formObjEstrategico" ).validate( {
+        rules: {
+            areasEstrategicas: {
+                required: true,
+            },
+            politicasEstrategicas: {
+                required: true,
+            },
+            codigo: {
+                required: true,
+                digits: true,
+                range: [1, 9],
+                require_from_group: [3, ".codigo_group"],
+                remote: {
+                    url: baseUrl + "verificar-codigo",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        codigo: function() {
+                            return $('#codigo').val(); // valor actual del campo
+                        },
+                        idAreaEstrategica: function (){
+                            let area = $('#areasEstrategicas').select2('data')
+                            return area[0].id
+                        },
+                        idPoliticaEstrategica: function (){
+                            let politica = $('#politicasEstrategicas').select2('data')
+                            return politica[0].id
+                        },
+                        idObjEstrategico: function (){
+                            return idObjEstrategico
+                        }
+                    }
+                }
+            },
+            objetivo:{
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+            producto:{
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+            descripcion:{
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+            formula:{
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+        },
+        messages: {
+            areasEstrategicas: {
+                required: "Debe seleccionar una opcion de area estrategica",
+            },
+            politicasEstrategicas: {
+                required: "Debe seleccionar una opcion de politica estrategica",
+            },
+            codigo: {
+                required: "Debe ingresar un codigo de objetico estrategico (OE)",
+                digits: "Solo se permite numeros enteros",
+                range: "Debe ingresar un numero comprendido entre 1 y 9",
+                require_from_group: "Debe seleccionar un area y una politica antes de validar el codigo de objetivo",
+                remote: "El codigo ingresado ya se encuentra en uso con el area y politica seleccionadas"
+            },
+            objetivo: {
+                required: "Debe ingresar la descripcion del objetivo estrategico",
+                minlength: "El objetivo debe tener por lo menos 2 caracteres",
+                maxlength: "El objetivo debe tener maximo 500 caracteres",
+            },
+            producto: {
+                required: "Debe ingresar el resultado esperado del objetivo estrategico",
+                minlength: "El resultado debe tener por lo menos 2 caracteres",
+                maxlength: "El resultad debe tener maximo 500 caracteres",
+            },
+            descripcion: {
+                required: "Debe ingresar la descripcion del indicador del objetivo estrategico",
+                minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion del indicador debe tener maximo 500 caracteres",
+                dependencia: "Debe ingresar un codigo valido para poder proseguir",
+            },
+            formula: {
+                required: "Debe ingresar la formula del indicador del objetivo estrategico",
+                minlength: "La formula del indicador debe tener por lo menos 2 caracteres",
+                maxlength: "La formula del indicador debe tener maximo 500 caracteres",
+            },
+        },
+        errorElement: "div",
+
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    } );
 })

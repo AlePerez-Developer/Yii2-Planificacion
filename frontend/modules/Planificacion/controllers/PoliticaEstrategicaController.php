@@ -208,7 +208,7 @@ class PoliticaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para buscar un registro en especifico
+     * accion para verificar un codigo ingresado
      *
      * @return bool
      * @noinspection PhpUnused
