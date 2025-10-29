@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 ?>
 <!-- Navbar -->
@@ -15,6 +16,25 @@ use yii\helpers\Html;
         </li>
         <li class="nav-item d-none d-sm-inline-block">
             <a href="#" class="nav-link">Contact</a>
+        </li>
+        <li class="nav-item dropdown d-none d-sm-inline-block" id="contexto-poa-dropdown" data-contexto-poa-url="<?= Url::to(['/Planificacion/estado-poa/listar-todo']) ?>">
+            <a href="#" class="nav-link d-flex align-items-center" id="contextoPoaToggle" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="fas fa-cog me-2"></i>
+                <span>Contexto POA</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="contextoPoaToggle" id="contextoPoaMenu" style="min-width: 16rem; max-width: 18rem;">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="text-muted text-uppercase fw-semibold small">Contexto POA</span>
+                    <button type="button" class="btn btn-link btn-sm ms-auto text-secondary" id="contextoPoaRefresh" title="Actualizar contexto">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-link btn-sm text-secondary" id="contextoPoaClose" title="Cerrar panel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="text-muted small d-none" id="contextoPoaFeedback"></div>
+                <ul class="list-unstyled mb-0" id="contextoPoaList"></ul>
+            </div>
         </li>
     </ul>
 
@@ -144,3 +164,55 @@ use yii\helpers\Html;
     </ul>
 </nav>
 <!-- /.navbar -->
+<?php
+$this->registerJsFile(
+    '@web/js/contexto-poa/ContextoPoaNavbar.js',
+    [
+        'depends' => [
+            '\yii\web\JqueryAsset',
+            '\yii\bootstrap5\BootstrapAsset',
+        ],
+    ]
+);
+$this->registerCss('
+    #contextoPoaMenu {
+        border-radius: 0.5rem;
+    }
+    #contextoPoaMenu .contexto-poa-item {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        cursor: pointer;
+        outline: none;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #contextoPoaMenu .contexto-poa-item + .contexto-poa-item {
+        margin-top: 0.5rem;
+    }
+    #contextoPoaMenu .contexto-poa-item:hover {
+        background-color: #eef3fb;
+    }
+    #contextoPoaMenu .contexto-poa-item:focus {
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
+    }
+    #contextoPoaMenu .contexto-poa-selected {
+        border-left: 0.35rem solid #0d6efd;
+        background-color: #d6e4ff;
+    }
+    #contextoPoaMenu .contexto-poa-selected:hover {
+        background-color: #ccdcff;
+    }
+    #contextoPoaMenu .contexto-poa-abreviacion {
+        border: 1px solid #ced4da;
+        color: #495057;
+        background-color: #ffffff;
+    }
+    #contextoPoaMenu .btn-link {
+        color: #6c757d;
+    }
+    #contextoPoaMenu .btn-link:hover {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+');
+?>

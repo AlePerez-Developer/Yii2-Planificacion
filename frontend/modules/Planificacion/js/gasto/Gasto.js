@@ -1,23 +1,12 @@
 $(document).ready(function () {
-  $("#ingresoDatos").hide();
-  $("#divTabla").show();
-
-  const programaMap = {};
-  $("#codigoPrograma option").each(function () {
-    const val = $(this).attr("value");
-    const text = $(this).text();
-    if (val) programaMap[val] = text;
-  });
-
-  let dt_actividad = $("#tablaListaActividades").DataTable({
-    autoWidth: false,
+  let dt_gasto = $("#tablaListaGastos").DataTable({
     ajax: {
       method: "POST",
       dataType: "json",
       cache: false,
       contentType: false,
       processData: false,
-      url: "index.php?r=Planificacion/actividad/listar-todo",
+      url: "index.php?r=Planificacion/gasto/listar-todo",
       dataSrc: "data",
       error: function (xhr, ajaxOptions, thrownError) {
         MostrarMensaje(
@@ -25,89 +14,6 @@ $(document).ready(function () {
           GenerarMensajeError(thrownError + " >" + xhr.responseText)
         );
       },
-    },
-    initComplete: function () {
-      const api = this.api();
-      const colIdx = 1; // Columna Programa
-
-      function escapeRegex(text) {
-        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      }
-
-      function buildProgramaFilter() {
-        const headerCell = $(api.column(colIdx).header());
-  let $select = headerCell.find("select#filtroCodigoPrograma");
-  const prevVal = $select.length ? ($select.val() || "") : "";
-        if ($select.length === 0) {
-          $select = $(
-            '<select id="filtroCodigoPrograma"><option value="">Programa...</option></select>'
-          );
-          headerCell.append($select);
-        }
-
-        const dataFks = api.column(colIdx, { search: "none" }).data().toArray();
-        const uniqueFks = Array.from(new Set(dataFks));
-        const codes = uniqueFks
-          .map(function (fk) {
-            const text = programaMap[fk] || ""; // Ej: "(100) - Descripción"
-            let code = null;
-            if (text) {
-              const m = text.match(/^\(([^)]+)\)/);
-              code = m ? m[1] : null;
-            }
-            if (!code && fk !== undefined && fk !== null && fk !== "") {
-              code = String(fk);
-            }
-            return code;
-          })
-          .filter(Boolean)
-          .sort(function (a, b) {
-            const an = Number(a),
-              bn = Number(b);
-            if (!isNaN(an) && !isNaN(bn)) return an - bn;
-            return a.localeCompare(b);
-          });
-
-        $select.find('option:not([value=""])').remove();
-        codes.forEach(function (code) {
-          $select.append('<option value="' + code + '">' + code + "</option>");
-        });
-
-        if (prevVal && codes.indexOf(prevVal) !== -1) {
-          $select.val(prevVal);
-        } else if (prevVal && codes.indexOf(prevVal) === -1) {
-          $select.val("");
-        }
-
-        $select.off("change").on("change", function () {
-          const val = $(this).val();
-          if (!val) {
-            api.column(colIdx).search("", true, false).draw();
-          } else {
-            // Coincidir "(COD) ..." o el valor crudo del FK
-            const pattern = "^(\\(" + escapeRegex(val) + "\\)|" + escapeRegex(val) + ")";
-            api.column(colIdx).search(pattern, true, false).draw();
-          }
-        });
-
-        headerCell.off("click.filtroPrograma").on("click.filtroPrograma", function (e) {
-          if ($(e.target).is('select')) return; // no interferir cuando se usa el select
-          const $sel = $(this).find('select#filtroCodigoPrograma');
-          if ($sel.length) {
-            if ($sel.val() !== "") {
-              $sel.val("").trigger('change');
-            } else {
-              // Si ya está vacío, fuerza el clear del filtro por si quedó algún estado
-              api.column(colIdx).search("", true, false).draw();
-            }
-          }
-        });
-      }
-
-      buildProgramaFilter();
-      $('#tablaListaActividades').on('draw.dt', function () {
-        buildProgramaFilter();
-      });
     },
     columns: [
       {
@@ -122,24 +28,12 @@ $(document).ready(function () {
       },
       {
         className: "dt-small",
-        data: "Programa", // FK (CodigoPrograma)
-        orderable: false,
-        render: function (data, type) {
-          if (type === "display" || type === "filter") {
-            return programaMap[data] || data || "";
-          }
-          return data;
-        },
-        width: 200,
-      },
-      {
-        className: "dt-small",
-        data: "Codigo",
-        width: 80,
-      },
-      {
-        className: "dt-small",
         data: "Descripcion",
+      },
+      {
+        className: "dt-small",
+        data: "EntidadTransferencia",
+        width: 30,
       },
       {
         className: "dt-small dt-estado dt-center",
@@ -149,12 +43,12 @@ $(document).ready(function () {
         render: function (data, type, row) {
           return type === "display" && row.CodigoEstado === ESTADO_VIGENTE
             ? '<button type="button" class="btn btn-outline-success btn-sm btnEstado" codigo="' +
-                row.CodigoActividad +
+                row.CodigoGasto +
                 '" estado="' +
                 ESTADO_VIGENTE +
                 '">Vigente</button>'
             : '<button type="button" class="btn btn-outline-danger btn-sm btnEstado" codigo="' +
-                row.CodigoActividad +
+                row.CodigoGasto +
                 '" estado="' +
                 ESTADO_CADUCO +
                 '">Caducado</button>';
@@ -164,7 +58,7 @@ $(document).ready(function () {
         className: "dt-small dt-acciones dt-center",
         orderable: false,
         searchable: false,
-        data: "CodigoActividad",
+        data: "CodigoGasto",
         render: function (data, type) {
           return type === "display"
             ? '<div class="btn-group" role="group">' +
@@ -181,10 +75,10 @@ $(document).ready(function () {
     ],
   });
 
-  dt_actividad
+  dt_gasto
     .on("order.dt search.dt", function () {
       let i = 1;
-      dt_actividad
+      dt_gasto
         .cells(null, 0, { search: "applied", order: "applied" })
         .every(function () {
           this.data(i++);
@@ -193,55 +87,53 @@ $(document).ready(function () {
     .draw();
 
   function reiniciarCampos() {
-    $("#formActividades *")
+    $("#formGasto *")
       .filter(":input")
       .each(function () {
         $(this).removeClass("is-invalid is-valid");
       });
-    $("#codigoActividad").val("");
-    $("#codigoPrograma").val("").trigger("change");
-    $("#Codigo").val("");
-    $("#Descripcion").val("");
+    $("#codigoGasto").val("");
+    $("#formGasto").trigger("reset");
   }
 
-  $("#btnMostrarCrear").off("click.actividadOpen").on("click.actividadOpen", function (e) {
+  $("#btnMostrarCrear").off("click.gastoOpen").on("click.gastoOpen", function (e) {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     const icono = $(".icon");
     icono.addClass("opened");
-    $("#ingresoDatos").show(500);
+    $("#divDatos").show(500);
     $("#divTabla").hide(500);
   });
 
   $("#btnCancelar").click(function () {
     $(".icon").removeClass("opened");
     reiniciarCampos();
-    $("#ingresoDatos").hide(500);
+    $("#divDatos").hide(500);
     $("#divTabla").show(500);
   });
 
   $("#btnGuardar").click(function () {
-    if (typeof $("#formActividades").valid === "function" && !$("#formActividades").valid()) {
-      return;
-    }
-    if ($("#codigoActividad").val() === "") {
-      guardarActividad();
-    } else {
-      actualizarActividad();
+    if ($("#formGasto").valid()) {
+      if ($("#codigoGasto").val() === "") {
+        guardarGasto();
+      } else {
+        actualizarGasto();
+      }
     }
   });
 
-  // Guardar actividad
-  async function guardarActividad() {
+  /*=============================================
+     INSERTA EN LA BD UN NUEVO REGISTRO de GASTO
+     =============================================*/
+  async function guardarGasto() {
     try {
       let datos = new FormData();
-      datos.append("programa_id", $("#codigoPrograma").val());
-      datos.append("codigo", $("#Codigo").val());
-      datos.append("descripcion", $("#Descripcion").val());
+      datos.append("descripcion", $("#descripcion").val());
+      datos.append("entidadTransferencia", $("#entidadTransferencia").val());
 
       const response = await $.ajax({
-        url: "index.php?r=Planificacion/actividad/guardar",
+        url: "index.php?r=Planificacion/gasto/guardar",
         method: "POST",
         data: datos,
         cache: false,
@@ -253,12 +145,10 @@ $(document).ready(function () {
       if (response.success) {
         MostrarMensaje(
           "success",
-          response.message || "Actividad guardada correctamente"
+          response.message || "Gasto guardado correctamente"
         );
-        await dt_actividad.ajax.reload(function (){
-          $("#btnCancelar").click();
-        });
-
+        await dt_gasto.ajax.reload(null, false);
+        $("#btnCancelar").click();
       } else {
         MostrarMensaje("error", response.message || "Error al guardar");
       }
@@ -274,25 +164,24 @@ $(document).ready(function () {
     }
   }
 
-  // Actualizar actividad 
-  async function actualizarActividad() {
+  /*=============================================
+     ACTUALIZA EL GASTO SELECCIONADO EN LA BD
+     =============================================*/
+  async function actualizarGasto() {
     const objectBtn = $("#btnGuardar");
     try {
       IniciarSpiner(objectBtn);
 
-      const datos = new FormData();
-      datos.append("codigoActividad", $("#codigoActividad").val());
-      datos.append("programa_id", $("#codigoPrograma").val());
-      datos.append("codigo", $("#Codigo").val());
-      datos.append("descripcion", $("#Descripcion").val());
+      const datos = {
+        codigoGasto: $("#codigoGasto").val(),
+        descripcion: $("#descripcion").val(),
+        entidadTransferencia: $("#entidadTransferencia").val(),
+      };
 
       const response = await $.ajax({
-        url: "index.php?r=Planificacion/actividad/actualizar",
+        url: "index.php?r=Planificacion/gasto/actualizar",
         method: "POST",
         data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
         dataType: "json",
       });
 
@@ -303,12 +192,11 @@ $(document).ready(function () {
         );
 
         try {
-          await dt_actividad.ajax.reload(function (){
-            $("#btnCancelar").click();
-          });
+          await dt_gasto.ajax.reload(null, false);
+          $("#btnCancelar").click(); // Cerrar formulario
         } catch (reloadError) {
           console.error("Error recargando tabla:", reloadError);
-          window.location.reload();
+          window.location.reload(); // Fallback
         }
       } else {
         throw new Error(
@@ -331,26 +219,28 @@ $(document).ready(function () {
       await MostrarMensaje("error", errorMsg);
 
       if (!error.status) {
-        dt_actividad.ajax.reload(null, false);
+        dt_gasto.ajax.reload(null, false);
       }
     } finally {
       DetenerSpiner(objectBtn);
     }
   }
-// Cambiar estado
-  $("#tablaListaActividades tbody").on("click", ".btnEstado", async function () {
+  /*=============================================
+     CAMBIA EL ESTADO DEL REGISTRO
+     =============================================*/
+  $("#tablaListaGastos tbody").on("click", ".btnEstado", async function () {
     const objectBtn = $(this);
-    const codigoActividad = objectBtn.attr("codigo");
-    const estado = objectBtn.attr("estado");
+    const codigoGasto = objectBtn.attr("codigo");
+    const estadoGasto = objectBtn.attr("estado");
 
     const datos = new FormData();
-    datos.append("codigoActividad", codigoActividad);
+    datos.append("codigoGasto", codigoGasto);
 
     try {
       IniciarSpiner(objectBtn);
 
       const response = await $.ajax({
-        url: "index.php?r=Planificacion/actividad/cambiar-estado",
+        url: "index.php?r=Planificacion/gasto/cambiar-estado",
         method: "POST",
         data: datos,
         cache: false,
@@ -360,7 +250,7 @@ $(document).ready(function () {
       });
 
       if (response.success || response.respuesta === RTA_CORRECTO) {
-        if (estado === ESTADO_VIGENTE) {
+        if (estadoGasto === ESTADO_VIGENTE) {
           objectBtn
             .removeClass("btn-outline-success")
             .addClass("btn-outline-danger");
@@ -386,16 +276,18 @@ $(document).ready(function () {
     }
   });
 
-  // Eliminar actividad
-  $("#tablaListaActividades tbody").on("click", ".btnEliminar", async function () {
+  /*=============================================
+     ELIMINA DE LA BD UN REGISTRO de GASTO 
+     =============================================*/
+  $("#tablaListaGastos tbody").on("click", ".btnEliminar", async function () {
     const objectBtn = $(this);
-    const codigoActividad = objectBtn.attr("codigo");
+    const codigoGasto = objectBtn.attr("codigo");
 
     try {
       const resultado = await Swal.fire({
         icon: "warning",
         title: "Confirmación de eliminación",
-        text: "¿Está seguro de eliminar la actividad elegida?",
+        text: "¿Está seguro de eliminar el gasto elegido?",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         confirmButtonText: "Borrar",
@@ -408,10 +300,10 @@ $(document).ready(function () {
       IniciarSpiner(objectBtn);
 
       const datos = new FormData();
-      datos.append("codigoActividad", codigoActividad);
+      datos.append("codigoGasto", codigoGasto);
 
       const response = await $.ajax({
-        url: "index.php?r=Planificacion/actividad/eliminar",
+        url: "index.php?r=Planificacion/gasto/eliminar",
         method: "POST",
         data: datos,
         cache: false,
@@ -421,8 +313,11 @@ $(document).ready(function () {
       });
 
       if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje("success", "La actividad ha sido borrada correctamente.");
-        await dt_actividad.ajax.reload(null, false);
+        await MostrarMensaje(
+          "success",
+          "El gasto ha sido borrado correctamente."
+        );
+        await dt_gasto.ajax.reload(null, false);
       } else {
         await MostrarMensaje(
           "error",
@@ -430,9 +325,9 @@ $(document).ready(function () {
         );
       }
     } catch (error) {
-      console.error("Error al eliminar actividad:", error);
+      console.error("Error al eliminar gasto:", error);
 
-      let errorMessage = "Error al eliminar la actividad";
+      let errorMessage = "Error al eliminar el gasto";
       if (error.responseJSON) {
         errorMessage =
           error.responseJSON.message ||
@@ -447,19 +342,21 @@ $(document).ready(function () {
     }
   });
 
-  // Editar actividad
-  $("#tablaListaActividades tbody").on("click", ".btnEditar", async function () {
+  /*=============================================
+     BUSCA EL GASTO SELECCIONADO EN LA BD (PARA EDITAR)
+     =============================================*/
+  $("#tablaListaGastos tbody").on("click", ".btnEditar", async function () {
     const objectBtn = $(this);
-    const codigoActividad = objectBtn.attr("codigo");
+    const codigoGasto = objectBtn.attr("codigo");
 
     try {
       IniciarSpiner(objectBtn);
 
       const datos = new FormData();
-      datos.append("codigoActividad", codigoActividad);
+      datos.append("codigoGasto", codigoGasto);
 
       const response = await $.ajax({
-        url: "index.php?r=Planificacion/actividad/buscar",
+        url: "index.php?r=Planificacion/gasto/buscar",
         method: "POST",
         data: datos,
         cache: false,
@@ -469,12 +366,11 @@ $(document).ready(function () {
       });
 
       if (response.success || response.respuesta === RTA_CORRECTO) {
-        const actividad = response.data || response.actividad;
+        const gasto = response.data || response.gasto;
 
-        $("#codigoActividad").val(actividad.CodigoActividad || "");
-        $("#codigoPrograma").val(actividad.Programa || "").trigger("change");
-        $("#Codigo").val(actividad.Codigo || "");
-        $("#Descripcion").val(actividad.Descripcion || "");
+        $("#codigoGasto").val(gasto.CodigoGasto || "");
+        $("#descripcion").val(gasto.Descripcion || "");
+        $("#entidadTransferencia").val(gasto.EntidadTransferencia || "");
 
         $("#btnMostrarCrear").trigger("click");
       } else {
@@ -484,9 +380,9 @@ $(document).ready(function () {
         );
       }
     } catch (error) {
-      console.error("Error al buscar actividad:", error);
+      console.error("Error al buscar gasto:", error);
 
-      let errorMessage = "Error al cargar los datos de la actividad";
+      let errorMessage = "Error al cargar los datos del gasto";
       if (error.responseJSON) {
         errorMessage =
           error.responseJSON.message ||

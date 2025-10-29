@@ -146,8 +146,10 @@ $(document).ready(function () {
           "success",
           response.message || "Programa guardado correctamente"
         );
-        await dt_programa.ajax.reload(null, false);
-        $("#btnCancelar").click();
+        await dt_programa.ajax.reload(function (){
+          $("#btnCancelar").click();
+        });
+
       } else {
         MostrarMensaje("error", response.message || "Error al guardar");
       }
@@ -191,8 +193,9 @@ $(document).ready(function () {
         );
 
         try {
-          await dt_programa.ajax.reload(null, false);
-          $("#btnCancelar").click(); // Cerrar formulario
+          await dt_programa.ajax.reload(function (){
+            $("#btnCancelar").click();
+          });// Cerrar formulario
         } catch (reloadError) {
           console.error("Error recargando tabla:", reloadError);
           window.location.reload(); // Fallback

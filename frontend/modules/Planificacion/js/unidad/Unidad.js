@@ -237,8 +237,10 @@ $(document).ready(function () {
           response.message ||
             "Los datos de la nueva unidad se guardaron correctamente."
         );
-        await table.ajax.reload(null, false);
-        $("#btnCancelar").click();
+        await table.ajax.reload(function (){
+          $("#btnCancelar").click();
+        });
+
       } else {
         MostrarMensaje("error", response.message || "Error al guardar unidad");
       }
@@ -432,8 +434,9 @@ $(document).ready(function () {
 
       if (response.success) {
         MostrarMensaje("success", "La unidad se actualizó correctamente.");
-        await table.ajax.reload(null, false);
-        $("#btnCancelar").click();
+        await table.ajax.reload(function (){
+          $("#btnCancelar").click();
+        });
       } else {
         MostrarMensaje(
           "error",

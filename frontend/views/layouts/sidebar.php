@@ -41,24 +41,38 @@
                         'badge' => '<span class="right badge badge-info"></span>',
                         'items' => [
                             ['label' => 'Pei', 'url' => ['/Planificacion/peis/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Indicador Estrategico', 'url' => ['/Planificacion/indicador-estrategico/index'], 'iconStyle' => 'far'],
                             ['label' => 'Area Estrategica', 'url' => ['/Planificacion/area-estrategica/index'], 'iconStyle' => 'far'],
                             ['label' => 'Politica Estrategica', 'url' => ['/Planificacion/politica-estrategica/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Objetivo Institucional', 'url' => ['/Planificacion/obj-institucional/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Objetivo Especifico', 'url' => ['/Planificacion/obj-especifico/index'], 'iconStyle' => 'far'],
-                            ['label' => 'indicadores', 'url' => ['/Planificacion/indicador/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Indicador Estrategico', 'url' => ['/Planificacion/indicador-estrategico/index'], 'iconStyle' => 'far'],
+                        ]
+                    ],
+                    [
+                        'label' => 'Estructura',
+                        'icon' => 'th',
+                        'badge' => '<span class="right badge badge-info"></span>',
+                        'items' => [
                             ['label' => 'Unidades', 'url' => ['/Planificacion/unidad/index'], 'iconStyle' => 'far'],
                             ['label' => 'Programas', 'url' => ['/Planificacion/programa/index'], 'iconStyle' => 'far'],
                             ['label' => 'Proyectos', 'url' => ['/Planificacion/proyecto/index'], 'iconStyle' => 'far'],
                             ['label' => 'Actividades', 'url' => ['/Planificacion/actividad/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Aperturas Programaticas', 'url' => ['/Planificacion/apertura-programatica/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Llave presupuestaria', 'url' => ['/Planificacion/llave-presupuestaria/index'], 'iconStyle' => 'far'],
+                        ]
+                    ],
+                    [
+                        'label' => 'catalogos',
+                        'icon' => 'th',
+                        'badge' => '<span class="right badge badge-info"></span>',
+                        'items' => [
+                            ['label' => 'Estados POA', 'url' => ['/Planificacion/estado-poa/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Gastos', 'url' => ['/Planificacion/gasto/index'], 'iconStyle' => 'far'],
                         ]
                     ],
                     [
                         'label' => 'Planificacion CH',
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',
+                        'visible' => false,
                         'items' => [
                             ['label' => 'Planificar', 'url' => ['/PlanificacionCH/planificar-carga-horaria/index'], 'iconStyle' => 'far'],
                             ['label' => 'Planificar Matriciales', 'url' => ['/PlanificacionCH/planificar-carga-horaria-matricial/index'], 'iconStyle' => 'far'],
