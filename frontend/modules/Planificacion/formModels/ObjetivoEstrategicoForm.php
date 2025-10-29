@@ -4,35 +4,34 @@ namespace app\modules\Planificacion\formModels;
 use yii\base\Model;
 
 /**
- * This is the model class for table "PEIs".
- * @property int $areaEstrategica
- * @property int $politicaEstrategica
- * @property string $codigoObjetivo
+ * @property string $idAreaEstrategica
+ * @property string $idPoliticaEstrategica
+ * @property integer $codigo
  * @property string $objetivo
- * @property string $resultado
- * @property string $indicadorDescripcion
- * @property string $indicadorFormula
- * @property int $pei
+ * @property string $producto
+ * @property string $descripcion
+ * @property string $formula
+ * @property string $idPei
  */
 
 class ObjetivoEstrategicoForm extends Model
 {
-    public int $areaEstrategica;
-    public int $politicaEstrategica;
-    public string $codigoObjetivo;
+    public string $idPei;
+    public string $idAreaEstrategica;
+    public string $idPoliticaEstrategica;
+    public int $codigo;
     public string $objetivo;
     public string $producto;
-    public string $indicadorDescripcion;
-    public string $indicadorFormula;
-    public int $pei;
+    public string $descripcion;
+    public string $formula;
 
     public function rules(): array
     {
         return [
-            [['areaEstrategica','politicaEstrategica','codigoObjetivo', 'objetivo','producto','indicadorDescripcion','indicadorFormula'], 'required'],
-            [['areaEstrategica', 'politicaEstrategica', 'pei'], 'integer'],
-            [['codigoObjetivo'], 'string', 'max' => 1],
-            [['objetivo','producto','indicadorDescripcion','indicadorFormula'], 'string', 'max' => 450],
+            [['idAreaEstrategica', 'idPoliticaEstrategica', 'codigo', 'objetivo', 'producto', 'descripcion', 'formula', 'idPei'], 'required'],
+            [['idAreaEstrategica', 'idPoliticaEstrategica', 'idPei'], 'string', 'max' => 36],
+            [['objetivo', 'producto', 'descripcion', 'formula'], 'string', 'max' => 500],
+            [['codigo'], 'integer','min' => 1, 'max' => 9,]
         ];
     }
 }

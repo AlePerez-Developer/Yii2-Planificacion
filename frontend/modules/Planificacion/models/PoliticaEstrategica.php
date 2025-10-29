@@ -37,7 +37,7 @@ class PoliticaEstrategica extends ActiveRecord
         return [
             [['IdPoliticaEstrategica', 'IdAreaEstrategica'], 'string'],
             [['IdAreaEstrategica', 'Codigo', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['Codigo'], 'integer'],
+            [['Codigo'], 'integer','min' => 1, 'max' => 9,],
             [['FechaHoraRegistro'], 'safe'],
             [['IdAreaEstrategica','IdPoliticaEstrategica'], 'string', 'max' => 36],
             [['Descripcion'], 'string', 'max' => 500],
@@ -97,7 +97,7 @@ class PoliticaEstrategica extends ActiveRecord
         ];
     }
 
-    public static function listOne($id): ?PoliticaEstrategica
+    public static function listOne(string $id): ?PoliticaEstrategica
     {
         return self::findOne(['IdPoliticaEstrategica' => $id, ['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
@@ -120,7 +120,7 @@ class PoliticaEstrategica extends ActiveRecord
             ->orderBy(['P.Codigo' => SORT_ASC]);
     }
 
-    public static function listAllByArea(int $idAreaEstrategica, string $search = '%%'): ActiveQuery
+    public static function listAllByArea(string $idAreaEstrategica, string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('P')
             ->select([

@@ -1,13 +1,19 @@
 $(document).ready(function(){
-    let codigoObjEstrategico = 0
+    let idObjEstrategico = '00000000-0000-0000-0000-000000000000'
+    let baseUrl = "index.php?r=Planificacion/obj-estrategico/"
 
     function ReiniciarCampos(){
         $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formObjEstrategico').trigger("reset");
-        s2Areas.val(null).trigger('change');
-        codigoObjEstrategico = 0
+        objEstrategico_s2PoliticaEstrategica.val(null).trigger('change')
+        objEstrategico_s2AreaEstrategica.val(null).trigger('change')
+        idObjEstrategico = '00000000-0000-0000-0000-000000000000'
+    }
+
+    function mensajeAccion(accion) {
+        return `Los datos del Objetivo Estratégico se ${accion}ron correctamente.`;
     }
 
     $("#btnCancelar").click(function () {
@@ -17,139 +23,86 @@ $(document).ready(function(){
         $("#divTabla").show(500);
     });
 
-    s2Areas.change(function () {
-        s2Politicas.val(null).trigger('change');
+    objEstrategico_s2AreaEstrategica.change(function () {
+        objEstrategico_s2PoliticaEstrategica.val(null).trigger('change');
         if ($(this).val() !== null) {
-            s2Politicas.prop("disabled", false);
-            populateS2Politicas($(this).val(),null)
+            objEstrategico_s2PoliticaEstrategica.prop("disabled", false);
+            populateS2Politicas($(this).val(),objEstrategico_s2PoliticaEstrategica,null)
         } else {
-            s2Politicas.prop("disabled", true);
+            objEstrategico_s2PoliticaEstrategica.prop("disabled", true);
         }
     })
 
-    $("#btnGuardar").click(function () {
+    $("#btnGuardar").click(async function () {
         const btn = $(this);
         const btnCancel = $('#btnCancelar')
 
-        IniciarSpiner(btn);
-        btnCancel.prop('disabled', true);
+        if (!$("#formObjEstrategico").valid()) return;
+
+        const hasCode =  idObjEstrategico !== '00000000-0000-0000-0000-000000000000';
+        let accion = hasCode ? 'actualizar' : 'guardar'
+
+        const idAreaEstrategica = objEstrategico_s2AreaEstrategica.select2('data')[0].id
+        const idPoliticaEstrategica = objEstrategico_s2PoliticaEstrategica.select2('data')[0].id
+        const codigo = $("#codigo").val();
+        const objetivo = $("#objetivo").val();
+        const producto = $("#producto").val();
+        const descripcion = $("#descripcion").val();
+        const formula = $("#formula").val();
+        const datos = new FormData();
+        datos.append("idObjEstrategico", idObjEstrategico);
+        datos.append("idAreaEstrategica", idAreaEstrategica);
+        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+        datos.append("codigo", codigo);
+        datos.append("objetivo", objetivo);
+        datos.append("producto", producto);
+        datos.append("descripcion", descripcion);
+        datos.append("formula", formula);
+
         try {
-            if ($("#formObjEstrategico").valid()) {
-                const hasCode =  codigoObjEstrategico !== 0;
-                hasCode ? actualizarRegistro() : guardarRegistro();
-            }
+            await ajaxPromise({
+                url: baseUrl + accion,
+                data: datos,
+                spinnerBtn: btn,
+                cancelBtn: btnCancel,
+                successMsg: mensajeAccion(accion),
+                reloadTable: dt_objEstrategico
+            });
         } catch (err) {
-            MostrarMensaje('error', GenerarMensajeError(err));
-        } finally {
-            DetenerSpiner(btn);
-            btnCancel.prop('disabled', false);
+            console.error("Error al procesar:", err);
         }
     });
 
     $(document).on('click', '#refresh', function(){
-        dt_obj.ajax.reload();
+        dt_objEstrategico.ajax.reload();
     })
 
-    function getDomData()
-    {
-        let areaEstrategica = s2Areas.select2('data')[0].id
-        let politicaEstrategica = s2Politicas.select2('data')[0].id
-        let codigoObjetivo = $("#codigoObjetivo").val();
-        let objetivo = $("#objetivo").val();
-        let producto = $("#producto").val();
-        let indicadorDescripcion = $("#descripcion").val();
-        let indicadorFormula = $("#formula").val();
-        let datos = new FormData();
-        datos.append("areaEstrategica", areaEstrategica);
-        datos.append("politicaEstrategica", politicaEstrategica);
-        datos.append("codigoObjetivo", codigoObjetivo);
-        datos.append("objetivo", objetivo);
-        datos.append("producto", producto);
-        datos.append("indicadorDescripcion", indicadorDescripcion);
-        datos.append("indicadorFormula", indicadorFormula);
-        return datos
-    }
-
-    /*=============================================
-    INSERTA EN LA BD UN NUEVO REGISTRO
-    =============================================*/
-    function  guardarRegistro()   {
-        let datos = getDomData();
-        $.ajax({
-            url: "index.php?r=Planificacion/obj-estrategico/guardar",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function () {
-                MostrarMensaje('success', 'Los datos del nuevo Objetivo Estrategico se guardaron correctamente.', null);
-                dt_obj.ajax.reload(() => {
-                    $("#btnCancelar").click();
-                });
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            }
-        });
-    }
-
-    /*=============================================
-    ACTUALIZA EL PEI SELECCIONADO EN LA BD
-    =============================================*/
-    function actualizarRegistro() {
-        let datos = getDomData();
-        datos.append("codigoObjEstrategico", codigoObjEstrategico.toString());
-        $.ajax({
-            url: "index.php?r=Planificacion/obj-estrategico/actualizar",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function () {
-                MostrarMensaje('success', 'Los datos del Obejtivo Estrategico se actualizaron correctamente.', null);
-                dt_obj.ajax.reload(() => {
-                    $("#btnCancelar").click();
-                });
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            }
-        });
-    }
 
     /* =============================================
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', function(){
-        let objectBtn = $(this);
-        const dt_row = dt_obj.row(objectBtn.closest('tr')).data()
-        let codigoObjEstrategico = dt_row["CodigoObjEstrategico"];
-        IniciarSpiner(objectBtn)
+    $(document).on('click', 'tbody #btnEstado', async function(){
 
-        $.ajax({
-            url: "index.php?r=Planificacion/obj-estrategico/cambiar-estado",
-            method: "POST",
-            data : {
-                codigoObjEstrategico: codigoObjEstrategico,
-            },
-            dataType: "json",
-            success: function (data) {
-                cambiarEstadoBtn(objectBtn, data["data"]);
-                DetenerSpiner(objectBtn)
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                DetenerSpiner(objectBtn)
-            }
-        });
+        let objectBtn = $(this);
+        const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
+        let idObjEstrategico = dt_row["IdObjEstrategico"];
+
+        const datos = new FormData();
+        datos.append("idObjEstrategico", idObjEstrategico);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + "cambiar-estado",
+                data: datos,
+                spinnerBtn: objectBtn,
+                successMsg: 'Estado actualizado correctamente.',
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
     });
 
     /*=============================================
@@ -157,39 +110,34 @@ $(document).ready(function(){
     =============================================*/
     $(document).on('click', 'tbody #btnEliminar', function(){
         let objectBtn = $(this)
-        const dt_row = dt_obj.row(objectBtn.closest('tr')).data()
-        let codigoObjEstrategico = dt_row["CodigoObjEstrategico"];
+        const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
+        let idObjEstrategico = dt_row["IdObjEstrategico"];
+
+        const datos = new FormData();
+        datos.append("idObjEstrategico", idObjEstrategico);
 
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar el obejtivo estrategico seleccionado?",
+            text: "¿Está seguro de eliminar el Objetivo Estrategico seleccionado?",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
-        }).then(function (resultado) {
+        }).then(async function (resultado) {
             if (resultado.value) {
-                IniciarSpiner(objectBtn)
-                $.ajax({
-                    url: "index.php?r=Planificacion/obj-estrategico/eliminar",
-                    method: "POST",
-                    data : {
-                        codigoObjEstrategico: codigoObjEstrategico,
-                    },
-                    dataType: "json",
-                    success: function () {
-                        MostrarMensaje('success','El Objetivo Estrategico ha sido eliminado correctamente.','')
-                        dt_obj.ajax.reload();
-                        DetenerSpiner(objectBtn)
-                    },
-                    error: function (xhr) {
-                        const data = JSON.parse(xhr.responseText)
-                        MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                        DetenerSpiner(objectBtn)
-                    }
-                });
+                try {
+                    await ajaxPromise({
+                        url: baseUrl + "eliminar",
+                        data: datos,
+                        spinnerBtn: objectBtn,
+                        successMsg: mensajeAccion('eliminar'),
+                        reloadTable: dt_objEstrategico
+                    });
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                }
             }
         });
     });
@@ -197,37 +145,33 @@ $(document).ready(function(){
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', function(){
+    $(document).on('click', 'tbody #btnEditar', async function(){
         let objectBtn = $(this);
-        const dt_row = dt_obj.row(objectBtn.closest('tr')).data()
-        codigoObjEstrategico = dt_row["CodigoObjEstrategico"];
-        IniciarSpiner(objectBtn)
+        const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
+        idObjEstrategico = dt_row["IdObjEstrategico"];
 
-        $.ajax({
-            url: "index.php?r=Planificacion/obj-estrategico/buscar",
-            method: "POST",
-            data : {
-                codigoObjEstrategico: codigoObjEstrategico,
-            },
-            dataType: "json",
-            success: function (data) {
-                let obj = JSON.parse(JSON.stringify(data["data"]));
-                s2Areas.val(obj["AreaEstrategica"]).trigger('change')
-                $("#codigoObjetivo").val(obj["CodigoObjetivo"]);
+        const datos = new FormData();
+        datos.append("idObjEstrategico", idObjEstrategico);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + "buscar",
+                data: datos,
+                spinnerBtn: objectBtn,
+            }).then((data) => {
+                let obj = data.data
+                objEstrategico_s2AreaEstrategica.val(obj["IdAreaEstrategica"]).trigger('change')
+                console.log(obj["IdPoliticaEstrategica"])
+                populateS2Politicas(obj["IdAreaEstrategica"],objEstrategico_s2PoliticaEstrategica,obj["IdPoliticaEstrategica"])
+                $("#codigo").val(obj["Codigo"]);
                 $("#objetivo").val(obj["Objetivo"]);
                 $("#producto").val(obj["Producto"]);
                 $("#descripcion").val(obj["Indicador_Descripcion"]);
                 $("#formula").val(obj["Indicador_Formula"]);
-                DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                DetenerSpiner(objectBtn)
-            }
-        }).then(function (resultado) {
-            populateS2Politicas(resultado["data"]["AreaEstrategica"],resultado["data"]["PoliticaEstrategica"])
-        });
+            });
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
     });
 })

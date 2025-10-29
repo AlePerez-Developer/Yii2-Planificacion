@@ -19,23 +19,24 @@ class ObjetivoEstrategicoService
      *
      * @return array of Objetivos
      */
-    public function listarObjetivos(): array
+    public function listarTodo(): array
     {
         $data = ObjetivoEstrategico::listAll()
-            ->asArray()
-            ->all();
-        return ResponseHelper::success($data,'Listado de Objetivos obtenido.');
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data,'Listado de Objetivos Estrategicos obtenido.');
     }
 
     /**
      * obtiene un Objetivo Estrategico en base a un codigo.
      *
-     * @param int $codigo
+     * @param string $id
      * @return ObjetivoEstrategico|null
      */
-    public  function listarObjetivo(int $codigo): ?ObjetivoEstrategico
+    public  function listarUno(string $id): ?ObjetivoEstrategico
     {
-        return ObjetivoEstrategico::listOne($codigo);
+        return ObjetivoEstrategico::listOne($id);
     }
 
     /**
@@ -45,29 +46,28 @@ class ObjetivoEstrategicoService
      * @return array ['message' => string, 'data' => string]
      * @throws Exception|ValidationException
      */
-    public function guardarObjetivo(ObjetivoEstrategicoForm $form): array
+    public function guardar(ObjetivoEstrategicoForm $form): array
     {
-        $objetivo = new ObjetivoEstrategico([
-            'CodigoObjEstrategico' => ObjEstrategicoDao::GenerarCodigoObjEstrategico(),
-            'AreaEstrategica' => $form->areaEstrategica,
-            'PoliticaEstrategica' => $form->politicaEstrategica,
-            'CodigoObjetivo'  => $form->codigoObjetivo,
+        $modelo = new ObjetivoEstrategico([
+            'IdPei' => $form->idPei,
+            'IdAreaEstrategica' => $form->idAreaEstrategica,
+            'IdPoliticaEstrategica' => $form->idPoliticaEstrategica,
+            'Codigo'  => $form->codigo,
             'Objetivo'  => mb_strtoupper(trim($form->objetivo), 'UTF-8'),
             'Producto'  => mb_strtoupper(trim($form->producto), 'UTF-8'),
-            'Indicador_Descripcion'  => mb_strtoupper(trim($form->indicadorDescripcion), 'UTF-8'),
-            'Indicador_Formula'  => mb_strtoupper(trim($form->indicadorFormula), 'UTF-8'),
-            'Pei' => $form->pei,
+            'Indicador_Descripcion'  => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
+            'Indicador_Formula'  => mb_strtoupper(trim($form->formula), 'UTF-8'),
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarModelo($objetivo);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Actualiza la informacion de un registro en el modelo
      *
-     * @param int $codigo
+     * @param string $id
      * @param ObjetivoEstrategicoForm $form
      * @return array
      * @throws Exception
@@ -75,100 +75,89 @@ class ObjetivoEstrategicoService
      * @throws ValidationException
      * @throws StaleObjectException
      */
-    public function actualizarObjetivo(int $codigo, ObjetivoEstrategicoForm $form): array
+    public function actualizar(string $id, ObjetivoEstrategicoForm $form): array
     {
-        $objetivo = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $objetivo->AreaEstrategica = $form->areaEstrategica;
-        $objetivo->PoliticaEstrategica = $form->politicaEstrategica;
-        $objetivo->CodigoObjetivo = $form->codigoObjetivo;
-        $objetivo->Objetivo = mb_strtoupper(trim($form->objetivo), 'UTF-8');
-        $objetivo->Producto = mb_strtoupper(trim($form->producto), 'UTF-8');
-        $objetivo->Indicador_Descripcion = mb_strtoupper(trim($form->indicadorDescripcion), 'UTF-8');
-        $objetivo->Indicador_Formula = mb_strtoupper(trim($form->indicadorFormula), 'UTF-8');
-        $objetivo->Pei = $form->pei;
+        $modelo->IdPei = $form->idPei;
+        $modelo->IdAreaEstrategica = $form->idAreaEstrategica;
+        $modelo->IdPoliticaEstrategica = $form->idPoliticaEstrategica;
+        $modelo->Codigo = $form->codigo;
+        $modelo->Objetivo = mb_strtoupper(trim($form->objetivo), 'UTF-8');
+        $modelo->Producto = mb_strtoupper(trim($form->producto), 'UTF-8');
+        $modelo->Indicador_Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->Indicador_Formula = mb_strtoupper(trim($form->formula), 'UTF-8');
 
-        return $this->validarProcesarModelo($objetivo);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Busca un Objetivo por su código y alterna su estado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $objetivo = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $objetivo->cambiarEstado();
+        $modelo->cambiarEstado();
 
-        if (!$objetivo->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$objetivo->getErrors(),500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$objetivo->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Objetivo Estrategico $objetivo->CodigoObjetivo", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$objetivo->getErrors(),500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el cambio de estado del Objetivo Estrategico $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $objetivo->CodigoEstado,
+            'data' => $modelo->CodigoEstado,
         ];
     }
 
     /**
      * Busca un Objetivo por su código y realiza un soft delete.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function eliminarObjetivo(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $objetivo = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if (ObjEstrategicoDao::enUso($objetivo)){
+        if (ObjEstrategicoDao::enUso($modelo)){
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El Objetivo se encuentra asignado a un objetivo institucional',500);
         }
 
-        $objetivo->eliminarObjetivo();
-        return $this->validarProcesarModelo($objetivo);
-    }
-
-    /**
-     * @param int $codigoPei
-     * @param int $codigoObjEstrategico
-     * @param string $codigoObjetivo
-     * @return bool
-     */
-    public function verificarCodigo(int $codigoPei, int $codigoObjEstrategico, string $codigoObjetivo): bool
-    {
-        return ObjEstrategicoDao::verificarCodigo($codigoPei, $codigoObjEstrategico, $codigoObjetivo);
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Obtiene el modelo segun el codigo enviado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $objetivo = $this->listarObjetivo($codigo);
+        $modelo = $this->listarUno($id);
 
-        if (!$objetivo) {
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $objetivo->getAttributes(array('AreaEstrategica', 'PoliticaEstrategica', 'CodigoObjEstrategico', 'CodigoObjetivo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'Pei',)),
+            'data' => $modelo->getAttributes(array('IdAreaEstrategica', 'IdPoliticaEstrategica', 'IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'IdPei')),
         ];
     }
 
@@ -176,36 +165,36 @@ class ObjetivoEstrategicoService
     /**
      * Obtiene el modelo segun el codigo enviado y valida si existe.
      *
-     * @param int $codigo
+     * @param string $id
      * @return ObjetivoEstrategico|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(int $codigo): ?ObjetivoEstrategico
+    private function obtenerModeloValidado(string $id): ?ObjetivoEstrategico
     {
-        $model = $this->listarObjetivo($codigo);
-        if (!$model) {
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
             throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
-        return $model;
+        return $modelo;
     }
 
     /**
      *  Recibe un modelo lo valida y realiza el guardado del mismo.
      *
-     * @param ObjetivoEstrategico $objetivo
+     * @param ObjetivoEstrategico $modelo
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function validarProcesarModelo(ObjetivoEstrategico $objetivo): array
+    public function validarProcesarModelo(ObjetivoEstrategico $modelo): array
     {
-        if (!$objetivo->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$objetivo->getErrors(),500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$objetivo->save(false)) {
-            Yii::error("Error al guardar los datos del objetivo $objetivo->CodigoObjetivo", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$objetivo->getErrors(),500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar los datos del objetivo $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [

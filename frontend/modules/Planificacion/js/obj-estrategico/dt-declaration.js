@@ -1,4 +1,4 @@
-let dt_obj
+let dt_objEstrategico;
 $(document).ready(function () {
     function format(d) {
         return (
@@ -9,7 +9,7 @@ $(document).ready(function () {
             '            </div>' +
             '            <div class="row">' +
             '                <div class="col-1 subsmall">Desc:</div>' +
-            '                <div class="col-3 little">' + d["pei"]["DescripcionPei"] + '</div>' +
+            '                <div class="col-3 little">' + d["pei"]["Descripcion"] + '</div>' +
             '                <div class="col-1 subsmall">Codigo</div>' +
             '                <div class="col-3 little"> - ' + d["areaEstrategica"]["Codigo"] + ' - </div>' +
             '                <div class="col-1 subsmall">Codigo</div>' +
@@ -29,7 +29,7 @@ $(document).ready(function () {
             '            </div>'
         );
     }
-    dt_obj = $("#tablaListaObjEstrategicos").DataTable({
+    dt_objEstrategico = $("#tablaListaObjEstrategicos").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
         },
@@ -44,7 +44,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
                 MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_obj.processing(false);
+                dt_objEstrategico.processing(false);
             }
         },
         columns: [
@@ -66,7 +66,7 @@ $(document).ready(function () {
             {
                 className: 'dt-small',
                 orderable: false,
-                data: 'CodigoObjetivo',
+                data: 'Codigo',
                 render: function (data, type, row){
                     return (type === 'display')
                         ?  ' (' + row["pei"]["GestionInicio"] + ' - ' + row["pei"]["GestionFin"] + ')'
@@ -115,7 +115,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoObjEstrategico',
+                data: 'IdObjEstrategico',
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -132,16 +132,16 @@ $(document).ready(function () {
         ],
     });
 
-    dt_obj.on('order.dt search.dt', function () {
+    dt_objEstrategico.on('order.dt search.dt', function () {
         let i = 1;
-        dt_obj.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
+        dt_objEstrategico.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
             this.data(i++);
         });
     }).draw();
 
     $('#tablaListaObjEstrategicos tbody').on('click', 'td.dt-control', function () {
         let tr = $(this).closest('tr');
-        let row = dt_obj.row(tr);
+        let row = dt_objEstrategico.row(tr);
 
         if (row["child"].isShown()) {
             row["child"].hide();

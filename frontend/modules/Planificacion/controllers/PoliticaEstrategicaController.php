@@ -81,15 +81,17 @@ class PoliticaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * accion para listar todos los registros del modelo para el llenado de select2.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @throws ValidationException
      * @noinspection PhpUnused
-     */
-    public function actionListarAreasEstrategicas(): array
+ */
+    public function actionListarPoliticasS2(): array
     {
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        return $this->withTryCatch(fn() => $this->serviceAreaEstrategica->listarAreasS2($search));
+        $idAreaEstrategica = $this->obtenerIdAreaEstrategica();
+        return $this->withTryCatch(fn() => $this->service->listarPoliticasS2($idAreaEstrategica, $search));
     }
 
     /**
@@ -102,7 +104,6 @@ class PoliticaEstrategicaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
-
             $form = new PoliticaEstrategicaForm();
             if (!$form->load($request->post(), '') || !$form->validate() || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
@@ -123,14 +124,14 @@ class PoliticaEstrategicaController extends BaseController
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $codigo = $this->obtenerId();
+            $id = $this->obtenerId();
             $form = new PoliticaEstrategicaForm();
 
             if (!$form->load($request->post(), '') || !$form->validate() || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->service->actualizar($codigo, $form);
+            return $this->service->actualizar($id, $form);
         });
     }
 
@@ -177,7 +178,7 @@ class PoliticaEstrategicaController extends BaseController
     }
 
     /**
-     * obtiene y valida si se recibio el codigo por el request
+     * obtiene y valida si se recibio el id por el request
      *
      * return string
      * @throws ValidationException
@@ -186,7 +187,22 @@ class PoliticaEstrategicaController extends BaseController
     {
         $id = Yii::$app->request->post('idPoliticaEstrategica');
         if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Área Estratégica no enviado.', 404);
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de Politica Estratégica no enviado.', 404);
+        }
+        return $id;
+    }
+
+    /**
+     * obtiene y valida si se recibio el id por el request
+     *
+     * return string
+     * @throws ValidationException
+     */
+    private function obtenerIdAreaEstrategica(): string
+    {
+        $id = Yii::$app->request->post('idAreaEstrategica');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de Área Estratégica no enviado.', 404);
         }
         return $id;
     }

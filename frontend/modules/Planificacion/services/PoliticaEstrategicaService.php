@@ -65,7 +65,7 @@ class PoliticaEstrategicaService
      */
     public function guardar(PoliticaEstrategicaForm $form): array
     {
-        $model = new PoliticaEstrategica([
+        $modelo = new PoliticaEstrategica([
             'IdAreaEstrategica' => $form->idAreaEstrategica,
             'Codigo' => $form->codigo,
             'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
@@ -73,7 +73,7 @@ class PoliticaEstrategicaService
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarModelo($model);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
@@ -219,5 +219,17 @@ class PoliticaEstrategicaService
     public function verificarCodigo(string $id, string $idAreaEstrategica, int $codigo): bool
     {
         return PoliticaEstrategicaDao::verificarCodigo($id, $idAreaEstrategica, $codigo);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @param string $idAreaEstrategica
+     * @return bool
+     */
+    public function validarId(string $id, string $idAreaEstrategica): bool
+    {
+        return PoliticaEstrategicaDao::validarId($id, $idAreaEstrategica);
     }
 }

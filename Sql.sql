@@ -26,14 +26,20 @@ CREATE TABLE Usuarios(
     foreign key (CodigoEstado) references Estados(CodigoEstado),
 )
 
+go
+
 create table Estados(
     CodigoEstado char(1) primary key,
     NombreEstado Varchar(50) not null
 )
 
+go
+
 insert into Estados values('V','Vigente')
 insert into Estados values('C','Caduco')
 insert into Estados values('E','Eliminado')
+
+go
 
 create table PEIs(
     IdPei uniqueidentifier DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
@@ -54,6 +60,8 @@ create table PEIs(
 	foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+go
+
 CREATE TRIGGER trg_Insert_Peis
     ON Peis
     AFTER INSERT
@@ -61,10 +69,18 @@ AS
     BEGIN
         INSERT INTO Auditoria_Peis (IdPei, Operacion, Usuario, IPCliente, DatosDespues)
         SELECT i.IdPei, 'INSERT', SYSTEM_USER, dbo.ObtenerIPCliente(),
-        CONCAT('{Descripcion:"', i.Descripcion, '", FechaAprobacion:"', i.FechaAprobacion, '",GestionInicio:"', i.GestionInicio, '", GestionFin:"', i.GestionFin, '"}')
+        CONCAT(
+                        '{Descripcion:"', i.Descripcion,
+                        '", FechaAprobacion:"', i.FechaAprobacion,
+                        '",GestionInicio:"', i.GestionInicio,
+                        '", GestionFin:"', i.GestionFin,
+                        '", Estado:"', i.CodigoEstado,
+                        '"}'
+        )
         FROM inserted i;
     END;
 
+go
 
 CREATE TRIGGER trg_Update_Peis
     ON Peis
@@ -73,12 +89,27 @@ AS
     BEGIN
         INSERT INTO Auditoria_Peis (IdPei, Operacion, Usuario, IPCliente, DatosAntes, DatosDespues)
         SELECT d.IdPei, 'UPDATE', SYSTEM_USER,dbo.ObtenerIPCliente(),
-        CONCAT('{Descripcion:"', d.Descripcion, '", FechaAprobacion:"', d.FechaAprobacion, '",GestionInicio:"', d.GestionInicio, '", GestionFin:"', d.GestionFin, '"}'),
-        CONCAT('{Descripcion:"', i.Descripcion, '", FechaAprobacion:"', i.FechaAprobacion, '",GestionInicio:"', i.GestionInicio, '", GestionFin:"', i.GestionFin, '"}')
+        CONCAT(
+                        '{Descripcion:"', d.Descripcion,
+                        '", FechaAprobacion:"', d.FechaAprobacion,
+                        '",GestionInicio:"', d.GestionInicio,
+                        '", GestionFin:"', d.GestionFin,
+                        '", Estado:"', d.CodigoEstado,
+                        '"}'
+        ),
+        CONCAT(
+                       '{Descripcion:"', i.Descripcion,
+                       '", FechaAprobacion:"', i.FechaAprobacion,
+                       '",GestionInicio:"', i.GestionInicio,
+                       '", GestionFin:"', i.GestionFin,
+                       '", Estado:"', i.CodigoEstado,
+                       '"}'
+        )
         FROM deleted d
         JOIN inserted i ON d.IdPei = i.idPei;
     END;
 
+go
 
 CREATE TRIGGER trg_Delete_Peis
     ON Peis
@@ -87,10 +118,18 @@ AS
     BEGIN
         INSERT INTO Auditoria_Peis (IdPei, Operacion, Usuario, IPCliente, DatosAntes)
         SELECT d.IdPei, 'DELETE', SYSTEM_USER,dbo.ObtenerIPCliente(),
-        CONCAT('{Descripcion:"', d.Descripcion, '", FechaAprobacion:"', d.FechaAprobacion, '",GestionInicio:"', d.GestionInicio, '", GestionFin:"', d.GestionFin, '"}')
+        CONCAT(
+                        '{Descripcion:"', d.Descripcion,
+                        '",FechaAprobacion:"', d.FechaAprobacion,
+                        '",GestionInicio:"', d.GestionInicio,
+                        '",GestionFin:"', d.GestionFin,
+                        '",Estado:"', d.CodigoEstado,
+                        '"}'
+        )
         FROM deleted d;
     END;
 
+go
 
 CREATE TABLE Auditoria_Peis (
     IdAuditoria INT IDENTITY(1,1) PRIMARY KEY,
@@ -103,6 +142,7 @@ CREATE TABLE Auditoria_Peis (
     DatosDespues NVARCHAR(MAX)     -- JSON opcional con estado nuevo
 )
 
+go
 
 create table AreasEstrategicas (
     IdAreaEstrategica uniqueidentifier DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
@@ -121,16 +161,19 @@ create table AreasEstrategicas (
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-CREATE UNIQUE INDEX [UQ_Area_Estrategica_Codigo_Pei]
+go
+
+CREATE UNIQUE INDEX [UQ_Area_Estrategica_Pei]
     ON [dbo].AreasEstrategicas(Codigo,IdPei)
     WHERE   ([CodigoEstado] = 'V');
 
+go
 
 create table PoliticasEstrategicas (
     IdPoliticaEstrategica uniqueidentifier DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
     IdAreaEstrategica UNIQUEIDENTIFIER NOT NULL,
     Codigo int not null,
-    Descripcion Varchar(500),
+    Descripcion Varchar(500) not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
@@ -138,76 +181,141 @@ create table PoliticasEstrategicas (
     constraint chk_Codigo_Politica_Estrategica check (Codigo != ''),
     constraint chk_Descripcion_Politica_Estrategica check (Descripcion != ''),
 
-    foreign key (IdAreaEstrategica) references AreasEstrtegcvicas(IdAreaEstrategica),
+    foreign key (IdAreaEstrategica) references AreasEstrategicas(IdAreaEstrategica),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-CREATE UNIQUE INDEX [UQ_Politica_Estrategica_Codigo_Pei]
+go
+
+CREATE UNIQUE INDEX [UQ_Politica_Estrategica_Area_Estrategica]
     ON [dbo].PoliticasEstrategicas(Codigo,IdAreaEstrategica)
     WHERE   ([CodigoEstado] = 'V');
 
-
-
-
-
-
+go
 
 create table ObjetivosEstrategicos(
     IdObjEstrategico uniqueidentifier DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
-    AreaEstrategica int not null,
-    PoliticaEstrategica int not null,
-    CodigoObjetivo char(1) not null,
-    Objetivo varchar(450) not null,
-    Producto varchar(450) not null,
-    Indicador_Descripcion varchar(450) not null,
-    Indicador_Formula varchar(450) not null,
-    Pei int not null,
+    IdAreaEstrategica UNIQUEIDENTIFIER not null,
+    IdPoliticaEstrategica UNIQUEIDENTIFIER not null,
+    Codigo int not null,
+    Objetivo varchar(500) not null,
+    Producto varchar(500) not null,
+    Indicador_Descripcion varchar(500) not null,
+    Indicador_Formula varchar(500) not null,
+    IdPei UNIQUEIDENTIFIER not null,
     CodigoEstado char(1) not null,
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
-    unique(AreaEstrategica,PoliticaEstrategica,CodigoObjetivo),
+    constraint chk_Codigo_Objetivo_Estrategico check (Codigo > 0),
+    constraint chk_Objetivo_Objetivo_Estrategico check (Objetivo != ''),
+    constraint chk_Resultado_Objetivo_Estrategico check (Producto != ''),
+    constraint chk_Indicador_Descripcion_Objetivo_Estrategico check (Indicador_Descripcion != ''),
+    constraint chk_Indicador_Formula_Objetivo_Estrategico check (Indicador_Formula != ''),
 
-    constraint chk_Codigo check (CodigoObjetivo != ''),
-    constraint chk_OE_Objetivo check (Objetivo != ''),
-    constraint chk_OE_Resultado check (Producto != ''),
-    constraint chk_OE_Indicador_Descripcion check (Indicador_Descripcion != ''),
-    constraint chk_OE_Indicador_Formulao check (Indicador_Formula != ''),
-
-    foreign key (AreaEstrategica) references AreasEstrategicas(CodigoAreaEstrategica),
-    foreign key (PoliticaEstrategica) references PoliticasEstrategicas(CodigoPoliticaEstrategica),
-    foreign key (Pei) references Peis(CodigoPei),
+    foreign key (IdAreaEstrategica) references AreasEstrategicas(IdAreaEstrategica),
+    foreign key (IdPoliticaEstrategica) references PoliticasEstrategicas(IdPoliticaEstrategica),
+    foreign key (IdPei) references Peis(IdPei),
     foreign key (CodigoEstado) references Estados(CodigoEstado),
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
+go
 
-
-
-
-
-create table ObjetivosEstrategicos(
-    IdObjEstrategico uniqueidentifier DEFAULT NEWSEQUENTIALID() PRIMARY KEY,
-    CodigoObjetivo char(3) not null,
-    Objetivo varchar(450) not null,
-    Pei_Id int not null,
-    CodigoEstado char(1) not null,
-    FechaHoraRegistro datetime not null default getdate(),
-    CodigoUsuario char(3) not null,
-
-    constraint chk_Codigo check (CodigoObjetivo != ''),
-    constraint chk_Objetivo check (Objetivo != ''),
-
-    foreign key (CodigoPei) references Peis(CodigoPei),
-    foreign key (CodigoEstado) references Estados(CodigoEstado),
-    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
-)
-
-CREATE UNIQUE INDEX [UQ_Codigo_Pei]
-    ON [dbo].ObjetivosEstrategicos(CodigoObjetivo,CodigoPei)
+CREATE UNIQUE INDEX [UQ_Objetivo_Area_Politica]
+    ON [dbo].ObjetivosEstrategicos(IdPei, IdAreaEstrategica, IdPoliticaEstrategica, Codigo)
     WHERE   ([CodigoEstado] = 'V');
 
+go
+
+CREATE TRIGGER trg_Insert_ObjEstrategico
+ON ObjetivosEstrategicos
+AFTER INSERT
+AS
+BEGIN
+INSERT INTO Auditoria_ObjEstrategico (IdObjEstrategico, Operacion, Usuario, IPCliente, DatosDespues)
+SELECT i.IdObjEstrategico, 'INSERT', SYSTEM_USER, dbo.ObtenerIPCliente(),
+CONCAT('{IdAreaEstrategica:"', i.IdAreaEstrategica,
+                    '", IdPoliticaEstrategica:"', i.IdPoliticaEstrategica,
+                    '",Codigo:"', i.Codigo,
+                    '", Objetivo:"', i.Objetivo,
+                    '", Producto:"', i.Producto,
+                    '", Ind_Descripcion:"', i.Indicador_Descripcion,
+                    '", Ind_Formula:"', i.Indicador_Formula,
+                    '", Estado:"', i.CodigoEstado,
+       '"}')
+FROM inserted i;
+END;
+
+go
+
+CREATE TRIGGER trg_Update_ObjEstrategico
+ON ObjetivosEstrategicos
+AFTER UPDATE
+AS
+BEGIN
+INSERT INTO Auditoria_ObjEstrategico (IdObjEstrategico, Operacion, Usuario, IPCliente, DatosAntes, DatosDespues)
+SELECT d.IdObjEstrategico, 'UPDATE', SYSTEM_USER,dbo.ObtenerIPCliente(),
+       CONCAT('{IdAreaEstrategica:"', d.IdAreaEstrategica,
+              '", IdPoliticaEstrategica:"', d.IdPoliticaEstrategica,
+              '",Codigo:"', d.Codigo,
+              '", Objetivo:"', d.Objetivo,
+              '", Producto:"', d.Producto,
+              '", Ind_Descripcion:"', d.Indicador_Descripcion,
+              '", Ind_Formula:"', d.Indicador_Formula,
+              '", Estado:"', d.CodigoEstado,
+              '"}'),
+       CONCAT('{IdAreaEstrategica:"', i.IdAreaEstrategica,
+              '", IdPoliticaEstrategica:"', i.IdPoliticaEstrategica,
+              '",Codigo:"', i.Codigo,
+              '", Objetivo:"', i.Objetivo,
+              '", Producto:"', i.Producto,
+              '", Ind_Descripcion:"', i.Indicador_Descripcion,
+              '", Ind_Formula:"', i.Indicador_Formula,
+              '", Estado:"', i.CodigoEstado,
+              '"}')
+FROM deleted d
+JOIN inserted i ON d.IdPei = i.idPei;
+END;
+
+go
+
+CREATE TRIGGER trg_Delete_ObjEstrategico
+ON ObjetivosEstrategicos
+AFTER DELETE
+AS
+BEGIN
+INSERT INTO Auditoria_ObjEstrategico (IdObjEstrategico, Operacion, Usuario, IPCliente, DatosAntes)
+SELECT d.IdObjEstrategico, 'DELETE', SYSTEM_USER,dbo.ObtenerIPCliente(),
+       CONCAT('{IdAreaEstrategica:"', d.IdAreaEstrategica,
+              '", IdPoliticaEstrategica:"', d.IdPoliticaEstrategica,
+              '",Codigo:"', d.Codigo,
+              '", Objetivo:"', d.Objetivo,
+              '", Producto:"', d.Producto,
+              '", Ind_Descripcion:"', d.Indicador_Descripcion,
+              '", Ind_Formula:"', d.Indicador_Formula,
+              '", Estado:"', d.CodigoEstado,
+              '"}')
+FROM deleted d;
+END;
+
+go
+
+CREATE TABLE Auditoria_ObjEstrategico (
+    IdAuditoria INT IDENTITY(1,1) PRIMARY KEY,
+    IdObjEstrategico UNIQUEIDENTIFIER,
+    Operacion VARCHAR(10),         -- 'INSERT', 'UPDATE', 'DELETE'
+    Usuario NVARCHAR(100),         -- Usuario que realizó la acción
+    IPCliente VARCHAR(50),         -- Dirección IP del cliente
+    Fecha DATETIME DEFAULT GETDATE(),
+    DatosAntes NVARCHAR(MAX),      -- JSON opcional con estado anterior
+    DatosDespues NVARCHAR(MAX)     -- JSON opcional con estado nuevo
+)
+
+
+
+/*
 
 create table IndicadoresEstrategicos(
     CodigoIndicador int primary key not null,
@@ -562,4 +670,4 @@ create table Gastos(
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-
+*/

@@ -12,24 +12,24 @@ use common\models\Usuario;
 /**
  * This is the model class for table "ObjetivosEstrategicos".
  *
- * @property int $CodigoObjEstrategico
- * @property int $AreaEstrategica
- * @property int $PoliticaEstrategica
- * @property string $CodigoObjetivo
+ * @property string $IdObjEstrategico
+ * @property string $IdAreaEstrategica
+ * @property string $IdPoliticaEstrategica
+ * @property int $Codigo
  * @property string $Objetivo
  * @property string $Producto
  * @property string $Indicador_Descripcion
  * @property string $Indicador_Formula
- * @property int $Pei
+ * @property string $IdPei
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
- * @property AreaEstrategica $areaEstrategica
- * @property PoliticaEstrategica $politicaEstrategica
+ * @property AreaEstrategica $idAreaEstrategica
+ * @property PoliticaEstrategica $idPoliticaEstrategica
+ * @property Pei $idPei
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
- * @property PeI $pei
  * @property ObjetivoInstitucional[] $objetivosInstitucionales
  */
 
@@ -49,20 +49,52 @@ class ObjetivoEstrategico extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['CodigoObjEstrategico', 'AreaEstrategica', 'PoliticaEstrategica', 'CodigoObjetivo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'Pei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoObjEstrategico', 'AreaEstrategica', 'PoliticaEstrategica', 'Pei'], 'integer'],
+            [['IdObjEstrategico', 'IdAreaEstrategica', 'IdPoliticaEstrategica', 'IdPei'], 'string', 'max' => 36],
+            [['IdAreaEstrategica', 'IdPoliticaEstrategica', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'IdPei', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['FechaHoraRegistro'], 'safe'],
-            [['CodigoObjetivo', 'CodigoEstado'], 'string', 'max' => 1],
-            [['Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula'], 'string', 'max' => 450],
+            [['Codigo'], 'integer','min' => 1, 'max' => 9,],
+            [['CodigoEstado'], 'string', 'max' => 1],
+            [['Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula'], 'string', 'max' => 500],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['AreaEstrategica', 'CodigoObjetivo', 'PoliticaEstrategica'], 'unique', 'targetAttribute' => ['AreaEstrategica', 'CodigoObjetivo', 'PoliticaEstrategica']],
-            [['CodigoObjEstrategico'], 'unique'],
+            [['Codigo'], 'validateUniqueActiva', 'skipOnError' => true],
+            [['IdObjEstrategico'], 'unique'],
+            [['IdAreaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['IdAreaEstrategica' => 'IdAreaEstrategica']],
+            [['IdPoliticaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => PoliticaEstrategica::class, 'targetAttribute' => ['IdPoliticaEstrategica' => 'IdPoliticaEstrategica']],
+            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
-            [['AreaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['AreaEstrategica' => 'CodigoAreaEstrategica']],
-            [['PoliticaEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => PoliticaEstrategica::class, 'targetAttribute' => ['PoliticaEstrategica' => 'CodigoPoliticaEstrategica']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['Pei'], 'exist', 'skipOnError' => true, 'targetClass' => PeI::class, 'targetAttribute' => ['Pei' => 'CodigoPei']],
         ];
+    }
+
+    /**
+     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     *
+     * @param string $attribute
+     * @used-by rules()
+     * @noinspection PhpUnused
+     */
+    public function validateUniqueActiva(string $attribute): void
+    {
+        if ($this->CodigoEstado !== 'V') {
+            return;
+        }
+
+        $id = $this->IdObjEstrategico == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdObjEstrategico;
+
+        $exists = self::find()
+            ->where([
+                'Codigo' => $this->Codigo,
+                'IdPei' => $this->IdPei,
+                'IdAreaEstrategica' => $this->IdAreaEstrategica,
+                'IdPoliticaEstrategica' => $this->IdPoliticaEstrategica,
+                'CodigoEstado' => 'V',
+            ])
+            ->andWhere(['<>', 'IdObjEstrategico', $id]) // Evita conflicto consigo mismo en update
+            ->exists();
+
+        if ($exists) {
+            $this->addError($attribute, 'El Codigo  de Objetivo Estrategico ya existe con con el Area y Politica elegidos');
+        }
     }
 
     /**
@@ -71,50 +103,51 @@ class ObjetivoEstrategico extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'CodigoObjEstrategico' => 'Codigo Obj Estrategico',
-            'AreaEstrategica' => 'Area Estrategica',
-            'PoliticaEstrategica' => 'Politica Estrategica',
-            'CodigoObjetivo' => 'Codigo Objetivo',
+            'IdObjEstrategico' => 'Id Obj Estrategico',
+            'IdAreaEstrategica' => 'Id Area Estrategica',
+            'IdPoliticaEstrategica' => 'Id Politica Estrategica',
+            'Codigo' => 'Codigo',
             'Objetivo' => 'Objetivo',
             'Producto' => 'Producto',
             'Indicador_Descripcion' => 'Indicador Descripcion',
             'Indicador_Formula' => 'Indicador Formula',
-            'Pei' => 'Pei',
+            'IdPei' => 'Id Pei',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
     }
 
-    public static function listOne($codigo): ?ObjetivoEstrategico
+    public static function listOne(string $id): ?ObjetivoEstrategico
     {
-        return self::findOne(['CodigoObjEstrategico' => $codigo,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdObjEstrategico' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listAll(): ActiveQuery
     {
         return self::find()->alias('O')
             ->select([
-                'O.CodigoObjEstrategico',
-                'CONCAT(A.Codigo,Pe.Codigo,O.CodigoObjetivo) AS Compuesto',
-                'O.CodigoObjetivo',
+                'O.IdObjEstrategico',
+                'CONCAT(Ae.Codigo,Pe.Codigo,O.Codigo) AS Compuesto',
+                'O.Codigo',
                 'O.Objetivo',
                 'O.Producto',
                 'O.Indicador_Descripcion',
                 'O.Indicador_Formula',
                 'O.CodigoEstado',
                 'O.CodigoUsuario',
-                'O.Pei',
-                'O.AreaEstrategica',
-                'O.PoliticaEstrategica',
+                'P.IdPei',
+                'Ae.IdAreaEstrategica',
+                'Pe.IdPoliticaEstrategica',
             ])
             ->joinWith('pei P', true, 'INNER JOIN')
-            ->joinWith('areaEstrategica A', true, 'INNER JOIN')
+            ->joinWith('areaEstrategica Ae', true, 'INNER JOIN')
             ->joinWith('politicaEstrategica Pe', true, 'INNER JOIN')
             ->where(['!=', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['o.Pei' => Yii::$app->contexto->getPei()])
-            ->orderBy(['CodigoObjetivo' => SORT_ASC]);
+            ->andWhere(['!=', 'Ae.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'Pe.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['o.IdPei' => Yii::$app->contexto->getPei()]);
     }
 
     /**
@@ -134,7 +167,7 @@ class ObjetivoEstrategico extends ActiveRecord
      *
      * @return void
      */
-    public function eliminarObjetivo(): void
+    public function eliminar(): void
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }
@@ -150,23 +183,36 @@ class ObjetivoEstrategico extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[AreaEstrategica]].
+     * Gets a query for [[Pei]].
      *
      * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getPei(): ActiveQuery
+    {
+        return $this->hasOne(Pei::class, ['IdPei' => 'IdPei']);
+    }
+
+    /**
+     * Gets a query for [[IdAreaEstrategica]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
      */
     public function getAreaEstrategica(): ActiveQuery
     {
-        return $this->hasOne(AreaEstrategica::class, ['CodigoAreaEstrategica' => 'AreaEstrategica']);
+        return $this->hasOne(AreaEstrategica::class, ['IdAreaEstrategica' => 'IdAreaEstrategica']);
     }
 
     /**
      * Gets a query for [[PoliticaEstrategica]].
      *
      * @return ActiveQuery
+     * @noinspection PhpUnused
      */
     public function getPoliticaEstrategica(): ActiveQuery
     {
-        return $this->hasOne(PoliticaEstrategica::class, ['CodigoPoliticaEstrategica' => 'PoliticaEstrategica']);
+        return $this->hasOne(PoliticaEstrategica::class, ['IdPoliticaEstrategica' => 'IdPoliticaEstrategica']);
     }
 
 
@@ -189,16 +235,4 @@ class ObjetivoEstrategico extends ActiveRecord
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
-
-    /**
-     * Gets a query for [[Pei]].
-     *
-     * @return ActiveQuery
-     */
-    public function getPei(): ActiveQuery
-    {
-        return $this->hasOne(Pei::class, ['CodigoPei' => 'Pei']);
-    }
-
-
 }

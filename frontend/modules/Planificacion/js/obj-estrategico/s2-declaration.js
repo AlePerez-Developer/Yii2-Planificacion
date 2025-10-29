@@ -1,55 +1,20 @@
-let s2Areas = $('#areasEstrategicas')
-let s2Politicas = $('#politicasEstrategicas')
+let objEstrategico_s2AreaEstrategica = $('#areasEstrategicas')
+let objEstrategico_s2PoliticaEstrategica = $('#politicasEstrategicas')
 $(document).ready(function() {
 
-    populateS2Areas()
+    populateS2Areas(objEstrategico_s2AreaEstrategica)
 
-    s2Areas.select2({
+    objEstrategico_s2AreaEstrategica.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una area estrategica",
         allowClear: true,
     })
 
-    s2Politicas.select2({
+    objEstrategico_s2PoliticaEstrategica.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una politica estrategica",
         allowClear: true,
     })
 
-    s2Politicas.prop("disabled", true);
+    objEstrategico_s2PoliticaEstrategica.prop("disabled", true);
 });
-
-
-
-function populateS2Politicas(codigoArea,codigoPolitica)
-{
-    $.ajax({
-        method: "POST",
-        dataType: 'json',
-        delay: 100,
-        data: {
-            area: codigoArea
-        },
-        cache: true,
-        url: 'index.php?r=Planificacion/obj-estrategico/listar-politicas-estrategicas',
-        success: function(data){
-            s2Politicas.empty();
-
-            $.each(data["data"], function(index, item) {
-                s2Politicas.append(
-                    $('<option>', {
-                        value: item["CodigoPoliticaEstrategica"],
-                        text: item["Descripcion"]
-                    })
-                );
-            });
-            s2Politicas.val(null).trigger('change');
-        },
-        error: function (xhr) {
-            const data = JSON.parse(xhr.responseText)
-            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-        },
-    }).then(function () {
-        $("#politicasEstrategicas").val(codigoPolitica).trigger('change');
-    })
-}

@@ -79,6 +79,20 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarAreasS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarAreasS2($search)) ;
+    }
+
+
+    /**
      * accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
@@ -166,7 +180,7 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * obtiene y valida si se recibio el codigo por el request
+     * obtiene y valida si se recibio el id por el request
      *
      * return string
      * @throws ValidationException
@@ -175,7 +189,7 @@ class AreaEstrategicaController extends BaseController
     {
         $id = Yii::$app->request->post('idAreaEstrategica');
         if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Área Estratégica no enviado.', 404);
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de Área Estratégica no enviado.', 404);
         }
         return $id;
     }

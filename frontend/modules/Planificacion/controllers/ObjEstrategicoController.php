@@ -2,26 +2,38 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\services\AreaEstrategicaService;
+use app\modules\Planificacion\services\PoliticaEstrategicaService;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
 use app\modules\Planificacion\formModels\ObjetivoEstrategicoForm;
+use app\modules\Planificacion\services\AreaEstrategicaService;
 use app\controllers\BaseController;
-use app\modules\Planificacion\services\PoliticaEstrategicaService;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Mpdf\MpdfException;
 use Mpdf\Mpdf;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class ObjEstrategicoController extends BaseController
 {
-    private ObjetivoEstrategicoService $objetivoService;
+    private ObjetivoEstrategicoService $service;
+    private PoliticaEstrategicaService $servicePoliticaEstrategica;
+    private AreaEstrategicaService $serviceAreaEstrategica;
 
-    public function __construct($id, $module, ObjetivoEstrategicoService $objetivoService, $config = [])
+    public function __construct($id, $module,
+                                ObjetivoEstrategicoService $service,
+                                AreaEstrategicaService $serviceAreaEstrategica,
+                                PoliticaEstrategicaService $servicePoliticaEstrategica,
+                                $config = [])
     {
-        $this->objetivoService = $objetivoService;
+        $this->service = $service;
+        $this->serviceAreaEstrategica = $serviceAreaEstrategica;
+        $this->servicePoliticaEstrategica = $servicePoliticaEstrategica;
         parent::__construct($id, $module, $config);
     }
+
     public function behaviors(): array
     {
         return [
@@ -72,7 +84,6 @@ class ObjEstrategicoController extends BaseController
      */
     public function actionIndex(): string
     {
-        yii::$app->contexto->setPei(2);
         return $this->render('objEstrategico');
     }
 
@@ -80,55 +91,54 @@ class ObjEstrategicoController extends BaseController
      * accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionListarTodo(): array
+    {
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
+    }
+
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionListarAreasEstrategicas(): array
     {
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        $serviceAreaEstrategica = new AreaEstrategicaService();
-        return $this->withTryCatch(fn() => $serviceAreaEstrategica->listarAreasS2($search));
+        return $this->withTryCatch(fn() => $this->serviceAreaEstrategica->listarAreasS2($search));
     }
 
     /**
      * accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionListarPoliticasEstrategicas(): array
     {
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        $area = $this->obtenerCodigoArea();
-        $servicePoliticaEstrategica = new PoliticaEstrategicaService();
-        return $this->withTryCatch(fn() => $servicePoliticaEstrategica->listarPoliticasByArea($area,$search));
-    }
-
-    /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
-    public function actionListarTodo(): array
-    {
-        return $this->withTryCatch(fn() => $this->objetivoService->listarObjetivos());
+        $idAreaEstrategica = $this->obtenerCodigoArea();
+        return $this->withTryCatch(fn() => $this->servicePoliticaEstrategica->listarPoliticasS2($idAreaEstrategica,$search));
     }
 
     /**
      * accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionGuardar(): array
     {
-        return $this->withTryCatch( function() {
+        return $this->withTryCatch(function () {
             $request = Yii::$app->request;
-
             $form = new ObjetivoEstrategicoForm();
-            $form->pei = Yii::$app->contexto->getPei();
-
+            $form->idPei = yii::$app->contexto->getPei();
             if (!$form->load($request->post(), '') || !$form->validate()) {
-                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-
-            return $this->objetivoService->guardarObjetivo($form);
+            return $this->service->guardar($form);
         });
     }
 
@@ -136,21 +146,25 @@ class ObjEstrategicoController extends BaseController
      * accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function() {
             $request = Yii::$app->request;
 
-            $codigoObjEstrategico = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new ObjetivoEstrategicoForm();
-            $form->pei = yii::$app->contexto->getPei();
+            $form->idPei = yii::$app->contexto->getPei();
 
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate()
+                || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)
+                || !$this->servicePoliticaEstrategica->validarId($form->idPoliticaEstrategica, $form->idAreaEstrategica))
+            {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            return $this->objetivoService->actualizarObjetivo($codigoObjEstrategico,$form);
+            return $this->service->actualizar($id,$form);
         });
     }
 
@@ -158,12 +172,13 @@ class ObjEstrategicoController extends BaseController
      * accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function() {
-            $codigoObjEstrategico = $this->obtenerCodigo();
-            return $this->objetivoService->cambiarEstado($codigoObjEstrategico);
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
         });
     }
 
@@ -171,12 +186,13 @@ class ObjEstrategicoController extends BaseController
      * accion para soft delete de un registro
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function() {
-            $codigoObjEstrategico = $this->obtenerCodigo();
-            return $this->objetivoService->eliminarObjetivo($codigoObjEstrategico);
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
         });
     }
 
@@ -184,52 +200,54 @@ class ObjEstrategicoController extends BaseController
      * accion para buscar un registro en especifico
      *
      * @return array
+     * @noinspection PhpUnused
      */
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function() {
-            $codigoObjEstrategico = $this->obtenerCodigo();
-            return $this->objetivoService->obtenerModelo($codigoObjEstrategico);
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
         });
     }
 
     /**
      * obtiene y valida si se recibio el codigo por el request
      *
-     * return int
+     * return string
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerId(): string
     {
-        $codigo = (int)Yii::$app->request->post('codigoObjEstrategico');
-        if (!$codigo) {
+        $id = Yii::$app->request->post('idObjEstrategico');
+        if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de objetivo no enviado.',404);
         }
-        return $codigo;
+        return $id;
     }
 
     /**
      * obtiene y valida si se recibio el codigo de are por el request
      *
-     * return int
+     * return string
      */
-    private function obtenerCodigoArea(): int
+    private function obtenerCodigoArea(): string
     {
-        $codigo = (int)Yii::$app->request->post('area');
+        $codigo = (string)Yii::$app->request->post('area');
         if (!$codigo) {
             return 0;
         }
         return $codigo;
     }
 
-    public function actionVerificarCodigo(): bool
+    /*public function actionVerificarCodigo(): bool
     {
         return true;
-        return $this->objetivoService->verificarCodigo(yii::$app->contexto->getPei(), 0, $_POST["codigo"]);
-    }
+
+    }*/
 
     /**
      * @throws MpdfException
+     * @noinspection PhpUnused
      */
     public function actionReporte(): void
     {

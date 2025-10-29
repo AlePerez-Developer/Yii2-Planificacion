@@ -39,7 +39,7 @@ class AreaEstrategica extends ActiveRecord
         return [
             [['IdAreaEstrategica', 'IdPei'], 'string'],
             [['IdPei', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['Codigo'], 'integer'],
+            [['Codigo'], 'integer','min' => 1, 'max' => 9,],
             [['FechaHoraRegistro'], 'safe'],
             [['IdPei'], 'string', 'max' => 36],
             [['Descripcion'], 'string', 'max' => 500],
@@ -48,7 +48,7 @@ class AreaEstrategica extends ActiveRecord
             [['IdAreaEstrategica'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => PeI::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
+            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
         ];
     }
 

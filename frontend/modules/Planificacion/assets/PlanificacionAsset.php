@@ -16,7 +16,7 @@ class PlanificacionAsset extends AssetBundle
         'js/Planificacion.js',
         'js/common_Functions.js',
         'js/dt_Configuration.js',
-        'js/Msg_Functions.js',
+        'js/msg_Functions.js',
         'js/ajax_Template.js'
     ];
     public $depends = [

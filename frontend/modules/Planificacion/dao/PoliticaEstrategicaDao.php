@@ -22,8 +22,8 @@ class PoliticaEstrategicaDao
         return !$model;
     }
 
-    /*static function verificarCodigoPolitica(int $idAreaEstrategica, int $codigoPolitica): bool
+    static function validarId(string $id, string $idAreaEstrategica): bool
     {
-        return PoliticaEstrategica::find()->where(['CodigoAreaEstrategica' => $codigoArea, 'CodigoPoliticaEstrategica' => $codigoPolitica])->exists();
-    }*/
+        return PoliticaEstrategica::find()->where(['IdAreaEstrategica'=> $idAreaEstrategica ,'IdPoliticaEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
+    }
 }

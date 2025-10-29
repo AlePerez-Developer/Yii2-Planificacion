@@ -13,7 +13,7 @@ class PoliticaEstrategicaForm extends Model
     {
         return [
             [['idAreaEstrategica', 'codigo', 'descripcion'], 'required'],
-            [['codigo'], 'integer'],
+            [['codigo'], 'integer','min' => 1, 'max' => 9,],
             [['idAreaEstrategica'], 'string', 'max' => 36],
             [['descripcion'], 'string', 'max' => 500],
             [['codigo', 'descripcion'], 'trim'],

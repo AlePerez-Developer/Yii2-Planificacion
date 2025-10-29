@@ -31,13 +31,13 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
         <div class="row">
             <div class="col-6">
                 <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-                    <div class="icon closed">
-                        <div class="circle">
-                            <div class="horizontal"></div>
-                            <div class="vertical"></div>
-                        </div>
+                    <span class="icon closed">
+                        <span class="circle">
+                            <span class="horizontal"></span>
+                            <span class="vertical"></span>
+                        </span>
                         Agregar Obj. Estrategico
-                    </div>
+                    </span>
                 </button>
             </div>
             <div class="col-6" style="text-align: right;">
@@ -64,8 +64,8 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                                 </select>
                             </div>
                             <div class="col-4">
-                                <label for="codigoObjetivo">Codigo de Objetivo Estrategico (OE)</label>
-                                <input type="text" class="form-control input-sm num" id="codigoObjetivo" name="codigoObjetivo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
+                                <label for="codigo">Codigo de Objetivo Estrategico (OE)</label>
+                                <input type="text" class="form-control input-sm num" id="codigo" name="codigo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
                             </div>
                         </div>
 
@@ -103,7 +103,6 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <button type="button" id="mio">mio mio</button>
                     <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
                     <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
@@ -166,13 +165,5 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
 
     .ltc {
         margin-bottom: 6px;
-    }
-
-    .mio {
-        color: green;
-    }
-
-    .tuyo {
-        color: red;
     }
 </style>
