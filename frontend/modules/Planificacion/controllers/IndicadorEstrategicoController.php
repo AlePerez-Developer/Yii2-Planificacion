@@ -54,7 +54,7 @@ class IndicadorEstrategicoController extends Controller
     public function actionIndex()
     {
         $objsEstrategicos = ObjetivoEstrategico::find()->alias('oe')
-            ->select(['oe.CodigoObjEstrategico','oe.CodigoObjetivo','oe.Objetivo'])
+            ->select(['oe.IdObjEstrategico as CodigoObjEstrategico','oe.Codigo as CodigoObjetivo','oe.Objetivo'])
             ->where(['oe.CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->asArray()->all();
         $tiposResultados = TipoResultado::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
@@ -76,7 +76,7 @@ class IndicadorEstrategicoController extends Controller
             $indicadores = IndicadorEstrategico::find()->alias('I')->select([
                 'I.CodigoIndicador', 'I.Codigo', 'I.Meta', 'I.Descripcion', 'I.ObjetivoEstrategico', 'I.Resultado', 'I.TipoIndicador', 'I.Categoria', 'I.Unidad', 'I.CodigoEstado',
                 'I.CodigoUsuario',
-                'Oe.CodigoObjetivo as CodigoObjetivo', 'Oe.Objetivo as ObjetivoEstrategico',
+                'Oe.Codigo as CodigoObjetivo', 'Oe.Objetivo as ObjetivoEstrategico',
                 'Tr.Descripcion as ResultadoDescripcion',
                 'Ti.Descripcion as TipoDescripcion',
                 'Ci.Descripcion as CategoriaDescripcion',
@@ -84,8 +84,8 @@ class IndicadorEstrategicoController extends Controller
                 '(sum(isnull(ig.Meta,0))) as Programado',
                 'I.Meta - (sum(isnull(ig.Meta,0))) as Diff'
             ])
-                ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.CodigoObjEstrategico')
-                ->join('INNER JOIN','PEIs p', 'oe.Pei = p.CodigoPei')
+                ->join('INNER JOIN','ObjetivosEstrategicos Oe', 'I.ObjetivoEstrategico = Oe.IdObjEstrategico')
+                ->join('INNER JOIN','PEIs p', 'oe.IdPei = p.IdPei')
                 ->join('INNER JOIN','TiposResultados Tr', 'I.Resultado = Tr.CodigoTipo')
                 ->join('INNER JOIN','TiposIndicadores Ti', 'I.TipoIndicador = Ti.CodigoTipo')
                 ->join('INNER JOIN','CategoriasIndicadores Ci', 'I.Categoria = Ci.CodigoCategoria')
@@ -94,9 +94,9 @@ class IndicadorEstrategicoController extends Controller
                 ->where(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'Oe.CodigoEstado', Estado::ESTADO_ELIMINADO])
                 ->andWhere(['!=', 'Tr.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'Ti.CodigoEstado', Estado::ESTADO_ELIMINADO])
                 ->andWhere(['!=', 'Ci.CodigoEstado', Estado::ESTADO_ELIMINADO])->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO])
-                ->andWhere(['p.CodigoPei'=> yii::$app->contexto->getPei()])
+                ->andWhere(['p.IdPei'=> yii::$app->contexto->getPei()])
                 ->groupBy('I.CodigoIndicador, I.Codigo, I.Meta, I.Descripcion, I.ObjetivoEstrategico, I.Resultado,I.TipoIndicador, I.Categoria, I.Unidad,I.CodigoEstado,I.FechaHoraRegistro,I.CodigoUsuario,
-                                   Oe.CodigoObjetivo, Oe.Objetivo,
+                                   Oe.Codigo, Oe.Objetivo,
                                    Tr.Descripcion, Ti.Descripcion, Ci.Descripcion, U.Descripcion')
                 ->orderBy('I.Codigo')
                 ->asArray()->all();
@@ -122,7 +122,7 @@ class IndicadorEstrategicoController extends Controller
         $indicador->Codigo = intval($_POST["codigoIndicador"]);
         $indicador->Meta = intval($_POST["metaIndicador"]);
         $indicador->Descripcion = mb_strtoupper(trim($_POST["descripcion"]),'utf-8');
-        $indicador->ObjetivoEstrategico = intval($_POST["codigoObjetivoEstrategico"]);
+        $indicador->ObjetivoEstrategico = $_POST["codigoObjetivoEstrategico"];
         $indicador->Resultado = intval($_POST["tipoResultado"]);
         $indicador->TipoIndicador = intval($_POST["tipoIndicador"]);
         $indicador->Categoria = intval($_POST["categoriaIndicador"]);
