@@ -14,28 +14,28 @@ class PeiDao
         return $pei->getObjetivosEstrategicos()->exists();
     }
 
-    static function validarGestionInicio(int $codigoPei, $inicioNuevo): bool
+    static function validarGestionInicio(string $idPei, $inicioNuevo): bool
     {
-        $ind = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (ig.Gestion < :Gestion) and (ig.Meta > 0) ',[':pei'=>$codigoPei,':Gestion'=>$inicioNuevo])
+        $model = Pei::find()->alias('p')->select(['*'])
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.IdPei = p.IdPei')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.IdObjEstrategico = o.IdObjEstrategico')
+            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
+            ->where('(p.IdPei = :pei) and (ig.Gestion < :Gestion) and (ig.Meta > 0) ',[':pei'=>$idPei,':Gestion'=>$inicioNuevo])
             ->one();
-        if (empty($ind)) {
+        if (empty($model)) {
             return true;
         } else {
             return false;
         }
     }
 
-    static function validarGestionFin(int $codigoPei, $finNuevo): bool
+    static function validarGestionFin(string $idPei, $finNuevo): bool
     {
-        $ind = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.CodigoPei = p.CodigoPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->where('(p.CodigoPei = :pei) and (ig.Gestion > :Gestion) and (ig.Meta > 0)',[':pei'=>$codigoPei,':Gestion'=>$finNuevo])
+        $model = Pei::find()->alias('p')->select(['*'])
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.IdPei = p.IdPei')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.IdObjEstrategico = o.IdObjEstrategico')
+            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
+            ->where('(p.IdPei = :pei) and (ig.Gestion > :Gestion) and (ig.Meta > 0)',[':pei'=>$idPei,':Gestion'=>$finNuevo])
             ->one();
         if (empty($ind)) {
             return true;
@@ -48,14 +48,14 @@ class PeiDao
      * @throws Throwable
      * @throws StaleObjectException
      */
-    static function regularizarProgramacionIndicadoresFin(int $codigoPei, int $gestionFin): void
+    static function regularizarProgramacionIndicadoresFin(string $idPei, int $gestionFin): void
     {
-        $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->where('(o.CodigoPei = :pei) and (ig.Gestion > :Gestion)',[':pei'=>$codigoPei,':Gestion'=>$gestionFin])
+        $model = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.IdObjEstrategico = o.IdObjEstrategico')
+            ->where('(o.IdPei = :pei) and (ig.Gestion > :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionFin])
             ->all();
-        foreach ($programaciones as $programacion){
+        foreach ($model as $programacion){
             if (!$programacion->delete()){
                 throw new Exception("No se pudo eliminar la programación", 500);
             }
@@ -66,14 +66,14 @@ class PeiDao
      * @throws Throwable
      * @throws StaleObjectException
      */
-    static function regularizarProgramacionIndicadoresInicio(int $codigoPei, int $gestionInicio): void
+    static function regularizarProgramacionIndicadoresInicio(string $idPei, int $gestionInicio): void
     {
-        $programaciones = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IndicadorEstrategico = i.CodigoIndicador')
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.ObjetivoEstrategico = o.CodigoObjEstrategico')
-            ->where('(o.CodigoPei = :pei) and (ig.Gestion < :Gestion)',[':pei'=>$codigoPei,':Gestion'=>$gestionInicio])
+        $model = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
+            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
+            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.IdObjEstrategico = o.IdObjEstrategico')
+            ->where('(o.CodigoPei = :pei) and (ig.Gestion < :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionInicio])
             ->all();
-        foreach ($programaciones as $programacion){
+        foreach ($model as $programacion){
             if (!$programacion->delete()){
                 throw new Exception("No se pudo eliminar la programación", 500);
             }

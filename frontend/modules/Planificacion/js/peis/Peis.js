@@ -1,11 +1,17 @@
 $(document).ready(function () {
-    let idPei = 0
+    let idPei = '00000000-0000-0000-0000-000000000000';
+    let baseUrl = "index.php?r=Planificacion/peis/"
+
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPei').trigger("reset");
-        idPei = 0
+        idPei = '00000000-0000-0000-0000-000000000000';
+    }
+
+    function mensajeAccion(accion) {
+        return `Los datos de la Política Estratégica se ${accion}ron correctamente.`;
     }
 
     $("#btnCancelar").click(function () {
@@ -15,22 +21,33 @@ $(document).ready(function () {
         $("#divTabla").show(500);
     });
 
-    $("#btnGuardar").click(function () {
+    $("#btnGuardar").click(async function () {
         const btn = $(this);
         const btnCancel = $('#btnCancelar')
 
-        IniciarSpiner(btn);
-        btnCancel.prop('disabled', true);
+        if (!$("#formPei").valid()) return;
+
+        const datos = new FormData();
+        datos.append('idPei', idPei)
+        datos.append("descripcion", $("#descripcion").val());
+        datos.append("fechaAprobacion", $("#fechaAprobacion").val());
+        datos.append("gestionInicio", $("#gestionInicio").val());
+        datos.append("gestionFin", $("#gestionFin").val());
+
+        const hasCode =  idPei !== '00000000-0000-0000-0000-000000000000';
+        let accion = hasCode ? 'actualizar' : 'guardar'
+
         try {
-            if ($("#formPei").valid()) {
-                const hasCode =  idPei !== 0;
-                hasCode ? actualizarRegistro() : guardarRegistro();
-            }
+            await ajaxPromise({
+                url: baseUrl + accion,
+                data: datos,
+                spinnerBtn: btn,
+                cancelBtn: btnCancel,
+                successMsg: mensajeAccion(accion),
+                reloadTable: dt_pei
+            });
         } catch (err) {
-            MostrarMensaje('error', GenerarMensajeError(err));
-        } finally {
-            DetenerSpiner(btn);
-            btnCancel.prop('disabled', false);
+            console.error("Error al procesar:", err);
         }
     });
 
@@ -42,109 +59,34 @@ $(document).ready(function () {
         $('#gestionInicio').valid();
     });
 
-
     $(document).on('click', '#refresh', function(){
         dt_pei.ajax.reload()
     })
-
-    /*=============================================
-    INSERTA EN LA BD UN NUEVO REGISTRO
-    =============================================*/
-     function  guardarRegistro()   {
-        let descripcion = $("#descripcion").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
-        let datos = new FormData();
-        datos.append("descripcion", descripcion);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("gestionFin", gestionFin);
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/guardar",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function () {
-                glbToast.success('Los datos del nuevo PEI se guardaron correctamente.');
-                // noinspection JSCheckFunctionSignatures
-                dt_pei.ajax.reload(() => {
-                    $("#btnCancelar").click();
-                });
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            }
-        });
-    }
-
-    /*=============================================
-    ACTUALIZA EL PEI SELECCIONADO EN LA BD
-    =============================================*/
-     function actualizarRegistro() {
-        let descripcion = $("#descripcion").val();
-        let fechaAprobacion = $("#fechaAprobacion").val();
-        let gestionInicio = $("#gestionInicio").val();
-        let gestionFin = $("#gestionFin").val();
-        let datos = new FormData();
-        datos.append("idPei", idPei.toString());
-        datos.append("descripcion", descripcion);
-        datos.append("gestionInicio", gestionInicio);
-        datos.append("fechaAprobacion", fechaAprobacion);
-        datos.append("gestionFin", gestionFin);
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/actualizar",
-            method: "POST",
-            data: datos,
-            cache: false,
-            contentType: false,
-            processData: false,
-            dataType: "json",
-            success: function () {
-                glbToast.success('Los datos del PEI se actualizaron correctamente.')
-                // noinspection JSCheckFunctionSignatures
-                dt_pei.ajax.reload(() => {
-                    $("#btnCancelar").click();
-                });
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-            }
-        });
-    }
 
     /* =============================================
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', function(){
+    $(document).on('click', 'tbody #btnEstado', async function(){
         let objectBtn = $(this);
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         let idPei = dt_row["IdPei"];
-        IniciarSpiner(objectBtn)
 
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/cambiar-estado",
-            method: "POST",
-            data : {
-                idPei: idPei,
-            },
-            dataType: "json",
-            success: function (data) {
-                cambiarEstadoBtn(objectBtn, data["data"]);
-                DetenerSpiner(objectBtn)
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                DetenerSpiner(objectBtn)
-            }
-        });
+        const datos = new FormData();
+        datos.append("idPei", idPei);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + "cambiar-estado",
+                data: datos,
+                spinnerBtn: objectBtn,
+                successMsg: 'Estado actualizado correctamente.',
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
     });
 
     /*=============================================
@@ -155,6 +97,9 @@ $(document).ready(function () {
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         let idPei = dt_row["IdPei"];
 
+        const datos = new FormData();
+        datos.append("idPei", idPei);
+
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
@@ -164,27 +109,19 @@ $(document).ready(function () {
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
-        }).then(function (resultado) {
+        }).then(async function (resultado) {
             if (resultado.value) {
-                IniciarSpiner(objectBtn)
-                $.ajax({
-                    url: "index.php?r=Planificacion/peis/eliminar",
-                    method: "POST",
-                    data : {
-                        idPei: idPei,
-                    },
-                    dataType: "json",
-                    success: function () {
-                        MostrarMensaje('success','El PEI ha sido eliminado correctamente.','')
-                        dt_pei.ajax.reload();
-                        DetenerSpiner(objectBtn)
-                    },
-                    error: function (xhr) {
-                        const data = JSON.parse(xhr.responseText)
-                        MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                        DetenerSpiner(objectBtn)
-                    }
-                });
+                try {
+                    await ajaxPromise({
+                        url: baseUrl + "eliminar",
+                        data: datos,
+                        spinnerBtn: objectBtn,
+                        successMsg: mensajeAccion('eliminar'),
+                        reloadTable: dt_pei
+                    });
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                }
             }
         });
     });
@@ -192,34 +129,30 @@ $(document).ready(function () {
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', function(){
+    $(document).on('click', 'tbody #btnEditar', async function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         idPei = dt_row["IdPei"];
-        IniciarSpiner(objectBtn)
 
-        $.ajax({
-            url: "index.php?r=Planificacion/peis/buscar",
-            method: "POST",
-            data : {
-                idPei: idPei,
-            },
-            dataType: "json",
-            success: function (data) {
-                let pei = JSON.parse(JSON.stringify(data["data"]));
+        const datos = new FormData();
+        datos.append("idPei", idPei);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + "buscar",
+                data: datos,
+                spinnerBtn: objectBtn,
+            }).then((data) => {
+                let pei = data.data
                 $("#descripcion").val(pei["Descripcion"]);
                 $("#fechaAprobacion").val(pei["FechaAprobacion"]);
                 $("#gestionInicio").val(pei["GestionInicio"]);
                 $("#gestionFin").val(pei["GestionFin"]);
-                DetenerSpiner(objectBtn)
                 $("#btnMostrarCrear").trigger('click');
-            },
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-                DetenerSpiner(objectBtn)
-            }
-        });
+            });
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
     });
 
     /**
@@ -298,5 +231,4 @@ $(document).ready(function () {
             let $otherElement = $(param);
             return parseInt(value, 10) < parseInt($otherElement.val(), 10);
         });
-
 })

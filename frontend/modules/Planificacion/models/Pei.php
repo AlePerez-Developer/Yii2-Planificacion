@@ -124,7 +124,7 @@ class Pei extends ActiveRecord
      */
     public function getObjetivosEstrategicos(): ActiveQuery
     {
-        return $this->hasMany(ObjetivoEstrategico::class, ['pei_id' => 'IdPei']);
+        return $this->hasMany(ObjetivoEstrategico::class, ['IdPei' => 'IdPei']);
     }
 
     /**
