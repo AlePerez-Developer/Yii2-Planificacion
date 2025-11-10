@@ -26,18 +26,6 @@ CREATE TABLE Usuarios(
     foreign key (CodigoEstado) references Estados(CodigoEstado),
 )
 
-go
-
-create table Estados(
-    CodigoEstado char(1) primary key,
-    NombreEstado Varchar(50) not null
-)
-
-go
-
-insert into Estados values('V','Vigente')
-insert into Estados values('C','Caduco')
-insert into Estados values('E','Eliminado')
 
 go
 
@@ -312,6 +300,90 @@ CREATE TABLE Auditoria_ObjEstrategico (
     DatosAntes NVARCHAR(MAX),      -- JSON opcional con estado anterior
     DatosDespues NVARCHAR(MAX)     -- JSON opcional con estado nuevo
 )
+
+
+
+
+
+
+
+
+
+/**
+ *  CATALOGOS
+ */
+
+create table Estados(
+    CodigoEstado char(1) primary key,
+    NombreEstado Varchar(50) not null
+)
+
+go
+
+insert into Estados values('V','Vigente')
+insert into Estados values('C','Caduco')
+insert into Estados values('E','Eliminado')
+
+go
+
+create table CatTiposResultados
+(
+    IdTipoResultado uniqueidentifier default newsequentialid() primary key,
+    Descripcion Varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into CatTiposResultados(Descripcion,CodigoEstado,CodigoUsuario) values('Bien','V','ADM')
+insert into CatTiposResultados(Descripcion,CodigoEstado,CodigoUsuario) values('Norma','V','ADM')
+insert into CatTiposResultados(Descripcion,CodigoEstado,CodigoUsuario) values('Servicio','V','ADM')
+
+go
+
+create table CatCategoriasIndicadores
+(
+    IdCategoriaIndicador uniqueidentifier default newsequentialid() primary key,
+    Descripcion Varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into CatCategoriasIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Proceso','V','ADM')
+insert into CatCategoriasIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Producto','V','ADM')
+insert into CatCategoriasIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Recursos Financieros','V','ADM')
+insert into CatCategoriasIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Recursos Fisicos','V','ADM')
+insert into CatCategoriasIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Recursos Humanos','V','ADM')
+
+go
+
+create table CatUnidadesIndicadores
+(
+    IdUnidadIndicador uniqueidentifier default newsequentialid() primary key,
+    Descripcion Varchar(250) not null,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+go
+
+insert into CatUnidadesIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Numero','V','ADM')
+insert into CatUnidadesIndicadores(Descripcion,CodigoEstado,CodigoUsuario) values('Porcentaje','V','ADM')
 
 
 

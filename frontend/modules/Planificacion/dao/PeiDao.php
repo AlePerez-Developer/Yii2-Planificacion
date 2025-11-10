@@ -1,17 +1,53 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
+use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
+use app\modules\Planificacion\models\PeiGestion;
 use app\modules\Planificacion\models\Pei;
 use yii\db\StaleObjectException;
 use yii\db\Exception;
 use Throwable;
+use Yii;
 
 class PeiDao
 {
     static function enUso(Pei $pei): bool
     {
         return $pei->getObjetivosEstrategicos()->exists();
+    }
+
+    /**
+     * @throws Exception|ValidationException
+     */
+    static function generarGestionesPei(Pei $pei): array
+    {
+        for ($i = $pei->GestionInicio; $i <= $pei->GestionFin; $i++) {
+            $gestion = new PeiGestion();
+            $gestion->IdPei = $pei->IdPei;
+            $gestion->Gestion  = $i;
+            $gestion->CodigoUsuario = $pei->CodigoUsuario;
+            $gestion->save();
+
+            if (!$gestion->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$gestion->getErrors(),500);
+            }
+
+            if (!$gestion->save(false)) {
+                Yii::error("Error al guardar el cambio de estado del PEI $gestion->IdPei", __METHOD__);
+                throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$gestion->getErrors(),500);
+            }
+        }
+
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => '',
+        ];
+    }
+
+    static function eliminarGestionesPei(Pei $pei): void
+    {
+        PeiGestion::deleteAll(['IdPei' => $pei->IdPei]);
     }
 
     static function validarGestionInicio(string $idPei, $inicioNuevo): bool

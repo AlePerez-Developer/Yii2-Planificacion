@@ -45,6 +45,7 @@ class PeiService
      * @param PeiForm $form
      * @return array ['message' => string, 'data' => string]
      * @throws Exception|ValidationException
+     * @throws Throwable
      */
     public function guardar(PeiForm $form): array
     {
@@ -57,7 +58,23 @@ class PeiService
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarModelo($modelo);
+        $transaction = Pei::getDb()->beginTransaction();
+
+        $resultado = $this->validarProcesarModelo($modelo);
+        try {
+            PeiDao::generarGestionesPei($modelo);
+
+            if ($resultado['message'] != 'ok') {
+                $transaction->rollBack();
+                return $resultado;
+            }
+
+            $transaction->commit();
+            return $resultado;
+        } catch (Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -159,6 +176,7 @@ class PeiService
         }
 
         $modelo->eliminar();
+        PeiDao::eliminarGestionesPei($modelo);
 
         return $this->validarProcesarModelo($modelo);
     }
