@@ -48,12 +48,68 @@ class Pei extends ActiveRecord
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdPei'], 'unique'],
-            [['GestionInicio'], 'unique', 'message' => 'Gestion inicio debe ser unico'],
-            [['GestionFin'], 'unique', 'message' => 'Gestion fin debe ser unico'],
+            [['GestionInicio'], 'validateUniqueInicio', 'skipOnError' => true],
+            [['GestionFin'], 'validateUniqueFin', 'skipOnError' => true],
             [['GestionInicio'], 'number', 'min' => 2000, 'tooSmall' => 'la Gestion de inicio debe ser mayor al año 2000'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
+    }
+
+    /**
+     * Valida que la gestion de inicio sea unica en los registros vigentes.
+     *
+     * @param string $attribute
+     * @used-by rules()
+     * @noinspection PhpUnused
+     */
+    public function validateUniqueInicio(string $attribute): void
+    {
+        if ($this->CodigoEstado !== 'V') {
+            return;
+        }
+
+        $id = $this->IdPei == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdPei;
+
+        $exists = self::find()
+            ->where([
+                'GestionInicio' => $this->GestionInicio,
+                'CodigoEstado' => 'V',
+            ])
+            ->andWhere(['<>', 'IdPei', $id])
+            ->exists();
+
+        if ($exists) {
+            $this->addError($attribute, 'Gestion inicio debe ser unico');
+        }
+    }
+
+    /**
+     * Valida que la gestion de fin sea unica en los registros vigentes.
+     *
+     * @param string $attribute
+     * @used-by rules()
+     * @noinspection PhpUnused
+     */
+    public function validateUniqueFin(string $attribute): void
+    {
+        if ($this->CodigoEstado !== 'V') {
+            return;
+        }
+
+        $id = $this->IdPei == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdPei;
+
+        $exists = self::find()
+            ->where([
+                'GestionFin' => $this->GestionFin,
+                'CodigoEstado' => 'V',
+            ])
+            ->andWhere(['<>', 'IdPei', $id])
+            ->exists();
+
+        if ($exists) {
+            $this->addError($attribute, 'Gestion fin debe ser unico');
+        }
     }
 
     /**
@@ -125,6 +181,17 @@ class Pei extends ActiveRecord
     public function getObjetivosEstrategicos(): ActiveQuery
     {
         return $this->hasMany(ObjetivoEstrategico::class, ['IdPei' => 'IdPei']);
+    }
+
+    /**
+     * Gets query for [[PeiGestion]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getPeiGestion(): ActiveQuery
+    {
+        return $this->hasMany(PeiGestion::class, ['IdPei' => 'IdPei']);
     }
 
     /**

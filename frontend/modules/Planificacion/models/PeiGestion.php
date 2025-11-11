@@ -38,12 +38,13 @@ class PeiGestion extends ActiveRecord
     {
         return [
             [['IdGestion', 'IdPei'], 'string'],
-            [['IdPei', 'Gestion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdPei', 'Gestion', 'CodigoUsuario'], 'required'],
             [['Gestion'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdGestion'], 'unique'],
+            [['IdPei', 'Gestion'], 'unique', 'targetAttribute' => ['IdPei', 'Gestion'], 'message' => 'ya existe una programacion de gestion con esos datos'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => PeI::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
@@ -66,6 +67,28 @@ class PeiGestion extends ActiveRecord
     }
 
     /**
+     * Gets query for [[IdPei]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getIdPei(): ActiveQuery
+    {
+        return $this->hasOne(PeI::class, ['IdPei' => 'IdPei']);
+    }
+
+    /**
+     * Gets a query for [[GestionProgramacion]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getGestionProgramacion(): ActiveQuery
+    {
+        return $this->hasMany(IndicadorEstrategicoProgramacionGestion::class, ['IdGestion' => 'IdGestion']);
+    }
+
+    /**
      * Gets a query for [[CodigoEstado]].
      *
      * @return ActiveQuery
@@ -83,16 +106,5 @@ class PeiGestion extends ActiveRecord
     public function getCodigoUsuario(): ActiveQuery
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
-    }
-
-    /**
-     * Gets query for [[IdPei]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     */
-    public function getIdPei(): ActiveQuery
-    {
-        return $this->hasOne(PeI::class, ['IdPei' => 'IdPei']);
     }
 }

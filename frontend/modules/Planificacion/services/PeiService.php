@@ -92,6 +92,9 @@ class PeiService
     {
         $modelo = $this->obtenerModeloValidado($id);
 
+        $accionInicio = ($modelo->GestionInicio !== $form->gestionInicio)?($modelo->GestionInicio < $form->gestionInicio )?'del':'add':'';
+        $accionFin = ($modelo->GestionFin !== $form->gestionFin)?($modelo->GestionFin > $form->gestionFin )?'del':'add':'';
+
         if ($modelo->GestionInicio < $form->gestionInicio ){
             if (!PeiDao::validarGestionInicio($modelo->IdPei, $form->gestionInicio)) {
                 throw new ValidationException(Yii::$app->params['ERROR_GESTION_INICIO'],'Existen indicadores programados con meta que serian afectados por el cambio de fecha de inicio',400);
@@ -112,8 +115,8 @@ class PeiService
         $transaction = Pei::getDb()->beginTransaction();
 
         try {
-        PeiDao::regularizarProgramacionIndicadoresInicio($modelo->IdPei, $form->gestionInicio);
-        PeiDao::regularizarProgramacionIndicadoresFin($modelo->IdPei, $form->gestionFin);
+        PeiDao::regularizarProgramacionIndicadoresInicio($modelo, $form->gestionInicio, $accionInicio);
+        PeiDao::regularizarProgramacionIndicadoresFin($modelo, $form->gestionFin, $accionFin);
 
         $resultado = $this->validarProcesarModelo($modelo);
 

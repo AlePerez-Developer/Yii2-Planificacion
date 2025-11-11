@@ -2,7 +2,6 @@
 namespace app\modules\Planificacion\dao;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\models\IndicadorEstrategicoGestion;
 use app\modules\Planificacion\models\PeiGestion;
 use app\modules\Planificacion\models\Pei;
 use yii\db\StaleObjectException;
@@ -27,7 +26,6 @@ class PeiDao
             $gestion->IdPei = $pei->IdPei;
             $gestion->Gestion  = $i;
             $gestion->CodigoUsuario = $pei->CodigoUsuario;
-            $gestion->save();
 
             if (!$gestion->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$gestion->getErrors(),500);
@@ -52,67 +50,116 @@ class PeiDao
 
     static function validarGestionInicio(string $idPei, $inicioNuevo): bool
     {
-        $model = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.IdPei = p.IdPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.IdObjEstrategico = o.IdObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
-            ->where('(p.IdPei = :pei) and (ig.Gestion < :Gestion) and (ig.Meta > 0) ',[':pei'=>$idPei,':Gestion'=>$inicioNuevo])
-            ->one();
-        if (empty($model)) {
-            return true;
-        } else {
-            return false;
-        }
+        return !Pei::find()->alias('P')->select([
+            'P.IdPei',
+            'peiGestion.IdGestion',
+            'IndicadorEstrategicoProgramacionGestion.IdProgramacionGestion',
+        ])
+            ->joinWith('peiGestion.gestionProgramacion', true, 'INNER JOIN')
+            ->where('p.IdPei = :pei',[':pei' => $idPei])
+            ->andWhere('peiGestion.Gestion < :Gestion',[':Gestion' => $inicioNuevo])
+            ->andWhere('IndicadorEstrategicoProgramacionGestion.MetaProgramada > 0')
+            ->exists();
     }
 
     static function validarGestionFin(string $idPei, $finNuevo): bool
     {
-        $model = Pei::find()->alias('p')->select(['*'])
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'o.IdPei = p.IdPei')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'i.IdObjEstrategico = o.IdObjEstrategico')
-            ->join('INNER JOIN','IndicadoresEstrategicosGestiones ig', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
-            ->where('(p.IdPei = :pei) and (ig.Gestion > :Gestion) and (ig.Meta > 0)',[':pei'=>$idPei,':Gestion'=>$finNuevo])
-            ->one();
-        if (empty($ind)) {
-            return true;
-        } else {
-            return false;
-        }
+        return !Pei::find()->alias('P')->select([
+            'P.IdPei',
+            'peiGestion.IdGestion',
+            'IndicadorEstrategicoProgramacionGestion.IdProgramacionGestion',
+        ])
+            ->joinWith('peiGestion.gestionProgramacion', true, 'INNER JOIN')
+            ->where('p.IdPei = :pei',[':pei' => $idPei])
+            ->andWhere('peiGestion.Gestion > :Gestion',[':Gestion' => $finNuevo])
+            ->andWhere('IndicadorEstrategicoProgramacionGestion.MetaProgramada > 0')
+            ->exists();
     }
 
     /**
      * @throws Throwable
      * @throws StaleObjectException
      */
-    static function regularizarProgramacionIndicadoresFin(string $idPei, int $gestionFin): void
+    static function regularizarProgramacionIndicadoresFin(Pei $modelo, int $gestionFin, string $accion): void
     {
-        $model = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.IdObjEstrategico = o.IdObjEstrategico')
-            ->where('(o.IdPei = :pei) and (ig.Gestion > :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionFin])
+        switch ($accion) {
+            case 'add':{
+                for ($i = $modelo->getOldAttribute('GestionFin'); $i <= $gestionFin; $i++) {
+                    $model = new PeiGestion();
+                    $model->IdPei = $modelo->IdPei;
+                    $model->Gestion  = $i;
+                    $model->CodigoUsuario = $modelo->CodigoUsuario;
+
+                    if (!$model->validate()) {
+                        throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$model->getErrors(),500);
+                    }
+
+                    if (!$model->save(false)) {
+                        Yii::error("Error al guardar el cambio de estado del PEI $model->IdPei", __METHOD__);
+                        throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$model->getErrors(),500);
+                    }
+                }
+            }
+            case 'del':{
+                $model = PeiGestion::find()->select('*')->alias('G')
+                    ->where('(G.IdPei = :pei) and (G.Gestion > :Gestion)',[':pei'=>$modelo->IdPei,':Gestion'=>$gestionFin])
+                    ->all();
+                foreach ($model as $programacion){
+                    if (!$programacion->delete()){
+                        throw new Exception("No se pudo eliminar la programación", 500);
+                    }
+                }
+            }
+                break;
+        }
+
+
+
+        /*$model = PeiGestion::find()->select('*')->alias('G')
+            ->where('(G.IdPei = :pei) and (G.Gestion > :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionFin])
             ->all();
         foreach ($model as $programacion){
             if (!$programacion->delete()){
                 throw new Exception("No se pudo eliminar la programación", 500);
             }
-        }
+        }*/
     }
 
     /**
      * @throws Throwable
      * @throws StaleObjectException
      */
-    static function regularizarProgramacionIndicadoresInicio(string $idPei, int $gestionInicio): void
+    static function regularizarProgramacionIndicadoresInicio(Pei $modelo, int $gestionInicio, string $accion): void
     {
-        $model = IndicadorEstrategicoGestion::find()->select('*')->alias('ig')
-            ->join('INNER JOIN','IndicadoresEstrategicos i', 'ig.IdIndicadorEstrategico = i.IdIndicadorEstrategico')
-            ->join('INNER JOIN','ObjetivosEstrategicos o', 'i.IdObjEstrategico = o.IdObjEstrategico')
-            ->where('(o.CodigoPei = :pei) and (ig.Gestion < :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionInicio])
-            ->all();
-        foreach ($model as $programacion){
-            if (!$programacion->delete()){
-                throw new Exception("No se pudo eliminar la programación", 500);
+        switch ($accion) {
+            case 'add':{
+                for ($i = $gestionInicio; $i <= $modelo->getOldAttribute('GestionInicio'); $i++) {
+                    $model = new PeiGestion();
+                    $model->IdPei = $modelo->IdPei;
+                    $model->Gestion  = $i;
+                    $model->CodigoUsuario = $modelo->CodigoUsuario;
+
+                    if (!$model->validate()) {
+                        throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$model->getErrors(),500);
+                    }
+
+                    if (!$model->save(false)) {
+                        Yii::error("Error al guardar el cambio de estado del PEI $model->IdPei", __METHOD__);
+                        throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$model->getErrors(),500);
+                    }
+                }
             }
+            case 'del':{
+                $model = PeiGestion::find()->select('*')->alias('G')
+                    ->where('(G.IdPei = :pei) and (G.Gestion < :Gestion)',[':pei'=>$modelo->IdPei,':Gestion'=>$gestionInicio])
+                    ->all();
+                foreach ($model as $programacion){
+                    if (!$programacion->delete()){
+                        throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$programacion->getErrors(),500);
+                    }
+                }
+            }
+            break;
         }
     }
 }
