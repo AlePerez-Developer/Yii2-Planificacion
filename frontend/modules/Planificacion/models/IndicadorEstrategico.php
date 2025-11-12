@@ -2,37 +2,36 @@
 
 namespace app\modules\Planificacion\models;
 
-use common\models\Usuario;
-use common\models\Estado;
-use yii\db\ActiveRecord;
+use Yii;
 
 /**
  * This is the model class for table "IndicadoresEstrategicos".
  *
- * @property int $CodigoIndicador
+ * @property string $IdIndicadorEstrategico
+ * @property string $IdObjEstrategico
  * @property int $Codigo
  * @property int $Meta
  * @property string $Descripcion
- * @property int $ObjetivoEstrategico
- * @property int $Resultado
- * @property int $TipoIndicador
- * @property int $Categoria
- * @property int $Unidad
+ * @property int $LineaBase
+ * @property string $IdTipoResultado
+ * @property string $IdCategoriaIndicador
+ * @property string $IdUnidadIndicador
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
- * @property ObjetivoEstrategico $objetivoEstrategico
- * @property TipoResultado $resultado
- * @property TipoIndicador $tipoIndicador
- * @property CategoriaIndicador $categoria
- * @property IndicadorUnidad $unidad
- * @property Estado $codigoEstado
- * @property Usuario $codigoUsuario
+ * @property CatCategoriaIndicador $catCategoriasIndicadores
+ * @property CatTipoResultado $catTiposResultados
+ * @property CatUnidadIndicador $catUnidadesIndicadores
+ * @property Estado $estados
+ * @property IndicadorEstrategicoProgramacionGestion[] $indicadorEstrategicoProgramacionGestions
+ * @property ObjetivosEstrategico $objetivosEstrategicos
+ * @property Usuario $usuarios
  */
-
-class IndicadorEstrategico extends ActiveRecord
+class IndicadorEstrategico extends \yii\db\ActiveRecord
 {
+
+
     /**
      * {@inheritdoc}
      */
@@ -47,21 +46,22 @@ class IndicadorEstrategico extends ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoIndicador', 'Codigo', 'Descripcion', 'Meta', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoIndicador', 'Codigo', 'Meta', 'ObjetivoEstrategico', 'Resultado', 'TipoIndicador', 'Categoria', 'Unidad'], 'integer'],
+            [['IdIndicadorEstrategico'], 'default', 'value' => 'ewsequentialid('],
+            [['FechaHoraRegistro'], 'default', 'value' => 'etdate('],
+            [['IdIndicadorEstrategico', 'IdObjEstrategico', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador'], 'string'],
+            [['IdObjEstrategico', 'Codigo', 'Meta', 'Descripcion', 'LineaBase', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Codigo', 'Meta', 'LineaBase'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
-            [['Descripcion'], 'string', 'max' => 250],
+            [['Descripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['Codigo', 'ObjetivoEstrategico'], 'unique', 'targetAttribute' => ['Codigo', 'ObjetivoEstrategico']],
-            [['CodigoIndicador'], 'unique'],
-            [['ObjetivoEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoEstrategico::class, 'targetAttribute' => ['ObjetivoEstrategico' => 'CodigoObjEstrategico']],
-            [['Resultado'], 'exist', 'skipOnError' => true, 'targetClass' => TipoResultado::class, 'targetAttribute' => ['Resultado' => 'CodigoTipo']],
-            [['TipoIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => TipoIndicador::class, 'targetAttribute' => ['TipoIndicador' => 'CodigoTipo']],
-            [['Categoria'], 'exist', 'skipOnError' => true, 'targetClass' => CategoriaIndicador::class, 'targetAttribute' => ['Categoria' => 'CodigoCategoria']],
-            [['Unidad'], 'exist', 'skipOnError' => true, 'targetClass' => IndicadorUnidad::class, 'targetAttribute' => ['Unidad' => 'CodigoTipo']],
+            [['IdIndicadorEstrategico'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['IdTipoResultado'], 'exist', 'skipOnError' => true, 'targetClass' => CatTiposResultado::class, 'targetAttribute' => ['IdTipoResultado' => 'IdTipoResultado']],
+            [['IdCategoriaIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => CatCategoriasIndicadore::class, 'targetAttribute' => ['IdCategoriaIndicador' => 'IdCategoriaIndicador']],
+            [['IdUnidadIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => CatUnidadesIndicadore::class, 'targetAttribute' => ['IdUnidadIndicador' => 'IdUnidadIndicador']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
+            [['IdObjEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivosEstrategico::class, 'targetAttribute' => ['IdObjEstrategico' => 'IdObjEstrategico']],
         ];
     }
 
@@ -71,17 +71,15 @@ class IndicadorEstrategico extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'CodigoIndicador' => 'Codigo Indicador',
+            'IdIndicadorEstrategico' => 'Id Indicador Estrategico',
+            'IdObjEstrategico' => 'Id Obj Estrategico',
             'Codigo' => 'Codigo',
             'Meta' => 'Meta',
             'Descripcion' => 'Descripcion',
-            'Pei' => 'Pei',
-            'ObjetivoEstrategico' => 'Objetivo Estrategico',
-            'Articulacion' => 'Articulacion',
-            'Resultado' => 'Resultado',
-            'TipoIndicador' => 'Tipo Indicador',
-            'Categoria' => 'Categoria',
-            'Unidad' => 'Unidad',
+            'LineaBase' => 'Linea Base',
+            'IdTipoResultado' => 'Id Tipo Resultado',
+            'IdCategoriaIndicador' => 'Id Categoria Indicador',
+            'IdUnidadIndicador' => 'Id Unidad Indicador',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
@@ -89,121 +87,73 @@ class IndicadorEstrategico extends ActiveRecord
     }
 
     /**
-     * Gets query for [[ObjetivoEstrategico]].
+     * Gets query for [[CatCategoriasIndicadores]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getObjetivoEstrategico()
+    public function getCatCategoriasIndicadores()
     {
-        return $this->hasOne(ObjetivoEstrategico::class, ['CodigoObjEstrategico' => 'ObjetivoEstrategico']);
+        return $this->hasOne(CatCategoriasIndicadore::class, ['IdCategoriaIndicador' => 'IdCategoriaIndicador']);
     }
 
     /**
-     * Gets query for [[Resultado]].
+     * Gets query for [[CatTiposResultados]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getResultado()
+    public function getCatTiposResultados()
     {
-        return $this->hasOne(TipoResultado::class, ['CodigoTipo' => 'Resultado']);
+        return $this->hasOne(CatTiposResultado::class, ['IdTipoResultado' => 'IdTipoResultado']);
     }
 
     /**
-     * Gets query for [[TipoIndicador]].
+     * Gets query for [[CatUnidadesIndicadores]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTipoIndicador()
+    public function getCatUnidadesIndicadores()
     {
-        return $this->hasOne(TipoIndicador::class, ['CodigoTipo' => 'TipoIndicador']);
+        return $this->hasOne(CatUnidadesIndicadore::class, ['IdUnidadIndicador' => 'IdUnidadIndicador']);
     }
 
     /**
-     * Gets query for [[Categoria]].
+     * Gets query for [[Estados]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCategoria()
-    {
-        return $this->hasOne(CategoriaIndicador::class, ['CodigoCategoria' => 'Categoria']);
-    }
-
-    /**
-     * Gets query for [[Unidad]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUnidad()
-    {
-        return $this->hasOne(IndicadorUnidad::class, ['CodigoTipo' => 'Unidad']);
-    }
-
-    /**
-     * Gets query for [[CodigoEstado]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCodigoEstado()
+    public function getEstados()
     {
         return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
     }
 
     /**
-     * Gets query for [[CodigoUsuario]].
+     * Gets query for [[IndicadorEstrategicoProgramacionGestions]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getCodigoUsuario()
+    public function getIndicadorEstrategicoProgramacionGestions()
+    {
+        return $this->hasMany(IndicadorEstrategicoProgramacionGestion::class, ['IdIndicadorEstrategico' => 'IdIndicadorEstrategico']);
+    }
+
+    /**
+     * Gets query for [[ObjetivosEstrategicos]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getObjetivosEstrategicos()
+    {
+        return $this->hasOne(ObjetivosEstrategico::class, ['IdObjEstrategico' => 'IdObjEstrategico']);
+    }
+
+    /**
+     * Gets query for [[Usuarios]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsuarios()
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    public function enUso()
-    {
-        return false;
-    }
-
-    public function exist()
-    {
-        $indicador = IndicadorEstrategico::find()
-            ->where(['Codigo' => $this->Codigo])
-            ->andWhere(['!=','CodigoIndicador', $this->CodigoIndicador])
-            ->andWhere(["CodigoEstado" => Estado::ESTADO_VIGENTE])->all();
-        if(!empty($indicador)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function generarProgramacion(): bool
-    {
-        $inicio = $this->objetivoEstrategico->pei->GestionInicio;
-        $fin = $this->objetivoEstrategico->pei->GestionFin;
-        for ($i = $inicio; $i<=$fin; $i++ )
-        {
-            $flag = false;
-            $programacion = IndicadorEstrategicoGestion::find()->where(['IndicadorEstrategico'=>$this->CodigoIndicador, 'Gestion' => $i])->one();
-            if (!$programacion){
-                $programacion = new IndicadorEstrategicoGestion();
-                $programacion->Gestion = $i;
-                $programacion->IndicadorEstrategico = $this->CodigoIndicador;
-                $programacion->Meta = 0;
-                if ($programacion->validate())
-                {
-                    if ($programacion->save())
-                    {
-                        $flag = true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                $flag = true;
-            }
-        }
-        return $flag;
-    }
 }

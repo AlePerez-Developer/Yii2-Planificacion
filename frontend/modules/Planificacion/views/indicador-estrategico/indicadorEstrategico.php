@@ -29,13 +29,13 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         <div class="row">
             <div class="col-6">
                 <button id="btnMostrarCrear" name="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-                    <div class="icon">
-                        <div class="circle">
-                            <div class="horizontal"></div>
-                            <div class="vertical"></div>
-                        </div>
+                    <span class="icon">
+                        <span class="circle">
+                            <span class="horizontal"></span>
+                            <span class="vertical"></span>
+                        </span>
                         Agregar Indicador
-                    </div>
+                    </span>
                 </button>
             </div>
             <div class="col-6" style="text-align: right;">
@@ -49,17 +49,12 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                 <div class="card">
                     <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                     <div class="card-body">
-                        <input type="text" id="codigoIndicadorEstrategico" name="codigoIndicadorEstrategico" disabled hidden >
                         <form id="formIndicadorEstrategico" action="" method="post">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label for="codigoObjEstrategico">Seleccione el objetivo estrategico</label>
-                                        <select class="form-control objEstrategico" id="codigoObjEstrategico" name="codigoObjEstrategico" >
-                                            <option></option>
-                                            <?php foreach ($objsEstrategicos as $objEstrategico){ ?>
-                                                <option value="<?= $objEstrategico['CodigoObjEstrategico'] ?>"><?= '('.  $objEstrategico['CodigoObjetivo'] .') - ' . $objEstrategico['Objetivo']  ?></option>
-                                            <?php } ?>
+                                        <label for="idObjEstrategico">Seleccione el objetivo estrategico</label>
+                                        <select class="form-control objEstrategico" id="idObjEstrategico" name="idObjEstrategico" >
                                         </select>
                                     </div>
                                 </div>
@@ -68,67 +63,48 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                             <div class="row">
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label for="codigoIndicador">Codigo indicador</label>
-                                        <input type="text" class="form-control input-sm num" id="codigoIndicador" name="codigoIndicador" maxlength="3"  placeholder="Codigo indicador" style="width: 150px" >
+                                        <label for="codigo">Codigo indicador</label>
+                                        <input type="text" class="form-control input-sm num" id="codigo" name="codigo" maxlength="3"  placeholder="Codigo indicador" style="width: 150px" >
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-group">
-                                        <label for="metaIndicador">Meta indicador</label>
-                                        <input type="text" class="form-control input-sm num" id="metaIndicador" name="metaIndicador"   placeholder="Meta del indicador" style="width: 150px" >
+                                        <label for="meta">Meta indicador</label>
+                                        <input type="text" class="form-control input-sm num" id="meta" name="meta"   placeholder="Meta del indicador" style="width: 150px" >
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="lineaBase">Linea base</label>
+                                        <input type="text" class="form-control input-sm num" id="lineaBase" name="lineaBase"   placeholder="Meta del indicador" style="width: 150px" >
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="form-group">
                                     <label for="descripcion" class="control-label">Descripcion del indicador</label>
-                                    <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="2" placeholder="Descripcion del indicador"></textarea>
+                                    <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="4" placeholder="Descripcion del indicador"></textarea>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <div class="form-group">
-                                        <label for="tipoResultado">Seleccione el resultado</label>
-                                        <select class="form-control" id="tipoResultado" name="tipoResultado" >
-                                            <option value="0" selected>Seleccione el resultado</option>
-                                            <?php foreach ($Resultados as $Resultado){  ?>
-                                                <option value="<?= $Resultado->CodigoTipo ?>"><?=$Resultado->Descripcion?></option>
-                                            <?php } ?>
+                                        <label for="idTipoResultado">Seleccione el resultado</label>
+                                        <select class="form-control" id="idTipoResultado" name="idTipoResultado" >
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-4">
                                     <div class="form-group">
-                                        <label for="tipoIndicador">Seleccione el tipo de indicador</label>
-                                        <select class="form-control" id="tipoIndicador" name="tipoIndicador" >
-                                            <option value="0" selected>Seleccione el tipo de indicador</option>
-                                            <?php foreach ($Tipos as $Tipo){  ?>
-                                                <option value="<?= $Tipo->CodigoTipo ?>"><?=$Tipo->Descripcion?></option>
-                                            <?php } ?>
+                                        <label for="idCategoriaIndicador">Seleccione el tipo de indicador</label>
+                                        <select class="form-control" id="idCategoriaIndicador" name="idCategoriaIndicador" >
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <div class="form-group">
-                                        <label for="categoriaIndicador">Seleccione la categoria</label>
-                                        <select class="form-control" id="categoriaIndicador" name="categoriaIndicador" >
-                                            <option value="0" selected>Seleccione la categoria</option>
-                                            <?php foreach ($Categorias as $Categoria){  ?>
-                                                <option value="<?= $Categoria->CodigoCategoria ?>"><?=$Categoria->Descripcion?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="tipoUnidad">Seleccione la unidad</label>
-                                        <select class="form-control" id="tipoUnidad" name="tipoUnidad" >
-                                            <option value="0" selected>Seleccione la unidad</option>
-                                            <?php foreach ($Unidades as $Unidad){  ?>
-                                                <option value="<?= $Unidad->CodigoTipo ?>"><?=$Unidad->Descripcion?></option>
-                                            <?php } ?>
+                                        <label for="idUnidadIndicador">Seleccione la unidad</label>
+                                        <select class="form-control" id="idUnidadIndicador" name="idUnidadIndicador" >
                                         </select>
                                     </div>
                                 </div>
@@ -136,7 +112,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                         </form>
                     </div>
                     <div class="card-footer text-center">
-                        <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><span class='fa fa-check-circle'></span> Guardar </button>
+                        <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
                         <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                     </div>
                 </div>
@@ -164,14 +140,5 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         </table>
     </div>
 </div>
-<style>
-    .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100px;
-        height: 100px;
-    }
-</style>
 
 <?php include_once "modalProgramarGestion.php"; ?>

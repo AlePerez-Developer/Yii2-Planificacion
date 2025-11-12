@@ -53,21 +53,7 @@ class IndicadorEstrategicoController extends Controller
 
     public function actionIndex()
     {
-        $objsEstrategicos = ObjetivoEstrategico::find()->alias('oe')
-            ->select(['oe.IdObjEstrategico as CodigoObjEstrategico','oe.Codigo as CodigoObjetivo','oe.Objetivo'])
-            ->where(['oe.CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->asArray()->all();
-        $tiposResultados = TipoResultado::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
-        $tiposIndicadores = TipoIndicador::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
-        $categoriasIndicadores = CategoriaIndicador::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
-        $indicadoresUnidades = IndicadorUnidad::find()->where(['CodigoEstado'=> Estado::ESTADO_VIGENTE])->all();
-        return $this->render('indicadorEstrategico',[
-            'objsEstrategicos' => $objsEstrategicos,
-            'Resultados'=> $tiposResultados,
-            'Tipos'=> $tiposIndicadores,
-            'Categorias'=> $categoriasIndicadores,
-            'Unidades'=> $indicadoresUnidades
-        ]);
+        return $this->render('indicadorEstrategico');
     }
 
     public function actionListarIndicadoresEstrategicos()

@@ -26,7 +26,7 @@ class CatUnidadIndicadorService
      * @param string $search
      * @return array of CatUnidadIndicador
      */
-    public function listarAreasS2(string $search): array
+    public function listarTodoS2(string $search): array
     {
         $data = CatUnidadIndicador::listAll($search)
             ->orderBy(['Codigo' => SORT_ASC])
@@ -45,5 +45,4 @@ class CatUnidadIndicadorService
     {
         return CatUnidadIndicador::listOne($id);
     }
-
 }
