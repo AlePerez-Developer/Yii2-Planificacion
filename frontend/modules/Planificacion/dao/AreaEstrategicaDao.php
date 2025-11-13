@@ -24,7 +24,6 @@ class AreaEstrategicaDao
         return !$model;
     }
 
-
     static function validarId(string $id): bool
     {
         return AreaEstrategica::find()->where(['IdPei'=> yii::$app->contexto->getPei() ,'IdAreaEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();

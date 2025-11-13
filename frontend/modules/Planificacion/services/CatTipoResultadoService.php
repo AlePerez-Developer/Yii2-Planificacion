@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\dao\CatTipoResultadoDao;
 use app\modules\Planificacion\models\CatTipoResultado;
 
 class CatTipoResultadoService
@@ -40,9 +41,21 @@ class CatTipoResultadoService
      *
      * @param string $id
      * @return CatTipoResultado|null
+     * @noinspection PhpUnused
      */
     public function listarUno(string $id): ?CatTipoResultado
     {
         return CatTipoResultado::listOne($id);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
+    {
+        return CatTipoResultadoDao::validarId($id);
     }
 }

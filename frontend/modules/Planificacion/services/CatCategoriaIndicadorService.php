@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\dao\CatCategoriaIndicadorDao;
 use app\modules\Planificacion\models\CatCategoriaIndicador;
 
 class CatCategoriaIndicadorService
@@ -40,9 +41,21 @@ class CatCategoriaIndicadorService
      *
      * @param string $id
      * @return CatCategoriaIndicador|null
+     * @noinspection PhpUnused
      */
     public function listarUno(string $id): ?CatCategoriaIndicador
     {
         return CatCategoriaIndicador::listOne($id);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
+    {
+        return CatCategoriaIndicadorDao::validarId($id);
     }
 }

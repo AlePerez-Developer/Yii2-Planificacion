@@ -9,7 +9,8 @@ class PlanificacionAsset extends AssetBundle
     public $sourcePath = '@app/modules/Planificacion/assets';
     public $css = [
         'css/Planificacion.css',
-        'css/btn_spinner.css'
+        'css/btn_spinner.css',
+        'css/dt_style.css'
     ];
     public $js = [
         'js/Validacion.js',

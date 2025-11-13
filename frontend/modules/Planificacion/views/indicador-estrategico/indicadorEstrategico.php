@@ -4,19 +4,10 @@ use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategico.js",[
+
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/dt-declaration.js",[
     'depends' => [
-        JqueryAsset::className()
-    ]
-]);
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategicoGestion.js",[
-    'depends' => [
-        JqueryAsset::className()
-    ]
-]);
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategicoUnidad.js",[
-    'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
 
@@ -119,26 +110,34 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
             </div>
         </div>
     </div>
-    <div id="divtabla" class="card-body">
-        <table id="tablaListaIndicadoresEstrategicos" class="table-bordered table-striped dt-responsive table-sm tablaListaIndicadoresEstrategicos" style="width: 100%" >
+    <div id="divTabla" class="card-body">
+        <table id="tablaListaIndicadoresEstrategicos" name="tablaListaIndicadoresEstrategicos" class="table table-bordered table-striped">
             <thead>
-                <th>#</th>
-                <th>#</th>
-                <th>Cod.</th>
-                <th>Meta</th>
-                <th>Prog</th>
-                <th>Descripcion</th>
-                <th>Resultado</th>
-                <th>Tipo</th>
-                <th>Categoria</th>
-                <th>Unidad</th>
-                <th>Obj.</th>
-                <th>Estado</th>
-                <th>Prog.</th>
-                <th>Acciones</th>
+            <th>#</th>
+            <th>Codigo.</th>
+            <th>Meta</th>
+            <th>Descripcion</th>
+            <th>LineaBase</th>
+            <th>Resultado</th>
+            <th>Categoria</th>
+            <th>Unidad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
             </thead>
         </table>
     </div>
 </div>
+
+<style>
+    .childtitulosmall {
+        font-size: 11px;
+        font-weight: normal; !important;
+    }
+    td[colspan] {
+        padding: 5px 2rem .75rem 5px;
+    }
+
+
+</style>
 
 <?php include_once "modalProgramarGestion.php"; ?>

@@ -32,4 +32,9 @@ class ObjEstrategicoDao
 
         return !$model;
     }
+
+    static function validarId(string $id): bool
+    {
+        return ObjetivoEstrategico::find()->where(['IdPei'=> yii::$app->contexto->getPei() ,'IdObjEstrategico' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
+    }
 }

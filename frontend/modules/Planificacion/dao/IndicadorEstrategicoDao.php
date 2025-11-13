@@ -1,23 +1,28 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
-use yii\db\Query;
+use app\modules\Planificacion\models\IndicadorEstrategico;
+use common\models\Estado;
 
 class IndicadorEstrategicoDao
 {
-    /*=====================================================
-        Genera un nuevo codigo de Indicador estrategico
-    =======================================================*/
-    static public function GenerarCodigoIndicadorEstrategico()
+    static function enUso(IndicadorEstrategico $modelo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoIndicador) as Codigo')
-            ->from('IndicadoresEstrategicos')
+        return $modelo->getIndicadorEstrategicoProgramacionGestions()->exists();
+    }
+
+    static function verificarCodigo(string $id,  int $codigo): bool
+    {
+        $modelo = IndicadorEstrategico::find()
+            ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','IdIndicadorEstrategico',$id])
             ->one();
-        if ($codigo['Codigo']){
-            return  $codigo['Codigo'] + 1;
-        } else {
-            return 1;
-        }
+
+        return !$modelo;
+    }
+
+    static function validarId(string $id, string $idObjEstrategico): bool
+    {
+        return IndicadorEstrategico::find()->where(['IdObjEstrategico'=> $idObjEstrategico ,'IdIndicadorEstrategico' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 }

@@ -1,40 +1,26 @@
-let dt_area
+let dt_indEstrategico;
 $(document).ready(function () {
     function format(d) {
         return (
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="titulosmall">Plan estrategico institucional</div>' +
-            '   </div>' +
-            '</div>' +
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Desc: </div>' +
-            '           </div>' +
-            '           <div class="col-8">' +
-            '               <div class="little">' + d["Descripcion"] + '</div>' +
-            '           </div>' +
-            '       </div>' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Fechas PEI</div>' +
-            '           </div>' +
-            '           <div class="col-4">' +
-            '               <div class="little">' +
-            '                   Vigencia: ' + d["GestionInicio"] +  ' - ' + d["GestionFin"] + '<br>' +
-            '                   Aprobacion: ' + d["FechaAprobacion"] +
-            '               </div>' +
-            '           </div>' +
-            '       </div>' +
-            '   </div>' +
-            '</div>'
+            '            <div class="row">' +
+            '                <div class="col-2 childtitulosmall" style="padding-left: 50px">Objetivo Estrategico: </div>' +
+            '                <div class="col-10 childtitulosmall" style="padding-left: 50px">123</div>' +
+            '            </div>' +
+            '            <div class="row">' +
+            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Objetivo"] + '</div>' +
+            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Producto"] + '</div>' +
+            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Indicador_Descripcion"] + '</div>' +
+            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Indicador_Formula"] + '</div>' +
+            '            </div>'
         );
     }
-    dt_area = $("#tablaListaAreas").DataTable({
+    dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
+
+            dt_indEstrategico.rows().every( function () {
+                this.child( format(this.data()) ).show();
+            } );
         },
         ajax: {
             method: "POST",
@@ -42,12 +28,12 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            url: 'index.php?r=Planificacion/area-estrategica/listar-todo',
+            url: 'index.php?r=Planificacion/indicador-estrategico/listar-todo',
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
                 MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_area.processing(false);
+                dt_indEstrategico.processing(false);
             }
         },
         columns: [
@@ -59,25 +45,47 @@ $(document).ready(function () {
                 width: 30
             },
             {
-                className: 'dt-small details-control dt-center',
+                className: 'dt-small dt-center',
                 orderable: false,
                 searchable: false,
-                data: null,
-                defaultContent: '',
-                "render": function () {
-                    return '<i class="fa fa-circle-notch fa-spin"></i>';
-                },
+                data: 'Codigo',
                 width: 30
             },
             {
-                className: 'dt-small dt-center',
+                className: 'dt-small',
                 orderable: false,
-                data: 'Codigo',
+                data: 'Meta',
                 width: 100
             },
             {
-                className: 'dt-small dt-left',
-                data: 'Descripcion'
+                className: 'dt-small',
+                orderable: false,
+                data: 'Descripcion',
+                width: 100
+            },
+            {
+                className: 'dt-small',
+                orderable: false,
+                data: 'LineaBase',
+                width: 100
+            },
+            {
+                className: 'dt-small',
+                orderable: false,
+                data: 'catTiposResultados.Descripcion',
+                width: 100
+            },
+            {
+                className: 'dt-small',
+                orderable: false,
+                data: 'catCategoriasIndicadores.Descripcion',
+                width: 100
+            },
+            {
+                className: 'dt-small',
+                orderable: false,
+                data: 'catUnidadesIndicadores.Descripcion',
+                width: 100
             },
             {
                 className: 'dt-small dt-estado dt-center',
@@ -99,7 +107,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-acciones dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'IdAreaEstrategica',
+                data: 'IdIndicadorEstrategico',
                 render: function (data, type) {
                     return type === 'display'
                         ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -116,30 +124,9 @@ $(document).ready(function () {
         ],
     });
 
-    // Add event listener for opening and closing details
-    $('#tablaListaAreas tbody').on('click', 'td.details-control', function () {
-        let tr = $(this).closest('tr');
-        let row = dt_area.row(tr);
-
-        if (row["child"].isShown()) {
-            row["child"].hide();
-            tr.removeClass('shown');
-        }
-        else {
-            row["child"](format(row.data())).show();
-            tr.addClass('shown');
-        }
-    });
-
-    dt_area.on("user-select", function (e, dt, type, cell, originalEvent) {
-        if ($(cell.node()).hasClass("details-control")) {
-            e.preventDefault();
-        }
-    });
-
-    dt_area.on('order.dt search.dt', function () {
+    dt_indEstrategico.on('order.dt search.dt', function () {
         let i = 1;
-        dt_area.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
+        dt_indEstrategico.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
             this.data(i++);
         });
     }).draw();

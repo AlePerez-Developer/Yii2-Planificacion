@@ -56,11 +56,14 @@ $(document).ready(function () {
                 width: 30
             },
             {
-                className: 'dt-small dt-control dt-center',
+                className: 'dt-small details-control dt-center',
                 orderable: false,
                 searchable: false,
                 data: null,
                 defaultContent: '',
+                "render": function () {
+                    return '<i class="fa fa-circle-notch fa-spin"></i>';
+                },
                 width: 30
             },
             {
@@ -139,15 +142,17 @@ $(document).ready(function () {
         });
     }).draw();
 
-    $('#tablaListaObjEstrategicos tbody').on('click', 'td.dt-control', function () {
+    $('#tablaListaObjEstrategicos tbody').on('click', 'td.details-control', function () {
         let tr = $(this).closest('tr');
         let row = dt_objEstrategico.row(tr);
 
         if (row["child"].isShown()) {
             row["child"].hide();
+            tr.removeClass('shown');
         }
         else {
             row["child"](format(row.data())).show();
+            tr.addClass('shown');
         }
     });
 })

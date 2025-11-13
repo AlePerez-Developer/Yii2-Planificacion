@@ -1,0 +1,89 @@
+.page-link{
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px!important;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    box-shadow:0 1px 2px #5e5d5b;
+}
+
+.dt-paging-button a {
+    font-size: 13px;
+}
+
+th.dt-center, td.dt-center { text-align: center !important; }
+
+td.dt-left { text-align: left !important; }
+
+th.dt-acciones, td.dt-acciones  {
+    width: 130px; !important;
+    text-align: center;
+}
+th.dt-estado, td.dt-estado  {
+    width: 50px;
+    text-align: center;
+}
+
+td.details-control {
+    text-align:center;
+    color:forestgreen;
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    text-align:center;
+    color:red;
+}
+
+.dt-search label{
+    font-size: 13px;
+}
+
+.dt-length label{
+    font-size: 13px;
+}
+
+.dt-info {
+    font-size: 13px;
+}
+
+.titulosmall{
+    font-size: 13px;
+    font-weight: bold;
+    padding-left: 50px; !important;
+}
+
+.subsmall{
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.little{
+    font-size: 11px;
+}
+
+th.dt-small, td.dt-small, dt.dt-small, dd.dt-small { font-size: 12px; !important; }
+
+
+
+
+
+
+tr.incompleto {
+    background-color: #f7d2e0 !important;
+}
+
+tr.completo {
+    background-color: #dcfadc !important;
+}
+
+.completo {
+    background-color: #dcfadc !important;
+}
+
+
+
+
+
