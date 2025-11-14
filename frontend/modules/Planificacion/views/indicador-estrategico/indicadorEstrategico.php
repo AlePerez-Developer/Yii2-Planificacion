@@ -134,10 +134,29 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         font-weight: normal; !important;
     }
     td[colspan] {
-        padding: 5px 2rem .75rem 5px;
+        padding: 0 5px .75rem 5px;
     }
 
+    .subDetail {
+        border-collapse: collapse;
+        border-color:#ccc;
+        border-spacing:0;
+        font-size: 10px;
+        width: 100%;
+    }
 
+    .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+    .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+        font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+    .tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+        font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+    .tg .tg-b91a{background-color:#f9f9f9;font-size:10px;text-align:left;vertical-align:top}
+    .tg .tg-l64y{font-size:10px;font-weight:bold;text-align:left;vertical-align:top}
+    .tg .tg-3j8g{font-size:10px;font-weight:bold;text-align:center;vertical-align:top}
+    .tg .tg-fqa1{background-color:#f9f9f9;font-size:10px; !important; text-align:right;vertical-align:top}
 </style>
+
+
+
 
 <?php include_once "modalProgramarGestion.php"; ?>

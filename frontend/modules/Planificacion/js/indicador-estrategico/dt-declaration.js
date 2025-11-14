@@ -2,17 +2,46 @@ let dt_indEstrategico;
 $(document).ready(function () {
     function format(d) {
         return (
-            '            <div class="row">' +
-            '                <div class="col-2 childtitulosmall" style="padding-left: 50px">Objetivo Estrategico: </div>' +
-            '                <div class="col-10 childtitulosmall" style="padding-left: 50px">123</div>' +
-            '            </div>' +
-            '            <div class="row">' +
-            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Objetivo"] + '</div>' +
-            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Producto"] + '</div>' +
-            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Indicador_Descripcion"] + '</div>' +
-            '                <div class="col-3 little"> ' + d["objetivosEstrategicos"]["Indicador_Formula"] + '</div>' +
-            '            </div>'
-        );
+            '<table class="subDetail">' +
+            '<colgroup>\n' +
+                '<col style="width: 126px">\n' +
+                '<col style="width: 125px">\n' +
+                '<col style="width: 144px">\n' +
+                '<col style="width: 214px">\n' +
+            '</colgroup>\n' +
+            '<thead>\n' +
+            '  <tr>\n' +
+            '    <th class="tg-1wig" colspan="4">Objetivo Estrategico</th>\n' +
+            '  </tr></thead>\n' +
+            '<tbody>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-buh4">Codigo</td>\n' +
+            '    <td class="tg-buh4" colspan="3">123</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-amwm">Objetivo</td>\n' +
+            '    <td class="tg-amwm">Producto</td>\n' +
+            '    <td class="tg-amwm">Descripcion</td>\n' +
+            '    <td class="tg-amwm">Formula</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-buh4">data1</td>\n' +
+            '    <td class="tg-buh4">data2</td>\n' +
+            '    <td class="tg-buh4">data3</td>\n' +
+            '    <td class="tg-buh4">data4</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-amwm" colspan="2">area</td>\n' +
+            '    <td class="tg-amwm" colspan="2">politica</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-p5oz">1</td>\n' +
+            '    <td class="tg-buh4">data5</td>\n' +
+            '    <td class="tg-p5oz">1</td>\n' +
+            '    <td class="tg-buh4">data5</td>\n' +
+            '  </tr>\n' +
+            '</tbody>\n' +
+            '</table>');
     }
     dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
         initComplete: function () {
