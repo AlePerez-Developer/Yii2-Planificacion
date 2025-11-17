@@ -55,9 +55,9 @@ class IndicadorEstrategicoService
             'IdCategoriaIndicador' => $form->idCategoriaIndicador,
             'IdUnidadIndicador' => $form->idUnidadIndicador,
             'Codigo'  => $form->codigo,
-            'meta'  => $form->meta,
+            'Meta'  => $form->meta,
             'Descripcion'  => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
-            'lineaBase'  => $form->lineaBase,
+            'LineaBase'  => $form->lineaBase,
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);

@@ -84,4 +84,116 @@ function populateS2Politicas(idAreaEsteategica, select2, val) {
     });
 }
 
+function populateS2ObjEstrategico(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-estrategico/listar-todo',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdObjEstrategico"],
+                        text: '(' + item["Compuesto"] + ') - ' + item["Objetivo"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2TiposResultados(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/cat-tipos-resultados/listar-todo-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdTipoResultado"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2CategoriasIndicadores(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/cat-categorias-indicadores/listar-todo-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdCategoriaIndicador"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2UnidadesIndicadores(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/cat-unidades-indicadores/listar-todo-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdUnidadIndicador"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
 $(document).ready(function () {})

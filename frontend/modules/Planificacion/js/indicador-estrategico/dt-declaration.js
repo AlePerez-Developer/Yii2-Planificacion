@@ -1,54 +1,52 @@
 let dt_indEstrategico;
+
+function indicadorEstrategico_format(d) {
+    return (
+        '<table id="subDetail" class="subDetail">' +
+        '<colgroup>\n' +
+        '<col style="width: 126px">\n' +
+        '<col style="width: 125px">\n' +
+        '<col style="width: 144px">\n' +
+        '<col style="width: 214px">\n' +
+        '</colgroup>\n' +
+        '<thead>\n' +
+        '  <tr>\n' +
+        '    <th class="tg-1wig" colspan="4">Objetivo Estrategico</th>\n' +
+        '  </tr></thead>\n' +
+        '<tbody>\n' +
+        '  <tr>\n' +
+        '    <td class="subDetail_Title">Codigo</td>\n' +
+        '    <td class="subDetail_Codigo" colspan="3">'+ d["Compuesto"]+'</td>\n' +
+        '  </tr>\n' +
+        '  <tr>\n' +
+        '    <td class="subDetail_Title">Objetivo</td>\n' +
+        '    <td class="subDetail_Title">Producto</td>\n' +
+        '    <td class="subDetail_Title">Descripcion</td>\n' +
+        '    <td class="subDetail_Title">Formula</td>\n' +
+        '  </tr>\n' +
+        '  <tr>\n' +
+        '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Objetivo"]+'</td>\n' +
+        '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Producto"]+'</td>\n' +
+        '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Descripcion"]+'</td>\n' +
+        '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Formula"]+'</td>\n' +
+        '  </tr>\n' +
+        '  <tr>\n' +
+        '    <td class="tg-amwm" colspan="2"><b>Area Estrategicas:</b> -' + d["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["areaEstrategica"]["Descripcion"] + ' </td>\n' +
+        '    <td class="tg-amwm" colspan="2"><b>Politica Estrategicas:</b> -' + d["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["politicaEstrategica"]["Descripcion"] + ' </td>\n' +
+        '  </tr>\n' +
+        '</tbody>\n' +
+        '</table>');
+}
+
+
 $(document).ready(function () {
-    function format(d) {
-        return (
-            '<table id="oso" class="subDetail">' +
-            '<colgroup>\n' +
-                '<col style="width: 126px">\n' +
-                '<col style="width: 125px">\n' +
-                '<col style="width: 144px">\n' +
-                '<col style="width: 214px">\n' +
-            '</colgroup>\n' +
-            '<thead>\n' +
-            '  <tr>\n' +
-            '    <th class="tg-1wig" colspan="4">Objetivo Estrategico</th>\n' +
-            '  </tr></thead>\n' +
-            '<tbody>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-buh4">Codigo</td>\n' +
-            '    <td class="tg-buh4" colspan="3">'+ d["Compuesto"]+'</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-amwm">Objetivo</td>\n' +
-            '    <td class="tg-amwm">Producto</td>\n' +
-            '    <td class="tg-amwm">Descripcion</td>\n' +
-            '    <td class="tg-amwm">Formula</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Objetivo"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Producto"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Descripcion"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Formula"]+'</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-amwm" colspan="2">Area Estrategicas: -' + d["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["areaEstrategica"]["Descripcion"] + ' </td>\n' +
-            '    <td class="tg-amwm" colspan="2">politica</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-p5oz">1</td>\n' +
-            '    <td class="tg-buh4">data5</td>\n' +
-            '    <td class="tg-p5oz">1</td>\n' +
-            '    <td class="tg-buh4">data5</td>\n' +
-            '  </tr>\n' +
-            '</tbody>\n' +
-            '</table>');
-    }
+
     dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
 
             dt_indEstrategico.rows().every( function () {
-                this.child( format(this.data()) ).show();
+                this["child"]( indicadorEstrategico_format(this.data()) ).show();
             } );
         },
         ajax: {
@@ -81,7 +79,7 @@ $(document).ready(function () {
                 width: 30
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'Meta',
                 width: 100
@@ -93,25 +91,25 @@ $(document).ready(function () {
                 width: 100
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'LineaBase',
                 width: 100
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catTiposResultados.Descripcion',
                 width: 100
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catCategoriasIndicadores.Descripcion',
                 width: 100
             },
             {
-                className: 'dt-small',
+                className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catUnidadesIndicadores.Descripcion',
                 width: 100

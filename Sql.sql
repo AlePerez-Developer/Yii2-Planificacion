@@ -301,6 +301,42 @@ CREATE TABLE Auditoria_ObjEstrategico (
     DatosDespues NVARCHAR(MAX)     -- JSON opcional con estado nuevo
 )
 
+go
+
+create table IndicadoresEstrategicos(
+    IdIndicadorEstrategico uniqueidentifier default newsequentialid() primary key,
+    IdObjEstrategico uniqueidentifier not null,
+    Codigo int not null,
+    Meta int not null,
+    Descripcion Varchar(500) not null,
+    LineaBase int not null,
+
+    IdTipoResultado uniqueidentifier not null,
+    IdCategoriaIndicador uniqueidentifier not null,
+    IdUnidadIndicador uniqueidentifier not null,
+
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Codigo_IndicadorEstrategico check (Codigo > 0),
+    constraint chk_LineaBase_IndicadorEstrategico check (LineaBase > 0),
+    constraint chk_DescripcionIndicadorEstrategico check (Descripcion != ''),
+
+    foreign key (IdObjEstrategico) references ObjetivosEstrategicos(IdObjEstrategico),
+
+    foreign key (IdTipoResultado) references CatTiposResultados(IdTipoResultado),
+    foreign key (IdCategoriaIndicador) references CatCategoriasIndicadores(IdCategoriaIndicador),
+    foreign key (IdUnidadIndicador) references CatUnidadesIndicadores(IdUnidadIndicador),
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Indicador_Objetivo_Codigo]
+    ON [dbo].IndicadoresEstrategicos(Codigo)
+    WHERE   ([CodigoEstado] = 'V');
+
 
 
 

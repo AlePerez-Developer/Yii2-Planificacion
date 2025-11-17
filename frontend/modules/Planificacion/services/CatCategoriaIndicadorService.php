@@ -16,7 +16,7 @@ class CatCategoriaIndicadorService
     public function listarTodo(): array
     {
         $data = CatCategoriaIndicador::listAll()
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdCategoriaIndicador' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de catalogo de tipo resultado obtenido.');
@@ -30,7 +30,7 @@ class CatCategoriaIndicadorService
     public function listarTodoS2(string $search): array
     {
         $data = CatCategoriaIndicador::listAll($search)
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdCategoriaIndicador' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de categoria indicador obtenido.');

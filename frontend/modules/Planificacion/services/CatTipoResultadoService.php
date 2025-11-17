@@ -16,7 +16,7 @@ class CatTipoResultadoService
     public function listarTodo(): array
     {
         $data = CatTipoResultado::listAll()
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdTipoResultado' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de catalogo de tipo resultado obtenido.');
@@ -30,7 +30,7 @@ class CatTipoResultadoService
     public function listarTodoS2(string $search): array
     {
         $data = CatTipoResultado::listAll($search)
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdTipoResultado' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de catalogo de tipo resultado obtenido.');

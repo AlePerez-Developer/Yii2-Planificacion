@@ -142,7 +142,8 @@ class IndicadorEstrategico extends ActiveRecord
             ->joinWith('catCategoriasIndicadores C', true, 'INNER JOIN')
             ->joinWith('catTiposResultados T', true, 'INNER JOIN')
             ->joinWith('catUnidadesIndicadores U', true, 'INNER JOIN')
-            ->where(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->where(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'T.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO]);

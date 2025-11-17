@@ -72,7 +72,7 @@ class CatCategoriaIndicador extends ActiveRecord
     {
         return self::find()->alias('U')
             ->select([
-                'U.IdCategoriarIndicador',
+                'U.IdCategoriaIndicador',
                 'U.Descripcion',
                 'U.Descripcion',
                 'U.CodigoUsuario',

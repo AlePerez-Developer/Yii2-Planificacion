@@ -16,7 +16,7 @@ class CatUnidadIndicadorService
     public function listarTodo(): array
     {
         $data = CatUnidadIndicador::listAll()
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdUnidadIndicador' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de catalogo de unidades de indicador obtenido.');
@@ -30,7 +30,7 @@ class CatUnidadIndicadorService
     public function listarTodoS2(string $search): array
     {
         $data = CatUnidadIndicador::listAll($search)
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['IdUnidadIndicador' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de catalogo de unidades de indicador obtenido.');
