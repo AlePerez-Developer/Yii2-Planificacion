@@ -2,7 +2,7 @@ let dt_indEstrategico;
 $(document).ready(function () {
     function format(d) {
         return (
-            '<table class="subDetail">' +
+            '<table id="oso" class="subDetail">' +
             '<colgroup>\n' +
                 '<col style="width: 126px">\n' +
                 '<col style="width: 125px">\n' +
@@ -16,7 +16,7 @@ $(document).ready(function () {
             '<tbody>\n' +
             '  <tr>\n' +
             '    <td class="tg-buh4">Codigo</td>\n' +
-            '    <td class="tg-buh4" colspan="3">123</td>\n' +
+            '    <td class="tg-buh4" colspan="3">'+ d["Compuesto"]+'</td>\n' +
             '  </tr>\n' +
             '  <tr>\n' +
             '    <td class="tg-amwm">Objetivo</td>\n' +
@@ -25,13 +25,13 @@ $(document).ready(function () {
             '    <td class="tg-amwm">Formula</td>\n' +
             '  </tr>\n' +
             '  <tr>\n' +
-            '    <td class="tg-buh4">data1</td>\n' +
-            '    <td class="tg-buh4">data2</td>\n' +
-            '    <td class="tg-buh4">data3</td>\n' +
-            '    <td class="tg-buh4">data4</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Objetivo"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Producto"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Descripcion"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Formula"]+'</td>\n' +
             '  </tr>\n' +
             '  <tr>\n' +
-            '    <td class="tg-amwm" colspan="2">area</td>\n' +
+            '    <td class="tg-amwm" colspan="2">Area Estrategicas: -' + d["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["areaEstrategica"]["Descripcion"] + ' </td>\n' +
             '    <td class="tg-amwm" colspan="2">politica</td>\n' +
             '  </tr>\n' +
             '  <tr>\n' +

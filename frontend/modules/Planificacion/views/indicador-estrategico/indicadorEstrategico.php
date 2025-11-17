@@ -111,7 +111,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         </div>
     </div>
     <div id="divTabla" class="card-body">
-        <table id="tablaListaIndicadoresEstrategicos" name="tablaListaIndicadoresEstrategicos" class="table table-bordered table-striped">
+        <table id="tablaListaIndicadoresEstrategicos" name="tablaListaIndicadoresEstrategicos" class="table table-bordered">
             <thead>
             <th>#</th>
             <th>Codigo.</th>
@@ -129,23 +129,53 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
 </div>
 
 <style>
-    .childtitulosmall {
-        font-size: 11px;
-        font-weight: normal; !important;
-    }
+
     td[colspan] {
         padding: 0 5px .75rem 5px;
     }
 
-    .subDetail {
+    table:not(.subDetail) > tbody > tr:not(.dt-hasChild) > td {
+        border: 1px solid lightblue; /* tu borde */
+    }
+
+    /* 1. THEAD de la tabla principal → rojo pálido */
+    body table:not(.subDetail) > thead > tr > th {
+        background-color: #ffdddd !important;
+    }
+
+    /* 2. Filas normales de la tabla principal (que NO tienen .subDetail) → verde pálido */
+    body table:not(.subDetail) > tbody > tr > td {
+        background-color: #ddffdd !important; /* verde pálido */
+    }
+
+    /* 3. Filas que contienen una tabla .subDetail → azul pálido */
+    body table:not(.subDetail) > tbody > tr:has(table.subDetail) > td {
+        background-color: #dde7ff !important; /* azul pálido */
+    }
+
+    /* 4. La tabla interna .subDetail y todos sus elementos → fondo blanco */
+    table.subDetail,
+    table.subDetail thead,
+    table.subDetail tr,
+    table.subDetail td,
+    table.subDetail th {
+        background-color: white !important;
+    }
+
+    table .subDetail {
         border-collapse: collapse;
-        border-color:#ccc;
         border-spacing:0;
         font-size: 10px;
         width: 100%;
     }
 
-    .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+
+
+
+
+
+
+    /*.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
     .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
         font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
     .tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
@@ -153,7 +183,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
     .tg .tg-b91a{background-color:#f9f9f9;font-size:10px;text-align:left;vertical-align:top}
     .tg .tg-l64y{font-size:10px;font-weight:bold;text-align:left;vertical-align:top}
     .tg .tg-3j8g{font-size:10px;font-weight:bold;text-align:center;vertical-align:top}
-    .tg .tg-fqa1{background-color:#f9f9f9;font-size:10px; !important; text-align:right;vertical-align:top}
+    .tg .tg-fqa1{background-color:#f9f9f9;font-size:10px; !important; text-align:right;vertical-align:top}*/
 </style>
 
 
