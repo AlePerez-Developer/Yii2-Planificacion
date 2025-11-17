@@ -11,6 +11,18 @@ $this->registerJsFile("@planificacionModule/js/indicador-estrategico/dt-declarat
     ]
 ]);
 
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/s2-declaration.js",[
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/indicadorEstrategico.js",[
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
 ?>
@@ -45,7 +57,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label for="idObjEstrategico">Seleccione el objetivo estrategico</label>
-                                        <select class="form-control objEstrategico" id="idObjEstrategico" name="idObjEstrategico" >
+                                        <select class="form-control objEstrategico codigo_group" id="idObjEstrategico" name="idObjEstrategico" >
                                         </select>
                                     </div>
                                 </div>
@@ -55,7 +67,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
                                 <div class="col-4">
                                     <div class="form-group">
                                         <label for="codigo">Codigo indicador</label>
-                                        <input type="text" class="form-control input-sm num" id="codigo" name="codigo" maxlength="3"  placeholder="Codigo indicador" style="width: 150px" >
+                                        <input type="text" class="form-control input-sm num codigo_group" id="codigo" name="codigo" maxlength="3"  placeholder="Codigo indicador" style="width: 150px" >
                                     </div>
                                 </div>
                                 <div class="col-4">
@@ -162,28 +174,25 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         background-color: white !important;
     }
 
+    /* noinspection CssUnusedStyles */
     table .subDetail {
         border-collapse: collapse;
         border-spacing:0;
         font-size: 10px;
         width: 100%;
     }
+    .subDetail_Title {
+        text-align: center;
+        vertical-align: top;
+        font-weight: bold;
+        color: black;
+    }
 
-
-
-
-
-
-
-    /*.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
-    .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-        font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
-    .tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-        font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-    .tg .tg-b91a{background-color:#f9f9f9;font-size:10px;text-align:left;vertical-align:top}
-    .tg .tg-l64y{font-size:10px;font-weight:bold;text-align:left;vertical-align:top}
-    .tg .tg-3j8g{font-size:10px;font-weight:bold;text-align:center;vertical-align:top}
-    .tg .tg-fqa1{background-color:#f9f9f9;font-size:10px; !important; text-align:right;vertical-align:top}*/
+    body .subDetail_Codigo {
+        text-align: left;
+        vertical-align: middle !important;
+        color: black;
+    }
 </style>
 
 
