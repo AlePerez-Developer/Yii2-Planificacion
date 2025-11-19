@@ -150,16 +150,6 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         border: 1px solid lightblue; /* tu borde */
     }
 
-    /* 1. THEAD de la tabla principal → rojo pálido */
-    /*body table:not(.subDetail) > thead > tr > th {
-        background-color: #ffdddd !important;
-    }*/
-
-    /* 2. Filas normales de la tabla principal (que NO tienen .subDetail) → verde pálido */
-    /*body table:not(.subDetail) > tbody > tr > td {
-        background-color: #ddffdd !important; /* verde pálido */
-    }*/
-
     /* 3. Filas que contienen una tabla .subDetail → azul pálido */
     body table:not(.subDetail) > tbody > tr:has(table.subDetail) > td {
         background-color: #dde7ff !important; /* azul pálido */

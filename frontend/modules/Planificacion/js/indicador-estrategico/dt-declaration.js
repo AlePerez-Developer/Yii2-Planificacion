@@ -67,50 +67,49 @@ $(document).ready(function () {
                 "render": function () {
                     return '<i class="fa fa-circle-notch fa-spin"></i>';
                 },
-                width: 30
+                width: 20
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 searchable: false,
                 data: 'Codigo',
-                width: 30
+                width: 20
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'Meta',
-                width: 100
+                width: 30
             },
             {
                 className: 'dt-small',
                 orderable: false,
                 data: 'Descripcion',
-                width: 100
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'LineaBase',
-                width: 100
+                width: 20
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catTiposResultados.Descripcion',
-                width: 100
+                width: 80
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catCategoriasIndicadores.Descripcion',
-                width: 100
+                width: 80
             },
             {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'catUnidadesIndicadores.Descripcion',
-                width: 100
+                width: 80
             },
             {
                 className: 'dt-small dt-estado dt-center',
@@ -148,13 +147,6 @@ $(document).ready(function () {
             },
         ],
     });
-
-    /*dt_indEstrategico.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_indEstrategico.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
-            this.data(i++);
-        });
-    }).draw();*/
 
     $('#tablaListaIndicadoresEstrategicos tbody').on('click', 'td.details-control', function () {
         let tr = $(this).closest('tr');
