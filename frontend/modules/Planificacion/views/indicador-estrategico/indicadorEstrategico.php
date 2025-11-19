@@ -17,7 +17,7 @@ $this->registerJsFile("@planificacionModule/js/indicador-estrategico/s2-declarat
     ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico/indicadorEstrategico.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategico.js",[
     'depends' => [
         JqueryAsset::class
     ]

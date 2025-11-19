@@ -264,7 +264,7 @@ SELECT d.IdObjEstrategico, 'UPDATE', SYSTEM_USER,dbo.ObtenerIPCliente(),
               '", Estado:"', i.CodigoEstado,
               '"}')
 FROM deleted d
-JOIN inserted i ON d.IdPei = i.idPei;
+JOIN inserted i ON d.IdObjEstrategico = i.IdObjEstrategico;
 END;
 
 go
@@ -337,6 +337,95 @@ CREATE UNIQUE INDEX [UQ_Indicador_Objetivo_Codigo]
     ON [dbo].IndicadoresEstrategicos(Codigo)
     WHERE   ([CodigoEstado] = 'V');
 
+go
+
+CREATE TRIGGER trg_Insert_IndEstrategico
+    ON IndicadoresEstrategicos
+    AFTER INSERT
+    AS
+BEGIN
+    INSERT INTO Auditoria_IndEstrategico (IdIndicadorEstrategico, Operacion, Usuario, IPCliente, DatosDespues)
+    SELECT i.IdIndicadorEstrategico, 'INSERT', SYSTEM_USER, dbo.ObtenerIPCliente(),
+       CONCAT('{IdObjEstrategico:"', i.IdObjEstrategico,
+          '", Codigo:"', i.Codigo,
+          '", Meta:"', i.Meta,
+          '", Descripcion:"', i.Descripcion,
+          '", LineaBase:"', i.LineaBase,
+          '", TipoResultado:"', i.IdTipoResultado,
+          '", CategoriaIndicador:"', i.IdCategoriaIndicador,
+          '", UnidadIndicador:"', i.IdUnidadIndicador,
+          '", Estado:"', i.CodigoEstado,
+          '"}')
+    FROM inserted i;
+END;
+
+go
+
+CREATE TRIGGER trg_Update_IndEstrategico
+    ON IndicadoresEstrategicos
+    AFTER UPDATE
+    AS
+BEGIN
+    INSERT INTO Auditoria_IndEstrategico (IdIndicadorEstrategico, Operacion, Usuario, IPCliente, DatosAntes, DatosDespues)
+    SELECT d.IdIndicadorEstrategico, 'UPDATE', SYSTEM_USER,dbo.ObtenerIPCliente(),
+       CONCAT('{IdObjEstrategico:"', d.IdObjEstrategico,
+          '", Codigo:"', d.Codigo,
+          '", Meta:"', d.Meta,
+          '", Descripcion:"', d.Descripcion,
+          '", LineaBase:"', d.LineaBase,
+          '", TipoResultado:"', d.IdTipoResultado,
+          '", CategoriaIndicador:"', d.IdCategoriaIndicador,
+          '", UnidadIndicador:"', d.IdUnidadIndicador,
+          '", Estado:"', d.CodigoEstado,
+          '"}'),
+       CONCAT('{IdObjEstrategico:"', i.IdObjEstrategico,
+          '", Codigo:"', i.Codigo,
+          '", Meta:"', i.Meta,
+          '", Descripcion:"', i.Descripcion,
+          '", LineaBase:"', i.LineaBase,
+          '", TipoResultado:"', i.IdTipoResultado,
+          '", CategoriaIndicador:"', i.IdCategoriaIndicador,
+          '", UnidadIndicador:"', i.IdUnidadIndicador,
+          '", Estado:"', i.CodigoEstado,
+          '"}')
+    FROM deleted d
+         JOIN inserted i ON d.IdIndicadorEstrategico = i.IdIndicadorEstrategico;
+END;
+
+go
+
+CREATE TRIGGER trg_Delete_IndEstrategico
+    ON IndicadoresEstrategicos
+    AFTER DELETE
+    AS
+BEGIN
+    INSERT INTO Auditoria_IndEstrategico (IdIndicadorEstrategico, Operacion, Usuario, IPCliente, DatosAntes)
+    SELECT d.IdIndicadorEstrategico, 'DELETE', SYSTEM_USER,dbo.ObtenerIPCliente(),
+       CONCAT('{IdObjEstrategico:"', d.IdObjEstrategico,
+          '", Codigo:"', d.Codigo,
+          '", Meta:"', d.Meta,
+          '", Descripcion:"', d.Descripcion,
+          '", LineaBase:"', d.LineaBase,
+          '", TipoResultado:"', d.IdTipoResultado,
+          '", CategoriaIndicador:"', d.IdCategoriaIndicador,
+          '", UnidadIndicador:"', d.IdUnidadIndicador,
+          '", Estado:"', d.CodigoEstado,
+          '"}')
+    FROM deleted d;
+END;
+
+go
+
+CREATE TABLE Auditoria_IndEstrategico (
+    IdAuditoria INT IDENTITY(1,1) PRIMARY KEY,
+    IdIndicadorEstrategico UNIQUEIDENTIFIER,
+    Operacion VARCHAR(10),         -- 'INSERT', 'UPDATE', 'DELETE'
+    Usuario NVARCHAR(100),         -- Usuario que realizó la acción
+    IPCliente VARCHAR(50),         -- Dirección IP del cliente
+    Fecha DATETIME DEFAULT GETDATE(),
+    DatosAntes NVARCHAR(MAX),      -- JSON opcional con estado anterior
+    DatosDespues NVARCHAR(MAX)     -- JSON opcional con estado nuevo
+)
 
 
 
