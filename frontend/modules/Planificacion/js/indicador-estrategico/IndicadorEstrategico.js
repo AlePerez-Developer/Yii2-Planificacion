@@ -24,9 +24,9 @@ $(document).ready(function(){
         ReiniciarCampos();
         $("#divDatos").hide(500);
         $("#divTabla").show(500)
-        dt_indEstrategico.rows().every(function () {
+        /*dt_indEstrategico.rows().every(function () {
             this["child"](indicadorEstrategico_format(this.data())).show();
-        });
+        });*/
     });
 
     $("#btnGuardar").click(async function () {
@@ -73,11 +73,11 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '#refresh', function(){
-        dt_indEstrategico.ajax.reload(function () {
+        dt_indEstrategico.ajax.reload(/*function () {
             dt_indEstrategico.rows().every(function () {
                 this["child"](indicadorEstrategico_format(this.data())).show();
             });
-        }, false);
+        }, false*/);
     })
 
     /* =============================================
@@ -189,6 +189,7 @@ $(document).ready(function(){
             codigo: {
                 required: true,
                 digits: true,
+                min: 1,
                 remote: {
                     url: baseUrl + "verificar-codigo",
                     type: "post",
@@ -206,10 +207,12 @@ $(document).ready(function(){
             meta: {
                 required: true,
                 digits: true,
+                min: 0
             },
             lineaBase: {
                 required: true,
                 digits: true,
+                min: 0
             },
             descripcion: {
                 required: true,
@@ -233,16 +236,19 @@ $(document).ready(function(){
             codigo: {
                 required: "Debe ingresar un codigo de indicador estrategico",
                 digits: "Solo se permite numeros enteros",
+                min: "El codigo debe ser un numero mayor que cero",
                 require_from_group: "Debe seleccionar un objetivo estrategico antes de validar el codigo de indicador",
                 remote: "El codigo ingresado ya se encuentra en uso",
             },
             meta: {
                 required: "Debe ingresar un valor para la meta del indicador",
                 digits: "Solo se permite numeros enteros",
+                min: "la meta del indicador debe ser un numero mayor igual a cero"
             },
             lineaBase: {
                 required: "Debe ingresar un valor para la linea base del indicador",
                 digits: "Solo se permite numeros enteros",
+                min: "La linea base del indicador debe ser un numer mayor o igual a cero"
             },
             descripcion: {
                 required: "Debe ingresar la descripcion del indicador estrategico",

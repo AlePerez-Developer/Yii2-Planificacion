@@ -319,8 +319,9 @@ create table IndicadoresEstrategicos(
     FechaHoraRegistro datetime not null default getdate(),
     CodigoUsuario char(3) not null,
 
-    constraint chk_Codigo_IndicadorEstrategico check (Codigo > 0),
-    constraint chk_LineaBase_IndicadorEstrategico check (LineaBase > 0),
+    constraint chk_Codigo_IndicadorEstrategico check (Codigo >= 0),
+    constraint chk_LineaBase_IndicadorEstrategico check (LineaBase >= 0),
+    constraint chk_Meta_IndicadorEstrategico check (Meta >= 0),
     constraint chk_DescripcionIndicadorEstrategico check (Descripcion != ''),
 
     foreign key (IdObjEstrategico) references ObjetivosEstrategicos(IdObjEstrategico),
@@ -333,7 +334,7 @@ create table IndicadoresEstrategicos(
     foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
 )
 
-CREATE UNIQUE INDEX [UQ_Indicador_Objetivo_Codigo]
+CREATE UNIQUE INDEX [UQ_Indicador_Estrategico_Codigo]
     ON [dbo].IndicadoresEstrategicos(Codigo)
     WHERE   ([CodigoEstado] = 'V');
 

@@ -49,7 +49,8 @@ class IndicadorEstrategico extends ActiveRecord
         return [
             [['IdIndicadorEstrategico', 'IdObjEstrategico', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador'], 'string', 'max' => 36],
             [['IdObjEstrategico', 'Codigo', 'Meta', 'Descripcion', 'LineaBase', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['Codigo', 'Meta', 'LineaBase'], 'integer'],
+            [['Meta', 'LineaBase'], 'integer', 'min' => 0],
+            [['Codigo'], 'integer', 'min' => 1],
             [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],

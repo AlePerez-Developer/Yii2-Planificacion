@@ -123,7 +123,7 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
         </div>
     </div>
     <div id="divTabla" class="card-body">
-        <table id="tablaListaIndicadoresEstrategicos" name="tablaListaIndicadoresEstrategicos" class="table table-bordered">
+        <table id="tablaListaIndicadoresEstrategicos" name="tablaListaIndicadoresEstrategicos" class="table table-bordered table-striped">
             <thead>
             <th>#</th>
             <th>Codigo.</th>
@@ -151,14 +151,14 @@ $this->params['breadcrumbs'] = [['label' => '/Ind. Estrategicos']];
     }
 
     /* 1. THEAD de la tabla principal → rojo pálido */
-    body table:not(.subDetail) > thead > tr > th {
+    /*body table:not(.subDetail) > thead > tr > th {
         background-color: #ffdddd !important;
-    }
+    }*/
 
     /* 2. Filas normales de la tabla principal (que NO tienen .subDetail) → verde pálido */
-    body table:not(.subDetail) > tbody > tr > td {
+    /*body table:not(.subDetail) > tbody > tr > td {
         background-color: #ddffdd !important; /* verde pálido */
-    }
+    }*/
 
     /* 3. Filas que contienen una tabla .subDetail → azul pálido */
     body table:not(.subDetail) > tbody > tr:has(table.subDetail) > td {
