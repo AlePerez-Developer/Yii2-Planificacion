@@ -4,6 +4,12 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
+$this->registerJsFile("@planificacionModule/js/programa/dt-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->registerJsFile("@planificacionModule/js/programa/Programa.js", [
     'depends' => [
         JqueryAsset::class
@@ -16,13 +22,13 @@ $this->params['breadcrumbs'] = [['label' => '/Programas']];
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
+            <span class="icon closed">
+                <span class="circle">
+                    <span class="horizontal"></span>
+                    <span class="vertical"></span>
+                </span>
                 Agregar Programa
-            </div>
+            </span>
         </button>
     </div>
     <div id="divDatos" class="card-body" style="display: none">
@@ -30,12 +36,10 @@ $this->params['breadcrumbs'] = [['label' => '/Programas']];
             <div class="card " style="width: 40rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigoPrograma" name="codigoPrograma" disabled hidden>
                     <form id="formPrograma" action="" method="post">
-
                         <div class="form-group">
                             <label for="codigo" class="control-label">Codigo de programa</label>
-                            <input type="text" id="codigo" name="codigo" class="form-control num" maxlength="3"  placeholder="Codigo" style="width: 120px"4>
+                            <input type="text" id="codigo" name="codigo" class="form-control num" maxlength="3"  placeholder="Codigo" style="width: 120px">
                         </div>
 
                         <div class="form-group">
@@ -52,7 +56,7 @@ $this->params['breadcrumbs'] = [['label' => '/Programas']];
             </div>
         </div>
     </div>
-    <div id="divTabla" name="divTabla" class="card-body overflow-auto">
+    <div id="divTabla" class="card-body">
         <table id="tablaListaProgramas" name="tablaListaActividades" class="table table-bordered table-striped">
             <thead>
             <th>#</th>

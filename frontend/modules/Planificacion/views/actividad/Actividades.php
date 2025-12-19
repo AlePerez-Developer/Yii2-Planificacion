@@ -6,9 +6,22 @@ app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
 $this->registerJsFile("@planificacionModule/js/Actividad/actividad.js", [
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
+
+$this->registerJsFile("@planificacionModule/js/Actividad/dt-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/Actividad/s2-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificacion';
 $this->params['breadcrumbs'] = [['label' => 'Actividades']];
 ?>
@@ -16,41 +29,37 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
 <div class="card ">
     <div class="card-header">
         <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
+            <span class="icon closed">
+                <span class="circle">
+                    <span class="horizontal"></span>
+                    <span class="vertical"></span>
+                </span>
                 Agregar Actividad
-            </div>
+            </span>
         </button>
     </div>
-    <div id="ingresoDatos" class="card-body">
+    <div id="divDatos" class="card-body">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigoActividad" name="codigoActividad" disabled hidden>
                     <form id="formActividades" action="" method="post">
 
                         <div class="form-group">
-                            <label for="codigoPrograma">Seleccione un programa</label>
-                            <select class="form-control programa" id="codigoPrograma" name="codigoPrograma" >
+                            <label for="idPrograma">Seleccione un programa</label>
+                            <select class="form-control codigo_group" id="idPrograma" name="idPrograma" >
                                 <option></option>
-                                <?php foreach ($programas as $programa){ ?>
-                                    <option value="<?= $programa->CodigoPrograma ?>"><?= '('.  $programa->Codigo .') - ' . $programa->Descripcion  ?></option>
-                                <?php } ?>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="Codigo" class="control-label">Codigo de actividad</label>
-                            <input id="Codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num">
+                            <label for="codigo" class="control-label">Codigo de actividad</label>
+                            <input id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num codigo_group">
                         </div>
 
                         <div class="form-group">
-                            <label for="Descripcion">Descripcion de la actividad</label>
-                            <textarea class="form-control input-sm txt" rows="4" id="Descripcion" name="descripcion" placeholder="Descripcion"></textarea>
+                            <label for="descripcion">Descripcion de la actividad</label>
+                            <textarea class="form-control input-sm txt" rows="4" id="descripcion" name="descripcion" placeholder="Descripcion"></textarea>
                         </div>
 
                     </form>

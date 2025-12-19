@@ -99,31 +99,6 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     * @noinspection PhpUnused
-     */
-    public function actionListarAreasEstrategicas(): array
-    {
-        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        return $this->withTryCatch(fn() => $this->serviceAreaEstrategica->listarAreasS2($search));
-    }
-
-    /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     * @noinspection PhpUnused
-     */
-    public function actionListarPoliticasEstrategicas(): array
-    {
-        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        $idAreaEstrategica = $this->obtenerCodigoArea();
-        return $this->withTryCatch(fn() => $this->servicePoliticaEstrategica->listarPoliticasS2($idAreaEstrategica,$search));
-    }
-
-    /**
      * accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
@@ -135,7 +110,10 @@ class ObjEstrategicoController extends BaseController
             $request = Yii::$app->request;
             $form = new ObjetivoEstrategicoForm();
             $form->idPei = yii::$app->contexto->getPei();
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate()
+                || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)
+                || !$this->servicePoliticaEstrategica->validarId($form->idPoliticaEstrategica, $form->idAreaEstrategica)
+            ) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
             return $this->service->guardar($form);
@@ -223,20 +201,6 @@ class ObjEstrategicoController extends BaseController
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de objetivo no enviado.',404);
         }
         return $id;
-    }
-
-    /**
-     * obtiene y valida si se recibio el codigo de are por el request
-     *
-     * return string
-     */
-    private function obtenerCodigoArea(): string
-    {
-        $codigo = (string)Yii::$app->request->post('area');
-        if (!$codigo) {
-            return 0;
-        }
-        return $codigo;
     }
 
     /**

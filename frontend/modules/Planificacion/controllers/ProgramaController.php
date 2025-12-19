@@ -2,22 +2,26 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\controllers\BaseController;
+
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\formModels\ProgramaForm;
 use app\modules\Planificacion\services\ProgramaService;
+use app\modules\Planificacion\formModels\ProgramaForm;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class ProgramaController extends BaseController
 {
-    private ProgramaService $programaService;
+    private ProgramaService $service;
 
-    public function __construct($id, $module, ProgramaService $programaService, $config = [])
+    public function __construct($id, $module, ProgramaService $service, $config = [])
     {
-        $this->programaService = $programaService;
+        $this->service = $service;
         parent::__construct($id, $module, $config);
     }
 
@@ -83,7 +87,7 @@ class ProgramaController extends BaseController
      */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->programaService->listarProgramas());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
 
@@ -103,7 +107,7 @@ class ProgramaController extends BaseController
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->programaService->guardarPrograma($form);
+            return $this->service->guardar($form);
         });
     }
 
@@ -117,14 +121,14 @@ class ProgramaController extends BaseController
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $codigoPrograma = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new ProgramaForm();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->programaService->actualizarPrograma($codigoPrograma, $form);
+            return $this->service->actualizar($id, $form);
         });
     }
 
@@ -136,8 +140,8 @@ class ProgramaController extends BaseController
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function () {
-            $codigoPrograma = $this->obtenerCodigo();
-            return $this->programaService->cambiarEstado($codigoPrograma);
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
         });
     }
 
@@ -149,8 +153,8 @@ class ProgramaController extends BaseController
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function () {
-            $codigoPrograma = $this->obtenerCodigo();
-            return $this->programaService->eliminarPrograma($codigoPrograma);
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
         });
     }
 
@@ -162,23 +166,44 @@ class ProgramaController extends BaseController
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function () {
-            $codigoPrograma = $this->obtenerCodigo();
-            return $this->programaService->obtenerModelo($codigoPrograma);
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
         });
     }
 
     /**
      * Obtiene y valida si se recibió el código por el request.
      *
-     * @return int
+     * @return string
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerId(): string
     {
-        $codigo = (int)Yii::$app->request->post('codigoPrograma');
-        if (!$codigo) {
+        $id = Yii::$app->request->post('idPrograma');
+        if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Programa no enviado.', 404);
         }
-        return $codigo;
+        return $id;
+    }
+
+    /**
+     * accion para verificar un codigo ingresado
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
+    {
+        $id = Yii::$app->request->post('idPrograma');
+        if (!isset($id)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id, $codigo);
     }
 }

@@ -52,10 +52,10 @@ class PeiDao
     {
         return !Pei::find()->alias('P')->select([
             'P.IdPei',
-            'peiGestion.IdGestion',
+            'peiGestiones.IdGestion',
             'IndicadorEstrategicoProgramacionGestion.IdProgramacionGestion',
         ])
-            ->joinWith('peiGestion.gestionProgramacion', true, 'INNER JOIN')
+            ->joinWith('peiGestiones.gestionProgramacion', true, 'INNER JOIN')
             ->where('p.IdPei = :pei',[':pei' => $idPei])
             ->andWhere('peiGestion.Gestion < :Gestion',[':Gestion' => $inicioNuevo])
             ->andWhere('IndicadorEstrategicoProgramacionGestion.MetaProgramada > 0')
@@ -66,10 +66,10 @@ class PeiDao
     {
         return !Pei::find()->alias('P')->select([
             'P.IdPei',
-            'peiGestion.IdGestion',
+            'peiGestiones.IdGestion',
             'IndicadorEstrategicoProgramacionGestion.IdProgramacionGestion',
         ])
-            ->joinWith('peiGestion.gestionProgramacion', true, 'INNER JOIN')
+            ->joinWith('peiGestiones.gestionProgramacion', true, 'INNER JOIN')
             ->where('p.IdPei = :pei',[':pei' => $idPei])
             ->andWhere('peiGestion.Gestion > :Gestion',[':Gestion' => $finNuevo])
             ->andWhere('IndicadorEstrategicoProgramacionGestion.MetaProgramada > 0')
@@ -112,17 +112,6 @@ class PeiDao
             }
                 break;
         }
-
-
-
-        /*$model = PeiGestion::find()->select('*')->alias('G')
-            ->where('(G.IdPei = :pei) and (G.Gestion > :Gestion)',[':pei'=>$idPei,':Gestion'=>$gestionFin])
-            ->all();
-        foreach ($model as $programacion){
-            if (!$programacion->delete()){
-                throw new Exception("No se pudo eliminar la programación", 500);
-            }
-        }*/
     }
 
     /**

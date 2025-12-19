@@ -25,7 +25,7 @@ class PeiService
         $data = Pei::listAll()
             ->asArray()
             ->all();
-        return ResponseHelper::success($data,'Listado de PEI obtenido.');
+        return ResponseHelper::success($data,'Listado de PEIs obtenido.');
     }
 
     /**

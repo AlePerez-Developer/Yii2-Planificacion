@@ -1,24 +1,37 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
-use yii\base\BaseObject;
-use yii\db\Query;
+use app\modules\Planificacion\models\Programa;
+use common\models\Estado;
 
 class ProgramaDao
 {
-    /*=====================================================
-                 Genera un nuevo codigo de programa
-    =======================================================*/
-    static public function GenerarCodigoPrograma()
+    static function enUso(Programa $modelo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoPrograma) as Codigo')
-            ->from('Programas')
+        return $modelo->getActividades()->exists() || $modelo->getProyectos()->exists() || $modelo->getLlavesPresupuestarias()->exists();
+    }
+
+    /**
+     * @param string $id
+     * @param string $codigo
+     * @return bool
+     */
+    static function verificarCodigo(string $id, string $codigo): bool
+    {
+        $model = Programa::find()
+            ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','IdPrograma',$id])
             ->one();
-        if ($codigo['Codigo']){
-            return  $codigo['Codigo'] + 1;
-        } else {
-            return 1;
-        }
+
+        return !$model;
+    }
+
+    /**
+     * @param string $id
+     * @return bool
+     */
+    static function validarId(string $id): bool
+    {
+        return Programa::find()->where(['IdPrograma' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 }

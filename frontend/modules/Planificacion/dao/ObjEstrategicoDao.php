@@ -10,7 +10,7 @@ class ObjEstrategicoDao
 
     static function enUso(ObjetivoEstrategico $objetivo): bool
     {
-        return $objetivo->getObjetivosInstitucionales()->exists();
+        return $objetivo->getObjetivosInstitucionales()->exists() || $objetivo->getIndicadoresEstrategicos()->exists();
     }
 
     /**

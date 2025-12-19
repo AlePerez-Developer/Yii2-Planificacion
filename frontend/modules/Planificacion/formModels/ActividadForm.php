@@ -3,24 +3,28 @@
 namespace app\modules\Planificacion\formModels;
 
 use yii\base\Model;
-use app\modules\Planificacion\models\Programa;
+
+/**
+ *
+ * @property string $idPrograma
+ * @property string $codigo
+ * @property string $descripcion
+ */
 
 class ActividadForm extends Model
 {
-    public $codigo = '';
-    public $descripcion = '';
-    public $programa_id = null;
-    public $codigoActividad = null;
+    public string $idPrograma;
+    public string $codigo;
+    public string $descripcion;
 
     public function rules(): array
     {
         return [
-            [['programa_id', 'codigo', 'descripcion'], 'required'],
-            [['codigoActividad', 'programa_id'], 'integer'],
-            [['codigo'], 'string', 'max' => 20],
-            [['descripcion'], 'string', 'max' => 250],
+            [['idPrograma', 'codigo', 'descripcion'], 'required'],
+            ['codigo','match','pattern' => '/^\d{3}$/','message' => 'Debe contener exactamente 3 dígitos (ej: 023).'],
+            [['descripcion'], 'string', 'max' => 500],
+            [['idPrograma'], 'string', 'max' => 36],
             [['codigo', 'descripcion'], 'trim'],
-            ['programa_id', 'exist', 'skipOnError' => true, 'targetClass' => Programa::class, 'targetAttribute' => ['programa_id' => 'CodigoPrograma']],
         ];
     }
 }

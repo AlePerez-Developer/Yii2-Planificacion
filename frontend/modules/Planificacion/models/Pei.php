@@ -11,15 +11,17 @@ use common\models\Usuario;
  * This is the model class for table "PEIs".
  *
  * @property string $IdPei
- * @property string|null $Descripcion
+ * @property string $Descripcion
  * @property string $FechaAprobacion
  * @property int $GestionInicio
  * @property int $GestionFin
  * @property string $CodigoEstado
- * @property string|null $FechaHoraRegistro
+ * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
  * @property ObjetivoEstrategico[] $objetivosEstrategicos
+ * @property AreaEstrategica[] $areasEstrategicas
+ * @property PeiGestion[] $peiGestiones
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
  */
@@ -184,12 +186,23 @@ class Pei extends ActiveRecord
     }
 
     /**
+     * Gets query for [[AreasEstrategicas]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getAreasEstrategicas(): ActiveQuery
+    {
+        return $this->hasMany(AreaEstrategica::class, ['IdPei' => 'IdPei']);
+    }
+
+    /**
      * Gets query for [[PeiGestion]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getPeiGestion(): ActiveQuery
+    public function getPeiGestiones(): ActiveQuery
     {
         return $this->hasMany(PeiGestion::class, ['IdPei' => 'IdPei']);
     }

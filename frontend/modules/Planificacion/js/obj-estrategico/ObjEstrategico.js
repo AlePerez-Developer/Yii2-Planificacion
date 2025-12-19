@@ -161,7 +161,6 @@ $(document).ready(function(){
             }).then((data) => {
                 let obj = data.data
                 objEstrategico_s2AreaEstrategica.val(obj["IdAreaEstrategica"]).trigger('change')
-                console.log(obj["IdPoliticaEstrategica"])
                 populateS2Politicas(obj["IdAreaEstrategica"],objEstrategico_s2PoliticaEstrategica,obj["IdPoliticaEstrategica"])
                 $("#codigo").val(obj["Codigo"]);
                 $("#objetivo").val(obj["Objetivo"]);

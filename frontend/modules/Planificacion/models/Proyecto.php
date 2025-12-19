@@ -2,30 +2,33 @@
 
 namespace app\modules\Planificacion\models;
 
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use common\models\Estado;
 use common\models\Usuario;
-use Yii;
 
 /**
  * This is the model class for table "Proyectos".
  *
- * @property int $CodigoProyecto
- * @property int $Programa
+ * @property string $IdProyecto
+ * @property string $IdPrograma
  * @property string $Codigo
  * @property string $Descripcion
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
+ * @property Programa $programa
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
+ * @property LlavePresupuestaria[] $llavesPresupuestarias
  */
-class Proyecto extends \yii\db\ActiveRecord
+class Proyecto extends ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'Proyectos';
     }
@@ -33,31 +36,60 @@ class Proyecto extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            // En creación no debe exigirse CodigoProyecto (PK). Lo elimina de 'required'.
-            [['Programa', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoProyecto', 'Programa'], 'integer'],
-            [['FechaHoraRegistro'], 'safe'],
+            [['IdPrograma', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdProyecto', 'IdPrograma'], 'string', 'max' => 36],
             [['Codigo'], 'string', 'max' => 20],
-            [['Descripcion'], 'string', 'max' => 250],
+            [['Descripcion'], 'string', 'max' => 500],
+            [['FechaHoraRegistro'], 'safe'],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['Programa'], 'exist', 'skipOnError' => true, 'targetClass' => Programa::class, 'targetAttribute' => ['Programa' => 'CodigoPrograma']],
+            [['Codigo'], 'validateUniqueActiva', 'skipOnError' => true],
+            [['IdPrograma'], 'exist', 'skipOnError' => true, 'targetClass' => Programa::class, 'targetAttribute' => ['IdPrograma' => 'IdPrograma']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
     }
 
     /**
+     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     *
+     * @param string $attribute
+     * @used-by rules()
+     * @noinspection PhpUnused
+     */
+    public function validateUniqueActiva(string $attribute): void
+    {
+        if ($this->CodigoEstado !== 'V') {
+            return;
+        }
+
+        $id = $this->IdProyecto == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdProyecto;
+
+        $exists = self::find()
+            ->where([
+                'Codigo' => $this->Codigo,
+                'IdPrograma' => $this->IdPrograma,
+                'CodigoEstado' => 'V',
+            ])
+            ->andWhere(['<>', 'IdProyecto', $id]) // Evita conflicto consigo mismo en update
+            ->exists();
+
+        if ($exists) {
+            $this->addError($attribute, 'El Codigo  de proyecto ya existe con programa elegido');
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
-            'CodigoProyecto' => 'Codigo Proyecto',
-            'Programa' => 'Programa',
+            'IdProyecto' => 'Id Proyecto',
+            'IdPrograma' => 'Id Programa',
             'Codigo' => 'Codigo',
             'Descripcion' => 'Descripcion',
             'CodigoEstado' => 'Codigo Estado',
@@ -66,47 +98,87 @@ class Proyecto extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * Gets query for [[Programa]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getPrograma()
+    public static function listOne(string $id): ?Proyecto
     {
-        return $this->hasOne(Programa::class, ['CodigoPrograma' => 'Programa']);
+        return self::findOne(['IdProyecto' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+    }
+
+    public static function listAll(): ActiveQuery
+    {
+        return self::find()->alias('P')
+            ->select([
+                'P.IdProyecto',
+                'P.Codigo',
+                'P.Descripcion',
+                'P.CodigoEstado',
+                'P.CodigoUsuario',
+                'Prg.IdPrograma',
+            ])
+            ->joinWith('programa Prg', true, 'INNER JOIN')
+            ->where(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'Prg.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 
     /**
-     * Gets query for [[CodigoEstado]].
+     * alterna el estado del modelo V/C.
      *
-     * @return \yii\db\ActiveQuery
+     * @return void
      */
-    public function getCodigoEstado()
+    public function cambiarEstado(): void
+    {
+        $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
+            ? Estado::ESTADO_CADUCO
+            : Estado::ESTADO_VIGENTE;
+    }
+
+    /**
+     * realiza el soft delete de un registro.
+     *
+     * @return void
+     */
+    public function eliminar(): void
+    {
+        $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
+    }
+
+    /**
+     * Gets a query for [[LlavesPresupuestarias]].
+     *
+     * @return ActiveQuery
+     */
+    public function getLlavesPresupuestarias(): ActiveQuery
+    {
+        return $this->hasMany(LlavePresupuestaria::class, ['IdProyecto' => 'IdProyecto']);
+    }
+
+    /**
+     * Gets a query for [[Programa]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getPrograma(): ActiveQuery
+    {
+        return $this->hasOne(Programa::class, ['IdPrograma' => 'IdPrograma']);
+    }
+
+    /**
+     * Gets a query for [[CodigoEstado]].
+     *
+     * @return ActiveQuery
+     */
+    public function getCodigoEstado(): ActiveQuery
     {
         return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
     }
 
     /**
-     * Gets query for [[CodigoUsuario]].
+     * Gets a query for [[CodigoUsuario]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoUsuario()
+    public function getCodigoUsuario(): ActiveQuery
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
-    }
-
-    public function exist(): bool
-    {
-        return self::find()
-            ->where(['Codigo' => $this->Codigo])
-            ->andWhere(['!=', 'CodigoProyecto', $this->CodigoProyecto])
-            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->exists();
-    }
-
-    public function isUsed()
-    {
-        return false;
     }
 }

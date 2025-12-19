@@ -3,8 +3,8 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
-use app\modules\Planificacion\dao\ProgramaDao;
 use app\modules\Planificacion\formModels\ProgramaForm;
+use app\modules\Planificacion\dao\ProgramaDao;
 use app\modules\Planificacion\models\Programa;
 use yii\db\StaleObjectException;
 use common\models\Estado;
@@ -19,23 +19,24 @@ class ProgramaService
      *
      * @return array of programas
      */
-    public function listarProgramas(): array
+    public function listarTodo(): array
     {
         $data = Programa::listAll()
-            ->asArray()
-            ->all();
-        return ResponseHelper::success($data, 'Listado de Programas obtenido.');
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data,'Listado de Objetivos Estrategicos obtenido.');
     }
 
     /**
      * Obtiene un programa en base a un código.
      *
-     * @param int $codigoPrograma
+     * @param string $id
      * @return Programa|null
      */
-    public function listarPrograma(int $codigoPrograma): ?Programa
+    public  function listarUno(string $id): ?Programa
     {
-        return Programa::listOne($codigoPrograma);
+        return Programa::listOne($id);
     }
 
     /**
@@ -45,187 +46,170 @@ class ProgramaService
      * @return array ['message' => string, 'data' => string]
      * @throws Exception|ValidationException
      */
-    public function guardarPrograma(ProgramaForm $form): array
+    public function guardar(ProgramaForm $form): array
     {
-        $programa = new Programa([
-            'CodigoPrograma' => ProgramaDao::generarCodigoPrograma(),
+        $modelo = new Programa([
             'Codigo'          => trim($form->codigo),
             'Descripcion'     => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarModelo($programa);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Actualiza la información de un registro en el modelo
      *
-     * @param int $codigo
+     * @param string $id
      * @param ProgramaForm $form
      * @return array
      * @throws Exception
      * @throws Throwable
      * @throws ValidationException
      * @throws StaleObjectException
-     */
-    public function actualizarPrograma(int $codigo, ProgramaForm $form): array
+    */
+    public function actualizar(string $id, ProgramaForm $form): array
     {
-        $programa = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        // Asignar nuevos valores antes de verificar duplicados
-        $programa->Codigo = trim($form->codigo);
-        $programa->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->Codigo = trim($form->codigo);
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
-        // Verificar si existe otro programa con el mismo código (excluyéndose a sí mismo)
-        if ($programa->exist()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'Ya existe un programa con ese código',
-                400
-            );
-        }
-
-        return $this->validarProcesarModelo($programa);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Busca un Programa por su código y alterna su estado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $programa = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $programa->cambiarEstado();
+        $modelo->cambiarEstado();
 
-        if (!$programa->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $programa->getErrors(), 500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$programa->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Programa $programa->CodigoPrograma", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $programa->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el cambio de estado del Programa $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $programa->CodigoEstado,
+            'data' => $modelo->CodigoEstado,
         ];
     }
 
     /**
      * Busca un Programa por su código y realiza un soft delete.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function eliminarPrograma(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $programa = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if ($programa->enUso()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'El Programa se encuentra en uso y no puede ser eliminado',
-                500
-            );
+        if (ProgramaDao::enUso($modelo)){
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El programa se encuentra en uso',500);
         }
 
-        $programa->eliminarPrograma();
-
-        if (!$programa->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $programa->getErrors(), 500);
-        }
-
-        if (!$programa->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Programa $programa->CodigoPrograma", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $programa->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Obtiene el modelo según el código enviado.
      *
-     * @param int $codigo
+     * @param string $id
      * @return array
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $programa = $this->listarPrograma($codigo);
+        $modelo = $this->listarUno($id);
 
-        if (!$programa) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'Registro no encontrado',
-                404
-            );
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $programa->getAttributes([
-                'CodigoPrograma',
-                'Codigo',
-                'Descripcion'
-            ]),
+            'data' => $modelo->getAttributes(array('IdPrograma', 'Codigo', 'Descripcion')),
         ];
     }
 
     /**
      * Obtiene el modelo según el código enviado y valida si existe.
      *
-     * @param int $codigo
+     * @param string $id
      * @return Programa|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(int $codigo): ?Programa
+    private function obtenerModeloValidado(string $id): ?Programa
     {
-        $model = $this->listarPrograma($codigo);
-        if (!$model) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'No se encontró el registro buscado',
-                404
-            );
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
-        return $model;
+        return $modelo;
     }
 
     /**
      * Recibe un modelo lo valida y realiza el guardado del mismo.
      *
-     * @param Programa $programa
+     * @param Programa $modelo
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function validarProcesarModelo(Programa $programa): array
+    public function validarProcesarModelo(Programa $modelo): array
     {
-        if (!$programa->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $programa->getErrors(), 500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $modelo->getErrors(), 500);
         }
 
-        if (!$programa->save(false)) {
-            Yii::error("Error al guardar el Programa $programa->CodigoPrograma", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $programa->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el Programa $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $modelo->getErrors(), 500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => '',
         ];
+    }
+
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param string $codigo
+     * @return bool
+     */
+    public function verificarCodigo(string $id, string $codigo): bool
+    {
+        return ProgramaDao::verificarCodigo($id, $codigo);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
+    {
+        return ProgramaDao::validarId($id);
     }
 }

@@ -4,145 +4,176 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
-use app\modules\Planificacion\dao\ActividadDao;
 use app\modules\Planificacion\formModels\ActividadForm;
+use app\modules\Planificacion\dao\ActividadDao;
 use app\modules\Planificacion\models\Actividad;
+use yii\db\StaleObjectException;
 use common\models\Estado;
+use yii\db\Exception;
 use Throwable;
 use Yii;
-use yii\db\Exception;
-use yii\db\Expression;
-use yii\db\StaleObjectException;
 
 class ActividadService
 {
-    public function listarActividades(): array
+    public function listarTodo(): array
     {
-        $data = Actividad::find()
-            ->select([
-                'CodigoActividad',
-                'Programa',
-                'Codigo',
-                'Descripcion',
-                'CodigoEstado',
-                'CodigoUsuario',
-            ])
-            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['CodigoActividad' => SORT_ASC])
-            ->asArray()
-            ->all();
+        $data = Actividad::listAll()
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de Actividades obtenido.');
     }
 
-    public function listarActividad(int $codigoActividad): ?Actividad
+    public function listarUno(int $id): ?Actividad
     {
-        return Actividad::find()
-            ->where(['CodigoActividad' => $codigoActividad])
-            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->one();
+        return Actividad::listOne($id);
     }
 
-    public function guardarActividad(ActividadForm $form): array
+    /**
+     * Guarda un nuevo Programa.
+     *
+     * @param ActividadForm $form
+     ** @return array ['message' => string, 'data' => string]
+     * * @throws Exception|ValidationException
+     */
+    public function guardar(ActividadForm $form): array
     {
-        // Duplicado por Codigo (vigente)
-        $existe = Actividad::find()
-            ->where(['Codigo' => trim($form->codigo)])
-            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->exists();
-        if ($existe) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'] ?? 'errorExiste',
-                'Ya existe una actividad con ese código',
-                400
-            );
-        }
-
-        $codigoUsuario = Yii::$app->user->identity->CodigoUsuario ?? null;
-        if (!$codigoUsuario) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'errorEnvio',
-                'Usuario no autenticado o CódigoUsuario no disponible',
-                401
-            );
-        }
-
-        $nuevoCodigo = ActividadDao::GenerarCodigoActividad();
-        $actividad = new Actividad([
-            'CodigoActividad' => (int) $nuevoCodigo,
-            'Programa'        => (int) $form->programa_id,
-            'Codigo'          => trim($form->codigo),
-            'Descripcion'     => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
-            'CodigoEstado'    => Estado::ESTADO_VIGENTE,
-            'FechaHoraRegistro' => new Expression('GETDATE()'),
-            'CodigoUsuario'   => $codigoUsuario,
+        $modelo = new Actividad([
+            'IdPrograma' => $form->idPrograma,
+            'Codigo' => trim($form->codigo),
+            'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
+            'CodigoEstado' => Estado::ESTADO_VIGENTE,
+            'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
-        return $this->validarProcesarModelo($actividad);
+        return $this->validarProcesarModelo($modelo);
     }
 
-    public function actualizarActividad(int $codigo, ActividadForm $form): array
+    /**
+     * Actualiza la información de un registro en el modelo
+     *
+     * @param string $id
+     * @param ActividadForm $form
+     * @return array
+     * @throws Exception
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws StaleObjectException
+     */
+    public function actualizar(string $id, ActividadForm $form): array
     {
-        $actividad = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        $actividad->Programa    = (int) $form->programa_id;
-        $actividad->Codigo      = trim($form->codigo);
-        $actividad->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->IdPrograma = $form->idPrograma;
+        $modelo->Codigo = trim($form->codigo);
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
-        if ($actividad->exist()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'Ya existe una actividad con ese código',
-                400
-            );
-        }
-
-        return $this->validarProcesarModelo($actividad);
+        return $this->validarProcesarModelo($modelo);
     }
 
-    public function cambiarEstado(int $codigo): array
+    /**
+     * Busca una Actividad por su código y alterna su estado.
+     *
+     * @param string $id
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function cambiarEstado(string $id): array
     {
-        $actividad = $this->obtenerModeloValidado($codigo);
-        $actividad->CodigoEstado = $actividad->CodigoEstado == Estado::ESTADO_VIGENTE
-            ? Estado::ESTADO_CADUCO
-            : Estado::ESTADO_VIGENTE;
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if (!$actividad->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $actividad->getErrors(), 500);
+        $modelo->cambiarEstado();
+
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$actividad->save(false)) {
-            Yii::error("Error al guardar el cambio de estado de la Actividad $actividad->CodigoActividad", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $actividad->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el cambio de estado del Programa $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $actividad->CodigoEstado,
+            'data' => $modelo->CodigoEstado,
         ];
     }
 
-    public function eliminarActividad(int $codigo): array
+    /**
+     * Busca una Actividad por su código y realiza un soft delete.
+     *
+     * @param string $id
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function eliminar(string $id): array
     {
-        $actividad = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        if ($actividad->isUsed()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'La Actividad se encuentra en uso y no puede ser eliminada',
-                500
-            );
+        if (ActividadDao::enUso($modelo)){
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'La actividad se encuentra en uso',500);
         }
 
-        $actividad->CodigoEstado = Estado::ESTADO_ELIMINADO;
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
+    }
 
-        if (!$actividad->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $actividad->getErrors(), 500);
+    /**
+     * Obtiene el modelo según el código enviado.
+     *
+     * @param string $id
+     * @return array
+     * @throws ValidationException
+     */
+    public function obtenerModelo(string $id): array
+    {
+        $modelo = $this->listarUno($id);
+
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
-        if (!$actividad->save(false)) {
-            Yii::error("Error al guardar el cambio de estado de la Actividad $actividad->CodigoActividad", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $actividad->getErrors(), 500);
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => $modelo->getAttributes(array('IdActividad', 'IdPrograma', 'Codigo', 'Descripcion')),
+        ];
+    }
+
+    /**
+     * Obtiene el modelo según el código enviado y valida si existe.
+     *
+     * @param string $id
+     * @return Actividad|null
+     * @throws ValidationException
+     */
+    private function obtenerModeloValidado(string $id): ?Actividad
+    {
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
+        }
+        return $modelo;
+    }
+
+    /**
+     * Recibe un modelo lo valida y realiza el guardado del mismo.
+     *
+     * @param Actividad $modelo
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function validarProcesarModelo(Actividad $modelo): array
+    {
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $modelo->getErrors(), 500);
+        }
+
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el Programa $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $modelo->getErrors(), 500);
         }
 
         return [
@@ -151,54 +182,27 @@ class ActividadService
         ];
     }
 
-    public function obtenerModelo(int $codigo): array
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param string $idPrograma
+     * @param string $codigo
+     * @return bool
+     */
+    public function verificarCodigo(string $id, string $idPrograma, string $codigo): bool
     {
-        $actividad = $this->listarActividad($codigo);
-        if (!$actividad) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'Registro no encontrado',
-                404
-            );
-        }
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $actividad->getAttributes([
-                'CodigoActividad',
-                'Programa',
-                'Codigo',
-                'Descripcion',
-            ]),
-        ];
+        return ActividadDao::verificarCodigo($id, $idPrograma, $codigo);
     }
 
-    private function obtenerModeloValidado(int $codigo): ?Actividad
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
     {
-        $model = $this->listarActividad($codigo);
-        if (!$model) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'No se encontró el registro buscado',
-                404
-            );
-        }
-        return $model;
-    }
-
-    public function validarProcesarModelo(Actividad $actividad): array
-    {
-        if (!$actividad->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $actividad->getErrors(), 500);
-        }
-
-        if (!$actividad->save(false)) {
-            Yii::error("Error al guardar la Actividad $actividad->CodigoActividad", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $actividad->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
+        return ActividadDao::validarId($id);
     }
 }

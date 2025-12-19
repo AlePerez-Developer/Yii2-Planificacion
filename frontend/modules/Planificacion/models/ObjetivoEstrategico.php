@@ -31,6 +31,7 @@ use common\models\Usuario;
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
  * @property ObjetivoInstitucional[] $objetivosInstitucionales
+ * @property IndicadorEstrategico[] $indicadoresEstrategicos
  */
 
 class ObjetivoEstrategico extends ActiveRecord
@@ -180,6 +181,16 @@ class ObjetivoEstrategico extends ActiveRecord
     public function getObjetivosInstitucionales(): ActiveQuery
     {
         return $this->hasMany(ObjetivoInstitucional::class, ['CodigoObjEstrategico' => 'CodigoObjEstrategico']);
+    }
+
+    /**
+     * Gets a query for [[IndicadoresEstrategicos]].
+     *
+     * @return ActiveQuery
+     */
+    public function getIndicadoresEstrategicos(): ActiveQuery
+    {
+        return $this->hasMany(IndicadorEstrategico::class, ['IdObjEstrategico' => 'IdObjEstrategico']);
     }
 
     /**

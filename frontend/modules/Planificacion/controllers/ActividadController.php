@@ -1,23 +1,28 @@
 <?php
 namespace app\modules\Planificacion\controllers;
 
-use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\formModels\ActividadForm;
-use app\modules\Planificacion\models\Programa;
 use app\modules\Planificacion\services\ActividadService;
+use app\modules\Planificacion\formModels\ActividadForm;
+use app\modules\Planificacion\services\ProgramaService;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class ActividadController extends BaseController
 {
-    private ActividadService $actividadService;
+    private ActividadService $service;
+    private ProgramaService $programaService;
 
-    public function __construct($id, $module, ActividadService $actividadService, $config = [])
+    public function __construct($id, $module, ActividadService $service, ProgramaService $programaService, $config = [])
     {
-        $this->actividadService = $actividadService;
+        $this->service = $service;
+        $this->programaService = $programaService;
         parent::__construct($id, $module, $config);
     }
 
@@ -67,15 +72,12 @@ class ActividadController extends BaseController
 
     public function actionIndex(): string
     {
-        $programas = Programa::find()->where(['CodigoEstado' => 'V'])->all();
-        return $this->render('Actividades', [
-            'programas' => $programas,
-        ]);
+        return $this->render('Actividades');
     }
 
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->actividadService->listarActividades());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
     public function actionGuardar(): array
@@ -84,11 +86,11 @@ class ActividadController extends BaseController
             $request = Yii::$app->request;
             $form = new ActividadForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate() || $this->programaService->validarId($form->idPrograma)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->actividadService->guardarActividad($form);
+            return $this->service->guardar($form);
         });
     }
 
@@ -96,48 +98,79 @@ class ActividadController extends BaseController
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
-            $codigoActividad = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new ActividadForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate() || $this->programaService->validarId($form->idPrograma)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->actividadService->actualizarActividad($codigoActividad, $form);
+            return $this->service->actualizar($id, $form);
         });
     }
 
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function () {
-            $codigoActividad = $this->obtenerCodigo();
-            return $this->actividadService->cambiarEstado($codigoActividad);
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
         });
     }
 
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function () {
-            $codigoActividad = $this->obtenerCodigo();
-            return $this->actividadService->eliminarActividad($codigoActividad);
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
         });
     }
 
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function () {
-            $codigoActividad = $this->obtenerCodigo();
-            return $this->actividadService->obtenerModelo($codigoActividad);
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
         });
     }
 
-    private function obtenerCodigo(): int
+    /**
+     * Obtiene y valida si se recibió el código por el request.
+     *
+     * @return string
+     * @throws ValidationException
+     */
+    private function obtenerId(): string
     {
-        $req = Yii::$app->request->post();
-        $codigo = (int)($req['codigoActividad'] ?? $req['CodigoActividad'] ?? $req['codigo'] ?? $req['Codigo'] ?? 0);
-        if (!$codigo) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Actividad no enviado.', 404);
+        $id = Yii::$app->request->post('idActividad');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'id Actividad no enviado.', 404);
         }
-        return $codigo;
+        return $id;
+    }
+
+    /**
+     * accion para verificar un codigo ingresado
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
+    {
+        $id = Yii::$app->request->post('idActividad');
+        if (!isset($id)) {
+            return false;
+        }
+
+        $idPrograma = Yii::$app->request->post('idPrograma');
+        if (!isset($idPrograma)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id, $idPrograma, $codigo);
     }
 }

@@ -3,20 +3,23 @@ namespace app\modules\Planificacion\formModels;
 
 use yii\base\Model;
 
+/**
+ * @property string $codigo
+ * @property string $descripcion
+ */
+
 class ProgramaForm extends Model
 {
-    public string $codigo = ''; // Inicializada
-    public string $descripcion = ''; // Inicializada
-    public ?int $codigoPrograma = null; // Inicializada como nullable
+    public string $codigo;
+    public string $descripcion;
 
     public function rules(): array
     {
         return [
             [['codigo', 'descripcion'], 'required'],
-            [['codigo'], 'string', 'max' => 20],
-            [['descripcion'], 'string', 'max' => 250],
-            [['codigo'], 'trim'],
-            ['codigoPrograma', 'integer'],
+            ['codigo','match','pattern' => '/^\d{3}$/','message' => 'Debe contener exactamente 3 dígitos (ej: 023).'],
+            [['descripcion'], 'string', 'max' => 500],
+            [['codigo','descripcion'], 'trim'],
         ];
     }
 }

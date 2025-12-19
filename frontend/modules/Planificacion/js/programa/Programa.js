@@ -1,402 +1,206 @@
 $(document).ready(function () {
-  let dt_programa = $("#tablaListaProgramas").DataTable({
-    ajax: {
-      method: "POST",
-      dataType: "json",
-      cache: false,
-      contentType: false,
-      processData: false,
-      url: "index.php?r=Planificacion/programa/listar-todo",
-      dataSrc: "data",
-      error: function (xhr, ajaxOptions, thrownError) {
-        MostrarMensaje(
-          "error",
-          GenerarMensajeError(thrownError + " >" + xhr.responseText)
-        );
-      },
-    },
-    columns: [
-      {
-        className: "dt-small dt-center",
-        orderable: false,
-        searchable: false,
-        data: null,
-        render: function (data, type, row, meta) {
-          return meta.row + 1;
-        },
-        width: 30,
-      },
-      {
-        className: "dt-small",
-        data: "Codigo",
-      },
-      {
-        className: "dt-small",
-        data: "Descripcion",
-      },
-      {
-        className: "dt-small dt-estado dt-center",
-        orderable: false,
-        searchable: false,
-        data: "CodigoEstado",
-        render: function (data, type, row) {
-          return type === "display" && row.CodigoEstado === ESTADO_VIGENTE
-            ? '<button type="button" class="btn btn-outline-success btn-sm btnEstado" codigo="' +
-                row.CodigoPrograma +
-                '" estado="' +
-                ESTADO_VIGENTE +
-                '">Vigente</button>'
-            : '<button type="button" class="btn btn-outline-danger btn-sm btnEstado" codigo="' +
-                row.CodigoPrograma +
-                '" estado="' +
-                ESTADO_CADUCO +
-                '">Caducado</button>';
-        },
-      },
-      {
-        className: "dt-small dt-acciones dt-center",
-        orderable: false,
-        searchable: false,
-        data: "CodigoPrograma",
-        render: function (data, type) {
-          return type === "display"
-            ? '<div class="btn-group" role="group">' +
-                '<button type="button" class="btn btn-outline-warning btn-sm btnEditar" codigo="' +
-                data +
-                '" data-toggle="tooltip" title="Click! para editar el registro"><i class="fa fa-pen-fancy"></i></button>' +
-                '<button type="button" class="btn btn-outline-danger btn-sm btnEliminar" codigo="' +
-                data +
-                '" data-toggle="tooltip" title="Click! para eliminar el registro"><i class="fa fa-trash-alt"></i></button>' +
-                "</div>"
-            : data;
-        },
-      },
-    ],
-  });
+    let idPrograma = '00000000-0000-0000-0000-000000000000'
+    let baseUrl = "index.php?r=Planificacion/programa/"
 
-  dt_programa
-    .on("order.dt search.dt", function () {
-      let i = 1;
-      dt_programa
-        .cells(null, 0, { search: "applied", order: "applied" })
-        .every(function () {
-          this.data(i++);
+    function ReiniciarCampos(){
+        $('#formPrograma *').filter(':input').each(function () {
+          $(this).removeClass('is-invalid is-valid');
         });
-    })
-    .draw();
-
-  function reiniciarCampos() {
-    $("#formPrograma *")
-      .filter(":input")
-      .each(function () {
-        $(this).removeClass("is-invalid is-valid");
-      });
-    $("#codigoPrograma").val("");
-    $("#formPrograma").trigger("reset");
-  }
-
-  $("#btnMostrarCrear").off("click.programaOpen").on("click.programaOpen", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    const icono = $(".icon");
-    icono.addClass("opened");
-    $("#divDatos").show(500);
-    $("#divTabla").hide(500);
-  });
-
-  $("#btnCancelar").click(function () {
-    $(".icon").removeClass("opened");
-    reiniciarCampos();
-    $("#divDatos").hide(500);
-    $("#divTabla").show(500);
-  });
-
-  $("#btnGuardar").click(function () {
-    if ($("#formPrograma").valid()) {
-      if ($("#codigoPrograma").val() === "") {
-        guardarPrograma();
-      } else {
-        actualizarPrograma();
-      }
+        $('#formPrograma').trigger("reset");
+        idPrograma = '00000000-0000-0000-0000-000000000000'
     }
-  });
 
-  /*=============================================
-     INSERTA EN LA BD UN NUEVO REGISTRO DE PROGRAMA
-     =============================================*/
-  async function guardarPrograma() {
-    try {
-      let datos = new FormData();
-      datos.append("codigo", $("#codigo").val());
-      datos.append("descripcion", $("#descripcion").val());
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/programa/guardar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success) {
-        MostrarMensaje(
-          "success",
-          response.message || "Programa guardado correctamente"
-        );
-        await dt_programa.ajax.reload(function (){
-          $("#btnCancelar").click();
-        });
-
-      } else {
-        MostrarMensaje("error", response.message || "Error al guardar");
-      }
-    } catch (error) {
-      console.error("Error detallado:", error);
-      const errorData = error.responseJSON || {};
-      MostrarMensaje(
-        "error",
-        errorData.message ||
-          GenerarMensajeError(error.statusText) ||
-          "Error desconocido al guardar"
-      );
+    function mensajeAccion(accion) {
+        return `Los datos del programa se ${accion}ron correctamente.`;
     }
-  }
 
-  /*=============================================
-     ACTUALIZA EL PROGRAMA SELECCIONADO EN LA BD
-     =============================================*/
-  async function actualizarPrograma() {
-    const objectBtn = $("#btnGuardar");
-    try {
-      IniciarSpiner(objectBtn);
+    $("#btnCancelar").click(function () {
+        $('.icon').toggleClass('opened');
+        ReiniciarCampos();
+        $("#divDatos").hide(500);
+        $("#divTabla").show(500);
+    });
 
-      const datos = {
-        codigoPrograma: $("#codigoPrograma").val(),
-        codigo: $("#codigo").val(),
-        descripcion: $("#descripcion").val(),
-      };
+    $("#btnGuardar").click(async function () {
+        const btn = $(this);
+        const btnCancel = $('#btnCancelar')
 
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/programa/actualizar",
-        method: "POST",
-        data: datos,
-        dataType: "json",
-      });
+        if (!$("#formPrograma").valid()) return;
 
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje(
-          "success",
-          response.message || "Actualización exitosa"
-        );
+        const hasCode =  idPrograma !== '00000000-0000-0000-0000-000000000000';
+        let accion = hasCode ? 'actualizar' : 'guardar'
+
+        const codigo = $("#codigo").val();
+        const descripcion = $("#descripcion").val();
+
+        const datos = new FormData();
+        datos.append("idPrograma", idPrograma);
+        datos.append("codigo", codigo);
+        datos.append("descripcion", descripcion);
 
         try {
-          await dt_programa.ajax.reload(function (){
-            $("#btnCancelar").click();
-          });// Cerrar formulario
-        } catch (reloadError) {
-          console.error("Error recargando tabla:", reloadError);
-          window.location.reload(); // Fallback
+            await ajaxPromise({
+                url: baseUrl + accion,
+                data: datos,
+                spinnerBtn: btn,
+                cancelBtn: btnCancel,
+                successMsg: mensajeAccion(accion),
+                reloadTable: dt_programa
+            });
+        } catch (err) {
+            console.error("Error al procesar:", err);
         }
-      } else {
-        throw new Error(
-          response.message || response.respuesta || "Error desconocido"
-        );
-      }
-    } catch (error) {
-      console.error("Error en actualización:", error);
+    });
 
-      let errorMsg = "Error al actualizar";
-      if (error.responseJSON) {
-        errorMsg =
-          error.responseJSON.message ||
-          GenerarMensajeError(error.responseJSON.respuesta) ||
-          errorMsg;
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
+    $(document).on('click', '#refresh', function(){
+        dt_programa.ajax.reload();
+    })
 
-      await MostrarMensaje("error", errorMsg);
+    /* =============================================
+     * CAMBIA EL ESTADO DEL REGISTRO
+     * =============================================
+     */
+    $(document).on('click', 'tbody #btnEstado', async function(){
+        let objectBtn = $(this);
+        const dt_row = dt_programa.row(objectBtn.closest('tr')).data()
+        let idPrograma = dt_row["IdPrograma"];
 
-      if (!error.status) {
-        dt_programa.ajax.reload(null, false);
-      }
-    } finally {
-      DetenerSpiner(objectBtn);
-    }
-  }
+        const datos = new FormData();
+        datos.append("idPrograma", idPrograma);
 
-  /*=============================================
-     CAMBIA EL ESTADO DEL REGISTRO
-     =============================================*/
-  $("#tablaListaProgramas tbody").on("click", ".btnEstado", async function () {
-    const objectBtn = $(this);
-    const codigoPrograma = objectBtn.attr("codigo");
-    const estadoPrograma = objectBtn.attr("estado");
-
-    const datos = new FormData();
-    datos.append("codigoPrograma", codigoPrograma);
-
-    try {
-      IniciarSpiner(objectBtn);
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/programa/cambiar-estado",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        if (estadoPrograma === ESTADO_VIGENTE) {
-          objectBtn
-            .removeClass("btn-outline-success")
-            .addClass("btn-outline-danger");
-          objectBtn.html("Caducado");
-          objectBtn.attr("estado", ESTADO_CADUCO);
-        } else {
-          objectBtn
-            .addClass("btn-outline-success")
-            .removeClass("btn-outline-danger");
-          objectBtn.html("Vigente");
-          objectBtn.attr("estado", ESTADO_VIGENTE);
+        try {
+            await ajaxPromise({
+                url: baseUrl + "cambiar-estado",
+                data: datos,
+                spinnerBtn: objectBtn,
+                successMsg: 'Estado actualizado correctamente.',
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
         }
-      } else {
-        MostrarMensaje("error", GenerarMensajeError(response.respuesta));
-      }
-    } catch (error) {
-      MostrarMensaje(
-        "error",
-        GenerarMensajeError(error.statusText + " >" + error.responseText)
-      );
-    } finally {
-      DetenerSpiner(objectBtn);
-    }
-  });
+    });
 
-  /*=============================================
-     ELIMINA DE LA BD UN REGISTRO DE PROGRAMA
-     =============================================*/
-  $("#tablaListaProgramas tbody").on("click", ".btnEliminar", async function () {
-    const objectBtn = $(this);
-    const codigoPrograma = objectBtn.attr("codigo");
+    /*=============================================
+    ELIMINA DE LA BD UN REGISTRO
+    =============================================*/
+    $(document).on('click', 'tbody #btnEliminar', function(){
+        let objectBtn = $(this)
+        const dt_row = dt_programa.row(objectBtn.closest('tr')).data()
+        let idPrograma = dt_row["IdPrograma"];
 
-    try {
-      const resultado = await Swal.fire({
-        icon: "warning",
-        title: "Confirmación de eliminación",
-        text: "¿Está seguro de eliminar el programa elegido?",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Borrar",
-        cancelButtonColor: "#d33",
-        cancelButtonText: "Cancelar",
-      });
+        const datos = new FormData();
+        datos.append("idPrograma", idPrograma);
 
-      if (!resultado.isConfirmed) return;
+        Swal.fire({
+            icon: "warning",
+            title: "Confirmación eliminación",
+            text: "¿Está seguro de eliminar el programa seleccionado?",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: 'Borrar',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Cancelar'
+        }).then(async function (resultado) {
+            if (resultado.value) {
+                try {
+                    await ajaxPromise({
+                        url: baseUrl + "eliminar",
+                        data: datos,
+                        spinnerBtn: objectBtn,
+                        successMsg: mensajeAccion('eliminar'),
+                        reloadTable: dt_programa
+                    });
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                }
+            }
+        });
+    });
 
-      IniciarSpiner(objectBtn);
+    /*=============================================
+    BUSCA EL REGISTRO SELECCIONADO EN LA BD
+    =============================================*/
+    $(document).on('click', 'tbody #btnEditar', async function(){
+        let objectBtn = $(this);
+        const dt_row = dt_programa.row(objectBtn.closest('tr')).data()
+        idPrograma = dt_row["IdPrograma"];
 
-      const datos = new FormData();
-      datos.append("codigoPrograma", codigoPrograma);
+        const datos = new FormData();
+        datos.append("idPrograma", idPrograma);
 
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/programa/eliminar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
+        try {
+            await ajaxPromise({
+                url: baseUrl + "buscar",
+                data: datos,
+                spinnerBtn: objectBtn,
+            }).then((data) => {
+                let obj = data.data
+                $("#codigo").val(obj["Codigo"]);
+                $("#descripcion").val(obj["Descripcion"]);
+                $("#btnMostrarCrear").trigger('click');
+            });
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
+    });
 
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje(
-          "success",
-          "El programa ha sido borrado correctamente."
-        );
-        await dt_programa.ajax.reload(null, false);
-      } else {
-        await MostrarMensaje(
-          "error",
-          GenerarMensajeError(response.message || response.respuesta)
-        );
-      }
-    } catch (error) {
-      console.error("Error al eliminar programa:", error);
 
-      let errorMessage = "Error al eliminar el programa";
-      if (error.responseJSON) {
-        errorMessage =
-          error.responseJSON.message ||
-          GenerarMensajeError(error.responseJSON.respuesta);
-      } else if (error.statusText) {
-        errorMessage += `: ${error.statusText}`;
-      }
+    /**
+     * Validacion del form
+     */
+    $( "#formPrograma" ).validate( {
+        rules: {
+            codigo: {
+                required: true,
+                minlength: 3,
+                maxlength: 3,
+                remote: {
+                    url: baseUrl + "verificar-codigo",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        codigo: function() {
+                            return $('#codigo').val(); // valor actual del campo
+                        },
+                        idPrograma: function (){
+                            return idPrograma
+                        }
+                    }
+                }
+            },
+            descripcion:{
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+        },
+        messages: {
+            codigo: {
+                required: "Debe ingresar un codigo de programa",
+                minlength: "El codigo debe debe ser de 3 digitos",
+                maxlength: "El codigo debe debe ser de 3 digitos",
+                remote: "El codigo ingresado ya se encuentra en uso"
+            },
+            descripcion: {
+                required: "Debe ingresar la descripcion del programa",
+                minlength: "La descripcion del programa debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion del programa  debe tener maximo 500 caracteres",
+            },
+        },
+        errorElement: "div",
 
-      await MostrarMensaje("error", errorMessage);
-    } finally {
-      DetenerSpiner(objectBtn);
-    }
-  });
+        errorPlacement: function ( error, element ) {
+            error.addClass( "invalid-feedback" );
+            error.insertAfter(element);
+        },
+        highlight: function ( element  ) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        },
+        unhighlight: function (element) {
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+        }
+    } );
 
-  /*=============================================
-     BUSCA EL PROGRAMA SELECCIONADO EN LA BD (PARA EDITAR)
-     =============================================*/
-  $("#tablaListaProgramas tbody").on("click", ".btnEditar", async function () {
-    const objectBtn = $(this);
-    const codigoPrograma = objectBtn.attr("codigo");
-
-    try {
-      IniciarSpiner(objectBtn);
-
-      const datos = new FormData();
-      datos.append("codigoPrograma", codigoPrograma);
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/programa/buscar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        const programa = response.data || response.programa;
-
-        $("#codigoPrograma").val(programa.CodigoPrograma || "");
-        $("#codigo").val(programa.Codigo || "");
-        $("#descripcion").val(programa.Descripcion || "");
-
-        $("#btnMostrarCrear").trigger("click");
-      } else {
-        await MostrarMensaje(
-          "error",
-          GenerarMensajeError(response.message || response.respuesta)
-        );
-      }
-    } catch (error) {
-      console.error("Error al buscar programa:", error);
-
-      let errorMessage = "Error al cargar los datos del programa";
-      if (error.responseJSON) {
-        errorMessage =
-          error.responseJSON.message ||
-          GenerarMensajeError(error.responseJSON.respuesta);
-      } else if (error.statusText) {
-        errorMessage += `: ${error.statusText}`;
-      }
-
-      await MostrarMensaje("error", errorMessage);
-    } finally {
-      DetenerSpiner(objectBtn);
-    }
-  });
 });

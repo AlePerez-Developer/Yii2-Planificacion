@@ -1,24 +1,35 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
-use yii\base\BaseObject;
-use yii\db\Query;
+use app\modules\Planificacion\models\Actividad;
+use common\models\Estado;
 
 class ActividadDao
 {
-    /*=====================================================
-             Genera un nuevo codigo de actividad
-        =======================================================*/
-    static public function GenerarCodigoActividad()
+    static function enUso(Actividad $modelo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoActividad) as Codigo')
-            ->from('Actividades')
+        return $modelo->getLlavesPresupuestarias()->exists();
+    }
+
+    /**
+     * @param string $id
+     * @param string $idPrograma
+     * @param string $codigo
+     * @return bool
+     */
+    static function verificarCodigo(string $id, string $idPrograma, string $codigo): bool
+    {
+        $model = Actividad::find()
+            ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','IdActividad',$id])
+            ->andWhere(['IdPrograma' => $idPrograma])
             ->one();
-        if ($codigo['Codigo']){
-            return  $codigo['Codigo'] + 1;
-        } else {
-            return 1;
-        }
+
+        return !$model;
+    }
+
+    static function validarId(string $id): bool
+    {
+        return Actividad::find()->where(['IdActividad' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 }
