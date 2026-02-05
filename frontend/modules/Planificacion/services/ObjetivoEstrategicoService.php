@@ -29,6 +29,20 @@ class ObjetivoEstrategicoService
     }
 
     /**
+     * lista un array de Areas Estrategicas no eliminados
+     * @param string $search
+     * @return array of Areas
+     */
+    public function listarObjEstrategicosS2(string $search): array
+    {
+        $data = ObjetivoEstrategico::listAll($search)
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Objetivos Estrategicos obtenido.');
+    }
+
+    /**
      * obtiene un Objetivo Estrategico en base a un codigo.
      *
      * @param string $id

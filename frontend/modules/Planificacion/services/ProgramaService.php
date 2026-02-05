@@ -25,7 +25,21 @@ class ProgramaService
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 
-        return ResponseHelper::success($data,'Listado de Objetivos Estrategicos obtenido.');
+        return ResponseHelper::success($data,'Listado de Programas obtenido.');
+    }
+
+    /**
+     * lista un array de Programas no eliminados
+     * @param string $search
+     * @return array of Programas
+     */
+    public function listarProgramasS2(string $search): array
+    {
+        $data = Programa::listAll($search)
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Programas obtenido.');
     }
 
     /**

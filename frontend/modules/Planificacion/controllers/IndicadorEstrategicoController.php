@@ -138,7 +138,11 @@ class IndicadorEstrategicoController extends BaseController
             $form = new IndicadorEstrategicoForm();
 
             $form->load($request->post(), '');
-            if (!$form->validate()) {
+            if (!$form->validate() &&
+                $this->serviceObjEstrategico->validarId($form->idObjEstrategico) &&
+                $this->serviceUnidadIndicador->validarId($form->idUnidadIndicador) &&
+                $this->serviceTipoResultado->validarId($form->idTipoResultado) &&
+                $this->serviceCategoriaIndicador->validarId($form->idCategoriaIndicador)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 

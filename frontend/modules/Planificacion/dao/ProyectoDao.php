@@ -8,7 +8,6 @@ class ProyectoDao
 {
     static function enUso(Proyecto $modelo): bool
     {
-        return false;
         return $modelo->getLlavesPresupuestarias()->exists();
     }
 

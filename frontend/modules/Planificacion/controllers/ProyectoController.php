@@ -2,23 +2,28 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\formModels\ProyectoForm;
-use app\modules\Planificacion\models\Programa;
+use app\modules\Planificacion\services\ProgramaService;
 use app\modules\Planificacion\services\ProyectoService;
+use app\modules\Planificacion\formModels\ProyectoForm;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
 use Yii;
 
+/**
+ * @noinspection PhpUnused
+ */
 class ProyectoController extends BaseController
 {
-    private ProyectoService $proyectoService;
+    private ProyectoService $service;
+    private ProgramaService $programaService;
 
-    public function __construct($id, $module, ProyectoService $proyectoService, $config = [])
+    public function __construct($id, $module, ProyectoService $service, ProgramaService $programaService, $config = [])
     {
-        $this->proyectoService = $proyectoService;
+        $this->service = $service;
+        $this->programaService = $programaService;
         parent::__construct($id, $module, $config);
     }
 
@@ -68,84 +73,134 @@ class ProyectoController extends BaseController
 
     public function actionIndex(): string
     {
-        $programas = Programa::find()->where(['CodigoEstado' => 'V'])->all();
-        return $this->render('Proyectos', [
-            'programas' => $programas,
-        ]);
+        return $this->render('Proyecto');
     }
 
+    /**
+     * Acción para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->proyectoService->listarProyectos());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
+    /**
+     * Acción para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionGuardar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
-
             $form = new ProyectoForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            if (!$form->load($request->post(), '') || !$form->validate() || !$this->programaService->validarId($form->idPrograma) ) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-
-            return $this->proyectoService->guardarProyecto($form);
+            return $this->service->guardar($form);
         });
     }
 
+    /**
+     * Acción para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $codigoProyecto = $this->obtenerCodigo();
+            $id = $this->obtenerId();
             $form = new ProyectoForm();
 
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->proyectoService->actualizarProyecto($codigoProyecto, $form);
-        });
-    }
-
-    public function actionCambiarEstado(): array
-    {
-        return $this->withTryCatch(function () {
-            $codigoProyecto = $this->obtenerCodigo();
-            return $this->proyectoService->cambiarEstado($codigoProyecto);
-        });
-    }
-
-    public function actionEliminar(): array
-    {
-        return $this->withTryCatch(function () {
-            $codigoProyecto = $this->obtenerCodigo();
-            return $this->proyectoService->eliminarProyecto($codigoProyecto);
-        });
-    }
-
-    public function actionBuscar(): array
-    {
-        return $this->withTryCatch(function () {
-            $codigoProyecto = $this->obtenerCodigo();
-            return $this->proyectoService->obtenerModelo($codigoProyecto);
+            return $this->service->actualizar($id, $form);
         });
     }
 
     /**
-     * Obtiene y valida si se recibió el código por el request
-     * 
-     * @return int
+     * Acción para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionCambiarEstado(): array
+    {
+        return $this->withTryCatch(function () {
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
+        });
+    }
+
+    /**
+     * Acción para soft delete de un registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function () {
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
+        });
+    }
+
+    /**
+     * Acción para buscar un registro en específico.
+     *
+     * @return array
+     */
+    public function actionBuscar(): array
+    {
+        return $this->withTryCatch(function () {
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
+        });
+    }
+
+    /**
+     * Obtiene y valida si se recibió el código por el request.
+     *
+     * @return string
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerId(): string
     {
-        $codigo = (int)Yii::$app->request->post('codigoProyecto');
-        if (!$codigo) {
+        $id = Yii::$app->request->post('idProyecto');
+        if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Proyecto no enviado.', 404);
         }
-        return $codigo;
+        return $id;
+    }
+
+    /**
+     * accion para verificar un codigo ingresado
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
+    {
+        $id = Yii::$app->request->post('idProyecto');
+        if (!isset($id)) {
+            return false;
+        }
+
+        $idPrograma = Yii::$app->request->post('idPrograma');
+        if (!isset($idPrograma)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id, $idPrograma, $codigo);
     }
 }

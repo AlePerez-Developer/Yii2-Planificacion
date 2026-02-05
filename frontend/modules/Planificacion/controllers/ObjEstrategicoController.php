@@ -49,7 +49,7 @@ class ObjEstrategicoController extends BaseController
                     [
                         'actions' => [
                             'index','listar-todo','verificar-codigo','guardar', 'actualizar', 'eliminar','cambiar-estado','buscar',
-                            'listar-areas-estrategicas','listar-politicas-estrategicas'
+                            'listar-areas-estrategicas','listar-politicas-estrategicas','listar-obj-estrategicos-s2'
                         ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -97,6 +97,20 @@ class ObjEstrategicoController extends BaseController
     {
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
+
+    /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarObjEstrategicosS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarObjEstrategicosS2($search)) ;
+    }
+
 
     /**
      * accion para agregar un nuevo registro.

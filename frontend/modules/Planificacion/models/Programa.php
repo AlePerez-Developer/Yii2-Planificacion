@@ -110,9 +110,10 @@ class Programa extends ActiveRecord
     /**
      * Obtiene todos los programas activos (no eliminados)
      *
+     * @param string $search
      * @return ActiveQuery
      */
-    public static function listAll(): ActiveQuery
+    public static function listAll($search = '%%'): ActiveQuery
     {
         return self::find()
             ->select([
@@ -123,6 +124,7 @@ class Programa extends ActiveRecord
                 'CodigoUsuario'
             ])
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'Descripcion', $search, false])
             ->orderBy(['Codigo' => SORT_ASC]);
     }
 

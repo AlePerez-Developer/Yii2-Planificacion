@@ -73,7 +73,7 @@ class AreaEstrategica extends ActiveRecord
         return self::findOne(['IdAreaEstrategica' => $id, ['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll($search = '%%'): ActiveQuery
+    public static function listAll(string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('A')
             ->select([

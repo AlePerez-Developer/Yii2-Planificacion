@@ -124,7 +124,7 @@ class ObjetivoEstrategico extends ActiveRecord
         return self::findOne(['IdObjEstrategico' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll(): ActiveQuery
+    public static function listAll(string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('O')
             ->select([
@@ -148,6 +148,7 @@ class ObjetivoEstrategico extends ActiveRecord
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Ae.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Pe.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'O.Objetivo', $search,false])
             ->andWhere(['o.IdPei' => Yii::$app->contexto->getPei()]);
     }
 

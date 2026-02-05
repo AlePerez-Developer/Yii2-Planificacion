@@ -90,7 +90,7 @@ function populateS2ObjEstrategico(select2) {
         dataType: 'json',
         delay: 100,
         cache: true,
-        url: 'index.php?r=Planificacion/obj-estrategico/listar-todo',
+        url: 'index.php?r=Planificacion/obj-estrategico/listar-obj-estrategicos-s2',
         success: function(data){
             select2.empty();
 
@@ -183,6 +183,34 @@ function populateS2UnidadesIndicadores(select2) {
                     $('<option>', {
                         value: item["IdUnidadIndicador"],
                         text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2Programas(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/programa/listar-programas-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdPrograma"],
+                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"]
                     })
                 );
             });

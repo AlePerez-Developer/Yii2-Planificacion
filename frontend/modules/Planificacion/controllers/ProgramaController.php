@@ -90,6 +90,21 @@ class ProgramaController extends BaseController
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
+    /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarProgramasS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarProgramasS2($search)) ;
+    }
+
+
+
 
     /**
      * Acción para agregar un nuevo registro.

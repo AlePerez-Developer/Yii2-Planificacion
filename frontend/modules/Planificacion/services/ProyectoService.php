@@ -4,15 +4,14 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
-use app\modules\Planificacion\dao\ProyectoDao;
 use app\modules\Planificacion\formModels\ProyectoForm;
 use app\modules\Planificacion\models\Proyecto;
+use app\modules\Planificacion\dao\ProyectoDao;
+use yii\db\StaleObjectException;
 use common\models\Estado;
+use yii\db\Exception;
 use Throwable;
 use Yii;
-use yii\db\Exception;
-use yii\db\Expression;
-use yii\db\StaleObjectException;
 
 class ProyectoService
 {
@@ -21,243 +20,200 @@ class ProyectoService
      *
      * @return array
      */
-    public function listarProyectos(): array
+    public function listarTodo(): array
     {
-        $data = Proyecto::find()
-            ->select([
-                'CodigoProyecto',
-                'Programa',
-                'Codigo',
-                'Descripcion',
-                'CodigoEstado',
-                'CodigoUsuario',
-            ])
-            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['CodigoProyecto' => SORT_ASC])
-            ->asArray()
-            ->all();
+        $data = Proyecto::listAll()
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
 
         return ResponseHelper::success($data, 'Listado de Proyectos obtenido.');
     }
 
     /**
-     * Obtiene un proyecto en base a un código (excluye eliminados).
+     * Obtiene un proyecto en base a un código.
+     *
+     * @param string $id
+     * @return Proyecto|null
      */
-    public function listarProyecto(int $codigoProyecto): ?Proyecto
+    public function listarUno(string $id): ?Proyecto
     {
-        return Proyecto::find()
-            ->where(['CodigoProyecto' => $codigoProyecto])
-            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->one();
-    }
-
-    public function guardarProyecto(ProyectoForm $form): array
-    {
-        // Validar duplicado por Código (vigente)
-        $existe = Proyecto::find()
-            ->where(['Codigo' => trim($form->codigo)])
-            ->andWhere(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->exists();
-
-        if ($existe) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'] ?? 'errorExiste',
-                'Ya existe un proyecto con ese código',
-                400
-            );
-        }
-
-        // Usuario obligatorio por constraint
-        $codigoUsuario = Yii::$app->user->identity->CodigoUsuario ?? null;
-        if (!$codigoUsuario) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'errorEnvio',
-                'Usuario no autenticado o CódigoUsuario no disponible',
-                401
-            );
-        }
-
-        // Generar PK (la columna no es IDENTITY en SQL Server)
-        $nuevoCodigoProyecto = ProyectoDao::GenerarCodigoProyecto();
-
-        $proyecto = new Proyecto([
-            'CodigoProyecto' => (int) $nuevoCodigoProyecto,
-            'Programa' => (int) $form->programa_id, // Cambiado de $form->programa
-            'Codigo' => trim($form->codigo),
-            'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
-            'CodigoEstado' => Estado::ESTADO_VIGENTE,
-            'FechaHoraRegistro' => new Expression('GETDATE()'), // Cambiado a GETDATE()
-            'CodigoUsuario' => $codigoUsuario,
-        ]);
-
-        return $this->validarProcesarModelo($proyecto);
+        return Proyecto::listOne($id);
     }
 
     /**
-     * Actualiza la información de un Proyecto.
+     * Guarda un nuevo Proyecto.
      *
+     * @param ProyectoForm $form
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception|ValidationException
+     */
+    public function guardar(ProyectoForm $form): array
+    {
+        $modelo = new Proyecto([
+            'IdPrograma' => $form->idPrograma,
+            'Codigo' => trim($form->codigo),
+            'Descripcion' => mb_strtoupper(trim($form->descripcion)),
+            'CodigoEstado' => Estado::ESTADO_VIGENTE,
+            'CodigoUsuario' => Yii::$app->user->identity->id,
+        ]);
+
+        return $this->validarProcesarModelo($modelo);
+    }
+
+    /**
+     * Actualiza la información de un registro en el modelo
+     *
+     * @param string $id
+     * @param ProyectoForm $form
+     * @return array
      * @throws Exception
      * @throws Throwable
      * @throws ValidationException
      * @throws StaleObjectException
      */
-    public function actualizarProyecto(int $codigo, ProyectoForm $form): array
+    public function actualizar(string $id, ProyectoForm $form): array
     {
-        $proyecto = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        // Asignar nuevos valores del formulario
-        $proyecto->Programa    = (int) $form->programa_id;
-        $proyecto->Codigo      = trim($form->codigo);
-        $proyecto->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->IdPrograma = $form->idPrograma;
+        $modelo->Codigo = trim($form->codigo);
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
 
-        // Verificar si existe otro proyecto con el mismo código (vigente) usando el nuevo código
-        if ($proyecto->exist()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'Ya existe un proyecto con ese código',
-                400
-            );
-        }
-
-        return $this->validarProcesarModelo($proyecto);
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
-     * Busca un Proyecto por su código y alterna su estado V/C.
+     * Busca un Programa por su código y alterna su estado.
      *
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $proyecto = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        // Alterna estado sin depender de método en el modelo
-        $proyecto->CodigoEstado = $proyecto->CodigoEstado == Estado::ESTADO_VIGENTE
-            ? Estado::ESTADO_CADUCO
-            : Estado::ESTADO_VIGENTE;
+        $modelo->cambiarEstado();
 
-        if (!$proyecto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $proyecto->getErrors(), 500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
-        if (!$proyecto->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Proyecto $proyecto->CodigoProyecto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $proyecto->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el cambio de estado del Proyecto $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $proyecto->CodigoEstado,
+            'data' => $modelo->CodigoEstado,
         ];
     }
 
     /**
      * Busca un Proyecto por su código y realiza un soft delete.
      *
+     * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function eliminarProyecto(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $proyecto = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
 
-        // Verificar si el proyecto está en uso (modelo define isUsed())
-        if ($proyecto->isUsed()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'El Proyecto se encuentra en uso y no puede ser eliminado',
-                500
-            );
+        if (ProyectoDao::enUso($modelo)){
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'El proyecto se encuentra en uso',500);
         }
 
-        // Soft delete
-        $proyecto->CodigoEstado = Estado::ESTADO_ELIMINADO;
-
-        if (!$proyecto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $proyecto->getErrors(), 500);
-        }
-
-        if (!$proyecto->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Proyecto $proyecto->CodigoProyecto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $proyecto->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
+        $modelo->eliminar();
+        return $this->validarProcesarModelo($modelo);
     }
 
     /**
      * Obtiene el modelo según el código enviado.
      *
+     * @param string $id
+     * @return array
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $proyecto = $this->listarProyecto($codigo);
+        $modelo = $this->listarUno($id);
 
-        if (!$proyecto) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'Registro no encontrado',
-                404
-            );
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'Registro no encontrado',404);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $proyecto->getAttributes([
-                'CodigoProyecto',
-                'Programa',
-                'Codigo',
-                'Descripcion',
-            ]),
+            'data' => $modelo->getAttributes(array( 'IdProyecto', 'IdPrograma', 'Codigo', 'Descripcion')),
         ];
     }
 
     /**
      * Obtiene el modelo según el código enviado y valida si existe.
      *
+     * @param string $id
+     * @return Proyecto|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(int $codigo): ?Proyecto
+    private function obtenerModeloValidado(string $id): ?Proyecto
     {
-        $model = $this->listarProyecto($codigo);
-        if (!$model) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'No se encontró el registro buscado',
-                404
-            );
+        $modelo = $this->listarUno($id);
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
         }
-        return $model;
+        return $modelo;
     }
 
     /**
      * Recibe un modelo lo valida y realiza el guardado del mismo.
      *
+     * @param Proyecto $modelo
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function validarProcesarModelo(Proyecto $proyecto): array
+    public function validarProcesarModelo(Proyecto $modelo): array
     {
-        if (!$proyecto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $proyecto->getErrors(), 500);
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $modelo->getErrors(), 500);
         }
 
-        if (!$proyecto->save(false)) {
-            Yii::error("Error al guardar el Proyecto $proyecto->CodigoProyecto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $proyecto->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar el Proyecto $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $modelo->getErrors(), 500);
         }
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => '',
         ];
+    }
+
+    /**
+     *  Recibe un codigo y verifica si esta en uso.
+     *
+     * @param string $id
+     * @param string $idPrograma
+     * @param string $codigo
+     * @return bool
+     */
+    public function verificarCodigo(string $id, string $idPrograma, string $codigo): bool
+    {
+        return ProyectoDao::verificarCodigo($id, $idPrograma, $codigo);
+    }
+
+    /**
+     *  Recibe un id y verifica si existe.
+     *
+     * @param string $id
+     * @return bool
+     */
+    public function validarId(string $id): bool
+    {
+        return ProyectoDao::validarId($id);
     }
 }
