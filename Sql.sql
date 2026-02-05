@@ -430,6 +430,51 @@ CREATE TABLE Auditoria_IndEstrategico (
 
 
 
+/**
+  estructura
+  */
+create table Programas(
+    IdPrograma uniqueidentifier default newsequentialid() primary key,
+    Codigo Char(3) not null,
+    Descripcion varchar(500) NOT NULL,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Programas_Codigo check (Codigo like '[0-9][0-9][0-9]'),
+    constraint chk_Programas_Descripcion check (Descripcion <> ''),
+
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Programa_Codigo]
+    ON [dbo].Programas(Codigo)
+    WHERE   ([CodigoEstado] = 'V');
+
+create table Proyectos(
+    IdProyecto        uniqueidentifier          default newsequentialid() primary key,
+    IdPrograma        uniqueidentifier not null,
+    Codigo            varchar(20)      not null,
+    Descripcion       varchar(500)     NOT NULL,
+    CodigoEstado      char(1)          not null,
+    FechaHoraRegistro datetime         not null default getdate(),
+    CodigoUsuario     char(3)          not null,
+
+    constraint chk_Proyectos_Codigo check (Codigo NOT LIKE '%[^0-9]%' AND LEN(Codigo) > 2
+      ),
+    constraint chk_Proyectos_Descripcion check (Descripcion <> ''),
+
+    foreign key (IdPrograma) references Programas (IdPrograma),
+    foreign key (CodigoEstado) references Estados (CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios (CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Proyecto_Codigo]
+    ON [dbo].Proyectos(IdPrograma,Codigo)
+    WHERE   ([CodigoEstado] = 'V');
+
+
 
 
 
