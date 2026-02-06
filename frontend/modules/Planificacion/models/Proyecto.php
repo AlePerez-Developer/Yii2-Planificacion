@@ -41,7 +41,8 @@ class Proyecto extends ActiveRecord
         return [
             [['IdPrograma', 'Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['IdProyecto', 'IdPrograma'], 'string', 'max' => 36],
-            [['Codigo'], 'string', 'max' => 20],
+            [['Codigo'], 'string', 'min' => 3, 'max' => 20],
+            [['Codigo'], 'match', 'pattern' => '/^\d+$/', 'message' => 'El código solo puede contener números.'],
             [['Descripcion'], 'string', 'max' => 500],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoEstado'], 'string', 'max' => 1],

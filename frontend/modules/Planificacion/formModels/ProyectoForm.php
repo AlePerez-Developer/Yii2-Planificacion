@@ -23,7 +23,8 @@ class ProyectoForm extends Model
     {
         return [
             [['idPrograma', 'codigo', 'descripcion'], 'required'],
-            [['codigo'], 'string', 'max' => 20],
+            [['codigo'], 'string', 'min' => 3, 'max' => 20],
+            [['codigo'], 'match', 'pattern' => '/^\d+$/', 'message' => 'El código solo puede contener números.'],
             [['descripcion'], 'string', 'max' => 500],
             [['idPrograma'], 'string', 'max' => 36],
             [['codigo', 'descripcion'], 'trim'],
