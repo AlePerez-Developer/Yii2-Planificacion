@@ -113,7 +113,7 @@ class Programa extends ActiveRecord
      * @param string $search
      * @return ActiveQuery
      */
-    public static function listAll($search = '%%'): ActiveQuery
+    public static function listAll(string $search = '%%'): ActiveQuery
     {
         return self::find()
             ->select([

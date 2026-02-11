@@ -11,8 +11,6 @@ use yii\base\Model;
  * @property string $descripcion
  */
 
-
-
 class ProyectoForm extends Model
 {
     public string $idPrograma;

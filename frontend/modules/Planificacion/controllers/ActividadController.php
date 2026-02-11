@@ -72,21 +72,44 @@ class ActividadController extends BaseController
 
     public function actionIndex(): string
     {
-        return $this->render('Actividades');
+        return $this->render('actividad');
     }
 
+    /**
+     * Acción para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionListarTodo(): array
     {
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
+    /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarActividadesS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarActividadesS2($search)) ;
+    }
+
+    /**
+     * Acción para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionGuardar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
             $form = new ActividadForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate() || $this->programaService->validarId($form->idPrograma)) {
+            if (!$form->load($request->post(), '') || !$form->validate() || !$this->programaService->validarId($form->idPrograma)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
@@ -94,14 +117,20 @@ class ActividadController extends BaseController
         });
     }
 
+    /**
+     * Acción para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
+
             $id = $this->obtenerId();
             $form = new ActividadForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate() || $this->programaService->validarId($form->idPrograma)) {
+            if (!$form->load($request->post(), '') || !$form->validate() || !$this->programaService->validarId($form->idPrograma)) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
@@ -109,6 +138,11 @@ class ActividadController extends BaseController
         });
     }
 
+    /**
+     * Acción para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionCambiarEstado(): array
     {
         return $this->withTryCatch(function () {
@@ -117,6 +151,11 @@ class ActividadController extends BaseController
         });
     }
 
+    /**
+     * Acción para soft delete de un registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     */
     public function actionEliminar(): array
     {
         return $this->withTryCatch(function () {
@@ -125,6 +164,11 @@ class ActividadController extends BaseController
         });
     }
 
+    /**
+     * Acción para buscar un registro en específico.
+     *
+     * @return array
+     */
     public function actionBuscar(): array
     {
         return $this->withTryCatch(function () {

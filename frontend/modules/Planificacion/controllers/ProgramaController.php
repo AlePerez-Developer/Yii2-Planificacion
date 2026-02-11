@@ -103,9 +103,6 @@ class ProgramaController extends BaseController
         return $this->withTryCatch(fn() => $this->service->listarProgramasS2($search)) ;
     }
 
-
-
-
     /**
      * Acción para agregar un nuevo registro.
      *

@@ -30,6 +30,20 @@ class ProyectoService
     }
 
     /**
+     * lista un array de Proyectos no eliminados
+     * @param string $search
+     * @return array of Programas
+     */
+    public function listarProyectosS2(string $search): array
+    {
+        $data = Proyecto::listAll($search)
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Proyectos obtenido.');
+    }
+
+    /**
      * Obtiene un proyecto en base a un código.
      *
      * @param string $id

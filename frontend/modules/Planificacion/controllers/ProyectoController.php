@@ -73,7 +73,7 @@ class ProyectoController extends BaseController
 
     public function actionIndex(): string
     {
-        return $this->render('Proyecto');
+        return $this->render('proyecto');
     }
 
     /**
@@ -84,6 +84,19 @@ class ProyectoController extends BaseController
     public function actionListarTodo(): array
     {
         return $this->withTryCatch(fn() => $this->service->listarTodo());
+    }
+
+    /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarProyectosS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarProyectosS2($search)) ;
     }
 
     /**

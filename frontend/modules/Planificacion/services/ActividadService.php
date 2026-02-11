@@ -15,6 +15,11 @@ use Yii;
 
 class ActividadService
 {
+    /**
+     * Lista un array de Actividades no eliminadas
+     *
+     * @return array of Actividades
+     */
     public function listarTodo(): array
     {
         $data = Actividad::listAll()
@@ -24,7 +29,27 @@ class ActividadService
         return ResponseHelper::success($data, 'Listado de Actividades obtenido.');
     }
 
-    public function listarUno(int $id): ?Actividad
+    /**
+     * lista un array de Actividades no eliminadas
+     * @param string $search
+     * @return array of Actividades
+     */
+    public function listarActividadesS2(string $search): array
+    {
+        $data = Actividad::listAll($search)
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Programas obtenido.');
+    }
+
+    /**
+     * Obtiene un proyecto en base a un código.
+     *
+     * @param string $id
+     * @return Actividad|null
+     */
+    public function listarUno(string $id): ?Actividad
     {
         return Actividad::listOne($id);
     }

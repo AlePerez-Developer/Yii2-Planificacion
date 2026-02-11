@@ -99,12 +99,24 @@ class Proyecto extends ActiveRecord
         ];
     }
 
+    /**
+     * Busca un proyecto específico por código, excluyendo eliminados
+     *
+     * @param string $id
+     * @return Programa|null
+     */
     public static function listOne(string $id): ?Proyecto
     {
         return self::findOne(['IdProyecto' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll(): ActiveQuery
+    /**
+     * Obtiene todos los proyectos activos (no eliminados)
+     *
+     * @param string $search
+     * @return ActiveQuery
+     */
+    public static function listAll(string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('P')
             ->select([
@@ -117,6 +129,7 @@ class Proyecto extends ActiveRecord
             ])
             ->joinWith('programa Prg', true, 'INNER JOIN')
             ->where(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'P.Descripcion', $search, false])
             ->andWhere(['!=', 'Prg.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 

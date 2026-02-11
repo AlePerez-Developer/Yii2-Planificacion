@@ -98,12 +98,24 @@ class Actividad extends ActiveRecord
         ];
     }
 
+    /**
+     * Busca una actividad específica por código, excluyendo eliminados
+     *
+     * @param string $id
+     * @return Programa|null
+     */
     public static function listOne(string $id): ?Actividad
     {
         return self::findOne(['IdActividad' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll(): ActiveQuery
+    /**
+     * Obtiene todas las actividades activas (no eliminados)
+     *
+     * @param string $search
+     * @return ActiveQuery
+     */
+    public static function listAll(string $search = '%%'): ActiveQuery
     {
         return self::find()->alias('A')
             ->select([
@@ -112,11 +124,12 @@ class Actividad extends ActiveRecord
                 'A.Descripcion',
                 'A.CodigoEstado',
                 'A.CodigoUsuario',
-                'P.IdPrograma',
+                'Prg.IdPrograma',
             ])
-            ->joinWith('programa P', true, 'INNER JOIN')
+            ->joinWith('programa Prg', true, 'INNER JOIN')
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+            ->andwhere(['like', 'A.Descripcion', $search, false])
+            ->andWhere(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 
     /**

@@ -38,23 +38,23 @@ $this->params['breadcrumbs'] = [['label' => 'Actividades']];
             </span>
         </button>
     </div>
-    <div id="divDatos" class="card-body">
+    <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
             <div class="card " style="width: 50rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <form id="formActividades" action="" method="post">
+                    <form id="formActividad" action="" method="post">
 
                         <div class="form-group">
-                            <label for="idPrograma">Seleccione un programa</label>
-                            <select class="form-control codigo_group" id="idPrograma" name="idPrograma" >
+                            <label for="programas">Seleccione un programa</label>
+                            <select class="form-control codigo_group" id="programas" name="programas" >
                                 <option></option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="codigo" class="control-label">Codigo de actividad</label>
-                            <input id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control input-lg num codigo_group">
+                            <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control num codigo_group" maxlength="3">
                         </div>
 
                         <div class="form-group">
