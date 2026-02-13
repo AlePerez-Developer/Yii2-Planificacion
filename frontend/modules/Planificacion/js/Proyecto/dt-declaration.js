@@ -1,9 +1,11 @@
 let dt_proyecto;
 $(document).ready(function () {
+
     dt_proyecto = $("#tablaListaProyectos").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
         },
+        responsive: true,
         ajax: {
             method: "POST",
             dataType: "json",
@@ -31,10 +33,11 @@ $(document).ready(function () {
             },
             {
                 className: "dt-small dt-center",
-                data: "programa",
                 width: 300,
-                render: function (data, type) {
-                    return (type === 'display')? "(" + data["Codigo"] + ") <br>" + data["Descripcion"] : data["Codigo"];
+                orderable: false,
+                data: "programa.Codigo",
+                render: function (data, type, row) {
+                    return (type === 'display')? "(" + row["programa"]["Codigo"] + ") <br>" + row["programa"]["Descripcion"] : row["programa"]["Codigo"];
                 },
             },
             {
@@ -93,4 +96,8 @@ $(document).ready(function () {
                 });
         })
         .draw();
+
+    $('#tablaListaProyectos').on('draw.dt', function () {
+        DataTable_actualizarFiltroColumna(dt_proyecto,1,'Codigo');
+    });
 })

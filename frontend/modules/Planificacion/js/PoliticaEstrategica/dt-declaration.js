@@ -1,27 +1,5 @@
 let dt_politica
 $(document).ready(function () {
-    function actualizarFiltroColumna(columnIndex) {
-        let column = dt_politica.column(columnIndex);
-        let header = $(column.header());
-
-        header.find('select').remove();
-
-        let select = $('<select><option value="">Buscar...</option></select>')
-            .appendTo(header)
-            .on('change', function () {
-                let val = $.fn.dataTable.util.escapeRegex($(this).val());
-                column.search(val ? '^' + val + '$' : '', true, false).draw();
-            });
-
-        column
-            .data()
-            .unique()
-            .sort()
-            .each(function (d) {
-                select.append('<option value="' + d + '">' + d + '</option>');
-            });
-    }
-
     function format(d) {
         return (
             '<div class="row">' +
@@ -95,7 +73,7 @@ $(document).ready(function () {
                 className: 'dt-small dt-center',
                 orderable: false,
                 data: 'areaEstrategica.Codigo',
-                width: 100
+                width: 160
             },
             {
                 className: 'dt-small dt-center',
@@ -166,7 +144,7 @@ $(document).ready(function () {
     });
 
     $('#tablaListaPoliticas').on('draw.dt', function () {
-        actualizarFiltroColumna(2);
+        DataTable_actualizarFiltroColumna(dt_politica,2,'Codigo');
     });
 
 

@@ -22,6 +22,55 @@ function cambiarEstadoBtn(objectBtn, data){
     }
 }
 
+function DataTable_actualizarFiltroColumna(dtTable,columnIndex,field) {
+
+    let column = dtTable.column(columnIndex);
+    let header = $(column.header());
+
+    let select = header.find('select');
+
+    if (select.length === 0) {
+        select = $('<select class="form-select form-select-sm">' +
+            '<option value="">Mostrar todo...</option>' +
+            '</select>')
+            .appendTo(header)
+            .on('change', function () {
+                let val = $(this).val();
+
+                if (val === "") {
+                    column.search('').draw();
+                } else {
+                    column.search(
+                        '^' + $.fn.dataTable.util.escapeRegex(val) + '$',
+                        true,
+                        false
+                    ).draw();
+                }
+            });
+    }
+
+    let valorSeleccionado = select.val();
+
+    select.find('option:not(:first)').remove();
+
+    column
+        .data()
+        .unique()
+        .sort()
+        .each(function (d) {
+            let valor = d[field] ?? d;
+
+            select.append(
+                $('<option>', {
+                    value: valor,
+                    text: valor
+                })
+            );
+        });
+
+    select.val(valorSeleccionado);
+}
+
 function populateS2Areas(select2) {
     $.ajax({
         method: "POST",

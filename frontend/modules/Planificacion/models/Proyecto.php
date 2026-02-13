@@ -126,6 +126,7 @@ class Proyecto extends ActiveRecord
                 'P.CodigoEstado',
                 'P.CodigoUsuario',
                 'Prg.IdPrograma',
+                'Prg.Codigo as codex'
             ])
             ->joinWith('programa Prg', true, 'INNER JOIN')
             ->where(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])

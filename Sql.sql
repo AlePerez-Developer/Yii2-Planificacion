@@ -474,6 +474,27 @@ CREATE UNIQUE INDEX [UQ_Proyecto_Codigo]
     ON [dbo].Proyectos(IdPrograma,Codigo)
     WHERE   ([CodigoEstado] = 'V');
 
+create table Actividades(
+    IdActividad uniqueidentifier default newsequentialid() primary key,
+    IdPrograma uniqueidentifier not null,
+    Codigo char(3) not null,
+    Descripcion varchar(500) NOT NULL,
+    CodigoEstado char(1) not null,
+    FechaHoraRegistro datetime not null default getdate(),
+    CodigoUsuario char(3) not null,
+
+    constraint chk_Actividades_Codigo check (Codigo like '[0-9][0-9][0-9]'),
+    constraint chk_Actividades_Descripcion check (Descripcion <> ''),
+
+    foreign key (IdPrograma) references Programas(IdPrograma),
+    foreign key (CodigoEstado) references Estados(CodigoEstado),
+    foreign key (CodigoUsuario) references Usuarios(CodigoUsuario)
+)
+
+CREATE UNIQUE INDEX [UQ_Actividad_Codigo]
+    ON [dbo].Actividades(IdPrograma,Codigo)
+    WHERE   ([CodigoEstado] = 'V');
+
 
 
 
