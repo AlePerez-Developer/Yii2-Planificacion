@@ -1,81 +1,101 @@
 let dt_pei
 $(document).ready(function () {
     dt_pei = $("#tablaListaPeis").DataTable({
-        initComplete: function() {
-            $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
+         initComplete: function () {
+            $("div.dt-search").append(`
+            <button type="button"
+                    id="refresh"
+                    class="btn btn-outline-primary btn-sm ms-2"
+                    title="Recargar tabla">
+                <i class="fas fa-sync fa-spin"></i>
+            </button>
+        `);
+
+            // Tooltip Bootstrap 5
+            $('[title]').tooltip();
         },
-        ajax: {
-            method: "POST",
-            dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
-            url: 'index.php?r=Planificacion/peis/listar-todo',
-            dataSrc: 'data',
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_pei.processing(false);
+
+        ajax:{
+            method:"POST",
+            dataType:"json",
+            url:"index.php?r=Planificacion/peis/listar-todo",
+            dataSrc:"data"
+        },
+
+        columns:[
+
+            {
+                title: '#',
+                data:"CodigoUsuario",
+                className:"text-center",
+                width:"60px",
+                render:function(data){
+                    return `<span class="badge-codigo">${data}</span>`;
+                }
+            },
+
+            {
+                title: '<center>Descripcion</center>',
+                data:null,
+                render:function(data,type,row){
+
+                    if(type!=="display"){
+                        return row.Descripcion;
+                    }
+
+                    return `
+                    <div class="pei-main">
+                        ${row.Descripcion}
+                    </div>
+
+                    <div class="pei-sub">
+                        Gestión ${row.GestionInicio} - ${row.GestionFin}
+                    </div>
+
+                    <div class="pei-sub">
+                        Aprobación: ${row.FechaAprobacion}
+                    </div>
+                `;
+                }
+            },
+
+            {
+                title: 'Estado',
+                data:"CodigoEstado",
+                className:"text-center",
+                width:"160px",
+                render:function(data,type,row){
+
+                    if(type!=="display"){
+                        return data;
+                    }
+
+                    return row.CodigoEstado == ESTADO_VIGENTE
+                        ? `<span class="badge-vigente btnEstado">Vigente</span>`
+                        : `<span class="badge-caducado btnEstado">Caducado</span>`;
+                }
+            },
+
+            {
+                title: 'Acciones',
+                data:"IdPei",
+                className:"text-center",
+                width:"130px",
+                orderable:false,
+                render:function(data){
+
+                    return `
+                    <button class="btn-action btn-edit btnEditar">
+                        <i class="fa fa-pen"></i>
+                    </button>
+
+                    <button class="btn-action btn-delete btnEliminar">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                `;
+                }
             }
-        },
-        columns: [
-            {
-                className: 'dt-small dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoUsuario',
-                width: 30
-            },
-            {
-                className: 'dt-small',
-                data: 'Descripcion'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'FechaAprobacion'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'GestionInicio'
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'GestionFin'
-            },
-            {
-                className: 'dt-small dt-estado dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoEstado',
-                render: function (data, type, row) {
-                    return ( (type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button id="btnEstado" type="button" class="btn btn-outline-success btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button id="btnEstado" type="button" class="btn btn-outline-danger btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>' ;
-                },
-            },
-            {
-                className: 'dt-small dt-acciones dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'IdPei',
-                render: function (data, type) {
-                    return type === 'display'
-                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                            '<button id="btnEditar" type="button" class="btn btn-outline-warning btn-sm btnEditar" data-toggle="tooltip" title="Click! para editar el registro">' +
-                            '    <i class="fa fa-pen-fancy"></i>' +
-                            '</button>' +
-                            '<button id="btnEliminar" type="button" class="btn btn-outline-danger btn-sm btnEliminar" data-toggle="tooltip" title="Click! para eliminar el registro">' +
-                            '    <i class="fa fa-trash-alt"></i>' +
-                            '</button>' +
-                          '</div>'
-                        : data;
-                },
-            },
-        ],
+        ]
     });
 
     dt_pei.on('order.dt search.dt', function () {

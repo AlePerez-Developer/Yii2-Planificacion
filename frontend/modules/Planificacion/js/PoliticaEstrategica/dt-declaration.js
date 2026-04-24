@@ -34,7 +34,7 @@ $(document).ready(function () {
     dt_politica = $("#tablaListaPoliticas").DataTable({
         initComplete: function () {
             $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
-            actualizarFiltroColumna(2);
+            DataTable_actualizarFiltroColumna(dt_politica,2,'Codigo');
         },
         ajax: {
             method: "POST",

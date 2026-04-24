@@ -60,7 +60,7 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '#refresh', function(){
-        dt_pei.ajax.reload()
+        dt_pei.ajax.reload(null, false);
     })
 
     /* =============================================

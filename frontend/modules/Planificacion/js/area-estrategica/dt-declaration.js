@@ -31,6 +31,43 @@ $(document).ready(function () {
             '   </div>' +
             '</div>'
         );
+
+        return (
+            '<table id="subDetail" class="subDetail">' +
+            '<colgroup>\n' +
+            '<col style="width: 126px">\n' +
+            '<col style="width: 125px">\n' +
+            '<col style="width: 144px">\n' +
+            '<col style="width: 214px">\n' +
+            '</colgroup>\n' +
+            '<thead>\n' +
+            '  <tr>\n' +
+            '    <th class="tg-1wig" colspan="4">Objetivo Estrategico</th>\n' +
+            '  </tr></thead>\n' +
+            '<tbody>\n' +
+            '  <tr>\n' +
+            '    <td class="subDetail_Title">Codigo</td>\n' +
+            '    <td class="subDetail_Codigo" colspan="3">'+ d["Compuesto"]+'</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="subDetail_Title">Objetivo</td>\n' +
+            '    <td class="subDetail_Title">Producto</td>\n' +
+            '    <td class="subDetail_Title">Descripcion</td>\n' +
+            '    <td class="subDetail_Title">Formula</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Objetivo"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Producto"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Descripcion"]+'</td>\n' +
+            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Formula"]+'</td>\n' +
+            '  </tr>\n' +
+            '  <tr>\n' +
+            '    <td class="tg-amwm" colspan="2"><b>Area Estrategicas:</b> -' + d["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["areaEstrategica"]["Descripcion"] + ' </td>\n' +
+            '    <td class="tg-amwm" colspan="2"><b>Politica Estrategicas:</b> -' + d["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["politicaEstrategica"]["Descripcion"] + ' </td>\n' +
+            '  </tr>\n' +
+            '</tbody>\n' +
+            '</table>');
+
     }
     dt_area = $("#tablaListaAreas").DataTable({
         initComplete: function () {

@@ -2,13 +2,13 @@
 CREATE FUNCTION dbo.ObtenerIPCliente()
     RETURNS VARCHAR(50)
 AS
-BEGIN
+  BEGIN
     DECLARE @ip VARCHAR(50);
-SELECT @ip = client_net_address
-FROM sys.dm_exec_connections
-WHERE session_id = @@SPID;
-RETURN @ip;
-END;
+    SELECT @ip = client_net_address
+    FROM sys.dm_exec_connections
+    WHERE session_id = @@SPID;
+    RETURN @ip;
+  END;
 
 CREATE TABLE Usuarios(
     CodigoUsuario char(3) primary key,
