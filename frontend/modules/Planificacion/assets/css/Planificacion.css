@@ -36,9 +36,9 @@
 .icon .circle .horizontal {
     position: absolute;
     background-color: whitesmoke;
-    width: 20px;
+    width: 18px;
     height: 2px;
-    left: 50%;
+    left: 55%;
     margin-left: -10px;
     top: 50%;
     margin-top: -1.2px;

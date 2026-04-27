@@ -101,3 +101,71 @@ a.desc:after {
 {
     text-decoration: none;
 }
+
+/* ==================================================
+   HEADER INTELIGENTE PRO
+================================================== */
+
+.content-wrapper-pro{
+    background:linear-gradient(180deg,#f8fafc,#f1f5f9);
+    min-height:100vh;
+}
+
+.header-card{
+    border-radius:22px !important;
+    background:linear-gradient(135deg,#ffffff,#f8fbff);
+}
+
+/* Icono */
+.page-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:22px;
+    box-shadow:0 12px 24px rgba(0,0,0,.12);
+}
+
+.page-icon:hover{
+    transform:translateY(-2px) rotate(20deg);
+}
+
+.page-title{
+    font-size:30px;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.page-subtitle{
+    font-size:14px;
+    color:#64748b;
+    margin-top:4px;
+}
+
+.breadcrumb-pro{
+    padding:12px 16px;
+    border-radius:999px;
+    background:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.04);
+}
+
+.breadcrumb-pro .breadcrumb-item + .breadcrumb-item::before{
+    content:"›";
+}
+
+/* Responsive */
+@media(max-width:768px){
+
+    .page-title{
+        font-size:22px;
+    }
+
+    .page-icon{
+        width:48px;
+        height:48px;
+    }
+
+}
