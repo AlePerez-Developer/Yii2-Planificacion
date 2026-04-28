@@ -1,5 +1,8 @@
+let urlProgramar
+
 $(document).ready(function(){
     let idObjEstrategico = '00000000-0000-0000-0000-000000000000'
+
     let baseUrl = "index.php?r=Planificacion/obj-estrategico/"
 
     function ReiniciarCampos(){
@@ -173,6 +176,15 @@ $(document).ready(function(){
             console.error("Error al procesar:", err);
         }
     });
+
+    $(document).on('click', 'tbody #btnProgramar', async function(){
+        let objectBtn = $(this);
+        const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data();
+        let idObjEstrategico = dt_row["IdObjEstrategico"];
+
+        // redirección
+        window.location.href = urlProgramar + '&id=' + idObjEstrategico;
+    })
 
 
     /**

@@ -15,7 +15,7 @@ class UnidadService
     {
         $unidades = Unidad::find()
             ->select([
-                'CodigoUnidad', 'Da', 'Ue', 'Descripcion', 'Organizacional',
+                'IdUnidad', 'Da', 'Ue', 'Descripcion', 'Organizacional',
                 'FechaInicio', 'FechaFin', 'CodigoEstado', 'CodigoUsuario'
             ])
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
@@ -31,11 +31,11 @@ class UnidadService
 
     public function guardar(array $params): array
     {
-        $this->validarRequeridos($params, ['da','ue','descripcion','organizacional','fechaInicio','fechaFin']);
+        $this->validarRequeridos($params, ['da','ue','descripcion','organizacional','fechaInicio']);
 
         $unidad = new Unidad();
         // PK por DAO (tabla no identidad)
-        $unidad->CodigoUnidad = UnidadDao::GenerarCodigoUnidad();
+
         $unidad->Da = $params['da'];
         $unidad->Ue = $params['ue'];
         $unidad->Descripcion = mb_strtoupper(trim($params['descripcion']), 'UTF-8');
@@ -59,7 +59,7 @@ class UnidadService
 
     public function actualizar(array $params): array
     {
-        $this->validarRequeridos($params, ['codigoUnidad','da','ue','descripcion','organizacional','fechaInicio','fechaFin']);
+        $this->validarRequeridos($params, ['codigoUnidad','da','ue','descripcion','organizacional','fechaInicio']);
 
         $unidad = Unidad::findOne($params['codigoUnidad']);
         if (!$unidad) {
@@ -86,7 +86,7 @@ class UnidadService
         ];
     }
 
-    public function cambiarEstado(int $codigoUnidad): array
+    public function cambiarEstado(string $codigoUnidad): array
     {
         $unidad = Unidad::findOne($codigoUnidad);
         if (!$unidad) {
@@ -107,7 +107,7 @@ class UnidadService
         ];
     }
 
-    public function eliminar(int $codigoUnidad): array
+    public function eliminar(string $codigoUnidad): array
     {
         $unidad = Unidad::findOne($codigoUnidad);
         if (!$unidad) {
@@ -128,7 +128,7 @@ class UnidadService
         ];
     }
 
-    public function buscar(int $codigoUnidad): array
+    public function buscar(string $codigoUnidad): array
     {
         $unidad = Unidad::findOne($codigoUnidad);
         if (!$unidad) {
@@ -136,7 +136,7 @@ class UnidadService
         }
 
         return [
-            'data' => $unidad->getAttributes(['CodigoUnidad','Da','Ue','Descripcion','Organizacional','FechaInicio','FechaFin','CodigoEstado']),
+            'data' => $unidad->getAttributes(['IdUnidad','Da','Ue','Descripcion','Organizacional','FechaInicio','FechaFin','CodigoEstado']),
             'message' => 'Unidad encontrada'
         ];
     }

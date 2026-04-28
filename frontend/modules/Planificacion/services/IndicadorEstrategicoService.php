@@ -30,6 +30,20 @@ class IndicadorEstrategicoService
     }
 
     /**
+     * lista un array de Indicadores Estrategicos no eliminados segun un Id Objetivo Estrategico
+     *
+     * @return array of Indicadores Estategicos segun
+     */
+    public function listarTodobyObj(string $id): array
+    {
+        $data = IndicadorEstrategico::listAllbyObj($id)
+            ->orderBy(['Codigo' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data,'Listado de Indicadores Estrategicos obtenido.');
+    }
+
+    /**
      * obtiene un Objetivo Estrategico en base a un codigo.
      *
      * @param string $id

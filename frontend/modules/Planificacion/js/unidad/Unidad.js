@@ -103,7 +103,7 @@ $(document).ready(function () {
         render: function (data, type, row, meta) {
           return type === "display" && row.CodigoEstado === ESTADO_VIGENTE
             ? '<button type="button" class="btn btn-outline-success btn-sm  btnEstado" codigo="' +
-                row.CodigoUnidad +
+                row.IdUnidad +
                 '" estado =  "' +
                 ESTADO_VIGENTE +
                 '" >Vigente</button>'
@@ -118,7 +118,7 @@ $(document).ready(function () {
         className: "dt-small dt-acciones dt-center",
         orderable: false,
         searchable: false,
-        data: "CodigoUnidad",
+        data: "IdUnidad",
         render: function (data, type, row, meta) {
           return type === "display"
             ? '<div class="btn-group" role="group" aria-label="Basic example">' +
@@ -379,7 +379,7 @@ $(document).ready(function () {
 
       if (response.success) {
         const unidad = response.data;
-        $("#codigoUnidad").val(unidad.CodigoUnidad);
+        $("#codigoUnidad").val(unidad.IdUnidad);
         $("#da").val(unidad.Da);
         $("#ue").val(unidad.Ue);
         $("#descripcion").val(unidad.Descripcion);

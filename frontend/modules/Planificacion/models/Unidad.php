@@ -7,7 +7,7 @@ use common\models\Usuario;
 /**
  * This is the model class for table "Unidades".
  *
- * @property int $CodigoUnidad
+ * @property string $IdUnidad
  * @property string $Da
  * @property string $Ue
  * @property string $Descripcion
@@ -37,14 +37,14 @@ class Unidad extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['CodigoUnidad', 'Da', 'Ue', 'Descripcion', 'Organizacional', 'FechaInicio', 'FechaFin', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoUnidad','Organizacional'], 'integer'],
+            [[ 'Da', 'Ue', 'Descripcion',  'FechaInicio',  'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Organizacional'], 'integer'],
             [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
             [['Da', 'Ue'], 'string', 'max' => 20],
             [['Descripcion'], 'string', 'max' => 250],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['CodigoUnidad'], 'unique'],
+            [['IdUnidad'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::className(), 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::className(), 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -95,7 +95,7 @@ class Unidad extends \yii\db\ActiveRecord
             ->where('((Da = :Da) and (Ue = :Ue))',
                 [':Da' => $this->Da, ':Ue' => $this->Ue]
             )
-            ->andWhere(['!=','CodigoUnidad', $this->CodigoUnidad])
+            ->andWhere(['!=','IdUnidad', $this->IdUnidad])
             ->andWhere(["CodigoEstado"=> Estado::ESTADO_VIGENTE])->all();
         if(!empty($unidad)){
             return true;

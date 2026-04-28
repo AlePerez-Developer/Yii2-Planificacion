@@ -3,12 +3,20 @@ use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
+/*
+$this->registerJs("
+     urlProgramar = '" . \yii\helpers\Url::to(['programar-indicadores/index']) . "';
+", \yii\web\View::POS_HEAD);*/
 
 $this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js",[
     'depends' => [
         JqueryAsset::class
     ]
 ]);
+
+$this->registerJs("
+    urlProgramar = '" . \yii\helpers\Url::to(['programar-indicador/index']) . "';
+");
 
 $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js", [
     'depends' => [

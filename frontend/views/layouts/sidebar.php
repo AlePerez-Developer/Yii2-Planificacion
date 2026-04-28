@@ -56,7 +56,7 @@
                             ['label' => 'Programas', 'url' => ['/Planificacion/programa/index'], 'iconStyle' => 'far'],
                             ['label' => 'Proyectos', 'url' => ['/Planificacion/proyecto/index'], 'iconStyle' => 'far'],
                             ['label' => 'Actividades', 'url' => ['/Planificacion/actividad/index'], 'iconStyle' => 'far'],
-                            ['label' => 'Llave presupuestaria', 'url' => ['/Planificacion/llave-presupuestaria/index'], 'iconStyle' => 'far'],
+
                         ]
                     ],
                     [

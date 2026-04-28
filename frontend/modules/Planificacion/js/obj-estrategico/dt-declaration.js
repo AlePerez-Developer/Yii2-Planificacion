@@ -128,6 +128,9 @@ $(document).ready(function () {
                         '<button id="btnEliminar" type="button" class="btn btn-outline-danger btn-sm btnEliminar" data-toggle="tooltip" title="Click! para eliminar el registro">' +
                         '    <i class="fa fa-trash-alt"></i>' +
                         '</button>' +
+                        '<button id="btnProgramar" type="button" class="btn btn-outline-info btn-sm btnProgramar" data-toggle="tooltip" title="Click! para programar indicadores">' +
+                        '    <i class="fa fa-code-branch"></i>' +
+                        '</button>' +
                         '</div>'
                         : data;
                 },

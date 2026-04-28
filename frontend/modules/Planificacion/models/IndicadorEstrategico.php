@@ -150,6 +150,37 @@ class IndicadorEstrategico extends ActiveRecord
             ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 
+    public static function listAllbyObj(string $id): ActiveQuery
+    {
+        return self::find()->alias('I')
+            ->select([
+                'I.IdIndicadorEstrategico',
+                'O.IdObjEstrategico',
+                'CONCAT(a.Codigo,p.Codigo,O.Codigo) AS Compuesto',
+                'I.Codigo',
+                'I.Meta',
+                'I.Descripcion',
+                'I.LineaBase',
+                'C.IdCategoriaIndicador',
+                'T.IdTipoResultado',
+                'U.IdUnidadIndicador',
+                'I.CodigoEstado',
+                'I.CodigoUsuario',
+            ])
+            ->joinWith('objetivosEstrategicos O', true, 'INNER JOIN')
+            ->joinWith('objetivosEstrategicos.areaEstrategica a', true, 'INNER JOIN')
+            ->joinWith('objetivosEstrategicos.politicaEstrategica p', true, 'INNER JOIN')
+            ->joinWith('catCategoriasIndicadores C', true, 'INNER JOIN')
+            ->joinWith('catTiposResultados T', true, 'INNER JOIN')
+            ->joinWith('catUnidadesIndicadores U', true, 'INNER JOIN')
+            ->where(['I.IdObjEstrategico' => $id])
+            ->andWhere(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'T.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+    }
+
     /**
      * alterna el estado del modelo V/C.
      *

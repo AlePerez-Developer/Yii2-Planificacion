@@ -14,11 +14,10 @@ function DetenerSpiner(Btn){
 
 function cambiarEstadoBtn(objectBtn, data){
     if (data === ESTADO_VIGENTE) {
-        //objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
-        objectBtn.addClass('estado-on').removeClass('estado-off');
+        objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
         objectBtn.find('.btn_text').html('Vigente')
     } else {
-        objectBtn.removeClass('estado-on').addClass('estado-off')
+        objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
         objectBtn.find('.btn_text').html('Caducado')
     }
 }

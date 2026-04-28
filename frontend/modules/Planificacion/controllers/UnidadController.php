@@ -120,9 +120,9 @@ class UnidadController extends BaseController
     /**
      * @throws ValidationException
      */
-    private function obtenerCodigo(): int
+    private function obtenerCodigo(): string
     {
-        $codigo = (int)Yii::$app->request->post('codigoUnidad');
+        $codigo = (string)Yii::$app->request->post('codigoUnidad');
         if (!$codigo) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo Unidad no enviado.', 404);
         }
