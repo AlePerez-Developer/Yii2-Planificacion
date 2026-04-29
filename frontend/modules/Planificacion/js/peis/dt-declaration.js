@@ -110,11 +110,11 @@ $(document).ready(function () {
                 render: function () {
 
                     return `
-                    <button class="btn-action btn-edit ">
+                    <button id="btnEditar" class="btn-action btn-edit ">
                         <i class="fa fa-pen"></i>
                     </button>
 
-                    <button class="btn-action btn-delete ">
+                    <button id="btnEliminar" class="btn-action btn-delete ">
                         <i class="fa fa-trash"></i>
                     </button>
                 `;
