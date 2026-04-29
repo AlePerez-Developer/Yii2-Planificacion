@@ -86,11 +86,11 @@ class ObjInstitucionalController extends BaseController
      */
     public function actionIndex(): string
     {
-        return $this->render('objInstitucionales');
+        return $this->render('ObjInstitucionales');
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * Accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -101,7 +101,7 @@ class ObjInstitucionalController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo para el llenado de Select2.
+     * Accion para listar todos los registros del modelo para el llenado de Select2.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
