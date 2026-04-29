@@ -12,9 +12,13 @@ use yii\base\BaseObject;
 use yii\web\Controller;
 use Yii;
 
+
+/**
+ * @noinspection PhpUnused
+ */
 class ObjInstitucionalController extends Controller
 {
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             'access' => [
@@ -74,11 +78,11 @@ class ObjInstitucionalController extends Controller
         if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
             $objs = ObjetivoInstitucional::find()->select([
                 'ObjetivosInstitucionales.CodigoObjInstitucional','ObjetivosInstitucionales.CodigoCOGE','ObjetivosInstitucionales.Objetivo','ObjetivosInstitucionales.CodigoEstado','ObjetivosInstitucionales.CodigoUsuario',
-                'ObjetivosEstrategicos.CodigoObjetivo as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
-                'PEIs.DescripcionPEI','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.CodigoObjetivo, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
+                'ObjetivosEstrategicos.Codigo as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
+                'PEIs.Descripcion','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.Codigo, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
                 ])
-                ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.CodigoObjEstrategico')
-                ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.CodigoPei = PEIs.CodigoPei')
+                ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.IdObjEstrategico')
+                ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.IdPei = PEIs.IdPei')
                 ->where(['!=','ObjetivosInstitucionales.CodigoEstado','E'])->andwhere(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
                 ->orderBy('ObjetivosInstitucionales.CodigoObjInstitucional')->asArray()->all();
             foreach($objs as  $obj) {

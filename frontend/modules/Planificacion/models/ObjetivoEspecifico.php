@@ -2,31 +2,38 @@
 
 namespace app\modules\Planificacion\models;
 
+use yii\db\ActiveQuery;
 use common\models\Estado;
 use common\models\Usuario;
-use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "ObjetivosEspecificos".
  *
- * @property int $CodigoObjEspecifico
- * @property string $CodigoCOGE
+ * @property string $IdObjEspecifico
+ * @property string $IdObjInstitucional
+ * @property string $IdLlavePresupuestaria
+ * @property string $Codigo
  * @property string $Objetivo
- * @property int $CodigoObjInstitucional
+ * @property string $Producto
+ * @property string $Indicador_Descripcion
+ * @property string $Indicador_Formula
+ * @property int $gestion
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
  * @property Estado $codigoEstado
- * @property ObjetivoInstitucional $codigoObjInstitucional
  * @property Usuario $codigoUsuario
+ * @property LlavePresupuestaria $idLlavePresupuestaria
+ * @property ObjetivoInstitucional $idObjInstitucional
  */
-class ObjetivoEspecifico extends \yii\db\ActiveRecord
+class ObjetivoEspecifico extends ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'ObjetivosEspecificos';
     }
@@ -34,33 +41,40 @@ class ObjetivoEspecifico extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['CodigoObjEspecifico', 'CodigoCOGE', 'Objetivo', 'CodigoObjInstitucional', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['CodigoObjEspecifico', 'CodigoObjInstitucional'], 'integer'],
+            [['IdObjEspecifico', 'IdObjInstitucional', 'IdLlavePresupuestaria'], 'string'],
+            [['IdObjInstitucional', 'IdLlavePresupuestaria', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'gestion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['gestion'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
-            [['CodigoCOGE'], 'string', 'max' => 2],
-            [['Objetivo'], 'string', 'max' => 200],
+            [['Codigo', 'CodigoUsuario'], 'string', 'max' => 3],
+            [['Objetivo', 'Producto'], 'string', 'max' => 200],
+            [['Indicador_Descripcion', 'Indicador_Formula'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
-            [['CodigoUsuario'], 'string', 'max' => 3],
-            [['CodigoObjEspecifico'], 'unique'],
+            [['IdObjEspecifico'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['CodigoObjInstitucional'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoInstitucional::class, 'targetAttribute' => ['CodigoObjInstitucional' => 'CodigoObjInstitucional']],
+            [['IdObjInstitucional'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoInstitucional::class, 'targetAttribute' => ['IdObjInstitucional' => 'IdObjInstitucional']],
+            [['IdLlavePresupuestaria'], 'exist', 'skipOnError' => true, 'targetClass' => LlavePresupuestaria::class, 'targetAttribute' => ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
-            'CodigoObjEspecifico' => 'Codigo Obj Especifico',
-            'CodigoCOGE' => 'Codigo Coge',
+            'IdObjEspecifico' => 'Id Obj Especifico',
+            'IdObjInstitucional' => 'Id Obj Institucional',
+            'IdLlavePresupuestaria' => 'Id Llave Presupuestaria',
+            'Codigo' => 'Codigo',
             'Objetivo' => 'Objetivo',
-            'CodigoObjInstitucional' => 'Codigo Obj Institucional',
+            'Producto' => 'Producto',
+            'Indicador_Descripcion' => 'Indicador Descripcion',
+            'Indicador_Formula' => 'Indicador Formula',
+            'gestion' => 'Gestion',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
@@ -68,53 +82,46 @@ class ObjetivoEspecifico extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[CodigoEstado]].
+     * Gets a query for [[CodigoEstado]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoEstado()
+    public function getCodigoEstado(): ActiveQuery
     {
         return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
     }
 
     /**
-     * Gets query for [[CodigoObjInstitucional]].
+     * Gets a query for [[CodigoUsuario]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCodigoObjInstitucional()
-    {
-        return $this->hasOne(ObjetivoInstitucional::class, ['CodigoObjInstitucional' => 'CodigoObjInstitucional']);
-    }
-
-    /**
-     * Gets query for [[CodigoUsuario]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCodigoUsuario()
+    public function getCodigoUsuario(): ActiveQuery
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    public function exist()
+    /**
+     * Gets a query for [[IdLlavePresupuestaria]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     *
+     */
+    public function getIdLlavePresupuestaria(): ActiveQuery
     {
-        $obj = ObjetivoEspecifico::find()->where(["CodigoCOGE" => $this->CodigoCOGE, "Objetivo"=>$this->Objetivo])->andWhere(["CodigoEstado"=>"V"])->all();
-        if(!empty($obj)){
-            return true;
-        }else{
-            return false;
-        }
+        return $this->hasOne(LlavePresupuestaria::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
     }
 
-    public function enUso()
+    /**
+     * Gets a query for [[IdObjInstitucional]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     *
+     */
+    public function getIdObjInstitucional(): ActiveQuery
     {
-        /*$Obj = ObjetivoInstitucional::find()->where(["CodigoObjEstrategico" => $this->CodigoObjEstrategico])->all();
-        if(!empty($Obj)){
-            return true;
-        }else{
-            return false;
-        }*/
-        return false;
+        return $this->hasOne(ObjetivoInstitucional::class, ['IdObjInstitucional' => 'IdObjInstitucional']);
     }
 }

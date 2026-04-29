@@ -44,7 +44,7 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                                 <select class="form-control" id="codigoUnidad" name="codigoUnidad">
                                     <option value="">Seleccione...</option>
                                     <?php foreach ($unidades as $unidad): ?>
-                                        <option value="<?= Html::encode($unidad->CodigoUnidad) ?>">
+                                        <option value="<?= Html::encode($unidad->IdUnidad) ?>">
                                             <?= Html::encode('(' . $unidad->Da . '/' . $unidad->Ue . ') - ' . $unidad->Descripcion) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -55,7 +55,7 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                                 <select class="form-control" id="codigoPrograma" name="codigoPrograma">
                                     <option value="">Seleccione...</option>
                                     <?php foreach ($programas as $programa): ?>
-                                        <option value="<?= Html::encode($programa->CodigoPrograma) ?>">
+                                        <option value="<?= Html::encode($programa->IdPrograma) ?>">
                                             <?= Html::encode('(' . $programa->Codigo . ') - ' . $programa->Descripcion) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -69,7 +69,7 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                                 <select class="form-control" id="codigoProyecto" name="codigoProyecto">
                                     <option value="">Seleccione...</option>
                                     <?php foreach ($proyectos as $proyecto): ?>
-                                        <option value="<?= Html::encode($proyecto->CodigoProyecto) ?>" data-programa="<?= Html::encode($proyecto->Programa) ?>">
+                                        <option value="<?= Html::encode($proyecto->IdProyecto) ?>">
                                             <?= Html::encode('(' . $proyecto->Codigo . ') - ' . $proyecto->Descripcion) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                                 <select class="form-control" id="codigoActividad" name="codigoActividad">
                                     <option value="">Seleccione...</option>
                                     <?php foreach ($actividades as $actividad): ?>
-                                        <option value="<?= Html::encode($actividad->CodigoActividad) ?>" data-programa="<?= Html::encode($actividad->Programa) ?>">
+                                        <option value="<?= Html::encode($actividad->IdActividad) ?>" >
                                             <?= Html::encode('(' . $actividad->Codigo . ') - ' . $actividad->Descripcion) ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -117,10 +117,7 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Unidad</th>
-                    <th>Programa</th>
-                    <th>Proyecto</th>
-                    <th>Actividad</th>
+                    <th>Llave</th>
                     <th>Descripción</th>
                     <th>Techo</th>
                     <th>Período</th>
@@ -131,3 +128,10 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
         </table>
     </div>
 </div>
+
+<style>
+    .btnFinalizar {
+        width: 60px;
+        height: 30px;
+    }
+</style>

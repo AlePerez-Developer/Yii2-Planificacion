@@ -81,17 +81,17 @@ class LlavePresupuestariaController extends BaseController
 
         $programas = Programa::find()
             ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['CodigoPrograma' => SORT_ASC])
+            ->orderBy(['IdPrograma' => SORT_ASC])
             ->all();
 
         $proyectos = Proyecto::find()
             ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['Programa' => SORT_ASC, 'Codigo' => SORT_ASC])
+            ->orderBy(['IdProyecto' => SORT_ASC, 'Codigo' => SORT_ASC])
             ->all();
 
         $actividades = Actividad::find()
             ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['Programa' => SORT_ASC, 'Codigo' => SORT_ASC])
+            ->orderBy(['IdPrograma' => SORT_ASC, 'Codigo' => SORT_ASC])
             ->all();
 
         return $this->render('llavePresupuestaria', compact('unidades', 'programas', 'proyectos', 'actividades'));
@@ -149,7 +149,6 @@ class LlavePresupuestariaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $claves = $this->obtenerClaves();
-
             return $this->llaveService->cambiarEstado(
                 $claves['unidad'],
                 $claves['programa'],
@@ -191,7 +190,6 @@ class LlavePresupuestariaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $claves = $this->obtenerClaves();
-
             return $this->llaveService->obtenerModelo(
                 $claves['unidad'],
                 $claves['programa'],
@@ -209,10 +207,10 @@ class LlavePresupuestariaController extends BaseController
         $post = Yii::$app->request->post();
         $append = $sufijo ? $sufijo : '';
 
-        $unidad = (int)($post['codigoUnidad' . $append] ?? 0);
-        $programa = (int)($post['codigoPrograma' . $append] ?? 0);
-        $proyecto = (int)($post['codigoProyecto' . $append] ?? 0);
-        $actividad = (int)($post['codigoActividad' . $append] ?? 0);
+        $unidad = (string)($post['codigoUnidad' . $append] ?? 0);
+        $programa = (string)($post['codigoPrograma' . $append] ?? 0);
+        $proyecto = (string)($post['codigoProyecto' . $append] ?? 0);
+        $actividad = (string)($post['codigoActividad' . $append] ?? 0);
 
         if (!$unidad || !$programa || !$proyecto || !$actividad) {
             throw new ValidationException(

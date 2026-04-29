@@ -44,6 +44,7 @@
                             ['label' => 'Area Estrategica', 'url' => ['/Planificacion/area-estrategica/index'], 'iconStyle' => 'far'],
                             ['label' => 'Politica Estrategica', 'url' => ['/Planificacion/politica-estrategica/index'], 'iconStyle' => 'far'],
                             ['label' => 'Objetivo Estrategico', 'url' => ['/Planificacion/obj-estrategico/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Objetivo Institucional', 'url' => ['/Planificacion/obj-institucional/index'], 'iconStyle' => 'far'],
                             ['label' => 'Indicador Estrategico', 'url' => ['/Planificacion/indicador-estrategico/index'], 'iconStyle' => 'far'],
                         ]
                     ],

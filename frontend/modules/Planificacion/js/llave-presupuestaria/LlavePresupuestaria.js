@@ -248,10 +248,10 @@ $(document).ready(function () {
     =============================================*/
   function construirBotones(row) {
     const keys =
-      'data-unidad="' + row.CodigoUnidad + '" ' +
-      'data-programa="' + row.CodigoPrograma + '" ' +
-      'data-proyecto="' + row.CodigoProyecto + '" ' +
-      'data-actividad="' + row.CodigoActividad + '"';
+      'data-unidad="' + row.IdUnidad + '" ' +
+      'data-programa="' + row.IdPrograma + '" ' +
+      'data-proyecto="' + row.IdProyecto + '" ' +
+      'data-actividad="' + row.IdActividad + '"';
 
     const finalizarDisabled = row.FechaFin ? "disabled" : "";
 
@@ -260,14 +260,15 @@ $(document).ready(function () {
       '<button type="button" class="btn btn-outline-warning btn-sm btnEditar" ' +
       keys +
       ' title="Editar"><i class="fa fa-pen-fancy"></i></button>' +
-      '<button type="button" class="btn btn-warning btn-sm btnFinalizar font-weight-bold" ' +
-      keys +
-      " " + finalizarDisabled +
-      ' title="Finalizar llave"><i class="fa fa-flag-checkered mr-1"></i>Finalizar</button>' +
+
       '<button type="button" class="btn btn-outline-danger btn-sm btnEliminar" ' +
       keys +
       ' title="Eliminar"><i class="fa fa-trash-alt"></i></button>' +
-      "</div>"
+      "</div>" +
+      '<button type="button" class="btn btn-outline-warning btn-sm btnFinalizar font-weight-bold" ' +
+      keys +
+      " " + finalizarDisabled +
+      ' title="Finalizar llave"><i class="fa fa-flag-checkered mr-1"></i></button>'
     );
   }
 
@@ -301,54 +302,10 @@ $(document).ready(function () {
       {
         className: "dt-small",
         data: null,
-        render: function (data) {
-          if (!data) return "";
-          const da = data.UnidadDa || "";
-          const ue = data.UnidadUe || "";
-          const desc = data.UnidadDescripcion || "";
-          if (!da && !ue && !desc) {
-            return unidadMap[data.CodigoUnidad]?.text || data.CodigoUnidad;
-          }
-          return "(" + da + "/" + ue + ") - " + desc;
-        },
-      },
-      {
-        className: "dt-small",
-        data: null,
-        render: function (data) {
-          if (!data) return "";
-          const codigo = data.ProgramaCodigo || "";
-          const desc = data.ProgramaDescripcion || "";
-          if (!codigo && !desc) {
-            return programaMap[data.CodigoPrograma]?.text || data.CodigoPrograma;
-          }
-          return "(" + codigo + ") - " + desc;
-        },
-      },
-      {
-        className: "dt-small",
-        data: null,
-        render: function (data) {
-          if (!data) return "";
-          const codigo = data.ProyectoCodigo || "";
-          const desc = data.ProyectoDescripcion || "";
-          if (!codigo && !desc) {
-            return proyectoMap[data.CodigoProyecto]?.text || data.CodigoProyecto;
-          }
-          return "(" + codigo + ") - " + desc;
-        },
-      },
-      {
-        className: "dt-small",
-        data: null,
-        render: function (data) {
-          if (!data) return "";
-          const codigo = data.ActividadCodigo || "";
-          const desc = data.ActividadDescripcion || "";
-          if (!codigo && !desc) {
-            return actividadMap[data.CodigoActividad]?.text || data.CodigoActividad;
-          }
-          return "(" + codigo + ") - " + desc;
+        render: function (data, type, row){
+          return (type === 'display')
+              ?  row["UnidadDa"] + ' - ' + row["UnidadUe"] + ' - ' + row["ProgramaCodigo"] + ' - ' + row["ProyectoCodigo"] + ' - ' + row["ActividadCodigo"]
+              :data;
         },
       },
       {
@@ -394,10 +351,10 @@ $(document).ready(function () {
         data: "CodigoEstado",
         render: function (data, type, row) {
           const keys =
-            'data-unidad="' + row.CodigoUnidad + '" ' +
-            'data-programa="' + row.CodigoPrograma + '" ' +
-            'data-proyecto="' + row.CodigoProyecto + '" ' +
-            'data-actividad="' + row.CodigoActividad + '"';
+            'data-unidad="' + row.IdUnidad + '" ' +
+            'data-programa="' + row.IdPrograma + '" ' +
+            'data-proyecto="' + row.IdProyecto + '" ' +
+            'data-actividad="' + row.IdActividad + '"';
           if (type !== "display") {
             return data;
           }
@@ -659,17 +616,17 @@ $(document).ready(function () {
       if (response.success || response.respuesta === RTA_CORRECTO) {
         const llave = response.data || {};
 
-        $codigoUnidadOriginal.val(llave.CodigoUnidad || "");
-        $codigoProgramaOriginal.val(llave.CodigoPrograma || "");
-        $codigoProyectoOriginal.val(llave.CodigoProyecto || "");
-        $codigoActividadOriginal.val(llave.CodigoActividad || "");
+        $codigoUnidadOriginal.val(llave.IdUnidad || "");
+        $codigoProgramaOriginal.val(llave.IdPrograma || "");
+        $codigoProyectoOriginal.val(llave.IdProyecto || "");
+        $codigoActividadOriginal.val(llave.IdActividad || "");
 
-        $codigoUnidad.val(llave.CodigoUnidad || "");
-        $codigoPrograma.val(llave.CodigoPrograma || "").trigger("change");
-        renderProyectos(llave.CodigoPrograma || null, llave.CodigoProyecto || null);
-        renderActividades(llave.CodigoPrograma || null, llave.CodigoActividad || null);
-        $codigoProyecto.val(llave.CodigoProyecto || "");
-        $codigoActividad.val(llave.CodigoActividad || "");
+        $codigoUnidad.val(llave.IdUnidad || "").trigger("change");
+        $codigoPrograma.val(llave.IdPrograma || "").trigger("change");
+        renderProyectos(llave.IdPrograma || null, llave.IdProyecto || null);
+        renderActividades(llave.IdPrograma || null, llave.IdActividad || null);
+        $codigoProyecto.val(llave.IdProyecto || "");
+        $codigoActividad.val(llave.IdActividad || "");
 
         $("#descripcion").val(llave.Descripcion || "");
         $("#techoPresupuestario").val(llave.TechoPresupuestario || "");

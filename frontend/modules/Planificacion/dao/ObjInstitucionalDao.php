@@ -1,24 +1,41 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
-use yii\base\BaseObject;
-use yii\db\Query;
+use app\modules\Planificacion\models\ObjetivoEstrategico;
+use app\modules\Planificacion\models\ObjetivoInstitucional;
+use common\models\Estado;
+use Yii;
 
 class ObjInstitucionalDao
 {
-    /*=====================================================
-         Genera un nuevo codigo de Objetivo Institucional
-    =======================================================*/
-    static public function GenerarCodigoObjInstitucional()
+
+    static function enUso(ObjetivoInstitucional $objetivo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoObjInstitucional) as CodigoObj')
-            ->from('ObjetivosInstitucionales')
+        return $objetivo->getObjetivosEspecificos()->exists() ;
+    }
+
+    /**
+     * @param string $id
+     * @param string $idAreaEstrategica
+     * @param string $idPoliticaEstrategica
+     * @param int $codigo
+     * @return bool
+     */
+    static function verificarCodigo(string $id, string $idAreaEstrategica, string $idPoliticaEstrategica, int $codigo): bool
+    {
+        $model = ObjetivoEstrategico::find()
+            ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->andWhere(['!=','IdObjEstrategico',$id])
+            ->andWhere(['IdPei' => yii::$app->contexto->getPei()])
+            ->andWhere(['IdAreaEstrategica' => $idAreaEstrategica])
+            ->andWhere(['IdPoliticaEstrategica' => $idPoliticaEstrategica])
             ->one();
-        if ($codigo['CodigoObj']){
-            return  $codigo['CodigoObj'] + 1;
-        } else {
-            return 1;
-        }
+
+        return !$model;
+    }
+
+    static function validarId(string $id): bool
+    {
+        return ObjetivoEstrategico::find()->where(['IdPei'=> yii::$app->contexto->getPei() ,'IdObjEstrategico' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 }

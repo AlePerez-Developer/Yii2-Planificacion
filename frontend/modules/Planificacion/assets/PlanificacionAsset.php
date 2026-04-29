@@ -6,7 +6,10 @@ use yii\web\AssetBundle;
 
 class PlanificacionAsset extends AssetBundle
 {
-    public $sourcePath = '@app/modules/Planificacion/assets';
+    public $sourcePath = '@app/modules/Planificacion/assets'; //para local
+    //public $basePath = '@webroot';   //produccion
+    //public $baseUrl = '@web';        //produccion
+
     public $css = [
         'css/Planificacion.css',
         'css/btn_spinner.css',

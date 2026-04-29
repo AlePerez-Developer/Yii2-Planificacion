@@ -1,73 +1,141 @@
 <?php
+use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@web/js/obj-institucional/ObjInstitucional.js",[
+
+$this->registerJsFile("@planificacionModule/js/obj-institucional/ObjInstitucional.js",[
     'depends' => [
-        JqueryAsset::className()
+        JqueryAsset::class
     ]
 ]);
+
+$this->registerJsFile("@planificacionModule/js/obj-institucional/dt-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/obj-institucional/s2-declaration.js", [
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Objs Institucionales']];
+$this->params['breadcrumbs'] = [['label' => '/Objs Institucionales']];
 ?>
 
 <div class="card ">
     <div class="card-header">
-        <button id="btnMostrarCrearObj" class="btn btn-primary bg-gradient-primary" >
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
-                Agregar Obj. Institucional
+        <div class="row">
+            <div class="col-6">
+                <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
+                    <span class="icon closed">
+                        <span class="circle">
+                            <span class="horizontal"></span>
+                            <span class="vertical"></span>
+                        </span>
+                        Agregar Obj. institucional
+                    </span>
+                </button>
             </div>
-        </button>
+            <input type="text" value="2026" style="width: 150px">
+        </div>
     </div>
-    <div id="IngresoDatos" class="card-body" >
+    <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 40rem;" >
+            <div class="card " style="width: 80rem;" >
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <input type="text" id="codigo" name="codigo" disabled hidden >
-                    <form id="formobjinstitucional" action="" method="post">
-                        <div class="form-group">
-                            <label for="CodigoObjEstrategico">Seleccione el objetivo estrategico</label>
-                            <select class="form-control objestrategicos" id="CodigoObjEstrategico" name="CodigoObjEstrategico" >
-                                <option></option>
-                                <?php foreach ($objsEstrategicos as $objEstrategico){  ?>
-                                    <option value="<?= $objEstrategico->CodigoObjEstrategico ?>"><?= '('.  $objEstrategico->CodigoObjetivo .') - ' . $objEstrategico->Objetivo  ?></option>
-                                <?php } ?>
-                            </select>
+                    <form id="formObjEstrategico" action="" method="post">
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="idObjEstrategico">Seleccione el objetivo estrategico</label>
+                                    <select class="form-control objEstrategico codigo_group" id="idObjEstrategico" name="idObjEstrategico" >
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="CodigoCOGE">Codigo de Objetivo de Gestion Institucional (OGI)</label>
-                            <input type="text" class="form-control input-sm num" id="CodigoCOGE" name="CodigoCOGE" maxlength="2"  placeholder="Codigo" style="width: 80px" >
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="objetivo" class="control-label">Descripcion del objetivo institucional</label>
+                                    <textarea class="form-control input-sm txt" id="objetivo" name="objetivo" rows="3" placeholder="Descripcion del objetivo institucional"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="producto" class="control-label">Resultado/Producto esperado</label>
+                                    <textarea class="form-control input-sm txt" id="producto" name="producto" rows="3" placeholder="Resultado/Producto esperado"></textarea>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="Objetivo" class="control-label">Descripcion del objetivo institucional</label>
-                            <textarea class="form-control input-sm txt" id="Objetivo" name="Objetivo" rows="4" placeholder="Descripcion del objetivo especifico"></textarea>
-                        </div>
+
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <button class='btn btn-primary bg-gradient-primary btnGuardar'><i class='fa fa-check-circle-o'>Guardar</i></button>
-                    <button class='btn btn-danger btn- btnCancel'><i class='fa fa-warning'>Cancelar</i></button>
+                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
             </div>
         </div>
     </div>
-    <div id="Divtabla" class="card-body">
-        <table class="table table-bordered table-striped dt-responsive tablaListaObjInstitucionales" style="width: 100%" >
+    <div id="divTabla" class="card-body">
+        <table id="tablaListaObjInstitucionales" name="tablaListaObjInstitucionales" class="table table-bordered table-striped">
             <thead>
-            <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">PEI</th>
-            <th style="text-align: center; vertical-align: middle;">Codigo</th>
-            <th style="text-align: center; vertical-align: middle;">Objetivo</th>
-            <th style="text-align: center; vertical-align: middle;">Estado</th>
-            <th style="text-align: center; vertical-align: middle;">Acciones</th>
+            <th>#</th>
+            <th>Codigo</th>
+            <th>Objetivo</th>
+            <th>Producto Esperado</th>
+            <th>Estado</th>
+            <th>Acciones</th>
             </thead>
         </table>
     </div>
 </div>
+
+
+<style>
+    :root {
+        --border-color: #007BFF; /* azul */
+        --border-width: 1px;
+        --padding: 14px;
+    }
+
+    .contenedor {
+        width: 100%; !important;
+        position: relative;
+        display: inline-block;
+    }
+
+    .square {
+        width: auto;
+        height: auto;
+        border: var(--border-width) solid var(--border-color);
+        border-radius: 8px;
+        padding: var(--padding);
+        box-sizing: border-box;
+        gap: 10px;
+    }
+
+    .ltc {
+        position: absolute;
+        top: -0.8em;       /* sube el texto para que corte la línea */
+        left: 16px;        /* margen interno desde la izquierda */
+        background: white; /* fondo blanco para "romper" el borde */
+        padding: 0 8px;    /* espacio horizontal */
+        color: var(--border-color);
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 4px;
+    }
+
+    .ltc {
+        margin-bottom: 6px;
+    }
+</style>

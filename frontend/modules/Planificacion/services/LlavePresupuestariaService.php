@@ -8,6 +8,7 @@ use app\modules\Planificacion\formModels\LlavePresupuestariaForm;
 use app\modules\Planificacion\models\LlavePresupuestaria;
 use common\models\Estado;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\db\Expression;
 
@@ -22,7 +23,7 @@ class LlavePresupuestariaService
         return ResponseHelper::success($data, 'Listado de Llaves Presupuestarias obtenido.');
     }
 
-    public function listarLlave(int $codigoUnidad, int $codigoPrograma, int $codigoProyecto, int $codigoActividad): ?LlavePresupuestaria
+    public function listarLlave(string $codigoUnidad, string $codigoPrograma, string $codigoProyecto, string $codigoActividad): array|ActiveRecord
     {
         return LlavePresupuestaria::listOne($codigoUnidad, $codigoPrograma, $codigoProyecto, $codigoActividad);
     }
@@ -119,7 +120,7 @@ class LlavePresupuestariaService
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(int $codigoUnidad, int $codigoPrograma, int $codigoProyecto, int $codigoActividad): array
+    public function cambiarEstado(string $codigoUnidad, string $codigoPrograma, string $codigoProyecto, string $codigoActividad): array
     {
         $llave = $this->obtenerModeloValidado($codigoUnidad, $codigoPrograma, $codigoProyecto, $codigoActividad);
 
@@ -209,7 +210,7 @@ class LlavePresupuestariaService
     /**
      * @throws ValidationException
      */
-    public function obtenerModelo(int $codigoUnidad, int $codigoPrograma, int $codigoProyecto, int $codigoActividad): array
+    public function obtenerModelo(string $codigoUnidad, string $codigoPrograma, string $codigoProyecto, string $codigoActividad): array
     {
         $llave = $this->listarLlave($codigoUnidad, $codigoPrograma, $codigoProyecto, $codigoActividad);
 
@@ -224,10 +225,10 @@ class LlavePresupuestariaService
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => $llave->getAttributes([
-                'CodigoUnidad',
-                'CodigoPrograma',
-                'CodigoProyecto',
-                'CodigoActividad',
+                'IdUnidad',
+                'IdPrograma',
+                'IdProyecto',
+                'IdActividad',
                 'Descripcion',
                 'TechoPresupuestario',
                 'FechaInicio',
@@ -240,10 +241,10 @@ class LlavePresupuestariaService
      * @throws ValidationException
      */
     private function obtenerModeloValidado(
-        int $codigoUnidad,
-        int $codigoPrograma,
-        int $codigoProyecto,
-        int $codigoActividad
+        string $codigoUnidad,
+        string $codigoPrograma,
+        string $codigoProyecto,
+        string $codigoActividad
     ): LlavePresupuestaria {
         $llave = $this->listarLlave($codigoUnidad, $codigoPrograma, $codigoProyecto, $codigoActividad);
 
