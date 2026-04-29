@@ -1,6 +1,7 @@
 <?php
 namespace app\modules\Planificacion\services;
 
+use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\UnidadDao;
 use app\modules\Planificacion\models\Unidad;
 use app\modules\Planificacion\common\exceptions\ValidationException;
@@ -27,6 +28,21 @@ class UnidadService
             'data' => $unidades,
             'message' => 'Listado de unidades'
         ];
+    }
+
+    /**
+     * lista un array de Programas no eliminados
+     * @param string $search
+     * @return array of Programas
+     */
+    public function listarUnidadesS2(string $search): array
+    {
+        $data = Unidad::listAll($search)
+            ->orderBy(['Da' => SORT_ASC])
+            ->orderBy(['Ue' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Unidades obtenido.');
     }
 
     public function guardar(array $params): array

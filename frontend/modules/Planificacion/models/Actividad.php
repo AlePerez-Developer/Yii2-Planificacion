@@ -133,6 +133,30 @@ class Actividad extends ActiveRecord
     }
 
     /**
+     * Obtiene todas las actividades activas (no eliminados)
+     *
+     * @param string $search
+     * @return ActiveQuery
+     */
+    public static function listAllbyPrograma(string $idPrograma, string $search = '%%'): ActiveQuery
+    {
+        return self::find()->alias('A')
+            ->select([
+                'A.IdActividad',
+                'A.Codigo',
+                'A.Descripcion',
+                'A.CodigoEstado',
+                'A.CodigoUsuario',
+                'Prg.IdPrograma',
+            ])
+            ->joinWith('programa Prg', true, 'INNER JOIN')
+            ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'A.Descripcion', $search, false])
+            ->andwhere(['A.IdPrograma' => $idPrograma])
+            ->andWhere(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+    }
+
+    /**
      * alterna el estado del modelo V/C.
      *
      * @return void

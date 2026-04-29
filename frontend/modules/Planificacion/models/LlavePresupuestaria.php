@@ -4,7 +4,6 @@ namespace app\modules\Planificacion\models;
 
 use common\models\Usuario;
 use common\models\Estado;
-use yii\base\InvalidCallException;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
 
@@ -117,29 +116,23 @@ class LlavePresupuestaria extends ActiveRecord
             ->alias('LP')
             ->select([
                 'LP.IdLlavePresupuestaria',
-                'LP.IdUnidad',
-                'LP.IdPrograma',
-                'LP.IdProyecto',
-                'LP.IdActividad',
+                'CONCAT(U.Da,\'-\',U.Ue,\'-\',PR.Codigo,\'-\',PY.Codigo,\'-\',AC.Codigo) AS Llave',
+                'U.IdUnidad',
+                'PR.IdPrograma',
+                'PY.IdProyecto',
+                'AC.IdActividad',
                 'LP.Descripcion',
                 'LP.TechoPresupuestario',
                 'LP.FechaInicio',
                 'LP.FechaFin',
                 'LP.CodigoEstado',
-                'UnidadDescripcion' => 'U.Descripcion',
-                'UnidadDa' => 'U.Da',
-                'UnidadUe' => 'U.Ue',
-                'ProgramaCodigo' => 'PR.Codigo',
-                'ProgramaDescripcion' => 'PR.Descripcion',
-                'ProyectoCodigo' => 'PY.Codigo',
-                'ProyectoDescripcion' => 'PY.Descripcion',
-                'ActividadCodigo' => 'AC.Codigo',
-                'ActividadDescripcion' => 'AC.Descripcion',
+                'LP.CodigoUsuario'
+
             ])
-            ->leftJoin('Unidades U', 'U.IdUnidad = LP.IdUnidad')
-            ->leftJoin('Programas PR', 'PR.IdPrograma = LP.IdPrograma')
-            ->leftJoin('Proyectos PY', 'PY.IdProyecto = LP.IdProyecto')
-            ->leftJoin('Actividades AC', 'AC.IdActividad = LP.IdActividad')
+            ->joinWith('unidad U', true, 'INNER JOIN')
+            ->joinWith('programa PR', true, 'INNER JOIN')
+            ->joinWith('proyecto PY', true, 'INNER JOIN')
+            ->joinWith('actividad AC', true, 'INNER JOIN')
             ->where(['!=', 'LP.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->orderBy([
                 'LP.IdUnidad' => SORT_ASC,
@@ -149,52 +142,41 @@ class LlavePresupuestaria extends ActiveRecord
             ]);
     }
 
-    public static function listOne(string $idUnidad, string $idPrograma, string $idProyecto, string $idActividad): array|ActiveRecord
+    public static function listOne(string $id): ?LlavePresupuestaria
     {
-        return self::find()
-            ->where([
-                'IdUnidad' => $idUnidad,
-                'IdPrograma' => $idPrograma,
-                'Idproyecto' => $idProyecto,
-                'IdActividad' => $idActividad,
-            ])
-            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->one();
+        return self::findOne(['IdLlavePresupuestaria' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
+    /**
+     * alterna el estado del modelo V/C.
+     *
+     * @return void
+     */
     public function cambiarEstado(): void
     {
-        $this->CodigoEstado = $this->CodigoEstado === Estado::ESTADO_VIGENTE
+        $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
     }
 
+    /**
+     * realiza el soft delete de un registro.
+     *
+     * @return void
+     */
     public function eliminar(): void
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }
 
-    public function finalizar(?string $fechaFin = null): void
+    /**
+     * realiza el soft delete de un registro.
+     *
+     * @return void
+     */
+    public function finalizar(): void
     {
-        // Validación: La fecha de inicio NO puede ser futura
-        $fechaInicioTimestamp = strtotime($this->FechaInicio);
-        $hoyTimestamp = strtotime(date('Y-m-d'));
-
-        if ($fechaInicioTimestamp > $hoyTimestamp) {
-            throw new InvalidCallException(
-                'No se puede finalizar una llave cuya fecha de inicio es posterior a la fecha actual. ' .
-                'FechaInicio: ' . date('Y-m-d', $fechaInicioTimestamp) . ', ' .
-                'Hoy: ' . date('Y-m-d', $hoyTimestamp)
-            );
-        }
-
-        // Si no se proporciona fecha, usar la fecha actual de PHP (no GETDATE() de SQL)
-        if ($fechaFin === null) {
-            $fechaFin = date('Y-m-d H:i:s');
-        }
-
-        $this->FechaFin = $fechaFin;
-        $this->CodigoEstado = Estado::ESTADO_CADUCO;
+        $this->FechaFin =  date('d-m-Y H:i:s');
     }
 
     /**

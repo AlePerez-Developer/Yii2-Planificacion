@@ -245,6 +245,34 @@ function populateS2UnidadesIndicadores(select2) {
     });
 }
 
+function populateS2Unidades(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/unidad/listar-unidades-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdUnidad"],
+                        text: '(' + item["Compuesto"] + ') - ' + item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
 function populateS2Programas(select2) {
     $.ajax({
         method: "POST",
@@ -273,11 +301,14 @@ function populateS2Programas(select2) {
     });
 }
 
-function populateS2Proyectos(select2) {
+function populateS2Proyectos(idPrograma, select2, val) {
     $.ajax({
         method: "POST",
         dataType: 'json',
         delay: 100,
+        data: {
+            idPrograma: idPrograma
+        },
         cache: true,
         url: 'index.php?r=Planificacion/proyecto/listar-proyectos-s2',
         success: function(data){
@@ -298,14 +329,20 @@ function populateS2Proyectos(select2) {
             const data = JSON.parse(xhr.responseText)
             MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
         },
+        complete: function () {
+            if (val) select2.val(val).trigger('change');
+        }
     });
 }
 
-function populateS2Actividades(select2) {
+function populateS2Actividades(idPrograma,select2, val) {
     $.ajax({
         method: "POST",
         dataType: 'json',
         delay: 100,
+        data: {
+            idPrograma: idPrograma
+        },
         cache: true,
         url: 'index.php?r=Planificacion/actividad/listar-actividades-s2',
         success: function(data){
@@ -326,6 +363,9 @@ function populateS2Actividades(select2) {
             const data = JSON.parse(xhr.responseText)
             MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
         },
+        complete: function () {
+            if (val) select2.val(val).trigger('change');
+        }
     });
 }
 

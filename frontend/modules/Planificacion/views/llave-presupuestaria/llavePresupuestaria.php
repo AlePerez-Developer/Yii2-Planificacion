@@ -1,6 +1,5 @@
 <?php
 
-use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -11,21 +10,37 @@ $this->registerJsFile("@planificacionModule/js/llave-presupuestaria/LlavePresupu
     ],
 ]);
 
+$this->registerJsFile("@planificacionModule/js/llave-presupuestaria/dt-declaration.js",[
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/llave-presupuestaria/s2-declaration.js",[
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);
+
 $this->title = 'Planificación';
 $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
 ?>
-
+<div class="btnFinalizar"></div>
 <div class="card">
     <div class="card-header">
-        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <div class="icon closed">
-                <div class="circle">
-                    <div class="horizontal"></div>
-                    <div class="vertical"></div>
-                </div>
-                Agregar Llave Presupuestaria
+        <div class="row">
+            <div class="col-6">
+                <button id="btnMostrarCrear" name="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
+                    <span class="icon">
+                        <span class="circle">
+                            <span class="horizontal"></span>
+                            <span class="vertical"></span>
+                        </span>
+                        Agregar Llave
+                    </span>
+                </button>
             </div>
-        </button>
+        </div>
     </div>
     <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
@@ -33,57 +48,31 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
                     <form id="formLlavePresupuestaria" action="" method="post">
-                        <input type="hidden" id="codigoUnidadOriginal" name="codigoUnidadOriginal">
-                        <input type="hidden" id="codigoProgramaOriginal" name="codigoProgramaOriginal">
-                        <input type="hidden" id="codigoProyectoOriginal" name="codigoProyectoOriginal">
-                        <input type="hidden" id="codigoActividadOriginal" name="codigoActividadOriginal">
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="codigoUnidad">Unidad</label>
-                                <select class="form-control" id="codigoUnidad" name="codigoUnidad">
-                                    <option value="">Seleccione...</option>
-                                    <?php foreach ($unidades as $unidad): ?>
-                                        <option value="<?= Html::encode($unidad->IdUnidad) ?>">
-                                            <?= Html::encode('(' . $unidad->Da . '/' . $unidad->Ue . ') - ' . $unidad->Descripcion) ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                <label for="unidad">Unidad</label>
+                                <select class="form-control" id="unidad" name="unidad">
                                 </select>
                             </div>
+
                             <div class="form-group col-md-6">
-                                <label for="codigoPrograma">Programa</label>
-                                <select class="form-control" id="codigoPrograma" name="codigoPrograma">
-                                    <option value="">Seleccione...</option>
-                                    <?php foreach ($programas as $programa): ?>
-                                        <option value="<?= Html::encode($programa->IdPrograma) ?>">
-                                            <?= Html::encode('(' . $programa->Codigo . ') - ' . $programa->Descripcion) ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                <label for="programa">Programa</label>
+                                <select class="form-control" id="programa" name="programa">
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="codigoProyecto">Proyecto</label>
-                                <select class="form-control" id="codigoProyecto" name="codigoProyecto">
-                                    <option value="">Seleccione...</option>
-                                    <?php foreach ($proyectos as $proyecto): ?>
-                                        <option value="<?= Html::encode($proyecto->IdProyecto) ?>">
-                                            <?= Html::encode('(' . $proyecto->Codigo . ') - ' . $proyecto->Descripcion) ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                <label for="proyecto">Proyecto</label>
+                                <select class="form-control" id="proyecto" name="codigoProyecto">
                                 </select>
                             </div>
+
                             <div class="form-group col-md-6">
-                                <label for="codigoActividad">Actividad</label>
-                                <select class="form-control" id="codigoActividad" name="codigoActividad">
-                                    <option value="">Seleccione...</option>
-                                    <?php foreach ($actividades as $actividad): ?>
-                                        <option value="<?= Html::encode($actividad->IdActividad) ?>" >
-                                            <?= Html::encode('(' . $actividad->Codigo . ') - ' . $actividad->Descripcion) ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                <label for="actividad">Actividad</label>
+                                <select class="form-control" id="actividad" name="codigoActividad">
                                 </select>
                             </div>
                         </div>
@@ -106,20 +95,21 @@ $this->params['breadcrumbs'] = [['label' => '/Llave Presupuestaria']];
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <button id="btnGuardar" name="btnGuardar" class="btn btn-primary bg-gradient-primary"><span class="fa fa-check-circle"></span> Guardar</button>
-                    <button id="btnCancelar" name="btnCancelar" class="btn btn-danger"><span class="fa fa-times-circle"></span> Cancelar</button>
+                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
             </div>
         </div>
     </div>
     <div id="divTabla" class="card-body overflow-auto">
-        <table id="tablaLlavesPresupuestarias" class="table table-bordered table-striped dt-responsive" style="width: 100%;">
+        <table id="tablaListaLlavesPresupuestarias" class="table table-bordered table-striped dt-responsive" style="width: 100%;">
             <thead>
                 <tr>
                     <th>#</th>
                     <th>Llave</th>
                     <th>Descripción</th>
                     <th>Techo</th>
+                    <th>Período</th>
                     <th>Período</th>
                     <th>Estado</th>
                     <th>Acciones</th>

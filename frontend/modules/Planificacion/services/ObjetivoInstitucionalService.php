@@ -62,6 +62,7 @@ class ObjetivoInstitucionalService
     public function guardar(ObjetivoInstitucionalForm $form): array
     {
         $modelo = new ObjetivoInstitucional([
+            'IdObjEstrategico' => $form->idObjEstrategico,
             'Codigo'  => $form->codigo,
             'Objetivo'  => mb_strtoupper(trim($form->objetivo), 'UTF-8'),
             'Producto'  => mb_strtoupper(trim($form->producto), 'UTF-8'),
@@ -161,7 +162,7 @@ class ObjetivoInstitucionalService
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $modelo->getAttributes(array('IdAreaEstrategica', 'IdPoliticaEstrategica', 'IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Descripcion', 'Indicador_Formula', 'IdPei')),
+            'data' => $modelo->getAttributes(array('IdObjInstitucional', 'IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'Gestion')),
         ];
     }
 
@@ -211,14 +212,13 @@ class ObjetivoInstitucionalService
      *  Recibe un codigo y verifica si esta en uso.
      *
      * @param string $id
-     * @param string $idAreaEstrategica
-     * @param string $idPoliticaEstrategica
+     * @param string $idObjEstrategico
      * @param int $codigo
      * @return bool
      */
-    public function verificarCodigo(string $id, string $idAreaEstrategica, string $idPoliticaEstrategica, int $codigo): bool
+    public function verificarCodigo(string $id, string $idObjEstrategico,  int $codigo): bool
     {
-        return ObjInstitucionalDao::verificarCodigo($id, $idAreaEstrategica, $idPoliticaEstrategica, $codigo);
+        return ObjInstitucionalDao::verificarCodigo($id, $idObjEstrategico, $codigo);
     }
 
     /**

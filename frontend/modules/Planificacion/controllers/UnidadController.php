@@ -73,6 +73,18 @@ class UnidadController extends BaseController
         return $this->withTryCatch(fn() => $this->unidadService->listar());
     }
 
+    /**
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarUnidadesS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->unidadService->listarUnidadesS2($search)) ;
+    }
     
 
     public function actionGuardar(): array

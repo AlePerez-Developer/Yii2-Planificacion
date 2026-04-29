@@ -91,11 +91,13 @@ class ActividadController extends BaseController
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      *
+     * @throws ValidationException
      */
     public function actionListarActividadesS2(): array
     {
         $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        return $this->withTryCatch(fn() => $this->service->listarActividadesS2($search)) ;
+        $idPrograma = $this->obtenerIdPrograma();
+        return $this->withTryCatch(fn() => $this->service->listarActividadesS2($idPrograma,$search)) ;
     }
 
     /**
@@ -188,6 +190,21 @@ class ActividadController extends BaseController
         $id = Yii::$app->request->post('idActividad');
         if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'id Actividad no enviado.', 404);
+        }
+        return $id;
+    }
+
+    /**
+     * obtiene y valida si se recibio el id por el request
+     *
+     * return string
+     * @throws ValidationException
+     */
+    private function obtenerIdPrograma(): string
+    {
+        $id = Yii::$app->request->post('idPrograma');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de programa no enviado.', 404);
         }
         return $id;
     }

@@ -1,652 +1,285 @@
 $(document).ready(function () {
-  const $form = $("#formLlavePresupuestaria");
-  const $btnGuardar = $("#btnGuardar");
-  const $btnCancelar = $("#btnCancelar");
-  const $btnMostrarCrear = $("#btnMostrarCrear");
+    let idLlavePresupuestaria = '00000000-0000-0000-0000-000000000000'
+    let baseUrl = "index.php?r=Planificacion/llave-presupuestaria/"
 
-  const $codigoUnidad = $("#codigoUnidad");
-  const $codigoPrograma = $("#codigoPrograma");
-  const $codigoProyecto = $("#codigoProyecto");
-  const $codigoActividad = $("#codigoActividad");
-
-  const $codigoUnidadOriginal = $("#codigoUnidadOriginal");
-  const $codigoProgramaOriginal = $("#codigoProgramaOriginal");
-  const $codigoProyectoOriginal = $("#codigoProyectoOriginal");
-  const $codigoActividadOriginal = $("#codigoActividadOriginal");
-  const $fechaInicio = $("#fechaInicio");
-
-  const proyectosAll = [];
-  $codigoProyecto.find("option").each(function () {
-    const $option = $(this);
-    const value = $option.val();
-    if (!value) {
-      return;
-    }
-    proyectosAll.push({
-      value: value,
-      text: $option.text(),
-      programa: Number($option.data("programa")) || null,
-    });
-  });
-
-  const actividadesAll = [];
-  $codigoActividad.find("option").each(function () {
-    const $option = $(this);
-    const value = $option.val();
-    if (!value) {
-      return;
-    }
-    actividadesAll.push({
-      value: value,
-      text: $option.text(),
-      programa: Number($option.data("programa")) || null,
-    });
-  });
-
-  const unidadMap = buildMap($codigoUnidad);
-  const programaMap = buildMap($codigoPrograma);
-  const proyectoMap = buildMap($codigoProyecto, "programa");
-  const actividadMap = buildMap($codigoActividad, "programa");
-
-  renderProyectos(null);
-  renderActividades(null);
-
-  // buildMap hace un mapeo de los select para búsquedas rápidas
-  function buildMap($select, extraAttr) {
-    const map = {};
-    $select.find("option").each(function () {
-      const $option = $(this);
-      const value = $option.val();
-      if (!value) {
-        return;
-      }
-      map[value] = {
-        text: $option.text(),
-      };
-      if (extraAttr) {
-        map[value][extraAttr] = $option.data(extraAttr) || null;
-      }
-    });
-    return map;
-  }
-
-  //esto sirve para filtrar los proyectos y actividades según el programa seleccionado
-  function renderProyectos(programaId, selected = null) {
-    const current = selected || $codigoProyecto.val();
-    $codigoProyecto.find("option:not(:first)").remove();
-    proyectosAll
-      .filter(function (item) {
-        return !programaId || item.programa === Number(programaId);
-      })
-      .forEach(function (item) {
-        const option = $("<option>")
-          .val(item.value)
-          .text(item.text)
-          .attr("data-programa", item.programa);
-        $codigoProyecto.append(option);
-      });
-    if (current && $codigoProyecto.find('option[value="' + current + '"]').length) {
-      $codigoProyecto.val(current);
-    } else {
-      $codigoProyecto.val("");
-    }
-  }
-
-  function renderActividades(programaId, selected = null) {
-    const current = selected || $codigoActividad.val();
-    $codigoActividad.find("option:not(:first)").remove();
-    actividadesAll
-      .filter(function (item) {
-        return !programaId || item.programa === Number(programaId);
-      })
-      .forEach(function (item) {
-        const option = $("<option>")
-          .val(item.value)
-          .text(item.text)
-          .attr("data-programa", item.programa);
-        $codigoActividad.append(option);
-      });
-    if (current && $codigoActividad.find('option[value="' + current + '"]').length) {
-      $codigoActividad.val(current);
-    } else {
-      $codigoActividad.val("");
-    }
-  }
-
-  function reiniciarCampos() {
-    $form[0].reset();
-    $form.find(":input").removeClass("is-invalid is-valid");
-    $codigoUnidadOriginal.val("");
-    $codigoProgramaOriginal.val("");
-    $codigoProyectoOriginal.val("");
-    $codigoActividadOriginal.val("");
-    $fechaInicio.val("");
-    renderProyectos(null);
-    renderActividades(null);
-  }
-
-  $btnMostrarCrear.off("click.llaveOpen").on("click.llaveOpen", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const icono = $(".icon");
-    icono.addClass("opened");
-    $("#divDatos").show(500);
-    $("#divTabla").hide(500);
-  });
-
-  $btnCancelar.on("click", function (e) {
-    e.preventDefault();
-    $(".icon").removeClass("opened");
-    reiniciarCampos();
-    $("#divDatos").hide(500);
-    $("#divTabla").show(500);
-  });
-
-  $codigoPrograma.on("change", function () {
-    const programaId = $(this).val() || null;
-    renderProyectos(programaId);
-    renderActividades(programaId);
-  });
-
-  function esEdicion() {
-    return (
-      $codigoUnidadOriginal.val() !== "" &&
-      $codigoProgramaOriginal.val() !== "" &&
-      $codigoProyectoOriginal.val() !== "" &&
-      $codigoActividadOriginal.val() !== ""
-    );
-  }
-
-  $btnGuardar.on("click", async function () {
-    if (typeof $form.valid === "function" && !$form.valid()) {
-      return;
-    }
-
-    if (esEdicion()) {
-      await actualizarLlave();
-    } else {
-      await guardarLlave();
-    }
-  });
-
-  /*=============================================
-    INSERTA EN LA BD UNA NUEVA LLAVE PRESUPUESTARIA
-    =============================================*/
-  async function guardarLlave() {
-    try {
-      const datos = new FormData($form[0]);
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/guardar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success) {
-        await MostrarMensaje(
-          "success",
-          response.message || "Llave presupuestaria guardada correctamente"
-        );
-        await dt_llaves.ajax.reload(null, false);
-        $btnCancelar.trigger("click");
-      } else {
-        MostrarMensaje("error", response.message || "Error al guardar");
-      }
-    } catch (error) {
-      const errorData = error.responseJSON || {};
-      MostrarMensaje(
-        "error",
-        errorData.message || "No se pudo completar la operación"
-      );
-    }
-  }
-
-  /*=============================================
-    ACTUALIZA UNA LLAVE PRESUPUESTARIA EXISTENTE
-    =============================================*/
-  async function actualizarLlave() {
-    const objectBtn = $btnGuardar;
-    try {
-      IniciarSpiner(objectBtn);
-      const datos = new FormData($form[0]);
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/actualizar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje(
-          "success",
-          response.message || "Llave presupuestaria actualizada"
-        );
-        await dt_llaves.ajax.reload(null, false);
-        $btnCancelar.trigger("click");
-      } else {
-        throw new Error(response.message || response.respuesta || "Error desconocido");
-      }
-    } catch (error) {
-      const errorData = error.responseJSON || {};
-      const mensaje = errorData.message || "No se pudo completar la operación";
-      await MostrarMensaje("error", mensaje);
-    } finally {
-      DetenerSpiner(objectBtn);
-    }
-  }
-
-  /*=============================================
-    CONSTRUYE LA COLUMNA DE ACCIONES PARA LA TABLA
-    =============================================*/
-  function construirBotones(row) {
-    const keys =
-      'data-unidad="' + row.IdUnidad + '" ' +
-      'data-programa="' + row.IdPrograma + '" ' +
-      'data-proyecto="' + row.IdProyecto + '" ' +
-      'data-actividad="' + row.IdActividad + '"';
-
-    const finalizarDisabled = row.FechaFin ? "disabled" : "";
-
-    return (
-      '<div class="btn-group" role="group">' +
-      '<button type="button" class="btn btn-outline-warning btn-sm btnEditar" ' +
-      keys +
-      ' title="Editar"><i class="fa fa-pen-fancy"></i></button>' +
-
-      '<button type="button" class="btn btn-outline-danger btn-sm btnEliminar" ' +
-      keys +
-      ' title="Eliminar"><i class="fa fa-trash-alt"></i></button>' +
-      "</div>" +
-      '<button type="button" class="btn btn-outline-warning btn-sm btnFinalizar font-weight-bold" ' +
-      keys +
-      " " + finalizarDisabled +
-      ' title="Finalizar llave"><i class="fa fa-flag-checkered mr-1"></i></button>'
-    );
-  }
-
-  const dt_llaves = $("#tablaLlavesPresupuestarias").DataTable({
-    ajax: {
-      method: "POST",
-      dataType: "json",
-      cache: false,
-      contentType: false,
-      processData: false,
-      url: "index.php?r=Planificacion/llave-presupuestaria/listar-todo",
-      dataSrc: "data",
-      error: function (xhr, ajaxOptions, thrownError) {
-        MostrarMensaje(
-          "error",
-          GenerarMensajeError(thrownError + " >" + xhr.responseText)
-        );
-      },
-    },
-    columns: [
-      {
-        className: "dt-small dt-center",
-        orderable: false,
-        searchable: false,
-        data: null,
-        render: function (data, type, row, meta) {
-          return meta.row + 1;
-        },
-        width: 30,
-      },
-      {
-        className: "dt-small",
-        data: null,
-        render: function (data, type, row){
-          return (type === 'display')
-              ?  row["UnidadDa"] + ' - ' + row["UnidadUe"] + ' - ' + row["ProgramaCodigo"] + ' - ' + row["ProyectoCodigo"] + ' - ' + row["ActividadCodigo"]
-              :data;
-        },
-      },
-      {
-        className: "dt-small",
-        data: "Descripcion",
-      },
-      {
-        className: "dt-small dt-right",
-        data: "TechoPresupuestario",
-        render: function (data, type) {
-          if (data === null || data === undefined || data === "") {
-            return "";
-          }
-          const valor = parseFloat(data);
-          if (Number.isNaN(valor)) {
-            return data;
-          }
-          return valor.toLocaleString("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        },
-      },
-      {
-        className: "dt-small dt-center dt-periodo",
-        data: null,
-        render: function (data) {
-          if (!data) return "";
-          const fechaInicio = data.FechaInicio ? data.FechaInicio.substring(0, 10) : "";
-          const fechaFin = data.FechaFin ? data.FechaFin.substring(0, 10) : "";
-          if (!fechaInicio && !fechaFin) {
-            return "";
-          }
-          return (
-            '<div class="text-nowrap">' +
-            '<span class="font-weight-bold">Inicio:</span> ' + (fechaInicio || "—") + '<br>' +
-            '<span class="font-weight-bold">Fin:</span> ' + (fechaFin || "—") +
-            "</div>"
-          );
-        },
-      },
-      {
-        className: "dt-small dt-estado dt-center",
-        orderable: false,
-        searchable: false,
-        data: "CodigoEstado",
-        render: function (data, type, row) {
-          const keys =
-            'data-unidad="' + row.IdUnidad + '" ' +
-            'data-programa="' + row.IdPrograma + '" ' +
-            'data-proyecto="' + row.IdProyecto + '" ' +
-            'data-actividad="' + row.IdActividad + '"';
-          if (type !== "display") {
-            return data;
-          }
-          if (row.CodigoEstado === ESTADO_VIGENTE) {
-            return (
-              '<button type="button" class="btn btn-outline-success btn-sm btnEstado" ' +
-              keys +
-              ' data-estado="' + ESTADO_VIGENTE + '">Vigente</button>'
-            );
-          }
-          return (
-            '<button type="button" class="btn btn-outline-danger btn-sm btnEstado" ' +
-            keys +
-            ' data-estado="' + ESTADO_CADUCO + '">Caducado</button>'
-          );
-        },
-      },
-      {
-        className: "dt-small dt-center dt-acciones",
-        orderable: false,
-        searchable: false,
-        data: null,
-        render: function (data, type, row) {
-          return type === "display" ? construirBotones(row) : data;
-        },
-      },
-    ],
-  });
-
-  dt_llaves
-    .on("order.dt search.dt", function () {
-      let i = 1;
-      dt_llaves
-        .cells(null, 0, { search: "applied", order: "applied" })
-        .every(function () {
-          this.data(i++);
+    function ReiniciarCampos() {
+        $('#formLlavePresupuestaria *').filter(':input').each(function () {
+            $(this).removeClass('is-invalid is-valid');
         });
-    })
-    .draw();
+        $('#formLlavePresupuestaria').trigger("reset");
+        llavePresupuestaria_s2Unidad.val(null).trigger('change')
+        llavePresupuestaria_s2Programa.val(null).trigger('change')
+        llavePresupuestaria_s2Proyecto.val(null).trigger('change')
+        llavePresupuestaria_s2Actividad.val(null).trigger('change')
 
-  /*=============================================
-    OBTIENE LOS IDENTIFICADORES A PARTIR DEL BOTÓN
-    =============================================*/
-  function obtenerPayloadDesdeBoton($btn) {
-    return {
-      codigoUnidad: $btn.data("unidad"),
-      codigoPrograma: $btn.data("programa"),
-      codigoProyecto: $btn.data("proyecto"),
-      codigoActividad: $btn.data("actividad"),
-    };
-  }
+        idLlavePresupuestaria = '00000000-0000-0000-0000-000000000000'
+    }
 
-  /*=============================================
-    CAMBIA EL ESTADO (VIGENTE/CADUCADO) DE LA LLAVE
-    =============================================*/
-  $("#tablaLlavesPresupuestarias tbody").on("click", ".btnEstado", async function () {
-    const $btn = $(this);
-    const estadoActual = $btn.data("estado");
-    const payload = obtenerPayloadDesdeBoton($btn);
+    function mensajeAccion(accion) {
+        return `Los datos de la llave presupuestaria se ${accion}ron correctamente.`;
+    }
 
-    const datos = new FormData();
-    datos.append("codigoUnidad", payload.codigoUnidad);
-    datos.append("codigoPrograma", payload.codigoPrograma);
-    datos.append("codigoProyecto", payload.codigoProyecto);
-    datos.append("codigoActividad", payload.codigoActividad);
+    $("#btnCancelar").click(function () {
+        $('.icon').toggleClass('opened');
+        ReiniciarCampos();
+        $("#divDatos").hide(500);
+        $("#divTabla").show(500)
+    });
 
-    try {
-      IniciarSpiner($btn);
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/cambiar-estado",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        const nuevoEstado = estadoActual === ESTADO_VIGENTE ? ESTADO_CADUCO : ESTADO_VIGENTE;
-        $btn.data("estado", nuevoEstado);
-        if (nuevoEstado === ESTADO_VIGENTE) {
-          $btn
-            .removeClass("btn-outline-danger")
-            .addClass("btn-outline-success")
-            .text("Vigente");
+    llavePresupuestaria_s2Programa.change(function () {
+        llavePresupuestaria_s2Proyecto.val(null).trigger('change');
+        llavePresupuestaria_s2Actividad.val(null).trigger('change');
+        if ($(this).val() !== null) {
+            llavePresupuestaria_s2Proyecto.prop("disabled", false);
+            llavePresupuestaria_s2Actividad.prop("disabled", false);
+            populateS2Proyectos($(this).val(), llavePresupuestaria_s2Proyecto, null)
+            populateS2Actividades($(this).val(), llavePresupuestaria_s2Actividad, null)
         } else {
-          $btn
-            .removeClass("btn-outline-success")
-            .addClass("btn-outline-danger")
-            .text("Caducado");
+            llavePresupuestaria_s2Proyecto.prop("disabled", true);
+            llavePresupuestaria_s2Actividad.prop("disabled", true);
         }
-      } else {
-        MostrarMensaje("error", GenerarMensajeError(response.message || response.respuesta));
-      }
-    } catch (error) {
-      MostrarMensaje(
-        "error",
-        GenerarMensajeError(error.statusText + " >" + error.responseText)
-      );
-    } finally {
-      DetenerSpiner($btn);
-    }
-  });
+    })
 
-  /*=============================================
-    FINALIZA LA LLAVE PRESUPUESTARIA (SET FECHA FIN)
+
+    $("#btnGuardar").click(async function () {
+        const btn = $(this);
+        const btnCancel = $('#btnCancelar')
+
+        if (!$("#formLlavePresupuestaria").valid()) return;
+
+        const hasCode = idLlavePresupuestaria !== '00000000-0000-0000-0000-000000000000';
+        let accion = hasCode ? 'actualizar' : 'guardar'
+
+        const idUnidad = llavePresupuestaria_s2Unidad.select2('data')[0].id
+        const idPrograma = llavePresupuestaria_s2Programa.select2('data')[0].id
+        const idProyecto = llavePresupuestaria_s2Proyecto.select2('data')[0].id
+        const idActividad = llavePresupuestaria_s2Actividad.select2('data')[0].id
+
+        const descripcion = $("#descripcion").val();
+        const techoPresupuestario = $("#techoPresupuestario").val();
+        const fechaInicio = $("#fechaInicio").val();
+
+        const datos = new FormData();
+        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
+        datos.append('idUnidad', idUnidad)
+        datos.append("idPrograma", idPrograma);
+        datos.append("idProyecto", idProyecto);
+        datos.append("idActividad", idActividad);
+        datos.append("descripcion", descripcion);
+        datos.append("techoPresupuestario", techoPresupuestario);
+        datos.append("fechaInicio", fechaInicio);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + accion,
+                data: datos,
+                spinnerBtn: btn,
+                cancelBtn: btnCancel,
+                successMsg: mensajeAccion(accion),
+                reloadTable: dt_llavePresupuestaria
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
+    });
+
+    $(document).on('click', '#refresh', function () {
+        dt_llavePresupuestaria.ajax.reload();
+    })
+
+    /* =============================================
+     * CAMBIA EL ESTADO DEL REGISTRO
+     * =============================================
+     */
+    $(document).on('click', 'tbody #btnEstado', async function () {
+
+        let objectBtn = $(this);
+        const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
+        let idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
+
+        const datos = new FormData();
+        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + "cambiar-estado",
+                data: datos,
+                spinnerBtn: objectBtn,
+                successMsg: 'Estado actualizado correctamente.',
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
+    });
+
+    /*=============================================
+    ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-  $("#tablaLlavesPresupuestarias tbody").on("click", ".btnFinalizar", async function () {
-    const $btn = $(this);
-    if ($btn.prop("disabled")) {
-      return;
-    }
+    $(document).on('click', 'tbody #btnEliminar', function(){
+        let objectBtn = $(this)
+        const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
+        let idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
 
-    const payload = obtenerPayloadDesdeBoton($btn);
+        const datos = new FormData();
+        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
 
-    const datos = new FormData();
-    datos.append("codigoUnidad", payload.codigoUnidad);
-    datos.append("codigoPrograma", payload.codigoPrograma);
-    datos.append("codigoProyecto", payload.codigoProyecto);
-    datos.append("codigoActividad", payload.codigoActividad);
+        Swal.fire({
+            icon: "warning",
+            title: "Confirmación eliminación",
+            text: "¿Está seguro de eliminar la llave presupuestaria seleccionada?",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: 'Borrar',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Cancelar'
+        }).then(async function (resultado) {
+            if (resultado.value) {
+                try {
+                    await ajaxPromise({
+                        url: baseUrl + "eliminar",
+                        data: datos,
+                        spinnerBtn: objectBtn,
+                        successMsg: mensajeAccion('eliminar'),
+                        reloadTable: dt_llavePresupuestaria
+                    });
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                }
+            }
+        });
+    });
 
-    try {
-      const confirmar = await Swal.fire({
-        icon: "question",
-        title: "Confirmar finalización",
-        text: "La fecha fin se establecerá con el día actual. ¿Desea continuar?",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, finalizar",
-        cancelButtonText: "Cancelar",
-      });
+    /* =============================================
+     * CAMBIA EL ESTADO DEL REGISTRO
+     * =============================================
+     */
+    $(document).on('click', 'tbody #btnFinalizar', async function () {
 
-      if (!confirmar.isConfirmed) {
-        return;
-      }
+        let objectBtn = $(this);
+        const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
+        let idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
 
-      IniciarSpiner($btn);
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/finalizar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
+        const datos = new FormData();
+        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
 
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje(
-          "success",
-          response.message || "Llave presupuestaria finalizada"
-        );
-        await dt_llaves.ajax.reload(null, false);
-      } else {
-        MostrarMensaje(
-          "error",
-          GenerarMensajeError(response.message || response.respuesta)
-        );
-      }
-    } catch (error) {
-      const errorData = error.responseJSON || {};
-      MostrarMensaje(
-        "error",
-        errorData.message || "No se pudo completar la operación"
-      );
-    } finally {
-      DetenerSpiner($btn);
-    }
-  });
+        try {
+            await ajaxPromise({
+                url: baseUrl + "finalizar",
+                data: datos,
+                spinnerBtn: objectBtn,
+                successMsg: 'Estado actualizado correctamente.',
+                reloadTable: dt_llavePresupuestaria
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
+    });
 
-  /*=============================================
-    ELIMINA (SOFT DELETE) LA LLAVE PRESUPUESTARIA
+    /*=============================================
+    BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-  $("#tablaLlavesPresupuestarias tbody").on("click", ".btnEliminar", async function () {
-    const $btn = $(this);
-    const payload = obtenerPayloadDesdeBoton($btn);
+    $(document).on('click', 'tbody #btnEditar', async function(){
+        let objectBtn = $(this);
+        const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
+        idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
 
-    try {
-      const confirmar = await Swal.fire({
-        icon: "warning",
-        title: "Confirmación de eliminación",
-        text: "¿Está seguro de eliminar la llave seleccionada?",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Borrar",
-        cancelButtonText: "Cancelar",
-      });
+        const datos = new FormData();
+        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
 
-      if (!confirmar.isConfirmed) {
-        return;
-      }
+        try {
+            await ajaxPromise({
+                url: baseUrl + "buscar",
+                data: datos,
+                spinnerBtn: objectBtn,
+            }).then((data) => {
+                let obj = data.data
+                llavePresupuestaria_s2Unidad.val(obj["IdUnidad"]).trigger('change')
+                llavePresupuestaria_s2Programa.val(obj["IdPrograma"]).trigger('change')
+                populateS2Proyectos(obj["IdPrograma"],llavePresupuestaria_s2Proyecto,obj["IdProyecto"])
+                populateS2Actividades(obj["IdPrograma"],llavePresupuestaria_s2Actividad,obj["IdActividad"])
+                $("#descripcion").val(obj["Descripcion"]);
+                $("#techoPresupuestario").val(obj["TechoPresupuestario"]);
+                let FechaInicio = obj["FechaInicio"]
+                $("#fechaInicio").val(FechaInicio.split(' ')[0]);
+                $("#btnMostrarCrear").trigger('click');
+            });
+        } catch (err) {
+            console.error("Error al procesar:", err);
+        }
+    });
 
-      const datos = new FormData();
-      datos.append("codigoUnidad", payload.codigoUnidad);
-      datos.append("codigoPrograma", payload.codigoPrograma);
-      datos.append("codigoProyecto", payload.codigoProyecto);
-      datos.append("codigoActividad", payload.codigoActividad);
 
-      IniciarSpiner($btn);
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/eliminar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
+    /**
+     * Validacion del form
+     */
+    $("#formLlavePresupuestaria").validate({
+        rules: {
+            unidad: {
+                required: true,
+            },
+            programa: {
+                required: true,
+            },
+            proyecto: {
+                required: true,
+            },
+            actividad: {
+                required: true,
+            },
+            descripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
+            techoPresupuestario: {
+                required: true,
+            },
+            fechaInicio: {
+                required: true,
+            }
+        },
+        messages: {
+            unidad: {
+                required: "Debe seleccionar una unidad",
+            },
+            programa: {
+                required: "Debe seleccionar un programa",
+            },
+            proyecto: {
+                required: "Debe seleccionar un proyecto",
+            },
+            actividad: {
+                required: "Debe seleccionar una actividad",
+            },
+            descripcion: {
+                required: "Debe ingresar la descripcion del indicador estrategico",
+                minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion del indicador debe tener maximo 500 caracteres",
+            },
+            techoPresupuestario: {
+                required: "Debe ingresar un techo presupuestario",
+            },
+            fechaInicio: {
+                required: "Debe seleccionar una fecha",
+            }
+        },
+        errorElement: "div",
 
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        await MostrarMensaje("success", "La llave ha sido eliminada correctamente.");
-        await dt_llaves.ajax.reload(null, false);
-      } else {
-        MostrarMensaje(
-          "error",
-          GenerarMensajeError(response.message || response.respuesta)
-        );
-      }
-    } catch (error) {
-      const errorData = error.responseJSON || {};
-      MostrarMensaje(
-        "error",
-        errorData.message || "No se pudo completar la operación"
-      );
-    } finally {
-      DetenerSpiner($btn);
-    }
-  });
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
+            error.insertAfter(element);
+        },
+        highlight: function (element) {
+            $(element).addClass("is-invalid").removeClass("is-valid");
+        },
+        unhighlight: function (element) {
+            $(element).addClass("is-valid").removeClass("is-invalid");
+        }
+    });
 
-  /*=============================================
-    BUSCA Y CARGA LA LLAVE PARA EDICIÓN
-    =============================================*/
-  $("#tablaLlavesPresupuestarias tbody").on("click", ".btnEditar", async function () {
-    const $btn = $(this);
-    const payload = obtenerPayloadDesdeBoton($btn);
 
-    try {
-      IniciarSpiner($btn);
-
-      const datos = new FormData();
-      datos.append("codigoUnidad", payload.codigoUnidad);
-      datos.append("codigoPrograma", payload.codigoPrograma);
-      datos.append("codigoProyecto", payload.codigoProyecto);
-      datos.append("codigoActividad", payload.codigoActividad);
-
-      const response = await $.ajax({
-        url: "index.php?r=Planificacion/llave-presupuestaria/buscar",
-        method: "POST",
-        data: datos,
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-      });
-
-      if (response.success || response.respuesta === RTA_CORRECTO) {
-        const llave = response.data || {};
-
-        $codigoUnidadOriginal.val(llave.IdUnidad || "");
-        $codigoProgramaOriginal.val(llave.IdPrograma || "");
-        $codigoProyectoOriginal.val(llave.IdProyecto || "");
-        $codigoActividadOriginal.val(llave.IdActividad || "");
-
-        $codigoUnidad.val(llave.IdUnidad || "").trigger("change");
-        $codigoPrograma.val(llave.IdPrograma || "").trigger("change");
-        renderProyectos(llave.IdPrograma || null, llave.IdProyecto || null);
-        renderActividades(llave.IdPrograma || null, llave.IdActividad || null);
-        $codigoProyecto.val(llave.IdProyecto || "");
-        $codigoActividad.val(llave.IdActividad || "");
-
-        $("#descripcion").val(llave.Descripcion || "");
-        $("#techoPresupuestario").val(llave.TechoPresupuestario || "");
-    $fechaInicio.val(llave.FechaInicio ? llave.FechaInicio.substring(0, 10) : "");
-
-        $btnMostrarCrear.trigger("click");
-      } else {
-        MostrarMensaje(
-          "error",
-          GenerarMensajeError(response.message || response.respuesta)
-        );
-      }
-    } catch (error) {
-      const errorData = error.responseJSON || {};
-      MostrarMensaje(
-        "error",
-        errorData.message || "No se pudo completar la operación"
-      );
-    } finally {
-      DetenerSpiner($btn);
-    }
-  });
-});
+})

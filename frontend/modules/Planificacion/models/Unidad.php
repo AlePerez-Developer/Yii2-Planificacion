@@ -3,6 +3,7 @@ namespace app\modules\Planificacion\models;
 
 use common\models\Estado;
 use common\models\Usuario;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "Unidades".
@@ -67,6 +68,27 @@ class Unidad extends \yii\db\ActiveRecord
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
+    }
+
+    /**
+     * Obtiene todos los programas activos (no eliminados)
+     *
+     * @param string $search
+     * @return ActiveQuery
+     */
+    public static function listAll(string $search = '%%'): ActiveQuery
+    {
+        return self::find()
+            ->select([
+                'IdUnidad',
+                'CONCAT(Da, \'-\',Ue) AS Compuesto',
+                'Descripcion',
+                'CodigoEstado',
+                'CodigoUsuario'
+            ])
+            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'Descripcion', $search, false])
+            ->orderBy(['Da' => SORT_ASC]);
     }
 
     /**

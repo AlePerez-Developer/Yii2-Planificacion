@@ -34,9 +34,9 @@ class ProyectoService
      * @param string $search
      * @return array of Programas
      */
-    public function listarProyectosS2(string $search): array
+    public function listarProyectosS2(string $idPrograma, string $search): array
     {
-        $data = Proyecto::listAll($search)
+        $data = Proyecto::listAllbyPrograma($idPrograma,$search)
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 

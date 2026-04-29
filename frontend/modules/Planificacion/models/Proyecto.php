@@ -135,6 +135,31 @@ class Proyecto extends ActiveRecord
     }
 
     /**
+     * Obtiene todos los proyectos activos (no eliminados)
+     *
+     * @param string $search
+     * @return ActiveQuery
+     */
+    public static function listAllbyPrograma(string $idPrograma,string $search = '%%'): ActiveQuery
+    {
+        return self::find()->alias('P')
+            ->select([
+                'P.IdProyecto',
+                'P.Codigo',
+                'P.Descripcion',
+                'P.CodigoEstado',
+                'P.CodigoUsuario',
+                'Prg.IdPrograma',
+                'Prg.Codigo as codex'
+            ])
+            ->joinWith('programa Prg', true, 'INNER JOIN')
+            ->where(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['P.IdPrograma' => $idPrograma])
+            ->andwhere(['like', 'P.Descripcion', $search, false])
+            ->andWhere(['!=', 'Prg.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+    }
+
+    /**
      * alterna el estado del modelo V/C.
      *
      * @return void

@@ -34,9 +34,9 @@ class ActividadService
      * @param string $search
      * @return array of Actividades
      */
-    public function listarActividadesS2(string $search): array
+    public function listarActividadesS2(string $idPrograma, string $search): array
     {
-        $data = Actividad::listAll($search)
+        $data = Actividad::listAllbyPrograma($idPrograma,$search)
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 

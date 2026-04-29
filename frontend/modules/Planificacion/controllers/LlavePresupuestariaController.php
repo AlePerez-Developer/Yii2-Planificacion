@@ -2,27 +2,26 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\formModels\LlavePresupuestariaForm;
-use app\modules\Planificacion\models\Actividad;
-use app\modules\Planificacion\models\Programa;
-use app\modules\Planificacion\models\Proyecto;
-use app\modules\Planificacion\models\Unidad;
 use app\modules\Planificacion\services\LlavePresupuestariaService;
-use common\models\Estado;
-use Yii;
+use app\modules\Planificacion\formModels\LlavePresupuestariaForm;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
+use Yii;
 
+
+/**
+ * @noinspection PhpUnused
+ */
 class LlavePresupuestariaController extends BaseController
 {
-    private LlavePresupuestariaService $llaveService;
+    private LlavePresupuestariaService $service;
 
     public function __construct($id, $module, LlavePresupuestariaService $llaveService, $config = [])
     {
-        $this->llaveService = $llaveService;
+        $this->service = $llaveService;
         parent::__construct($id, $module, $config);
     }
 
@@ -72,159 +71,139 @@ class LlavePresupuestariaController extends BaseController
         return parent::beforeAction($action);
     }
 
+    /**
+     * accion index.
+     *
+     * @return string
+     */
     public function actionIndex(): string
     {
-        $unidades = Unidad::find()
-            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['Da' => SORT_ASC, 'Ue' => SORT_ASC])
-            ->all();
-
-        $programas = Programa::find()
-            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['IdPrograma' => SORT_ASC])
-            ->all();
-
-        $proyectos = Proyecto::find()
-            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['IdProyecto' => SORT_ASC, 'Codigo' => SORT_ASC])
-            ->all();
-
-        $actividades = Actividad::find()
-            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->orderBy(['IdPrograma' => SORT_ASC, 'Codigo' => SORT_ASC])
-            ->all();
-
-        return $this->render('llavePresupuestaria', compact('unidades', 'programas', 'proyectos', 'actividades'));
+        return $this->render('llavePresupuestaria');
     }
 
+    /**
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn () => $this->llaveService->listarLlaves());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
+    /**
+     * accion para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
     public function actionGuardar(): array
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
             $form = new LlavePresupuestariaForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
-                throw new ValidationException(
-                    Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'errorEnvio',
-                    $form->getErrors(),
-                    400
-                );
+            if (!$form->load($request->post(), '') || !$form->validate()
+            ) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-
-            return $this->llaveService->guardarLlave($form);
-        });
-    }
-
-    public function actionActualizar(): array
-    {
-        return $this->withTryCatch(function () {
-            $request = Yii::$app->request;
-            $claves = $this->obtenerClaves('Original');
-
-            $form = new LlavePresupuestariaForm();
-            if (!$form->load($request->post(), '') || !$form->validate()) {
-                throw new ValidationException(
-                    Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'errorEnvio',
-                    $form->getErrors(),
-                    400
-                );
-            }
-
-            return $this->llaveService->actualizarLlave(
-                $claves['unidad'],
-                $claves['programa'],
-                $claves['proyecto'],
-                $claves['actividad'],
-                $form
-            );
-        });
-    }
-
-    public function actionCambiarEstado(): array
-    {
-        return $this->withTryCatch(function () {
-            $claves = $this->obtenerClaves();
-            return $this->llaveService->cambiarEstado(
-                $claves['unidad'],
-                $claves['programa'],
-                $claves['proyecto'],
-                $claves['actividad']
-            );
-        });
-    }
-
-    public function actionEliminar(): array
-    {
-        return $this->withTryCatch(function () {
-            $claves = $this->obtenerClaves();
-
-            return $this->llaveService->eliminarLlave(
-                $claves['unidad'],
-                $claves['programa'],
-                $claves['proyecto'],
-                $claves['actividad']
-            );
-        });
-    }
-
-    public function actionFinalizar(): array
-    {
-        return $this->withTryCatch(function () {
-            $claves = $this->obtenerClaves();
-
-            return $this->llaveService->finalizarLlave(
-                $claves['unidad'],
-                $claves['programa'],
-                $claves['proyecto'],
-                $claves['actividad']
-            );
-        });
-    }
-
-    public function actionBuscar(): array
-    {
-        return $this->withTryCatch(function () {
-            $claves = $this->obtenerClaves();
-            return $this->llaveService->obtenerModelo(
-                $claves['unidad'],
-                $claves['programa'],
-                $claves['proyecto'],
-                $claves['actividad']
-            );
+            return $this->service->guardar($form);
         });
     }
 
     /**
+     * accion para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionActualizar(): array
+    {
+        return $this->withTryCatch(function() {
+            $request = Yii::$app->request;
+
+            $id = $this->obtenerId();
+            $form = new LlavePresupuestariaForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate())
+            {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+            }
+
+            return $this->service->actualizar($id,$form);
+        });
+    }
+
+    /**
+     * accion para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionCambiarEstado(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
+        });
+    }
+
+    /**
+     * accion para soft delete de un registro
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
+        });
+    }
+
+    /**
+     * accion para soft delete de un registro
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionFinalizar(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->finalizar($id);
+        });
+    }
+
+    /**
+     * accion para buscar un registro en especifico
+     *
+     * @return array
+     * @noinspection PhpUnused
+     */
+    public function actionBuscar(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
+        });
+    }
+
+    /**
+     * obtiene y valida si se recibio el codigo por el request
+     *
+     * return string
      * @throws ValidationException
      */
-    private function obtenerClaves(string $sufijo = ''): array
+    private function obtenerId(): string
     {
-        $post = Yii::$app->request->post();
-        $append = $sufijo ? $sufijo : '';
-
-        $unidad = (string)($post['codigoUnidad' . $append] ?? 0);
-        $programa = (string)($post['codigoPrograma' . $append] ?? 0);
-        $proyecto = (string)($post['codigoProyecto' . $append] ?? 0);
-        $actividad = (string)($post['codigoActividad' . $append] ?? 0);
-
-        if (!$unidad || !$programa || !$proyecto || !$actividad) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'] ?? 'errorEnvio',
-                'Identificadores de la llave presupuestaria incompletos.',
-                404
-            );
+        $id = Yii::$app->request->post('idLlavePresupuestaria');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de Llave presupuestaria no enviado.',404);
         }
-
-        return [
-            'unidad' => $unidad,
-            'programa' => $programa,
-            'proyecto' => $proyecto,
-            'actividad' => $actividad,
-        ];
+        return $id;
     }
+
+
 }
