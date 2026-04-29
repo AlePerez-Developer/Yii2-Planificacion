@@ -16,19 +16,17 @@ class ObjInstitucionalDao
 
     /**
      * @param string $id
-     * @param string $idAreaEstrategica
-     * @param string $idPoliticaEstrategica
+     * @param string $idObjEstrategico
      * @param int $codigo
      * @return bool
      */
-    static function verificarCodigo(string $id, string $idAreaEstrategica, string $idPoliticaEstrategica, int $codigo): bool
+    static function verificarCodigo(string $id, string $idObjEstrategico, int $codigo): bool
     {
-        $model = ObjetivoEstrategico::find()
+        $model = ObjetivoInstitucional::find()
             ->where(['Codigo' => $codigo, 'CodigoEstado' => Estado::ESTADO_VIGENTE])
-            ->andWhere(['!=','IdObjEstrategico',$id])
+            ->andWhere(['!=','IdObjInstitucional',$id])
             ->andWhere(['IdPei' => yii::$app->contexto->getPei()])
-            ->andWhere(['IdAreaEstrategica' => $idAreaEstrategica])
-            ->andWhere(['IdPoliticaEstrategica' => $idPoliticaEstrategica])
+            ->andWhere(['IdObjInstitucional' => $idObjEstrategico])
             ->one();
 
         return !$model;

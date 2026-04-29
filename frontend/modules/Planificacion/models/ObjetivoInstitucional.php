@@ -41,11 +41,11 @@ class ObjetivoInstitucional extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdObjInstitucional', 'IdObjEstrategico'], 'string'],
-            [['IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'gestion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['gestion'], 'integer'],
+            [['IdObjInstitucional', 'IdObjEstrategico'], 'string', 'max' => 36],
+            [['IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'Gestion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Gestion', 'Codigo'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
-            [['Codigo', 'CodigoUsuario'], 'string', 'max' => 3],
+            [['CodigoUsuario'], 'string', 'max' => 3],
             [['Objetivo', 'Producto'], 'string', 'max' => 200],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['IdObjInstitucional'], 'unique'],
@@ -95,7 +95,7 @@ class ObjetivoInstitucional extends ActiveRecord
             'Codigo' => 'Codigo',
             'Objetivo' => 'Objetivo',
             'Producto' => 'Producto',
-            'gestion' => 'Gestion',
+            'Gestion' => 'Gestion',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
@@ -112,19 +112,18 @@ class ObjetivoInstitucional extends ActiveRecord
         return self::find()->alias('O')
             ->select([
                 'O.IdObjInstitucional',
-                'CONCAT(Ae.Codigo,Pe.Codigo,O.Codigo) AS Compuesto',
+                'CONCAT(a.Codigo,p.Codigo,Oe.Codigo, \'-\',O.Codigo) AS Compuesto',
                 'O.Codigo',
                 'O.Objetivo',
                 'O.Producto',
-                'O.Indicador_Descripcion',
-                'O.Indicador_Formula',
+                'O.Gestion',
                 'O.CodigoEstado',
                 'O.CodigoUsuario',
-                'P.IdPei',
-                'Ae.IdAreaEstrategica',
-                'Pe.IdPoliticaEstrategica',
+                'Oe.IdObjEstrategico',
             ])
             ->joinWith('objetivoEstrategico Oe', true, 'INNER JOIN')
+            ->joinWith('objetivoEstrategico.areaEstrategica a', true, 'INNER JOIN')
+            ->joinWith('objetivoEstrategico.politicaEstrategica p', true, 'INNER JOIN')
             ->where(['!=', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Oe.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'O.Objetivo', $search,false]);
@@ -179,7 +178,7 @@ class ObjetivoInstitucional extends ActiveRecord
      * @noinspection PhpUnused
      *
      */
-    public function getIdObjEstrategico(): ActiveQuery
+    public function getObjetivoEstrategico(): ActiveQuery
     {
         return $this->hasOne(ObjetivoEstrategico::class, ['IdObjEstrategico' => 'IdObjEstrategico']);
     }

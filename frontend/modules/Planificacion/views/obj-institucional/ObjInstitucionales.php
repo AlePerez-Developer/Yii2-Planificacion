@@ -1,5 +1,4 @@
 <?php
-use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -41,7 +40,6 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Institucionales']];
                     </span>
                 </button>
             </div>
-            <input type="text" value="2026" style="width: 150px">
         </div>
     </div>
     <div id="divDatos" class="card-body" style="display: none">
@@ -49,15 +47,22 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Institucionales']];
             <div class="card " style="width: 80rem;" >
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
-                    <form id="formObjEstrategico" action="" method="post">
+                    <form id="formObjInstitucional" action="" method="post">
 
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group">
-                                    <label for="idObjEstrategico">Seleccione el objetivo estrategico</label>
-                                    <select class="form-control objEstrategico codigo_group" id="idObjEstrategico" name="idObjEstrategico" >
+                                    <label for="objsEstrategicos">Seleccione el objetivo estrategico</label>
+                                    <select class="form-control objEstrategico codigo_group" id="objsEstrategicos" name="objsEstrategicos" >
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <label for="codigo">Codigo de Objetivo Institucional (OI)</label>
+                                <input type="text" class="form-control input-sm num codigo_group" id="codigo" name="codigo" maxlength="3"  placeholder="Codigo" style="width: 100px"  >
                             </div>
                         </div>
 
@@ -86,7 +91,9 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Institucionales']];
         </div>
     </div>
     <div id="divTabla" class="card-body">
-        <table id="tablaListaObjInstitucionales" name="tablaListaObjInstitucionales" class="table table-bordered table-striped">
+        <table id="tablaListaObjInstitucionales"
+               name="tablaListaObjInstitucionales"
+               class="table table-bordered table-striped">
             <thead>
             <th>#</th>
             <th>Codigo</th>
@@ -99,43 +106,3 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Institucionales']];
     </div>
 </div>
 
-
-<style>
-    :root {
-        --border-color: #007BFF; /* azul */
-        --border-width: 1px;
-        --padding: 14px;
-    }
-
-    .contenedor {
-        width: 100%; !important;
-        position: relative;
-        display: inline-block;
-    }
-
-    .square {
-        width: auto;
-        height: auto;
-        border: var(--border-width) solid var(--border-color);
-        border-radius: 8px;
-        padding: var(--padding);
-        box-sizing: border-box;
-        gap: 10px;
-    }
-
-    .ltc {
-        position: absolute;
-        top: -0.8em;       /* sube el texto para que corte la línea */
-        left: 16px;        /* margen interno desde la izquierda */
-        background: white; /* fondo blanco para "romper" el borde */
-        padding: 0 8px;    /* espacio horizontal */
-        color: var(--border-color);
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 4px;
-    }
-
-    .ltc {
-        margin-bottom: 6px;
-    }
-</style>

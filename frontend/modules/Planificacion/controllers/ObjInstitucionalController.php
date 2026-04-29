@@ -1,28 +1,43 @@
 <?php
 
-
 namespace app\modules\Planificacion\controllers;
-use app\modules\Planificacion\models\ObjetivoInstitucional;
-use app\modules\Planificacion\models\ObjetivoEstrategico;
-use app\modules\Planificacion\dao\ObjInstitucionalDao;
-use yii\db\StaleObjectException;
+
+use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\ObjetivoInstitucionalService;
+use app\modules\Planificacion\formModels\ObjetivoInstitucionalForm;
+use app\modules\Planificacion\services\ObjetivoEstrategicoService;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\base\BaseObject;
-use yii\web\Controller;
+use Mpdf\MpdfException;
+use Mpdf\Mpdf;
 use Yii;
 
 
 /**
  * @noinspection PhpUnused
  */
-class ObjInstitucionalController extends Controller
+class ObjInstitucionalController extends BaseController
 {
+    private ObjetivoInstitucionalService $service;
+    private ObjetivoEstrategicoService $serviceEstrategico;
+
+    public function __construct($id, $module,
+                                ObjetivoInstitucionalService $service,
+                                ObjetivoEstrategicoService $serviceEstrategico,
+        $config = [])
+    {
+        $this->service = $service;
+        $this->serviceEstrategico = $serviceEstrategico;
+        parent::__construct($id, $module, $config);
+    }
+
     public function behaviors(): array
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => [],
                 'rules' => [
                     [
@@ -31,14 +46,22 @@ class ObjInstitucionalController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => [],
+                        'actions' => [
+                            'index','listar-todo','verificar-codigo','guardar', 'actualizar', 'eliminar','cambiar-estado','buscar',
+                            'listar-areas-estrategicas','listar-politicas-estrategicas','listar-obj-institucionals-s2'
+                        ],
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function () {
+                            Yii::$app->contexto->validarPeiActivo();
+                            return true;
+                        },
+
                     ],
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -46,195 +69,189 @@ class ObjInstitucionalController extends Controller
         ];
     }
 
-    public function beforeAction($action)
+    /**
+     * @throws BadRequestHttpException
+     */
+    public function beforeAction($action): bool
     {
-        if ($action->id == "listar-objs")
+        if ($action->id == "listar-todo")
             $this->enableCsrfValidation = false;
         return parent::beforeAction($action);
     }
 
-
-    public function actionIndex()
+    /**
+     * accion index.
+     *
+     * @return string
+     */
+    public function actionIndex(): string
     {
-        $objsEstrategicos = ObjetivoEstrategico::find()->where(['CodigoEstado'=>'V'])->all();
-        return $this->render('ObjInstitucionales',['objsEstrategicos'=>$objsEstrategicos]);
-    }
-
-    public function actionOsito()
-    {
-        $Data = array();
-        if (\Yii::$app->request->isAjax) {
-            $objs = ObjetivoEstrategico::find()->where(['CodigoEstado'=>'V'])->asArray()->all();
-            foreach($objs as  $obj) {
-                array_push($Data, $obj);
-            }
-        }
-        return json_encode($Data);
-    }
-
-    public function actionListarObjs()
-    {
-        $Data = array();
-        if (\Yii::$app->request->isAjax && \Yii::$app->request->isPost) {
-            $objs = ObjetivoInstitucional::find()->select([
-                'ObjetivosInstitucionales.CodigoObjInstitucional','ObjetivosInstitucionales.CodigoCOGE','ObjetivosInstitucionales.Objetivo','ObjetivosInstitucionales.CodigoEstado','ObjetivosInstitucionales.CodigoUsuario',
-                'ObjetivosEstrategicos.Codigo as COGEEstrategico','ObjetivosEstrategicos.Objetivo as ObjEstrategico',
-                'PEIs.Descripcion','PEIs.GestionInicio','PEIs.GestionFin','PEIs.FechaAprobacion','concat(ObjetivosEstrategicos.Codigo, char(45) , ObjetivosInstitucionales.CodigoCOGE) as Codigo  '
-                ])
-                ->join('INNER JOIN','ObjetivosEstrategicos', 'ObjetivosInstitucionales.CodigoObjEstrategico = ObjetivosEstrategicos.IdObjEstrategico')
-                ->join('INNER JOIN','PEIs', 'ObjetivosEstrategicos.IdPei = PEIs.IdPei')
-                ->where(['!=','ObjetivosInstitucionales.CodigoEstado','E'])->andwhere(['!=','ObjetivosEstrategicos.CodigoEstado','E'])->andWhere(['!=','PEIs.CodigoEstado','E'])
-                ->orderBy('ObjetivosInstitucionales.CodigoObjInstitucional')->asArray()->all();
-            foreach($objs as  $obj) {
-                array_push($Data, $obj);
-            }
-        }
-        return json_encode($Data);
-    }
-
-    public function actionGuardarObjs()
-    {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjestrategico"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"])){
-                $obj = new ObjetivoInstitucional();
-                $obj->CodigoObjInstitucional = ObjInstitucionalDao::GenerarCodigoObjInstitucional();
-                $obj->CodigoObjEstrategico = $_POST["codigoobjestrategico"];
-                $obj->CodigoCOGE = trim($_POST["codigocoge"]);
-                $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
-                $obj->CodigoEstado = 'V';
-                $obj->CodigoUsuario = 'BGC';//Yii::$app->user->identity->CodigoUsuario;
-                if ($obj->validate()){
-                    if (!$obj->exist()){
-                        if ($obj->save())
-                        {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorExiste";
-                    }
-                } else {
-                    return "errorValidacion";
-                }
-            } else {
-                return 'errorEnvio';
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->render('objInstitucionales');
     }
 
     /**
-     * @throws StaleObjectException
-     * @throws Throwable
+     * accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
      */
-    public function actionCambiarEstadoObj()
+    public function actionListarTodo(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjinstitucional"])) {
-                $obj = ObjetivoInstitucional::findOne($_POST["codigoobjinstitucional"]);
-                if ($obj){
-                    if ($obj->CodigoEstado == "V") {
-                        $obj->CodigoEstado = "C";
-                    } else {
-                        $obj->CodigoEstado = "V";
-                    }
-                    if ($obj->update()){
-                        return "ok";
-                    } else {
-                        return "errorSql";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
     /**
-     * @throws Throwable
-     * @throws StaleObjectException
+     * accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
      */
-    public function actionEliminarObj()
+    public function actionListarObjInstitucionalsS2(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjinstitucional"]) && $_POST["codigoobjinstitucional"] != "") {
-                $obj = ObjetivoInstitucional::findOne($_POST["codigoobjinstitucional"]);
-                if ($obj){
-                    if (!$obj->enUso()) {
-                        $obj->CodigoEstado = 'E';
-                        if ($obj->update()) {
-                            return "ok";
-                        } else {
-                            return "errorSql";
-                        }
-                    } else {
-                        return "errorEnUso";
-                    }
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
-            }
-        } else {
-            return "errorCabecera";
-        }
+        return [];
+        /*$search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarObjInstitucionalsS2($search)) ;*/
     }
 
-    public function actionBuscarObj()
+
+    /**
+     * accion para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionGuardar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjinstitucional"]) && $_POST["codigoobjinstitucional"] != "") {
-                $obj = ObjetivoInstitucional::findOne($_POST["codigoobjinstitucional"]);
-                if ($obj){
-                    return json_encode($obj->getAttributes(array('CodigoObjInstitucional','CodigoObjEstrategico','CodigoCOGE','Objetivo')));
-                } else {
-                    return 'errorNoEncontrado';
-                }
-            } else {
-                return "errorEnvio";
+        return $this->withTryCatch(function () {
+            $request = Yii::$app->request;
+            $form = new ObjetivoInstitucionalForm();
+            $form->load($request->post(), '');
+            if (!$form->load($request->post(), '') || !$form->validate()
+                || !$this->serviceEstrategico->validarId($form->idObjEstrategico)
+            ) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabecera";
-        }
+            return $this->service->guardar($form);
+        });
     }
 
-    public function actionActualizarObj()
+    /**
+     * accion para actualizar los valores de un registro existente.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionActualizar(): array
     {
-        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            if (isset($_POST["codigoobjestrategico"]) && isset($_POST["codigoobjinstitucional"]) && isset($_POST["codigocoge"]) && isset($_POST["objetivo"]) ){
-                $obj = ObjetivoInstitucional::findOne($_POST["codigoobjinstitucional"]);
-                if ($obj){
-                    $obj->CodigoObjEstrategico = $_POST["codigoobjestrategico"];
-                    $obj->CodigoCOGE = trim($_POST["codigocoge"]);
-                    $obj->Objetivo =  mb_strtoupper(trim($_POST["objetivo"]),'utf-8');
-                    if ($obj->validate()){
-                        if (!$obj->exist()){
-                            if ($obj->update() !== false) {
-                                return "ok";
-                            } else {
-                                return "errorSql";
-                            }
-                        } else {
-                            return "errorExiste";
-                        }
-                    } else {
-                        return "errorValidacion";
-                    }
-                } else {
-                    return "errorNoEncontrado";
-                }
-            } else {
-                return 'errorEnvio';
+        return $this->withTryCatch(function() {
+            $request = Yii::$app->request;
+
+            $id = $this->obtenerId();
+            $form = new ObjetivoInstitucionalForm();
+
+            if (!$form->load($request->post(), '') || !$form->validate()
+                || !$this->serviceEstrategico->validarId($form->idObjEstrategico)
+            ) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-        } else {
-            return "errorCabecera";
+
+            return $this->service->actualizar($id,$form);
+        });
+    }
+
+    /**
+     * accion para alternar el estado de un registro V/C.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionCambiarEstado(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->cambiarEstado($id);
+        });
+    }
+
+    /**
+     * accion para soft delete de un registro
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->eliminar($id);
+        });
+    }
+
+    /**
+     * accion para buscar un registro en especifico
+     *
+     * @return array
+     * @noinspection PhpUnused
+     */
+    public function actionBuscar(): array
+    {
+        return $this->withTryCatch(function() {
+            $id = $this->obtenerId();
+            return $this->service->obtenerModelo($id);
+        });
+    }
+
+    /**
+     * obtiene y valida si se recibio el codigo por el request
+     *
+     * return string
+     * @throws ValidationException
+     */
+    private function obtenerId(): string
+    {
+        $id = Yii::$app->request->post('idObjInstitucional');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de objetivo no enviado.',404);
         }
+        return $id;
+    }
+
+    /**
+     * accion para verificar un codigo ingresado
+     *
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function actionVerificarCodigo(): bool
+    {
+        $id = Yii::$app->request->post('idObjInstitucional');
+        if (!isset($id)) {
+            return false;
+        }
+
+        $idObjEstrategico = Yii::$app->request->post('idObjEstrategico');
+        if (!isset($idObjEstrategico)) {
+            return false;
+        }
+
+        $codigo = Yii::$app->request->post('codigo');
+        if (!isset($codigo)) {
+            return false;
+        }
+
+        return $this->service->verificarCodigo($id, $idObjEstrategico, $codigo);
+    }
+
+    /**
+     * @throws MpdfException
+     * @noinspection PhpUnused
+     */
+    public function actionReporte(): void
+    {
+        $mpdf = new Mpdf();
+        $mpdf->SetMargins(0, 0,32);
+
+        $mpdf->Output();
     }
 }
