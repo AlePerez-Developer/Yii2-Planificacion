@@ -1,5 +1,4 @@
 <?php
-use yii\helpers\Html;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -35,12 +34,12 @@ $this->params['actions'] =
         </span>
      </button>
 
-     <a href="#" class="btn btn-outline-success btn-sm">
-        <i class="fas fa-file-excel"></i> Exportar
+     <a href="" class="btn btn-outline-danger btn-sm">
+        <i class="fas fa-file-pdf"></i> Exportar
      </a>';
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ PEI'
+    'label' => '/ Peis'
 ];
 ?>
 
@@ -217,6 +216,26 @@ $this->params['breadcrumbs'][] = [
             box-shadow:0 3px 10px rgba(0,0,0,.03);
         }
 
+        .dt-length {
+            margin-right: 40px;
+        }
+
+        .dt-length label{
+            font-size: 13px;
+        }
+
+        .dt-search label{
+            font-size: 13px;
+        }
+
+        .dt-search{
+            margin-left: 40px;
+        }
+
+        .dt-info{
+            margin-left: 40px;
+        }
+
         /* refresh integrado */
         .btn-refresh{
             width:44px;
@@ -308,26 +327,7 @@ $this->params['breadcrumbs'][] = [
             line-height:1.55;
         }
 
-        /* ================= ESTADOS ================= */
 
-        .badge-vigente,
-        .badge-caducado{
-            padding:10px 18px;
-            border-radius:999px;
-            font-size:12px;
-            font-weight:800;
-            letter-spacing:.3px;
-        }
-
-        .badge-vigente{
-            background:#dcfce7;
-            color:#166534;
-        }
-
-        .badge-caducado{
-            background:#fee2e2;
-            color:#991b1b;
-        }
 
         /* ================= BOTONES ================= */
 
@@ -342,7 +342,7 @@ $this->params['breadcrumbs'][] = [
 
         .btn-edit{
             background:#fff7ed;
-            color:#ea580c;
+            color:#ffa423;
         }
 
         .btn-delete{
@@ -375,7 +375,7 @@ $this->params['breadcrumbs'][] = [
 
         .page-link{
             min-width:44px;
-            height:44px;
+            height:30px;
             border-radius:14px !important;
             border:1px solid var(--line) !important;
             display:flex !important;
@@ -465,6 +465,23 @@ $this->params['breadcrumbs'][] = [
             transition:.18s;
         }
 
+        .btn-programar {
+            border:0;
+            border-radius:999px;
+            min-width:150px;
+            height:42px;
+            padding:0 16px;
+            font-size:12px;
+            font-weight:800;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition:.18s;
+            background-color:#ADD8E6;
+            color: #4A5C62     ;
+        }
+
         .estado-on{
             background:#dcfce7;
             color:#166534;
@@ -480,10 +497,12 @@ $this->params['breadcrumbs'][] = [
             box-shadow:0 10px 18px rgba(0,0,0,.08);
         }
 
-        .estado-loading{
-            opacity:.8;
-            pointer-events:none;
+        .btn-programar:hover{
+            transform:translateY(-2px);
+            box-shadow:0 10px 18px rgba(0,0,0,.08);
         }
+
+
 
     </style>
 

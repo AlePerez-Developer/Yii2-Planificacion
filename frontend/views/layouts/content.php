@@ -79,7 +79,7 @@ $actions = $this->params['actions']
                                     'links' => $this->params['breadcrumbs'] ?? [],
                                     'options' => [
                                         'class' =>
-                                            'breadcrumb breadcrumb-pro justify-content-md-end justify-content-start mb-0'
+                                            'breadcrumb justify-content-md-end justify-content-start mb-0'
                                     ]
                                 ]);
                             } catch (Throwable $e) {
