@@ -1,139 +1,115 @@
 <?php
 
 use yii\web\JqueryAsset;
-use yii\web\View;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-if (isset($id)) {
-    $this->registerJs("
-        window.appConfig = {
-            idObj: " . json_encode($id) . ",
-        };
-    ", View::POS_HEAD);
-}
+$this->title = 'Programar Indicadores';
 
-$this->registerJsFile("@planificacionModule/js/programar-indicador/ProgIndicador.js",[
-    'depends' => [
-        JqueryAsset::class
-    ]
+$id = Yii::$app->request->get('id');
+
+/* PASAR VARIABLE GLOBAL */
+$this->registerJs("
+    window.appConfig = {
+        idObj: " . json_encode($id) . "
+    };
+", \yii\web\View::POS_HEAD);
+
+/* REGISTRAR JS */
+$this->registerJsFile("@planificacionModule/js/programar-indicador/ProgIndicador.js", [
+    'depends' => [JqueryAsset::class]
 ]);
-
-
-
-$this->title = 'Planificación Institucional';
-
-$this->params['subtitle'] = 'Programacion de indicadores estrategicos';
-
-$this->params['icon'] = 'fa fa-code-branch';
-
-$this->params['iconColor'] = 'info';
-
-$this->params['actions'] =
-    '';
-
-$this->params['breadcrumbs'][] = [
-    'label' => '/ Obj Estrategico',
-    'url' => ['obj-estrategico/index'],
-];
-
-$this->params['breadcrumbs'][] = [
-    'label' => '/ Programacion'
-];
-
 ?>
-<div class="container-fluid mt-4">
 
-    <div class="card shadow-sm border-0">
-
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Planificación por Código</h5>
-        </div>
-
-        <div class="card-body">
-
-            <!-- Spinner general -->
-            <div id="loaderGeneral" class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
-                <div class="mt-2">Cargando información...</div>
-            </div>
-
-            <!-- Contenido principal -->
-            <div id="contenedorPrincipal" style="display:none;"></div>
-
-        </div>
-
-    </div>
-
+<div class="container-fluid mt-3">
+    <div id="contenedor"></div>
 </div>
 
-
 <!-- MODAL -->
-<div class="modal fade" id="modalDetalle" tabindex="-1">
-
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-
+<div class="modal fade" id="modalLlaves">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
             <div class="modal-header bg-primary text-white">
-
-                <h5 class="modal-title">Detalle Gestión</h5>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
-                </button>
-
+                <h5>Seleccionar Llave Presupuestaria</h5>
             </div>
 
-            <div class="modal-body" id="contenidoModal">
-
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary"></div>
-                    <div class="mt-2">Cargando...</div>
-                </div>
-
+            <div class="modal-body">
+                <table id="tblLlaves" class="table table-sm table-hover"></table>
             </div>
 
         </div>
-
     </div>
-
 </div>
-
 
 <style>
 
-    .custom-accordion-header{
-        background: linear-gradient(135deg,#ffffff,#f8f9fa);
-        border: none !important;
-        box-shadow: none !important;
-        transition: all .25s ease;
+    /* ===============================
+       TABS
+    =============================== */
+    .tabs-pei{
+        border-bottom:2px solid #dee2e6;
     }
 
-    .custom-accordion-header:not(.collapsed){
-        background: linear-gradient(135deg,#e8f2ff,#f5faff);
+    .tabs-pei .nav-link{
+        border:none;
+        border-radius:10px 10px 0 0;
+        background:#f8f9fa;
+        margin-right:5px;
     }
 
-    .custom-accordion-header:hover{
-        background: linear-gradient(135deg,#f8fbff,#eef6ff);
+    .tabs-pei .nav-link.active{
+        background:#0d6efd;
+        color:white;
     }
 
-    .custom-accordion-header::after{
-        margin-left: 15px;
+    /* ===============================
+       TAB CONTENT
+    =============================== */
+    .tab-box{
+        border:1px solid #dee2e6;
+        border-top:0;
+        padding:15px;
+        border-radius:0 0 10px 10px;
     }
 
-    .accordion-button:focus{
-        box-shadow:none;
+    /* ===============================
+       TABLE STYLE
+    =============================== */
+    .dataTables_wrapper{
+        background:#fff;
+        border-radius:12px;
+        padding:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,.05);
     }
 
-    .accordion-item{
-        border-left: 5px solid #0d6efd;
+    .table thead{
+        background:linear-gradient(135deg,#0d6efd,#0b5ed7);
+        color:white;
     }
 
-    .badge{
-        font-weight:500;
-        letter-spacing:.3px;
+    /* ===============================
+       INPUT META
+    =============================== */
+    .inputMeta{
+        text-align:center;
+        border-radius:8px;
+    }
+
+    .inputMeta:focus{
+        border-color:#0d6efd;
+        box-shadow:0 0 0 .1rem rgba(13,110,253,.25);
+    }
+
+    /* ===============================
+       LOADER TABLA
+    =============================== */
+    .table-loader{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:30px;
+        color:#0d6efd;
     }
 
 </style>

@@ -1,291 +1,351 @@
-$(document).ready(function () {
-    let baseUrl = "index.php?r=Planificacion/programar-indicador/"
+let baseUrl = "index.php?r=Planificacion/programar-indicador/"
 
-    let idObj = appConfig.idObj;
+/* ==========================================================
+   APP INDICADORES
+========================================================== */
 
-    const datos = new FormData();
-    datos.append("idObjEstrategico", idObj);
+const AppIndicadores = {
 
-    try {
-        ajaxPromise({
-            url: baseUrl + "listar-todo",
-            data: datos,
-        }).then((data) => {
-            response = data.data
-            let html = `
-                <div class="accordion accordion-flush" id="accordionPlan">
-            `;
+    init() {
+        if (!window.appConfig || !appConfig.idObj) {
+            console.error('IdObjEstrategico no definidos');
+            return;
+        }
 
-            if (response.length === 0) {
-                html += `
-                    <div class="alert alert-warning">
-                        No existen registros.
-                    </div>
-                `;
-            }
+        this.IdObj = appConfig.idObj;
+        this.cargarIndicadores();
+    },
 
-            $.each(response, function (i, row) {
+    /* ==========================================
+       INDICADORES
+    ========================================== */
+    cargarIndicadores() {
 
-                let idCollapse = 'collapse_' + row.Codigo;
-                let idTabs = 'tabs_' + row.Codigo;
+        $.get(baseUrl + 'listar-indicadores', {IdObj: this.IdObj}, (resp) => {
 
-                <!-- REEMPLAZA SOLO EL HTML DEL ACCORDION DENTRO DEL $.each(response...) -->
+            let html = `<div class="accordion" id="accIndicadores">`;
 
-                html += `
-<div class="accordion-item border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
-
-    <!-- ENCABEZADO MEJORADO -->
-    <h2 class="accordion-header">
-
-        <button class="accordion-button collapsed px-4 py-3 custom-accordion-header"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#${idCollapse}">
-
-            <div class="w-100">
-
-                <!-- FILA SUPERIOR -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-
-                    <div class="d-flex flex-wrap gap-2">
-
-                        <span class="badge bg-primary fs-6 px-3 py-2">
-                            Código ${row.Codigo}
-                        </span>
-
-                        <span class="badge bg-success fs-6 px-3 py-2">
-                            Meta ${row.Meta}
-                        </span>
-
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-2">
-
-                        <span class="badge bg-warning text-dark px-3 py-2">
-                            ${row.catCategoriasIndicadores.Descripcion}
-                        </span>
-
-                        <span class="badge bg-info text-dark px-3 py-2">
-                            ${row.catTiposResultados.Descripcion}
-                        </span>
-
-                        <span class="badge bg-secondary px-3 py-2">
-                            ${row.catUnidadesIndicadores.Descripcion}
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- DESCRIPCIÓN -->
-                <div class="mt-3 pe-4">
-
-                    <div class="fw-semibold text-dark">
-                        ${row.Descripcion}
-                    </div>
-
-                </div>
-
-            </div>
-
-        </button>
-
-    </h2>
-
-    <!-- BODY -->
-    <div id="${idCollapse}"
-         class="accordion-collapse collapse"
-         data-codigo="${row.Codigo}">
-
-        <div class="accordion-body bg-light">
-
-
-
-            <div id="${idTabs}">
-                <div class="text-center py-3">
-                    <div class="spinner-border spinner-border-sm text-primary"></div>
-                    <span class="ms-2">Cargando gestiones...</span>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-`;
+            resp.forEach(row => {
+                html += this.templateAccordion(row);
             });
 
             html += `</div>`;
 
-            $('#contenedorPrincipal').html(html);
+            $('#contenedor').html(html);
 
-            $('#loaderGeneral').hide();
-            $('#contenedorPrincipal').fadeIn();
-
+        }).fail(() => {
+            MostrarMensaje('error', 'Error cargando indicadores');
         });
-    } catch (err) {
-        console.error("Error al procesar:", err);
-    }
+    },
 
+    templateAccordion(row) {
+        return `
+        <div class="accordion-item shadow-sm mb-3 rounded-4">
 
-    /* ==========================================================
-       CARGAR TABS SOLO UNA VEZ AL ABRIR ACCORDION
-    ========================================================== */
-    $(document).on('shown.bs.collapse', '.accordion-collapse', function () {
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#acc_${row.IdIndicadorEstrategico}">
 
-        let codigoMeta = $(this).data('codigo');
-        let contenedor = $('#tabs_' + codigoMeta);
+                    <div class="w-100">
 
-        if (contenedor.data('loaded') === true)
-            return;
-
-        cargarGestiones(codigoMeta, contenedor);
-
-    });
-
-
-    function cargarGestiones(codigoMeta, contenedor) {
-        $.ajax({
-
-            url: baseUrl + "gestiones",
-            type: 'POST',
-            data: {
-                codigoMeta: codigoMeta
-            },
-            dataType: 'json',
-
-            success: function (response) {
-
-                let nav = `<ul class="nav nav-tabs">`;
-                let body = `<div class="tab-content border border-top-0 p-3">`;
-
-                $.each(response, function (i, row) {
-
-                    let active = i === 0 ? 'active' : '';
-                    let show = i === 0 ? 'show active' : '';
-
-                    let tabId = `tab_${codigoMeta}_${row.gestion}`;
-
-                    nav += `
-                    <li class="nav-item">
-                        <button class="nav-link ${active}"
-                                data-bs-toggle="tab"
-                                data-bs-target="#${tabId}">
-                            Gestión ${row.gestion}
-                        </button>
-                    </li>
-                `;
-
-                    body += `
-                    <div class="tab-pane fade ${show}" id="${tabId}">
-
-                        <div class="d-flex justify-content-between align-items-center">
-
+                        <div class="d-flex justify-content-between">
                             <div>
-                                <h6 class="mb-0">
-                                    Gestión ${row.gestion}
-                                </h6>
+                                <span class="badge bg-primary">Meta ${row.Meta}</span>
+                                <span class="badge bg-success">${row.Tipo}</span>
                             </div>
-
-                            <button class="btn btn-primary btn-sm btnAbrirModal"
-                                    data-codigo="${codigoMeta}"
-                                    data-gestion="${row.gestion}">
-                                Ver detalle
-                            </button>
-
+                            <span class="badge bg-secondary">${row.Categoria}</span>
                         </div>
 
-                        <hr>
-
-                        <p class="text-muted mb-0">
-                            Información resumida de la gestión ${row.gestion}
-                        </p>
+                        <div class="mt-2 fw-bold">${row.Descripcion}</div>
 
                     </div>
-                `;
-                });
 
-                nav += `</ul>`;
-                body += `</div>`;
+                </button>
+            </h2>
 
-                contenedor.html(nav + body);
-                contenedor.data('loaded', true);
+            <div id="acc_${row.IdIndicadorEstrategico}"
+                 class="accordion-collapse collapse"
+                 data-id="${row.IdIndicadorEstrategico}">
 
-            },
-
-            error: function () {
-                contenedor.html(`
-                <div class="alert alert-danger">
-                    Error al cargar gestiones.
+                <div class="accordion-body bg-light">
+                    <div id="tabs_${row.IdIndicadorEstrategico}"></div>
                 </div>
-            `);
+
+            </div>
+        </div>`;
+    },
+
+    /* ==========================================
+       TABS
+    ========================================== */
+    cargarTabs(idIndicador) {
+
+        let cont = $('#tabs_' + idIndicador);
+        if (cont.data('loaded')) return;
+
+        $.get(baseUrl + 'listar-gestiones', {}, (resp) => {
+
+            let nav = `<ul class="nav nav-tabs tabs-pei">`;
+            let body = `<div class="tab-content tab-box">`;
+
+            resp.forEach((g, i) => {
+
+                let active = i === 0 ? 'active' : '';
+                let show = i === 0 ? 'show active' : '';
+
+                let tabId = `tab_${idIndicador}_${g.IdGestion}`;
+
+                nav += `
+                <li class="nav-item">
+                    <button class="nav-link ${active}"
+                            data-bs-toggle="tab"
+                            data-idindicador="${idIndicador}"
+                            data-idgestion="${g.IdGestion}"
+                            data-bs-target="#${tabId}">
+                        ${g.Gestion}
+                    </button>
+                </li>`;
+
+                body += `
+                <div class="tab-pane fade ${show}" id="${tabId}">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <h6 class="fw-bold text-primary">
+                            Gestión ${g.Gestion}
+                        </h6>
+
+                        <button class="btn btn-outline-primary btn-sm btnLlaves"
+                                data-idindicador="${idIndicador}"
+                                data-idgestion="${g.IdGestion}">
+                            + Agregar
+                        </button>
+
+                    </div>
+
+                    <table class="table table-sm table-bordered"
+                           id="tbl_${idIndicador}_${g.IdGestion}">
+                    </table>
+
+                </div>`;
+            });
+
+            nav += `</ul>`;
+            body += `</div>`;
+
+            cont.html(nav + body);
+            cont.data('loaded', true);
+
+            if (resp.length) {
+                this.cargarTabla(idIndicador, resp[0].IdGestion);
             }
 
+        });
+    },
+
+    /* ==========================================
+       LOADER TABLA
+    ========================================== */
+    mostrarLoaderTabla(idIndicador, idGestion) {
+
+        let tabla = `#tbl_${idIndicador}_${idGestion}`;
+
+        $(tabla).html(`
+            <tbody>
+                <tr>
+                    <td colspan="3">
+                        <div class="table-loader">
+                            <div class="spinner-border text-primary"></div>
+                            <span class="ms-2">Cargando datos...</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        `);
+    },
+
+    /* ==========================================
+       DATATABLE
+    ========================================== */
+    cargarTabla(idIndicador, idGestion) {
+
+        let id = `#tbl_${idIndicador}_${idGestion}`;
+
+        if ($.fn.DataTable.isDataTable(id)) return;
+
+        this.mostrarLoaderTabla(idIndicador, idGestion);
+
+        $(id).DataTable({
+
+            paging: false,
+            searching: false,
+            info: false,
+            ordering: false,
+
+            ajax: {
+                url: baseUrl + 'listar-programacion',
+                type: 'POST',
+                data: {
+                    IdIndicadorEstrategico: idIndicador,
+                    IdGestion: idGestion
+                }
+            },
+
+            columns: [
+                {data: 'IdLlavePresupuestaria', title: 'Código'},
+                {data: 'Descripcion', title: 'Descripción'},
+                {
+                    data: 'MetaProgramada',
+                    title: 'Meta',
+                    render: (data, row) => `
+                        <input type="number" min="0"
+                               class="form-control form-control-sm inputMeta"
+                               data-id="${row.IdProgramacionIndicadorGestion}"
+                               value="${data || 0}">
+                    `
+                }
+            ]
+        });
+    },
+
+    /* ==========================================
+       REFRESH SIN RECARGA
+    ========================================== */
+    refrescarTabla(idIndicador, idGestion) {
+
+        let tabla = `#tbl_${idIndicador}_${idGestion}`;
+
+        if ($.fn.DataTable.isDataTable(tabla)) {
+            $(tabla).DataTable().ajax.reload(null, false);
+        }
+    },
+
+    /* ==========================================
+       UPDATE META
+    ========================================== */
+    actualizarMeta(input) {
+
+        let val = input.val().trim();
+
+        if (val === '' || !/^\d+$/.test(val)) {
+            MostrarMensaje('error', 'Solo números positivos');
+            input.val(0);
+            return;
+        }
+
+        input.addClass('border-warning');
+
+        $.post(baseUrl + 'actualizar-meta', {
+            id: input.data('id'),
+            valor: val
+        }, (resp) => {
+
+            if (resp.success) {
+
+                input.removeClass('border-warning').addClass('border-success');
+
+                setTimeout(() => {
+                    input.removeClass('border-success');
+                }, 1500);
+
+            } else {
+                input.removeClass('border-warning');
+                MostrarMensaje('error', resp.message, resp.errors);
+            }
+
+        }).fail(() => {
+            input.removeClass('border-warning');
+            MostrarMensaje('error', 'Error servidor');
         });
     }
 
+};
 
-    /* ==========================================================
-       MODAL DINÁMICO
-    ========================================================== */
-    $(document).on('click', '.btnAbrirModal', function () {
 
-        let codigo = $(this).data('codigo');
-        let gestion = $(this).data('gestion');
+/* ==========================================
+   EVENTOS
+========================================== */
 
-        let modal = new bootstrap.Modal(
-            document.getElementById('modalDetalle')
-        );
+$(document).ready(() => {
+    AppIndicadores.init();
+});
 
-        $('#contenidoModal').html(`
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-            <div class="mt-2">Cargando detalle...</div>
-        </div>
-    `);
+$(document).on('shown.bs.collapse', '.accordion-collapse', function () {
+    AppIndicadores.cargarTabs($(this).data('id'));
+});
 
-        modal.show();
+$(document).on('shown.bs.tab', '.nav-link', function () {
+    AppIndicadores.cargarTabla(
+        $(this).data('idindicador'),
+        $(this).data('idgestion')
+    );
+});
 
-        $.ajax({
+$(document).on('change', '.inputMeta', function () {
+    AppIndicadores.actualizarMeta($(this));
+});
 
-            url: urlModal,
-            type: 'GET',
-            data: {
-                codigo: codigo,
-                gestion: gestion
-            },
 
-            success: function (html) {
-                $('#contenidoModal').html(html);
-            },
+/* ==========================================
+   MODAL
+========================================== */
 
-            error: function () {
-                $('#contenidoModal').html(`
-                <div class="alert alert-danger">
-                    No se pudo cargar el detalle.
-                </div>
-            `);
+$(document).on('click', '.btnLlaves', function () {
+
+    let ind = $(this).data('idindicador');
+    let ges = $(this).data('idgestion');
+
+    new bootstrap.Modal('#modalLlaves').show();
+
+    $('#tblLlaves').DataTable({
+        destroy: true,
+        ajax: 'listar-llaves',
+        columns: [
+            {data: 'IdLlavePresupuestaria', title: 'Código'},
+            {data: 'Descripcion', title: 'Descripción'},
+            {
+                data: null,
+                render: (row) => `
+                    <button class="btn btn-success btn-sm btnSelectLlave"
+                        data-id="${row.IdLlavePresupuestaria}"
+                        data-ind="${ind}"
+                        data-ges="${ges}">
+                        Seleccionar
+                    </button>`
             }
-
-        });
-
+        ]
     });
 
+});
 
-    /* ==========================================================
-       UTILITARIOS
-    ========================================================== */
-    function mostrarErrorGeneral() {
-        $('#loaderGeneral').hide();
+$(document).on('click', '.btnSelectLlave', function () {
 
-        $('#contenedorPrincipal')
-            .html(`
-            <div class="alert alert-danger">
-                Error al cargar la información principal.
-            </div>
-        `)
-            .show();
-    }
+    let btn = $(this);
 
-})
+    let idIndicador = btn.data('ind');
+    let idGestion = btn.data('ges');
+
+    $.post('insertar-programacion', {
+        IdIndicadorEstrategico: idIndicador,
+        IdGestion: idGestion,
+        IdLlavePresupuestaria: btn.data('id')
+    }, function (resp) {
+
+        if (resp.success) {
+
+            MostrarMensaje('success', 'Registro agregado');
+
+            $('#modalLlaves').modal('hide');
+
+            AppIndicadores.refrescarTabla(idIndicador, idGestion);
+
+        } else {
+            MostrarMensaje('error', resp.message, resp.errors);
+        }
+
+    }).fail(() => {
+        MostrarMensaje('error', 'Error al insertar');
+    });
+
+});

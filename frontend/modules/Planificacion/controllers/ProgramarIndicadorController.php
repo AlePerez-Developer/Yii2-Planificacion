@@ -3,108 +3,85 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\controllers\BaseController;
-use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\services\IndicadorEstrategicoService;
+
+use app\modules\Planificacion\models\IndicadorEstrategico;
+
+use app\modules\Planificacion\models\PeiGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
+
 use Yii;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
+
+use yii\web\Controller;
+use yii\web\Response;
+
 
 /**
  * @noinspection PhpUnused
  */
-class ProgramarIndicadorController extends BaseController
+class ProgramarIndicadorController extends Controller
 {
-    private IndicadorEstrategicoService $serviceIndicador;
-
-    public function __construct($id, $module,
-                                IndicadorEstrategicoService $serviceIndicador,
-        $config = [])
+    public function actionIndex()
     {
-        $this->serviceIndicador = $serviceIndicador;
-        parent::__construct($id, $module, $config);
+        return $this->render('Programar');
     }
-    public function behaviors(): array
+    public function actionListarIndicadores($IdObj): array
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'only' => [],
-                'rules' => [
-                    [
-                        'actions' => [],
-                        'allow' => true,
-                        'roles' => ['?'],
-                    ],
-                    [
-                        'actions' => [],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return IndicadorEstrategico::find()
+            ->where(['IdObjEstrategico'=>$IdObj])
+            ->asArray()->all();
     }
 
-    /**
-     * @throws BadRequestHttpException
-     */
-    public function beforeAction($action): bool
+    public function actionListarGestiones(): array
     {
-        if ($action->id == 'listar-todo') {
-            $this->enableCsrfValidation = false;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return PeiGestion::find()->asArray()->all();
+    }
+
+    public function actionListarProgramacion(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $data = ProgramacionIndicadorGestion::find()
+            ->alias('p')
+            ->leftJoin('LlavesPresupuestarias l','l.IdLlavePresupuestaria=p.IdLlavePresupuestaria')
+            ->where([
+                'IdIndicadorEstrategico'=>$_POST['IdIndicadorEstrategico'],
+                'IdGestion'=>$_POST['IdGestion']
+            ])
+            ->select(['p.*','l.Descripcion'])
+            ->asArray()->all();
+
+        return ['data'=>$data];
+    }
+
+    public function actionActualizarMeta(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = ProgramacionIndicadorGestion::findOne($_POST['id']);
+
+        if(!$model){
+            return ['success'=>false,'message'=>'No existe'];
         }
-        return parent::beforeAction($action);
-    }
 
-    public function actionIndex(string $id): string
-    {
-        return $this->render('Programar', ['id' => $id]);
-    }
+        $valor = $_POST['valor'];
 
-    /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     * @noinspection PhpUnused
-     * @throws ValidationException
-     */
-    public function actionListarTodo(): array
-    {
-        $id = $this->obtenerId();
-        return $this->withTryCatch(fn() => $this->serviceIndicador->listarTodobyObj($id));
-    }
-
-    /**
-     * obtiene y valida si se recibio el id por el request
-     *
-     * return string
-     * @throws ValidationException
-     */
-    private function obtenerId(): string
-    {
-        $id = Yii::$app->request->post('idObjEstrategico');
-        if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de indicador estrategico no enviado.', 404);
+        if(!is_numeric($valor) || $valor < 0){
+            return ['success'=>false,'message'=>'Valor inválido'];
         }
-        return $id;
-    }
 
-    public function actionGestiones(): array
-    {
+        $model->MetaProgramada = (int)$valor;
+
+        if($model->save()){
+            return ['success'=>true];
+        }
 
         return [
-            ['gestion' => 2026],
-            ['gestion' => 2027],
-            ['gestion' => 2028],
-            ['gestion' => 2029],
-            ['gestion' => 2030],
+            'success'=>false,
+            'message'=>'Error',
+            'errors'=>$model->getErrors()
         ];
     }
 
