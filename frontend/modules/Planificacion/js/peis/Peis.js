@@ -83,7 +83,7 @@ $(document).ready(function () {
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
             }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
+                cambiarEstadoBtnDtic(objectBtn, data.data);
             })
         } catch (err) {
             console.error("Error al procesar:", err);

@@ -34,9 +34,11 @@ $this->params['actions'] =
         </span>
      </button>
 
-     <a href="" class="btn btn-outline-danger btn-sm">
+     <a href="" id="btnReportePdf" class="btn btn-outline-danger btn-sm">
         <i class="fas fa-file-pdf"></i> Exportar
      </a>';
+
+
 
 $this->params['breadcrumbs'][] = [
     'label' => '/ Peis'
@@ -108,25 +110,4 @@ $this->params['breadcrumbs'][] = [
 
         </div>
     </div>
-
 </div>
-
-
-
-
-
-
-
-
-
-
-    <style>
-
-
-
-
-
-    </style>
-
-
-

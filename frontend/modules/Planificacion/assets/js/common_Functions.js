@@ -12,6 +12,16 @@ function DetenerSpiner(Btn){
     Btn.prop( "disabled", false );
 }
 
+function cambiarEstadoBtnDtic(objectBtn, data){
+    if (data === ESTADO_VIGENTE) {
+        objectBtn.addClass('estado-on').removeClass('estado-off');
+        objectBtn.find('.btn_text').html('Vigente')
+    } else {
+        objectBtn.removeClass('estado-on').addClass('estado-off')
+        objectBtn.find('.btn_text').html('Caducado')
+    }
+}
+
 function cambiarEstadoBtn(objectBtn, data){
     if (data === ESTADO_VIGENTE) {
         objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');

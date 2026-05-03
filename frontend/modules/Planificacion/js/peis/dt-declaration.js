@@ -9,7 +9,7 @@ $(document).ready(function () {
             );
 
             $("#peiLoading").hide();
-            $("#peiTableContainer").fadeIn(400);
+            $("#peiTableContainer").fadeIn(250);
         },
 
         ajax: {
@@ -22,7 +22,6 @@ $(document).ready(function () {
         columns: [
 
             {
-                title: "#",
                 data: "CodigoUsuario",
                 className: "text-center",
                 width: "60px",
@@ -32,7 +31,6 @@ $(document).ready(function () {
             },
 
             {
-                title: 'Descripcion',
                 data: null,
                 render: function (data, type, row) {
 
@@ -57,52 +55,23 @@ $(document).ready(function () {
             },
 
             {
-                title: 'Estado',
                 data: "CodigoEstado",
                 className: "text-center",
                 width: "90px",
-
+                orderable: false,
                 render: function (data, type, row) {
-                    return ( (type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
+                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
                         ? '<button id="btnEstado" type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>'+
+                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
                         '    <span class="btn_text">Vigente</span>' +
                         '  </button>'
                         : '<button id="btnEstado" type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>'+
+                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
                         '    <span class="btn_text">Caducado</span>' +
-                        '  </button>' ;
+                        '  </button>';
                 },
-
-                /*render: function (data, type, row) {
-
-                    if (type !== "display") {
-                        return data;
-                    }
-
-                    const vigente = row["CodigoEstado"] === ESTADO_VIGENTE;
-
-                    return `
-                        <button
-                            type="button"
-                            id="btnEstado"
-                            class="btn-toggle-estado  ${vigente ? 'estado-on' : 'estado-off'}"
-                            title="Click para cambiar estado">
-            
-                            <span class="estado-icon">
-                                <i class="fas ${vigente ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                            </span>
-            
-                            <span class="estado-text">
-                                ${vigente ? 'Vigente' : 'Caducado'}
-                            </span>
-            
-                        </button>`;
-                }*/
             },
-
             {
-                title: 'Acciones',
                 data: "IdPei",
                 className: "text-center",
                 width: "140px",

@@ -53,6 +53,9 @@ class Pei extends ActiveRecord
             [['GestionInicio'], 'validateUniqueInicio', 'skipOnError' => true],
             [['GestionFin'], 'validateUniqueFin', 'skipOnError' => true],
             [['GestionInicio'], 'number', 'min' => 2000, 'tooSmall' => 'la Gestion de inicio debe ser mayor al año 2000'],
+            [['peiGestiones'], 'exist', 'skipOnError' => true, 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
+            [['objetivosEstrategicos'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoEstrategico::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
+            [['areasEstrategicas'], 'exist', 'skipOnError' => true, 'targetClass' => AreaEstrategica::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
@@ -150,7 +153,7 @@ class Pei extends ActiveRecord
                 'CodigoUsuario'
             ])
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['IdPei' => SORT_ASC]);
+            ->orderBy(['FechaHoraRegistro' => SORT_ASC]);
     }
 
     /**
