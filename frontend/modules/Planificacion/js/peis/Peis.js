@@ -1,6 +1,7 @@
 $(document).ready(function () {
     let idPei = '00000000-0000-0000-0000-000000000000';
     let baseUrl = "index.php?r=Planificacion/peis/"
+    let dtEvents = $('#tablaListaPeis')
 
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
@@ -67,7 +68,7 @@ $(document).ready(function () {
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', async function(){
+    dtEvents.on('click', '.btn-toggle-estado', async function(){
         let objectBtn = $(this);
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         let idPei = dt_row["IdPei"];
@@ -92,7 +93,7 @@ $(document).ready(function () {
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
+    dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         let idPei = dt_row["IdPei"];
@@ -129,7 +130,7 @@ $(document).ready(function () {
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
+    dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
         idPei = dt_row["IdPei"];
