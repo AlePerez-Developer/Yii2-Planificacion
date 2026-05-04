@@ -6,6 +6,7 @@ use common\models\Usuario;
 use common\models\Estado;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
+use Yii;
 
 /**
  * This is the model class for table "PeiGestion".
@@ -66,6 +67,20 @@ class PeiGestion extends ActiveRecord
         ];
     }
 
+    public static function listAll(): ActiveQuery
+    {
+        return self::find()
+            ->select([
+                'IdGestion',
+                'IdPei',
+                'Gestion'
+            ])
+            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->orderBy(['Gestion' => SORT_ASC]);
+    }
+
+
+
     /**
      * Gets query for [[IdPei]].
      *
@@ -74,7 +89,7 @@ class PeiGestion extends ActiveRecord
      */
     public function getIdPei(): ActiveQuery
     {
-        return $this->hasOne(PeI::class, ['IdPei' => 'IdPei']);
+        return $this->hasOne(Pei::class, ['IdPei' => 'IdPei']);
     }
 
     /**

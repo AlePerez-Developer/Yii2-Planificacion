@@ -15,7 +15,7 @@ $this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js
 ]);
 
 $this->registerJs("
-    urlProgramar = '" . Url::to(['programar-indicador/index']) . "';
+    urlProgramar = '" . Url::to(['indicador-estrategico-programacion/index']) . "';
 ");
 
 $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js", [

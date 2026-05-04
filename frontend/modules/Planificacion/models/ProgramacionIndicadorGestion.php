@@ -2,6 +2,7 @@
 
 namespace app\modules\Planificacion\models;
 
+use common\models\Estado;
 use common\models\Usuario;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
@@ -65,6 +66,30 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',
         ];
+    }
+
+    public static function listAllbyGestion(string $idIndicadorEstrategico, string $idGestion): ActiveQuery
+    {
+        return self::find()->alias('P')
+            ->select([
+                'P.IdProgramacionIndicadorGestio',
+                'CONCAT(Lu.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
+                'L.Descripcion',
+                'P.MetaProgramada as Meta',
+                'G.IdGestion',
+                'I.IDIndicadorEstrategico',
+                'L.IdLlavePresupuestaria',
+            ])
+            ->joinWith('gestion G', true, 'INNER JOIN')
+            ->joinWith('indicadorEstrategico I', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria L', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.unidad Lu', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.programa Lpr', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.proyecto Lpy', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.actividad La', true, 'INNER JOIN')
+            ->where(['!=', 'G.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['P.IdGestion' => $idGestion])
+            ->andWhere(['P.IdIndicadorEstrategico' => $idIndicadorEstrategico]);
     }
 
     /**
