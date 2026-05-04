@@ -30,7 +30,7 @@ $this->params['actions'] =
                 <span class="horizontal"></span>
                 <span class="vertical"></span>
             </span>
-             Nuevo 
+             Nuevo registro
         </span>
      </button>
 
@@ -98,14 +98,14 @@ $this->params['breadcrumbs'][] = [
 
             </div>
 
-            <div id="peiLoading" class="p-4">
+            <div id="dticTableLoading" class="p-4">
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
             </div>
 
-            <div class="p-2" id="peiTableContainer" style="display:none;">
-                <table id="tablaListaPeis" class="table w-100"></table>
+            <div class="p-2" id="dticTableContainer" style="display:none;">
+                <table id="tablaListaPeis" class="table w-100 dtic-table"></table>
             </div>
 
         </div>

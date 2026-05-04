@@ -1,38 +1,18 @@
 let dt_objEstrategico;
 $(document).ready(function () {
-    function format(d) {
-        return (
-            '            <div class="row">' +
-            '                <div class="col-4 titulosmall" style="padding-left: 50px">Plan Estrategico Institucional</div>' +
-            '                <div class="col-4 titulosmall" style="padding-left: 50px">Area Estrategica</div>' +
-            '                <div class="col-4 titulosmall" style="padding-left: 50px">Politica Estrategica</div>' +
-            '            </div>' +
-            '            <div class="row">' +
-            '                <div class="col-1 subsmall">Desc:</div>' +
-            '                <div class="col-3 little">' + d["pei"]["Descripcion"] + '</div>' +
-            '                <div class="col-1 subsmall">Codigo</div>' +
-            '                <div class="col-3 little"> - ' + d["areaEstrategica"]["Codigo"] + ' - </div>' +
-            '                <div class="col-1 subsmall">Codigo</div>' +
-            '                <div class="col-3 little"> - ' + d["politicaEstrategica"]["Codigo"] + ' - </div>' +
-            '            </div>' +
-            '            <div class="row">' +
-            '                <div class="col-1 subsmall">Fechas</div>' +
-            '                <div class="col-3 little">Vigencia: ' + d["pei"]["GestionInicio"] + ' - ' + d["pei"]["GestionFin"] + '</div>' +
-            '                <div class="col-1 subsmall">Desc:</div>' +
-            '                <div class="col-3 little">' + d["areaEstrategica"]["Descripcion"] + '</div>' +
-            '                <div class="col-1 subsmall">Desc:</div>' +
-            '                <div class="col-3 little">' + d["politicaEstrategica"]["Descripcion"] + '</div>' +
-            '            </div>' +
-            '            <div class="row">' +
-            '                <div class="col-1"></div>' +
-            '                <div class="col-3 little">Aprobacion: ' + d["pei"]["FechaAprobacion"] + '</div>' +
-            '            </div>'
-        );
-    }
+
     dt_objEstrategico = $("#tablaListaObjEstrategicos").DataTable({
         initComplete: function () {
-            $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
+            $("div.dt-search").append(`
+            <button id="refreshTable" class="btn-refresh">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </button>`
+            );
+
+            $("#dticTableLoading").hide();
+            $("#dticTableContainer").fadeIn(250);
         },
+
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -47,95 +27,113 @@ $(document).ready(function () {
                 dt_objEstrategico.processing(false);
             }
         },
+
         columns: [
             {
-                className: 'dt-small dt-center',
+                data: "CodigoUsuario",
+                className: "text-center",
+                width: "60px",
                 orderable: false,
-                searchable: false,
-                data: 'CodigoUsuario',
-                width: 30
+                render: function (data) {
+                    return `<div class="badge-codigo">${data}</div>`;
+                }
             },
             {
-                className: 'dt-small details-control dt-center',
-                orderable: false,
-                searchable: false,
-                data: null,
-                defaultContent: '',
-                "render": function () {
-                    return '<i class="fa fa-circle-notch fa-spin"></i>';
-                },
-                width: 30
-            },
-            {
-                className: 'dt-small',
-                orderable: false,
-                data: 'Codigo',
-                render: function (data, type, row){
-                    return (type === 'display')
-                        ?  ' (' + row["pei"]["GestionInicio"] + ' - ' + row["pei"]["GestionFin"] + ')'
-                        :data;
-                },
-                width: 100
-            },
-            {
-                className: 'dt-small dt-center',
-                data: 'Compuesto',
-                width: 100
-            },
-            {
-                className: 'dt-small',
-                data: 'Objetivo'
-            },
-            {
-                className: 'dt-small',
-                data: 'Producto'
-            },
-            {
-                className: 'dt-small',
-                data: 'Indicador_Descripcion'
-            },
-            {
-                className: 'dt-small',
-                data: 'Indicador_Formula'
-            },
-            {
-                className: 'dt-small dt-estado dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoEstado',
+                data: "Objetivo",
                 render: function (data, type, row) {
-                    return ( (type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button id="btnEstado" type="button" class="btn btn-outline-success btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                    if (type !== "display") {
+                        return row["Objetivo"];
+                    }
+
+                    return `
+                    <div class="dtic-item-main">
+                        Codigo: ${row["Compuesto"]}
+                    </div>
+                    
+                    <div class="dtic-item-sub">
+                        <b>OBJETIVO:</b> ${row["Objetivo"]}
+                    </div>
+                    
+                    <div class="dtic-item-sub">
+                        <b>PRODUCTO:</b> ${row["Producto"]}
+                    </div>
+                  
+                    <div class="dtic-item-sub">
+                        <b>Gestión:</b> ${row["pei"]["GestionInicio"]} - ${row["pei"]["GestionFin"]}
+                    </div>
+                    
+                    <div class="dtic-item-sub">
+                        <b>Area:</b> ${row["areaEstrategica"]["Codigo"]} - ${row["areaEstrategica"]["Descripcion"]}
+                    </div>
+
+                    <div class="dtic-item-sub">
+                        <b>Politica:</b> ${row["politicaEstrategica"]["Codigo"]} - ${row["politicaEstrategica"]["Descripcion"]}
+                    </div>
+                    <div class="dtic-item-sub">
+                        <small>${row["Indicador_Descripcion"]} - ${row["Indicador_Formula"]}</small>
+                    </div>                    
+                `;
+                }
+            },
+            {data: "Compuesto",visible: false},
+            {data: "Producto",visible: false},
+            {
+                data: "CodigoEstado",
+                className: "text-center",
+                width: "65px",
+                orderable: false,
+                searchable: false,
+                render: function (data, type) {
+                    return ((type === 'display'))
+                        ? '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para programar indicadores">' +
+                        '    <span class="btn_ico"><i class="far fa-calendar-check"></i></span>' +
+                        '    <span class="btn_text">Programar</span>' +
+                        '  </button>'
+                        : data
+                },
+            },
+            {
+                data: "CodigoEstado",
+                className: "text-center",
+                width: "65px",
+                orderable: false,
+                searchable: false,
+                visible: false,
+                render: function (data, type, row) {
+                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
+                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
                         '    <span class="btn_text">Vigente</span>' +
                         '  </button>'
-                        : '<button id="btnEstado" type="button" class="btn btn-outline-danger btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
                         '    <span class="btn_text">Caducado</span>' +
-                        '  </button>' ;
+                        '  </button>';
                 },
-                visible: false
             },
             {
-                className: 'dt-small dt-acciones dt-center',
+                data: "IdObjEstrategico",
+                className: "text-center",
+                width: "140px",
                 orderable: false,
                 searchable: false,
-                data: 'IdObjEstrategico',
-                render: function (data, type) {
-                    return type === 'display'
-                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button id="btnEditar" type="button" class="btn btn-outline-warning btn-sm btnEditar" data-toggle="tooltip" title="Click! para editar el registro">' +
-                        '    <i class="fa fa-pen-fancy"></i>' +
-                        '</button>' +
-                        '<button id="btnEliminar" type="button" class="btn btn-outline-danger btn-sm btnEliminar" data-toggle="tooltip" title="Click! para eliminar el registro">' +
-                        '    <i class="fa fa-trash-alt"></i>' +
-                        '</button>' +
-                        '<button id="btnProgramar" type="button" class="btn btn-outline-info btn-sm btnProgramar" data-toggle="tooltip" title="Click! para programar indicadores">' +
-                        '    <i class="fa fa-code-branch"></i>' +
-                        '</button>' +
-                        '</div>'
-                        : data;
-                },
+                render: function () {
+                    return `
+                    <button class="btn-action btn-edit ">
+                        <i class="fa fa-pen"></i>
+                    </button>
+
+                    <button class="btn-action btn-delete ">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                `;
+                }
             },
         ],
+    });
+
+    $(document).on("click", "#refreshTable", function () {
+        dt_objEstrategico.ajax.reload();
     });
 
     dt_objEstrategico.on('order.dt search.dt', function () {
@@ -144,18 +142,4 @@ $(document).ready(function () {
             this.data(i++);
         });
     }).draw();
-
-    $('#tablaListaObjEstrategicos tbody').on('click', 'td.details-control', function () {
-        let tr = $(this).closest('tr');
-        let row = dt_objEstrategico.row(tr);
-
-        if (row["child"].isShown()) {
-            row["child"].hide();
-            tr.removeClass('shown');
-        }
-        else {
-            row["child"](format(row.data())).show();
-            tr.addClass('shown');
-        }
-    });
 })

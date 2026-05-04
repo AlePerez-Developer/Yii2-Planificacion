@@ -1,5 +1,5 @@
 <?php
-use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
@@ -15,7 +15,7 @@ $this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js
 ]);
 
 $this->registerJs("
-    urlProgramar = '" . \yii\helpers\Url::to(['programar-indicador/index']) . "';
+    urlProgramar = '" . Url::to(['programar-indicador/index']) . "';
 ");
 
 $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js", [
@@ -30,32 +30,37 @@ $this->registerJsFile("@planificacionModule/js/obj-estrategico/s2-declaration.js
     ]
 ]);
 
-$this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
-?>
+$this->title = 'Planificación Institucional';
 
+$this->params['subtitle'] = 'Administración de objetivos estratégicos institucionales';
+
+$this->params['icon'] = 'fas fa-clipboard-list';
+
+$this->params['iconColor'] = 'info';
+
+$this->params['actions'] =
+    '<button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
+        <span class="icon closed">
+            <span class="circle" style="margin-right: 4px">
+                <span class="horizontal"></span>
+                <span class="vertical"></span>
+            </span>
+             Nuevo objetivo
+        </span>
+     </button>
+
+     <a href="" id="btnReportePdf" class="btn btn-outline-danger btn-sm">
+        <i class="fas fa-file-pdf"></i> Exportar
+     </a>';
+
+$this->params['breadcrumbs'][] = [
+    'label' => '/ Objetivos estrategicos institucionales',
+];
+?>
 <div class="card ">
-    <div class="card-header">
-        <div class="row">
-            <div class="col-6">
-                <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-                    <span class="icon closed">
-                        <span class="circle">
-                            <span class="horizontal"></span>
-                            <span class="vertical"></span>
-                        </span>
-                        Agregar Obj. Estrategico
-                    </span>
-                </button>
-            </div>
-            <div class="col-6" style="text-align: right;">
-                <?= Html::a('Reporte Obj Estrategico', ['reporte'], ['class' => 'btn btn-success', 'target' => '_Blank']) ?>
-            </div>
-        </div>
-    </div>
     <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 80rem;" >
+            <div class="card " style="width: 80rem;">
                 <div class="card-header bg-gradient-primary">Ingreso Datos</div>
                 <div class="card-body">
                     <form id="formObjEstrategico" action="" method="post">
@@ -117,61 +122,26 @@ $this->params['breadcrumbs'] = [['label' => '/Objs Estrategicos']];
             </div>
         </div>
     </div>
+
     <div id="divTabla" class="card-body">
-        <table id="tablaListaObjEstrategicos" name="tablaListaObjEstrategicos" class="table table-bordered table-striped">
-            <thead>
-            <th>#</th>
-            <th>#</th>
-            <th>PEI</th>
-            <th>Codigo</th>
-            <th>Objetivo</th>
-            <th>Producto Esperado</th>
-            <th>Ind. Descripcion</th>
-            <th>Ind. Formula</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-            </thead>
-        </table>
+        <div class="card-dtic-style">
+
+            <div class="card-dtic-style-header">
+                <div class="card-dtic-style-title">
+                    Objetivos Estratégicos Institucionales
+                </div>
+            </div>
+
+            <div id="dticTableLoading" class="p-4">
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+            </div>
+
+            <div class="p-2" id="dticTableContainer" style="display:none;">
+                <table id="tablaListaObjEstrategicos" class="table w-100 dtic-table"></table>
+            </div>
+
+        </div>
     </div>
 </div>
-
-
-<style>
-    :root {
-        --border-color: #007BFF; /* azul */
-        --border-width: 1px;
-        --padding: 14px;
-    }
-
-    .contenedor {
-        width: 100%; !important;
-        position: relative;
-        display: inline-block;
-    }
-
-    .square {
-        width: auto;
-        height: auto;
-        border: var(--border-width) solid var(--border-color);
-        border-radius: 8px;
-        padding: var(--padding);
-        box-sizing: border-box;
-        gap: 10px;
-    }
-
-    .ltc {
-        position: absolute;
-        top: -0.8em;       /* sube el texto para que corte la línea */
-        left: 16px;        /* margen interno desde la izquierda */
-        background: white; /* fondo blanco para "romper" el borde */
-        padding: 0 8px;    /* espacio horizontal */
-        color: var(--border-color);
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 4px;
-    }
-
-    .ltc {
-        margin-bottom: 6px;
-    }
-</style>

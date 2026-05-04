@@ -2,8 +2,8 @@ let urlProgramar
 
 $(document).ready(function(){
     let idObjEstrategico = '00000000-0000-0000-0000-000000000000'
-
     let baseUrl = "index.php?r=Planificacion/obj-estrategico/"
+    let dtEvents = $('#tablaListaObjEstrategicos')
 
     function ReiniciarCampos(){
         $('#formObjEstrategico *').filter(':input').each(function () {
@@ -85,7 +85,7 @@ $(document).ready(function(){
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', async function(){
+    dtEvents.on('click', '.btn-toggle-estado', async function(){
 
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
@@ -111,7 +111,7 @@ $(document).ready(function(){
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
+    dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
         let idObjEstrategico = dt_row["IdObjEstrategico"];
@@ -148,7 +148,7 @@ $(document).ready(function(){
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
+    dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
         idObjEstrategico = dt_row["IdObjEstrategico"];
@@ -177,7 +177,7 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on('click', 'tbody #btnProgramar', async function(){
+    dtEvents.on('click', '.btn-programar', async function(){
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data();
         let idObjEstrategico = dt_row["IdObjEstrategico"];

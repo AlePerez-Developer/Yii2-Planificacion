@@ -8,8 +8,8 @@ $(document).ready(function () {
             </button>`
             );
 
-            $("#peiLoading").hide();
-            $("#peiTableContainer").fadeIn(250);
+            $("#dticTableLoading").hide();
+            $("#dticTableContainer").fadeIn(250);
         },
 
         ajax: {
@@ -25,6 +25,8 @@ $(document).ready(function () {
                 data: "CodigoUsuario",
                 className: "text-center",
                 width: "60px",
+                orderable: false,
+                searchable: false,
                 render: function (data) {
                     return `<div class="badge-codigo">${data}</div>`;
                 }
@@ -39,15 +41,15 @@ $(document).ready(function () {
                     }
 
                     return `
-                    <div class="pei-main">
+                    <div class="dtic-item-main">
                         ${row["Descripcion"]}
                     </div>
 
-                    <div class="pei-sub">
+                    <div class="dtic-item-sub">
                         Gestión ${row["GestionInicio"]} - ${row["GestionFin"]}
                     </div>
 
-                    <div class="pei-sub">
+                    <div class="dtic-item-sub">
                         Aprobación: ${row["FechaAprobacion"]}
                     </div>
                 `;
@@ -59,13 +61,14 @@ $(document).ready(function () {
                 className: "text-center",
                 width: "90px",
                 orderable: false,
+                searchable: false,
                 render: function (data, type, row) {
                     return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button id="btnEstado" type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
                         '    <span class="btn_text">Vigente</span>' +
                         '  </button>'
-                        : '<button id="btnEstado" type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
                         '    <span class="btn_text">Caducado</span>' +
                         '  </button>';
@@ -76,14 +79,15 @@ $(document).ready(function () {
                 className: "text-center",
                 width: "140px",
                 orderable: false,
+                searchable: false,
                 render: function () {
 
                     return `
-                    <button id="btnEditar" class="btn-action btn-edit ">
+                    <button class="btn-action btn-edit ">
                         <i class="fa fa-pen"></i>
                     </button>
 
-                    <button id="btnEliminar" class="btn-action btn-delete ">
+                    <button class="btn-action btn-delete ">
                         <i class="fa fa-trash"></i>
                     </button>
                 `;

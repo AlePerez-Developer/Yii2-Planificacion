@@ -22,7 +22,7 @@ class ObjetivoEstrategicoService
     public function listarTodo(): array
     {
         $data = ObjetivoEstrategico::listAll()
-            ->orderBy(['Codigo' => SORT_ASC])
+            ->orderBy(['Compuesto' => SORT_ASC])
             ->asArray()->all();
 
         return ResponseHelper::success($data,'Listado de Objetivos Estrategicos obtenido.');
