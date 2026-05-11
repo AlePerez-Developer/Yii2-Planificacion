@@ -53,7 +53,8 @@
                         'icon' => 'th',
                         'badge' => '<span class="right badge badge-info"></span>',
                         'items' => [
-                            ['label' => 'Unidades', 'url' => ['/Planificacion/unidad/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Da', 'url' => ['/Planificacion/da/index'], 'iconStyle' => 'far'],
+                            ['label' => 'Ue', 'url' => ['/Planificacion/ue/index'], 'iconStyle' => 'far'],
                             ['label' => 'Programas', 'url' => ['/Planificacion/programa/index'], 'iconStyle' => 'far'],
                             ['label' => 'Proyectos', 'url' => ['/Planificacion/proyecto/index'], 'iconStyle' => 'far'],
                             ['label' => 'Actividades', 'url' => ['/Planificacion/actividad/index'], 'iconStyle' => 'far'],
