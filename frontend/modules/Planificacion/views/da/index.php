@@ -41,7 +41,7 @@ $this->params['actions'] =
 
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ Peis'
+    'label' => '/ Direccion Administrativa',
 ];
 ?>
 
