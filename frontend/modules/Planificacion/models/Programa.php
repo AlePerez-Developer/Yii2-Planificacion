@@ -54,7 +54,7 @@ class Programa extends ActiveRecord
     }
 
     /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
      * @used-by rules()
@@ -126,6 +126,19 @@ class Programa extends ActiveRecord
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'Descripcion', $search, false])
             ->orderBy(['Codigo' => SORT_ASC]);
+    }
+
+    /**
+     * @param string $id
+     * @return string
+     */
+    public static function getCodigo(string $id): string
+    {
+        return self::find()
+            ->where(['IdPrograma' => $id])
+            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->select('Codigo')
+            ->scalar() ?? '';
     }
 
     /**

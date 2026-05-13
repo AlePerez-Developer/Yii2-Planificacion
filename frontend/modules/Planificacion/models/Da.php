@@ -51,7 +51,7 @@ class Da extends ActiveRecord
     }
 
     /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
      * @used-by rules()
@@ -123,6 +123,19 @@ class Da extends ActiveRecord
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'Descripcion', $search, false])
             ->orderBy(['Codigo' => SORT_ASC]);
+    }
+
+    /**
+     * @param string $id
+     * return string
+    */
+    public static function getDa(string $id): string
+    {
+        return self::find()
+            ->where(['IdDa' => $id])
+            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->select('Da')
+            ->scalar() ?? '';
     }
 
     /**

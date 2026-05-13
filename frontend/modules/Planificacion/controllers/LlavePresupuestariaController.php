@@ -15,13 +15,22 @@ use Yii;
 /**
  * @noinspection PhpUnused
  */
+
 class LlavePresupuestariaController extends BaseController
 {
     private LlavePresupuestariaService $service;
 
-    public function __construct($id, $module, LlavePresupuestariaService $llaveService, $config = [])
+
+    public function __construct(
+        $id,
+        $module,
+        LlavePresupuestariaService $service,
+
+        $config = []
+    )
     {
-        $this->service = $llaveService;
+        $this->service = $service;
+
         parent::__construct($id, $module, $config);
     }
 
@@ -78,11 +87,11 @@ class LlavePresupuestariaController extends BaseController
      */
     public function actionIndex(): string
     {
-        return $this->render('llavePresupuestaria');
+        return $this->render('index');
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * Accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -93,7 +102,7 @@ class LlavePresupuestariaController extends BaseController
     }
 
     /**
-     * accion para agregar un nuevo registro.
+     * Accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -102,47 +111,48 @@ class LlavePresupuestariaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
+
             $form = new LlavePresupuestariaForm();
-            if (!$form->load($request->post(), '') || !$form->validate()
-            ) {
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-            return $this->service->guardar($form);
+
+            return $this->service->validarGuardar($form);
         });
     }
 
     /**
-     * accion para actualizar los valores de un registro existente.
+     * Accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionActualizar(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
             $id = $this->obtenerId();
             $form = new LlavePresupuestariaForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate())
-            {
-                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->service->actualizar($id,$form);
+            return $this->service->validarActualizar($id, $form);
         });
     }
 
     /**
-     * accion para alternar el estado de un registro V/C.
+     * Accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionCambiarEstado(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $id = $this->obtenerId();
             return $this->service->cambiarEstado($id);
         });
@@ -156,7 +166,7 @@ class LlavePresupuestariaController extends BaseController
      */
     public function actionEliminar(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $id = $this->obtenerId();
             return $this->service->eliminar($id);
         });
@@ -170,28 +180,28 @@ class LlavePresupuestariaController extends BaseController
      */
     public function actionFinalizar(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $id = $this->obtenerId();
             return $this->service->finalizar($id);
         });
     }
 
     /**
-     * accion para buscar un registro en especifico
+     * Accion para buscar un registro en específico
      *
      * @return array
      * @noinspection PhpUnused
      */
     public function actionBuscar(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->obtenerModelo($id);
+            return $this->service->obtenerModeloCompleto($id);
         });
     }
 
     /**
-     * obtiene y valida si se recibio el codigo por el request
+     * Obtiene y válida si se recibio el codigo por el request
      *
      * return string
      * @throws ValidationException
@@ -200,10 +210,31 @@ class LlavePresupuestariaController extends BaseController
     {
         $id = Yii::$app->request->post('idLlavePresupuestaria');
         if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],'Codigo de Llave presupuestaria no enviado.',404);
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo de Llave presupuestaria no enviado.', 404);
         }
         return $id;
     }
 
+    /**
+     * Verifica si la llave resultante ya existe
+     *
+     * @return boolean
+     * @noinspection PhpUnused
+     * @throws ValidationException
+     */
+    public function actionVerificarLlave(): bool
+    {
+        $id = $this->obtenerId();
 
+        $parametros = ['idDa', 'idUe', 'idPrograma', 'idProyecto', 'idActividad'];
+
+        foreach ($parametros as $param) {
+            $$param = Yii::$app->request->post($param);
+            if (!isset($$param)) {
+                return false;
+            }
+        }
+
+        return $this->service->VerificarLlave($id, $idDa, $idUe, $idProyecto, $idActividad);
+    }
 }

@@ -29,7 +29,7 @@ class ProgramaService
     }
 
     /**
-     * lista un array de Programas no eliminados
+     * Lista un array de Programas no eliminados
      * @param string $search
      * @return array of Programas
      */
@@ -43,7 +43,7 @@ class ProgramaService
     }
 
     /**
-     * Obtiene un programa en base a un código.
+     * Obtiene un programa con base en un código.
      *
      * @param string $id
      * @return Programa|null
@@ -51,6 +51,17 @@ class ProgramaService
     public  function listarUno(string $id): ?Programa
     {
         return Programa::listOne($id);
+    }
+
+    /**
+     * Obtiene el valor del proyecto asociado
+     *
+     * @param string $id
+     * @return string
+     */
+    public function getCodigo(string $id): string
+    {
+        return Programa::getCodigo($id);
     }
 
     /**
@@ -164,7 +175,7 @@ class ProgramaService
     }
 
     /**
-     * Obtiene el modelo según el código enviado y valida si existe.
+     * Obtiene el modelo según el código enviado y válida si existe.
      *
      * @param string $id
      * @return Programa|null
@@ -205,7 +216,7 @@ class ProgramaService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param string $codigo

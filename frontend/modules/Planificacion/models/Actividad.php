@@ -54,7 +54,7 @@ class Actividad extends ActiveRecord
     }
 
     /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
      * @used-by rules()
@@ -135,6 +135,7 @@ class Actividad extends ActiveRecord
     /**
      * Obtiene todas las actividades activas (no eliminados)
      *
+     * @param string $idPrograma
      * @param string $search
      * @return ActiveQuery
      */
@@ -157,7 +158,35 @@ class Actividad extends ActiveRecord
     }
 
     /**
-     * alterna el estado del modelo V/C.
+     * @param string $id
+     * @return string
+     */
+    public static function getIdPrograma(string $id): string
+    {
+        return self::find()->alias('Act')
+            ->joinWith('programa Prg', true, 'INNER JOIN')
+            ->where(['IdActividad' => $id])
+            ->andWhere(['!=', 'Act.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->select('Prg.IdPrograma')
+            ->scalar() ?? '';
+    }
+
+    /**
+     * @param string $id
+     * @return string
+     */
+    public static function getCodigo(string $id): string
+    {
+        return self::find()
+            ->where(['IdActividad' => $id])
+            ->andWhere(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->select('Codigo')
+            ->scalar() ?? '';
+    }
+
+
+    /**
+     * Alterna el estado del modelo V/C.
      *
      * @return void
      */

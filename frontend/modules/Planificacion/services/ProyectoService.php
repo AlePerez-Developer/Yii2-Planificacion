@@ -30,7 +30,8 @@ class ProyectoService
     }
 
     /**
-     * lista un array de Proyectos no eliminados
+     * Lista un array de Proyectos no eliminados
+     * @param string $idPrograma
      * @param string $search
      * @return array of Programas
      */
@@ -44,7 +45,7 @@ class ProyectoService
     }
 
     /**
-     * Obtiene un proyecto en base a un código.
+     * Obtiene un proyecto con base en un código.
      *
      * @param string $id
      * @return Proyecto|null
@@ -52,6 +53,28 @@ class ProyectoService
     public function listarUno(string $id): ?Proyecto
     {
         return Proyecto::listOne($id);
+    }
+
+    /**
+     * Obtiene el valor del programa asociado
+     *
+     * @param string $id
+     * @return string
+     */
+    public function getIdPrograma(string $id): string
+    {
+        return Proyecto::getIdPrograma($id);
+    }
+
+    /**
+     * Obtiene el valor del proyecto asociado
+     *
+     * @param string $id
+     * @return string
+     */
+    public function getCodigo(string $id): string
+    {
+        return Proyecto::getCodigo($id);
     }
 
     /**
@@ -167,7 +190,7 @@ class ProyectoService
     }
 
     /**
-     * Obtiene el modelo según el código enviado y valida si existe.
+     * Obtiene el modelo según el código enviado y válida si existe.
      *
      * @param string $id
      * @return Proyecto|null
@@ -208,7 +231,7 @@ class ProyectoService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param string $idPrograma

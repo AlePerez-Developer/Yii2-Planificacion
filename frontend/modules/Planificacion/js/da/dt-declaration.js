@@ -31,7 +31,6 @@ $(document).ready(function () {
                     return `<div class="badge-codigo">${data}</div>`;
                 }
             },
-
             {
                 data: null,
                 render: function (data, type, row) {
@@ -42,7 +41,7 @@ $(document).ready(function () {
 
                     return `
                     <div class="dtic-item-main">
-                        Da ${row["Da"]}
+                        DA: ${row["Da"]}
                     </div>
 
                     <div class="dtic-item-sub">
@@ -51,7 +50,7 @@ $(document).ready(function () {
                 `;
                 }
             },
-
+            {data: "Da", visible: false},
             {
                 data: "CodigoEstado",
                 className: "text-center",

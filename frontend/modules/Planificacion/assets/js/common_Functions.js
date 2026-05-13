@@ -255,21 +255,51 @@ function populateS2UnidadesIndicadores(select2) {
     });
 }
 
-function populateS2Unidades(select2) {
+function populateS2Da(select2) {
     $.ajax({
         method: "POST",
         dataType: 'json',
         delay: 100,
         cache: true,
-        url: 'index.php?r=Planificacion/unidad/listar-unidades-s2',
+        url: 'index.php?r=Planificacion/da/listar-das-s2',
         success: function(data){
             select2.empty();
 
             $.each(data["data"], function(index, item) {
                 select2.append(
                     $('<option>', {
-                        value: item["IdUnidad"],
-                        text: '(' + item["Compuesto"] + ') - ' + item["Descripcion"]
+                        value: item["IdDa"],
+                        text: '(' + item["Da"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Da"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2Ue(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/ue/listar-ues-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdUe"],
+                        text: '(' + item["Ue"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Ue"]
                     })
                 );
             });
@@ -297,7 +327,8 @@ function populateS2Programas(select2) {
                 select2.append(
                     $('<option>', {
                         value: item["IdPrograma"],
-                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"]
+                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Codigo"]
                     })
                 );
             });
@@ -328,7 +359,8 @@ function populateS2Proyectos(idPrograma, select2, val) {
                 select2.append(
                     $('<option>', {
                         value: item["IdProyecto"],
-                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"]
+                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Codigo"]
                     })
                 );
             });
@@ -362,7 +394,8 @@ function populateS2Actividades(idPrograma,select2, val) {
                 select2.append(
                     $('<option>', {
                         value: item["IdActividad"],
-                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"]
+                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Codigo"]
                     })
                 );
             });

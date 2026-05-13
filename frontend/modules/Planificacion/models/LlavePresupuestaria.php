@@ -2,111 +2,89 @@
 
 namespace app\modules\Planificacion\models;
 
-use common\models\Usuario;
-use common\models\Estado;
-use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use common\models\Estado;
+use common\models\Usuario;
 
 /**
- * This is the model class for table "LlavePresupuestaria".
+ * This is the model class for table "LlavesPresupuestarias".
  *
  * @property string $IdLlavePresupuestaria
- * @property string $IdUnidad
- * @property string $IdPrograma
+ * @property string $IdDa
+ * @property string $IdUe
  * @property string $IdProyecto
  * @property string $IdActividad
+ * @property string $Llave
  * @property string $Descripcion
- * @property float $TechoPresupuestario
+ * @property int $esOrganizacional
  * @property string $FechaInicio
  * @property string|null $FechaFin
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
- * @property Unidad $unidad
- * @property Programa $programa
- * @property Proyecto $proyecto
- * @property Actividad $actividad
+ * @property Da $idDa
+ * @property Ue $idUe
+ * @property Proyecto $idProyecto
+ * @property Actividad $idActividad
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
+ *
  */
 class LlavePresupuestaria extends ActiveRecord
 {
+    /**
+     * {@inheritdoc}
+     */
     public static function tableName(): string
     {
         return 'LlavesPresupuestarias';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function rules(): array
     {
         return [
-            [['IdUnidad', 'IdPrograma', 'IdProyecto', 'IdActividad', 'Descripcion', 'TechoPresupuestario', 'FechaInicio', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['IdLlavePresupuestaria', 'IdUnidad', 'IdPrograma', 'IdProyecto', 'IdActividad'], 'string', 'max' => 250],
-            [['TechoPresupuestario'], 'number'],
+            [['IdLlavePresupuestaria', 'IdDa', 'IdUe', 'IdProyecto', 'IdActividad'], 'string', 'max' => 36],
+            [['IdDa', 'IdUe', 'IdProyecto', 'IdActividad', 'Llave', 'Descripcion', 'esOrganizacional', 'FechaInicio', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['esOrganizacional'], 'integer'],
             [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
-            [['Descripcion'], 'string', 'max' => 250],
+            [['Llave'], 'string', 'max' => 200],
+            [['Descripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['Descripcion'], 'trim'],
-            [
-                ['CodigoEstado'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Estado::class,
-                'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']
-            ],
-            [
-                ['CodigoUsuario'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Usuario::class,
-                'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']
-            ],
-            [
-                ['IdUnidad'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Unidad::class,
-                'targetAttribute' => ['IdUnidad' => 'IdUnidad']
-            ],
-            [
-                ['IdPrograma'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Programa::class,
-                'targetAttribute' => ['IdPrograma' => 'IdPrograma']
-            ],
-            [
-                ['IdProyecto'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Proyecto::class,
-                'targetAttribute' => ['IdProyecto' => 'IdProyecto']
-            ],
-            [
-                ['IdActividad'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => Actividad::class,
-                'targetAttribute' => ['IdActividad' => 'IdActividad']
-            ],
+            [['IdLlavePresupuestaria'], 'unique'],
+            [['IdDa'], 'exist', 'skipOnError' => true, 'targetClass' => Da::class, 'targetAttribute' => ['IdDa' => 'IdDa']],
+            [['IdUe'], 'exist', 'skipOnError' => true, 'targetClass' => Ue::class, 'targetAttribute' => ['IdUe' => 'IdUe']],
+            [['IdProyecto'], 'exist', 'skipOnError' => true, 'targetClass' => Proyecto::class, 'targetAttribute' => ['IdProyecto' => 'IdProyecto']],
+            [['IdActividad'], 'exist', 'skipOnError' => true, 'targetClass' => Actividad::class, 'targetAttribute' => ['IdActividad' => 'IdActividad']],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels(): array
     {
         return [
-            'IdUnidad' => 'Unidad',
-            'IdPrograma' => 'Programa',
-            'IdProyecto' => 'Proyecto',
-            'IdActividad' => 'Actividad',
-            'Descripcion' => 'Descripción',
-            'TechoPresupuestario' => 'Techo Presupuestario',
+            'IdLlavePresupuestaria' => 'Id Llave Presupuestaria',
+            'IdDa' => 'Id Da',
+            'IdUe' => 'Id Ue',
+            'IdProyecto' => 'Id Proyecto',
+            'IdActividad' => 'Id Actividad',
+            'Llave' => 'Llave',
+            'Descripcion' => 'Descripcion',
+            'esOrganizacional' => 'Es Organizacional',
             'FechaInicio' => 'Fecha Inicio',
             'FechaFin' => 'Fecha Fin',
-            'CodigoEstado' => 'Estado',
-            'FechaHoraRegistro' => 'Fecha Registro',
-            'CodigoUsuario' => 'Usuario',
+            'CodigoEstado' => 'Codigo Estado',
+            'FechaHoraRegistro' => 'Fecha Hora Registro',
+            'CodigoUsuario' => 'Codigo Usuario',
         ];
     }
 
@@ -116,29 +94,28 @@ class LlavePresupuestaria extends ActiveRecord
             ->alias('LP')
             ->select([
                 'LP.IdLlavePresupuestaria',
-                'CONCAT(U.Da,\'-\',U.Ue,\'-\',PR.Codigo,\'-\',PY.Codigo,\'-\',AC.Codigo) AS Llave',
-                'U.IdUnidad',
-                'PR.IdPrograma',
-                'PY.IdProyecto',
-                'AC.IdActividad',
+                'LP.Llave',
                 'LP.Descripcion',
-                'LP.TechoPresupuestario',
+                'LP.esOrganizacional',
                 'LP.FechaInicio',
                 'LP.FechaFin',
+                'Da.IdDa',
+                'Ue.IdUe',
+                'Pr.IdPrograma',
+                'Py.IdProyecto',
+                'Ac.IdActividad',
                 'LP.CodigoEstado',
                 'LP.CodigoUsuario'
-
             ])
-            ->joinWith('unidad U', true, 'INNER JOIN')
-            ->joinWith('programa PR', true, 'INNER JOIN')
-            ->joinWith('proyecto PY', true, 'INNER JOIN')
-            ->joinWith('actividad AC', true, 'INNER JOIN')
+            ->joinWith('da Da', true, 'INNER JOIN')
+            ->joinWith('ue Ue', true, 'INNER JOIN')
+            ->joinWith('proyecto.programa Pr', true, 'INNER JOIN')
+            ->joinWith('proyecto Py', true, 'INNER JOIN')
+            ->joinWith('actividad Ac', true, 'INNER JOIN')
             ->where(['!=', 'LP.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->orderBy([
-                'LP.IdUnidad' => SORT_ASC,
-                'LP.IdPrograma' => SORT_ASC,
-                'LP.IdProyecto' => SORT_ASC,
-                'LP.IdActividad' => SORT_ASC,
+                'Da.Da' => SORT_ASC,
+                'Ue.Ue' => SORT_ASC
             ]);
     }
 
@@ -147,8 +124,28 @@ class LlavePresupuestaria extends ActiveRecord
         return self::findOne(['IdLlavePresupuestaria' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
+    public static function listOneComplete(string $id): array|ActiveRecord
+    {
+        $modelo =  self::find()->alias('Ll')
+            ->joinWith('proyecto.programa Pr', true, 'INNER JOIN')
+            ->where(['IdLlavePresupuestaria' => $id])
+            ->andWhere(['!=', 'Ll.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->one();
+
+        return [
+            'IdDa' => $modelo['IdDa'],
+            'IdUe' => $modelo['IdUe'],
+            'IdPrograma' => $modelo->proyecto->programa->IdPrograma ?? null,
+            'IdProyecto' => $modelo['IdProyecto'],
+            'IdActividad' => $modelo['IdActividad'],
+            'Descripcion' => $modelo['Descripcion'],
+            'esOrganizacional' => $modelo['esOrganizacional'],
+            'FechaInicio' => $modelo['FechaInicio'],
+        ];
+    }
+
     /**
-     * alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C.
      *
      * @return void
      */
@@ -179,30 +176,31 @@ class LlavePresupuestaria extends ActiveRecord
         $this->FechaFin =  date('d-m-Y H:i:s');
     }
 
+
     /**
-     * Gets a query for [[Unidades]].
+     * Gets query for [[IdDa]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getUnidad(): ActiveQuery
+    public function getDa(): ActiveQuery
     {
-        return $this->hasOne(Unidad::class, ['IdUnidad' => 'IdUnidad']);
+        return $this->hasOne(Da::class, ['IdDa' => 'IdDa']);
     }
 
     /**
-     * Gets a query for [[Programas]].
+     * Gets query for [[IdUe]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getPrograma(): ActiveQuery
+    public function getUe(): ActiveQuery
     {
-        return $this->hasOne(Programa::class, ['IdPrograma' => 'IdPrograma']);
+        return $this->hasOne(Ue::class, ['IdUe' => 'IdUe']);
     }
 
     /**
-     * Gets a query for [[Proyectos]].
+     * Gets query for [[IdProyecto]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
@@ -213,7 +211,7 @@ class LlavePresupuestaria extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[Actividades]].
+     * Gets a query for [[IdActividad]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
@@ -224,10 +222,9 @@ class LlavePresupuestaria extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[Estados]].
+     * Gets a query for [[CodigoEstado]].
      *
      * @return ActiveQuery
-     * @noinspection PhpUnused
      */
     public function getCodigoEstado(): ActiveQuery
     {
@@ -235,10 +232,9 @@ class LlavePresupuestaria extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[Usuarios]].
+     * Gets a query for [[CodigoUsuario]].
      *
      * @return ActiveQuery
-     * @noinspection PhpUnused
      */
     public function getCodigoUsuario(): ActiveQuery
     {

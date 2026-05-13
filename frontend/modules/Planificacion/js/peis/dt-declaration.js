@@ -16,7 +16,12 @@ $(document).ready(function () {
             method: "POST",
             dataType: "json",
             url: "index.php?r=Planificacion/peis/listar-todo",
-            dataSrc: "data"
+            dataSrc: "data",
+            error: function (xhr) {
+                const data = JSON.parse(xhr.responseText)
+                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
+                dt_pei.processing(false);
+            }
         },
 
         columns: [

@@ -29,7 +29,7 @@ class DaService
     }
 
     /**
-     * lista un array de Das no eliminados
+     * Lista un array de Das no eliminados
      * @param string $search
      * @return array of Das
      */
@@ -48,9 +48,20 @@ class DaService
      * @param string $id
      * @return Da|null
      */
-    public  function listarUno(string $id): ?Da
+    public function listarUno(string $id): ?Da
     {
         return Da::listOne($id);
+    }
+
+    /**
+     * Obtiene un da en base a un código.
+     *
+     * @param string $id
+     * @return string
+     */
+    public function getDa(string $id): string
+    {
+        return Da::getDa($id);
     }
 
     /**
@@ -164,7 +175,7 @@ class DaService
     }
 
     /**
-     * Obtiene el modelo según el código enviado y valida si existe.
+     * Obtiene el modelo según el código enviado y válida si existe.
      *
      * @param string $id
      * @return Da|null
@@ -205,7 +216,7 @@ class DaService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param string $codigo

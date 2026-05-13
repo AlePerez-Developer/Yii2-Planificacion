@@ -29,7 +29,7 @@ class UeService
     }
 
     /**
-     * lista un array de Ues no eliminados
+     * Lista un array de Ues no eliminados
      * @param string $search
      * @return array of Ues
      */
@@ -43,7 +43,7 @@ class UeService
     }
 
     /**
-     * Obtiene un ue en base a un código.
+     * Obtiene un ue con base en un código.
      *
      * @param string $id
      * @return Ue|null
@@ -51,6 +51,17 @@ class UeService
     public  function listarUno(string $id): ?Ue
     {
         return Ue::listOne($id);
+    }
+
+    /**
+     * Obtiene un ue con base en un código.
+     *
+     * @param string $id
+     * @return string
+     */
+    public function getUe(string $id): string
+    {
+        return Ue::getUe($id);
     }
 
     /**
@@ -164,7 +175,7 @@ class UeService
     }
 
     /**
-     * Obtiene el modelo según el código enviado y valida si existe.
+     * Obtiene el modelo según el código enviado y válida si existe.
      *
      * @param string $id
      * @return Ue|null
@@ -205,7 +216,7 @@ class UeService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param string $codigo

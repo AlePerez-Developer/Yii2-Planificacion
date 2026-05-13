@@ -1,13 +1,15 @@
 $(document).ready(function () {
     let idLlavePresupuestaria = '00000000-0000-0000-0000-000000000000'
     let baseUrl = "index.php?r=Planificacion/llave-presupuestaria/"
+    let dtEvents = $('#tablaListaLlavesPresupuestarias')
 
-    function ReiniciarCampos() {
+    function reiniciarCampos() {
         $('#formLlavePresupuestaria *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formLlavePresupuestaria').trigger("reset");
-        llavePresupuestaria_s2Unidad.val(null).trigger('change')
+        llavePresupuestaria_s2Da.val(null).trigger('change')
+        llavePresupuestaria_s2Ue.val(null).trigger('change')
         llavePresupuestaria_s2Programa.val(null).trigger('change')
         llavePresupuestaria_s2Proyecto.val(null).trigger('change')
         llavePresupuestaria_s2Actividad.val(null).trigger('change')
@@ -21,9 +23,9 @@ $(document).ready(function () {
 
     $("#btnCancelar").click(function () {
         $('.icon').toggleClass('opened');
-        ReiniciarCampos();
+        reiniciarCampos();
         $("#divDatos").hide(500);
-        $("#divTabla").show(500)
+        $("#divTabla").show(500);
     });
 
     llavePresupuestaria_s2Programa.change(function () {
@@ -40,6 +42,52 @@ $(document).ready(function () {
         }
     })
 
+    $('#da, #ue, #programa, #proyecto, #actividad').change(function() {
+        actualizarLlave();
+
+        if (todosLosSelectsTienenValor()) {
+            $("#formLlavePresupuestaria")
+                .validate()
+                .element("#actividad");
+        }
+    });
+
+    function obtenerValorLlave(selector) {
+        let select = $(selector);
+        return select.find('option:selected').data('key')
+            ?? select.attr('data-default')
+            ?? '';
+    }
+
+    function actualizarLlave() {
+        let partes = [
+            obtenerValorLlave('#da'),
+            obtenerValorLlave('#ue'),
+            obtenerValorLlave('#programa'),
+            obtenerValorLlave('#proyecto'),
+            obtenerValorLlave('#actividad')
+        ];
+
+        $('#llave').val(partes.join('-'));
+    }
+
+    function todosLosSelectsTienenValor() {
+
+        let completos = true;
+
+        $('.codigo_group').each(function () {
+
+            let value = $(this).val();
+
+            if (!value) {
+                completos = false;
+                return false;
+            }
+        });
+
+        return completos;
+    }
+
 
     $("#btnGuardar").click(async function () {
         const btn = $(this);
@@ -50,23 +98,27 @@ $(document).ready(function () {
         const hasCode = idLlavePresupuestaria !== '00000000-0000-0000-0000-000000000000';
         let accion = hasCode ? 'actualizar' : 'guardar'
 
-        const idUnidad = llavePresupuestaria_s2Unidad.select2('data')[0].id
+        const idDa = llavePresupuestaria_s2Da.select2('data')[0].id
+        const idUe = llavePresupuestaria_s2Ue.select2('data')[0].id
         const idPrograma = llavePresupuestaria_s2Programa.select2('data')[0].id
         const idProyecto = llavePresupuestaria_s2Proyecto.select2('data')[0].id
         const idActividad = llavePresupuestaria_s2Actividad.select2('data')[0].id
 
         const descripcion = $("#descripcion").val();
-        const techoPresupuestario = $("#techoPresupuestario").val();
+        const organizacional  =  $("#organizacional").is(":checked") ? '1' : '0'
+        const llave = $('#llave').val()
         const fechaInicio = $("#fechaInicio").val();
 
         const datos = new FormData();
         datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
-        datos.append('idUnidad', idUnidad)
+        datos.append('idDa', idDa)
+        datos.append('idUe', idUe)
         datos.append("idPrograma", idPrograma);
         datos.append("idProyecto", idProyecto);
         datos.append("idActividad", idActividad);
         datos.append("descripcion", descripcion);
-        datos.append("techoPresupuestario", techoPresupuestario);
+        datos.append("llave", llave);
+        datos.append("esOrganizacional", organizacional);
         datos.append("fechaInicio", fechaInicio);
 
         try {
@@ -91,8 +143,7 @@ $(document).ready(function () {
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', async function () {
-
+    dtEvents.on('click', '.btn-toggle-estado', async function(){
         let objectBtn = $(this);
         const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
         let idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
@@ -107,7 +158,7 @@ $(document).ready(function () {
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
             }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
+                cambiarEstadoBtnDtic(objectBtn, data.data);
             })
         } catch (err) {
             console.error("Error al procesar:", err);
@@ -117,7 +168,7 @@ $(document).ready(function () {
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
+    dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
         let idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
@@ -182,7 +233,7 @@ $(document).ready(function () {
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
+    dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this);
         const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
         idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
@@ -197,12 +248,17 @@ $(document).ready(function () {
                 spinnerBtn: objectBtn,
             }).then((data) => {
                 let obj = data.data
-                llavePresupuestaria_s2Unidad.val(obj["IdUnidad"]).trigger('change')
+                llavePresupuestaria_s2Da.val(obj["IdDa"]).trigger('change')
+                llavePresupuestaria_s2Ue.val(obj["IdUe"]).trigger('change')
                 llavePresupuestaria_s2Programa.val(obj["IdPrograma"]).trigger('change')
                 populateS2Proyectos(obj["IdPrograma"],llavePresupuestaria_s2Proyecto,obj["IdProyecto"])
                 populateS2Actividades(obj["IdPrograma"],llavePresupuestaria_s2Actividad,obj["IdActividad"])
                 $("#descripcion").val(obj["Descripcion"]);
-                $("#techoPresupuestario").val(obj["TechoPresupuestario"]);
+
+                $("#organizacional").prop(
+                    "checked",
+                    obj["esOrganizacional"] === 1 || obj["esOrganizacional"] === "1"
+                );
                 let FechaInicio = obj["FechaInicio"]
                 $("#fechaInicio").val(FechaInicio.split(' ')[0]);
                 $("#btnMostrarCrear").trigger('click');
@@ -218,7 +274,10 @@ $(document).ready(function () {
      */
     $("#formLlavePresupuestaria").validate({
         rules: {
-            unidad: {
+            da: {
+                required: true,
+            },
+            ue: {
                 required: true,
             },
             programa: {
@@ -229,22 +288,53 @@ $(document).ready(function () {
             },
             actividad: {
                 required: true,
+                require_from_group: [5, ".codigo_group"],
+                remote: {
+                    url: baseUrl + "verificar-llave",
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        idDa: function() {
+                            let da = $('#da').select2('data')
+                            return da[0].id
+                        },
+                        idUe: function (){
+                            let ue = $('#ue').select2('data')
+                            return ue[0].id
+                        },
+                        idPrograma: function (){
+                            let programa = $('#programa').select2('data')
+                            return programa[0].id
+                        },
+                        idProyecto: function (){
+                            let proyecto = $('#proyecto').select2('data')
+                            return proyecto[0].id
+                        },
+                        idActividad: function (){
+                            let actividad = $('#actividad').select2('data')
+                            return actividad[0].id
+                        },
+                        idLlavePresupuestaria: function (){
+                            return idLlavePresupuestaria
+                        }
+                    }
+                }
             },
             descripcion: {
                 required: true,
                 minlength: 2,
                 maxlength: 500,
             },
-            techoPresupuestario: {
-                required: true,
-            },
             fechaInicio: {
                 required: true,
             }
         },
         messages: {
-            unidad: {
-                required: "Debe seleccionar una unidad",
+            da: {
+                required: "Debe seleccionar una direccion administrativa",
+            },
+            ue: {
+                required: "Debe seleccionar una unidad ejecutora",
             },
             programa: {
                 required: "Debe seleccionar un programa",
@@ -254,14 +344,13 @@ $(document).ready(function () {
             },
             actividad: {
                 required: "Debe seleccionar una actividad",
+                require_from_group: "Debe todos los campos que intervienen en la llave presupuestaria",
+                remote: "errorLlave"
             },
             descripcion: {
                 required: "Debe ingresar la descripcion del indicador estrategico",
-                minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
-                maxlength: "La descripcion del indicador debe tener maximo 500 caracteres",
-            },
-            techoPresupuestario: {
-                required: "Debe ingresar un techo presupuestario",
+                minlength: "La descripcion debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion debe tener maximo 500 caracteres",
             },
             fechaInicio: {
                 required: "Debe seleccionar una fecha",
@@ -270,14 +359,28 @@ $(document).ready(function () {
         errorElement: "div",
 
         errorPlacement: function (error, element) {
-            error.addClass("invalid-feedback");
+            error.addClass( "invalid-feedback" );
             error.insertAfter(element);
+            let errorElement = $("#llave")
+            errorElement.html("");
+
+            if (
+                element.attr("name") === "actividad" &&
+                error.text() === "errorLlave"
+            ) {
+                $('.codigo_group').each(function() {
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                });
+                errorElement.removeClass("is-valid").addClass("is-invalid");
+                error.insertAfter(errorElement);
+            }
         },
-        highlight: function (element) {
-            $(element).addClass("is-invalid").removeClass("is-valid");
+        highlight: function (error, element) {
+            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
         },
         unhighlight: function (element) {
-            $(element).addClass("is-valid").removeClass("is-invalid");
+            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+            $("#errorLlavePresupuestaria").html("");
         }
     });
 

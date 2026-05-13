@@ -51,7 +51,7 @@ $(document).ready(function () {
                 `;
                 }
             },
-
+            {data: "Ue", visible: false },
             {
                 data: "CodigoEstado",
                 className: "text-center",
@@ -91,7 +91,6 @@ $(document).ready(function () {
             }
         ]
     });
-
 
     $(document).on("click", "#refreshTable", function () {
         dt_ue.ajax.reload();
