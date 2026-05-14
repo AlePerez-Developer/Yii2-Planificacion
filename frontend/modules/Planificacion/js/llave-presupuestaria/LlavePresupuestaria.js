@@ -251,15 +251,15 @@ $(document).ready(function () {
         let objectBtn = $(this);
         const dt_row = dt_llavePresupuestaria.row(objectBtn.closest('tr')).data()
         idLlavePresupuestaria = dt_row["IdLlavePresupuestaria"];
-
         const datos = new FormData();
+
         datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
 
+        IniciarSpiner(objectBtn)
         try {
             await ajaxPromise({
                 url: baseUrl + "buscar",
                 data: datos,
-                spinnerBtn: objectBtn,
             }).then(async (data) => {
                 let obj = data.data
                 llavePresupuestaria_s2Da.val(obj["IdDa"]).trigger('change')
@@ -297,9 +297,11 @@ $(document).ready(function () {
                 let FechaInicio = obj["FechaInicio"]
                 $("#fechaInicio").val(FechaInicio.split(' ')[0]);
                 $("#btnMostrarCrear").trigger('click');
+                DetenerSpiner(objectBtn)
             });
         } catch (err) {
             console.error("Error al procesar:", err);
+            DetenerSpiner(objectBtn)
         }
     });
 
