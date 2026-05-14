@@ -28,15 +28,29 @@ $(document).ready(function () {
         $("#divTabla").show(500);
     });
 
-    llavePresupuestaria_s2Programa.change(function () {
+    llavePresupuestaria_s2Programa.change(async function () {
+        let idPrograma = $(this).val();
+
         llavePresupuestaria_s2Proyecto.val(null).trigger('change');
         llavePresupuestaria_s2Actividad.val(null).trigger('change');
-        if ($(this).val() !== null) {
+
+        if (idPrograma) {
+
             llavePresupuestaria_s2Proyecto.prop("disabled", false);
             llavePresupuestaria_s2Actividad.prop("disabled", false);
-            populateS2Proyectos($(this).val(), llavePresupuestaria_s2Proyecto, null)
-            populateS2Actividades($(this).val(), llavePresupuestaria_s2Actividad, null)
+
+            await populateS2Proyectos(
+                idPrograma,
+                llavePresupuestaria_s2Proyecto
+            );
+
+            await populateS2Actividades(
+                idPrograma,
+                llavePresupuestaria_s2Actividad
+            );
+
         } else {
+
             llavePresupuestaria_s2Proyecto.prop("disabled", true);
             llavePresupuestaria_s2Actividad.prop("disabled", true);
         }
@@ -246,13 +260,34 @@ $(document).ready(function () {
                 url: baseUrl + "buscar",
                 data: datos,
                 spinnerBtn: objectBtn,
-            }).then((data) => {
+            }).then(async (data) => {
                 let obj = data.data
                 llavePresupuestaria_s2Da.val(obj["IdDa"]).trigger('change')
                 llavePresupuestaria_s2Ue.val(obj["IdUe"]).trigger('change')
-                llavePresupuestaria_s2Programa.val(obj["IdPrograma"]).trigger('change')
-                populateS2Proyectos(obj["IdPrograma"],llavePresupuestaria_s2Proyecto,obj["IdProyecto"])
-                populateS2Actividades(obj["IdPrograma"],llavePresupuestaria_s2Actividad,obj["IdActividad"])
+
+                llavePresupuestaria_s2Programa
+                    .val(obj["IdPrograma"])
+                    .trigger('change.select2');
+
+                // habilitar
+                llavePresupuestaria_s2Proyecto.prop("disabled", false);
+                llavePresupuestaria_s2Actividad.prop("disabled", false);
+
+                // esperar carga proyectos
+                await populateS2Proyectos(
+                    obj["IdPrograma"],
+                    llavePresupuestaria_s2Proyecto,
+                    obj["IdProyecto"]
+                );
+
+                // esperar carga actividades
+                await populateS2Actividades(
+                    obj["IdPrograma"],
+                    llavePresupuestaria_s2Actividad,
+                    obj["IdActividad"]
+                );
+
+
                 $("#descripcion").val(obj["Descripcion"]);
 
                 $("#organizacional").prop(

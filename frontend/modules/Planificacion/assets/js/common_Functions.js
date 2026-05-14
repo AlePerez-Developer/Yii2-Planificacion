@@ -321,7 +321,7 @@ function populateS2Programas(select2) {
         cache: true,
         url: 'index.php?r=Planificacion/programa/listar-programas-s2',
         success: function(data){
-            select2.empty();
+            select2.html('');
 
             $.each(data["data"], function(index, item) {
                 select2.append(
@@ -342,20 +342,21 @@ function populateS2Programas(select2) {
     });
 }
 
-function populateS2Proyectos(idPrograma, select2, val) {
-    $.ajax({
+function populateS2Proyectos(idPrograma, select2, val = null) {
+    return $.ajax({
         method: "POST",
         dataType: 'json',
-        delay: 100,
         data: {
             idPrograma: idPrograma
         },
-        cache: true,
         url: 'index.php?r=Planificacion/proyecto/listar-proyectos-s2',
+
         success: function(data){
-            select2.empty();
+
+            select2.html('');
 
             $.each(data["data"], function(index, item) {
+
                 select2.append(
                     $('<option>', {
                         value: item["IdProyecto"],
@@ -365,30 +366,27 @@ function populateS2Proyectos(idPrograma, select2, val) {
                 );
             });
 
-            select2.val(null).trigger('change');
-        },
-        error: function (xhr) {
-            const data = JSON.parse(xhr.responseText)
-            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-        },
-        complete: function () {
-            if (val) select2.val(val).trigger('change');
+            if (val) {
+                select2.val(val).trigger('change');
+            } else {
+                select2.val(null).trigger('change');
+            }
         }
     });
 }
 
-function populateS2Actividades(idPrograma,select2, val) {
-    $.ajax({
+function populateS2Actividades(idPrograma,select2, val = null) {
+    return $.ajax({
         method: "POST",
         dataType: 'json',
-        delay: 100,
         data: {
             idPrograma: idPrograma
         },
-        cache: true,
         url: 'index.php?r=Planificacion/actividad/listar-actividades-s2',
+
         success: function(data){
-            select2.empty();
+
+            select2.html('');
 
             $.each(data["data"], function(index, item) {
                 select2.append(
@@ -400,14 +398,11 @@ function populateS2Actividades(idPrograma,select2, val) {
                 );
             });
 
-            select2.val(null).trigger('change');
-        },
-        error: function (xhr) {
-            const data = JSON.parse(xhr.responseText)
-            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
-        },
-        complete: function () {
-            if (val) select2.val(val).trigger('change');
+            if (val) {
+                select2.val(val).trigger('change');
+            } else {
+                select2.val(null).trigger('change');
+            }
         }
     });
 }
