@@ -80,7 +80,7 @@ class IndicadorEstrategicoProgramacionController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * Accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -147,18 +147,19 @@ class IndicadorEstrategicoProgramacionController extends BaseController
         $data = LlavePresupuestaria::find()->alias('l')
             ->select([
                 'l.IdLlavePresupuestaria',
-                'CONCAT(Lu.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
+                'CONCAT(Ld.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
                 'l.Descripcion',
                 'Meta' => new Expression('0'),
             ])
-            ->joinWith('unidad Lu', true, 'INNER JOIN')
-            ->joinWith('programa Lpr', true, 'INNER JOIN')
+            ->joinWith('da Ld', true, 'INNER JOIN')
+            ->joinWith('ue Lu', true, 'INNER JOIN')
+            ->joinWith('proyecto.programa Lpr', true, 'INNER JOIN')
             ->joinWith('proyecto Lpy', true, 'INNER JOIN')
             ->joinWith('actividad La', true, 'INNER JOIN')
             ->where(['!=', 'l.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andFilterWhere([
                 'or',
-                ['like', new Expression("CONCAT(Lu.Da,'-',Lu.Ue,'-',Lpr.Codigo,'-',Lpy.Codigo,'-',La.Codigo)"), $term],
+                ['like', new Expression("CONCAT(Ld.Da,'-',Lu.Ue,'-',Lpr.Codigo,'-',Lpy.Codigo,'-',La.Codigo)"), $term],
                 ['like', 'l.Descripcion', $term], // ajusta el alias si corresponde
             ])->limit(20)->asArray()->all();
 

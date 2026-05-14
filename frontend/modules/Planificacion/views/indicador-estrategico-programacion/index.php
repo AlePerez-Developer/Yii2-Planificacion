@@ -92,6 +92,17 @@ $this->params['breadcrumbs'][] = [
         font-weight:700;
     }
 
+    .meta-badge-incompleta{
+        background-color: ;
+    }
+
+    .dtic-item-sub{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
     /* DESCRIPCION */
     .acc-desc{
         font-size:15px;
@@ -108,8 +119,8 @@ $this->params['breadcrumbs'][] = [
 
     /* KPI */
     .kpi-circle{
-        width:42px;
-        height:42px;
+        width:38px;
+        height:38px;
         border-radius:12px;
         background:#64748b;
         color:#fff;
@@ -141,6 +152,7 @@ $this->params['breadcrumbs'][] = [
         padding:4px 8px;
         font-size:11px;
         width: 120px;
+        text-align: center;
     }
 
     /* BODY */

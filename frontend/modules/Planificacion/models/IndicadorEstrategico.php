@@ -67,7 +67,7 @@ class IndicadorEstrategico extends ActiveRecord
     }
 
     /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
      * @used-by rules()
@@ -166,8 +166,10 @@ class IndicadorEstrategico extends ActiveRecord
                 'U.IdUnidadIndicador',
                 'I.CodigoEstado',
                 'I.CodigoUsuario',
+                'isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'
             ])
             ->joinWith('objetivosEstrategicos O', true, 'INNER JOIN')
+            ->joinWith('indicadorEstrategicoProgramacionGestions Ip', true, 'LEFT JOIN')
             ->joinWith('objetivosEstrategicos.areaEstrategica a', true, 'INNER JOIN')
             ->joinWith('objetivosEstrategicos.politicaEstrategica p', true, 'INNER JOIN')
             ->joinWith('catCategoriasIndicadores C', true, 'INNER JOIN')
@@ -178,11 +180,24 @@ class IndicadorEstrategico extends ActiveRecord
             ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'T.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+            ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->groupBy(['I.IdIndicadorEstrategico',
+                'O.IdObjEstrategico',
+                'a.Codigo','p.Codigo','O.Codigo',
+                'I.Codigo',
+                'I.Meta',
+                'I.Descripcion',
+                'I.LineaBase',
+                'C.IdCategoriaIndicador',
+                'T.IdTipoResultado',
+                'U.IdUnidadIndicador',
+                'I.CodigoEstado',
+                'I.CodigoUsuario']);
+
     }
 
     /**
-     * alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C.
      *
      * @return void
      */
@@ -276,6 +291,6 @@ class IndicadorEstrategico extends ActiveRecord
      */
     public function getIndicadorEstrategicoProgramacionGestions(): ActiveQuery
     {
-        return $this->hasMany(IndicadorEstrategicoProgramacionGestion::class, ['IdIndicadorEstrategico' => 'IdIndicadorEstrategico']);
+        return $this->hasMany(ProgramacionIndicadorGestion::class, ['IdIndicadorEstrategico' => 'IdIndicadorEstrategico']);
     }
 }

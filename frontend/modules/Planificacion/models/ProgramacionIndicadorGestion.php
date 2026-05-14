@@ -73,7 +73,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
         return self::find()->alias('P')
             ->select([
                 'P.IdProgramacionIndicadorGestio',
-                'CONCAT(Lu.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
+                'CONCAT(Ld.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
                 'L.Descripcion',
                 'P.MetaProgramada as Meta',
                 'G.IdGestion',
@@ -83,8 +83,9 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             ->joinWith('gestion G', true, 'INNER JOIN')
             ->joinWith('indicadorEstrategico I', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria L', true, 'INNER JOIN')
-            ->joinWith('llavePresupuestaria.unidad Lu', true, 'INNER JOIN')
-            ->joinWith('llavePresupuestaria.programa Lpr', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.da Ld', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.ue Lu', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.proyecto.programa Lpr', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.proyecto Lpy', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.actividad La', true, 'INNER JOIN')
             ->where(['!=', 'G.CodigoEstado', Estado::ESTADO_ELIMINADO])

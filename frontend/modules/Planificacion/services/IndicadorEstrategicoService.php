@@ -16,7 +16,7 @@ use Yii;
 class IndicadorEstrategicoService
 {
     /**
-     * lista un array de Indicadores Estrategicos no eliminados
+     * Lista un array de Indicadores Estrategicos no eliminados
      *
      * @return array of Indicadores Estategicos
      */
@@ -30,7 +30,7 @@ class IndicadorEstrategicoService
     }
 
     /**
-     * lista un array de Indicadores Estrategicos no eliminados segun un Id Objetivo Estrategico
+     * Lista un array de Indicadores Estrategicos no eliminados según un, Id Objetivo Estrategico
      *
      * @return array of Indicadores Estategicos segun
      */
@@ -44,7 +44,7 @@ class IndicadorEstrategicoService
     }
 
     /**
-     * obtiene un Objetivo Estrategico en base a un codigo.
+     * Obtiene un Objetivo Estrategico con base en un codigo.
      *
      * @param string $id
      * @return IndicadorEstrategico|null
@@ -156,7 +156,7 @@ class IndicadorEstrategicoService
     }
 
     /**
-     * Obtiene el modelo segun el codigo enviado.
+     * Obtiene el modelo según el codigo enviado.
      *
      * @param string $id
      * @return array
@@ -178,7 +178,7 @@ class IndicadorEstrategicoService
 
 
     /**
-     * Obtiene el modelo segun el codigo enviado y valida si existe.
+     * Obtiene el modelo según el codigo enviado y válida si existe.
      *
      * @param string $id
      * @return IndicadorEstrategico|null
@@ -219,7 +219,7 @@ class IndicadorEstrategicoService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param int $codigo
