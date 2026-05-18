@@ -59,7 +59,7 @@ class Pei extends ActiveRecord
     }
 
     /**
-     * Valida que la gestion de inicio sea unica en los registros vigentes.
+     * Válida que la gestion de inicio sea unica en los registros vigentes.
      *
      * @param string $attribute
      * @used-by rules()
@@ -87,7 +87,7 @@ class Pei extends ActiveRecord
     }
 
     /**
-     * Valida que la gestion de fin sea unica en los registros vigentes.
+     * Válida que la gestion de fin sea unica en los registros vigentes.
      *
      * @param string $attribute
      * @used-by rules()
@@ -154,7 +154,7 @@ class Pei extends ActiveRecord
     }
 
     /**
-     * alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C.
      *
      * @return void
      */
