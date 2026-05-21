@@ -1,39 +1,122 @@
 <?php
 
 /** @var yii\web\View $this */
+/** @var $modulos */
 
-$this->title = 'Usfx';
+
+use yii\helpers\Url;
+
+$this->title = 'Bienvenido a POA Presupuestos';
+$this->params['breadcrumbs'][] = $this->title;
+
 ?>
-<div class="site-index">
+<div class="row">
 
-</div>
+    <?php foreach ($modulos as $modulo): ?>
 
-<?php
+        <div class="col-lg-4 col-md-6 col-sm-12">
 
-/** @var yii\web\View $this */
+            <a
+                    href="<?= Url::to([
+                        $modulo->DashboardRoute
+                    ]) ?>"
+                    class="module-card-link"
+            >
 
-$this->title = 'Bienvenido a SPO-SP';
-?>
-<div class="site-index">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <p class="mb-1">Se encuentra en la unidad <strong>RECTORADO</strong> (010010000000001)</p>
-            <p class="mb-4">Informacion POA &mdash; <span class="badge bg-danger">VIGENTE</span> de la gestion <span class="badge bg-secondary">2025</span></p>
+                <div
+                        class="module-card"
+                        style="border-top: 4px solid <?= $modulo->Color ?>"
+                >
 
-            <p>
-                El sistema informatico <strong>SPO-SP</strong> de Gestion por Resultados, ha sido disenado e implementado con el objetivo de
-                facilitar y consolidar los procesos de formulacion, modificacion, reformulacion, seguimiento y evaluacion del Programa de
-                Operaciones Anual (POA) y Presupuesto de la Universidad de San Francisco Xavier de Chuquisaca.
-            </p>
-            <p>
-                Al sistema <strong>SPO-SP</strong> tienen acceso las autoridades responsables de unidades organizacionales (Decanos y Directores en el area administrativa)
-                y los responsables de unidades operacionales (Directores de Carrera, Institutos y responsables de unidades administrativas), para el registro de los distintos
-                formularios de formulacion y la elaboracion de los informes de seguimiento y evaluacion de la ejecucion del Programa de Operaciones Anual y Presupuesto,
-                de acuerdo a los distintos niveles de acceso que correspondan a las fases de formulacion, seguimiento y evaluacion.
-            </p>
-            <p>
-                Para ingresar al sistema dirijase al icono de ajustes en la parte superior derecha de la pantalla y seleccione la categoria programatica de su unidad.
-            </p>
+                    <div class="module-icon">
+                        <i class="<?= $modulo->Icono ?>"></i>
+                        <i class="fa fa-chalkboard"></i>
+
+                    </div>
+
+                    <div class="module-title">
+
+                        <?= $modulo->Nombre ?>
+
+                    </div>
+
+                    <div class="module-description">
+
+                        Acceder al módulo
+
+                    </div>
+
+                </div>
+
+            </a>
+
         </div>
-    </div>
+
+    <?php endforeach; ?>
+
 </div>
+
+<style>
+    .module-card-link {
+
+        text-decoration: none !important;
+    }
+
+    .module-card {
+
+        background: #2c3643;
+
+        border-radius: 16px;
+
+        padding: 35px 20px;
+
+        margin-bottom: 25px;
+
+        text-align: center;
+
+        transition: all .25s ease;
+
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+
+        border: 1px solid #3b4655;
+
+        min-height: 220px;
+
+        cursor: pointer;
+    }
+
+    .module-card:hover {
+
+        transform: translateY(-6px);
+
+        box-shadow: 0 12px 24px rgba(0,0,0,0.28);
+
+        background: #344150;
+    }
+
+    .module-icon {
+
+        font-size: 52px;
+
+        margin-bottom: 20px;
+    }
+
+    .module-title {
+
+        color: #fff;
+
+        font-size: 22px;
+
+        font-weight: 600;
+
+        margin-bottom: 10px;
+    }
+
+    .module-description {
+
+        color: #c7d0d9;
+
+        font-size: 13px;
+    }
+
+</style>

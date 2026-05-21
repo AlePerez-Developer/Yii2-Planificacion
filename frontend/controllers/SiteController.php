@@ -1,28 +1,20 @@
 <?php
 namespace frontend\controllers;
 
-use frontend\models\ResendVerificationEmailForm;
-use frontend\models\PasswordResetRequestForm;
-use yii\base\InvalidArgumentException;
-use frontend\models\ResetPasswordForm;
-use frontend\models\VerifyEmailForm;
+use common\models\Estado;
+use common\models\seguridad\Modulo;
+use common\models\seguridad\Usuario;
 use yii\captcha\CaptchaAction;
-use yii\web\BadRequestHttpException;
-use frontend\models\ContactForm;
-use frontend\models\SignupForm;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\models\Usuario;
-use yii\web\Controller;
 use yii\web\ErrorAction;
+use yii\web\Controller;
 use yii\web\Response;
-use Exception;
 use Yii;
-
-
 
 /**
  * Site controller
+ * @noinspection PhpUnused
  */
 class SiteController extends Controller
 {
@@ -34,15 +26,14 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['logout', 'signup'],
                 'rules' => [
                     [
-                        'actions' => ['signup'],
+                        'actions' => ['portal-login', 'usuario-invalido', 'error'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout'],
+                        'actions' => ['index', 'log-out', 'about'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -51,7 +42,7 @@ class SiteController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post'],
+                    'log-out' => ['post'],
                 ],
             ],
         ];
@@ -74,200 +65,97 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
+     * @param string|null $cu
      *
-     * @return string|void
-     * @throws Exception
+     *  Logs in a user.
+     *
+     * @return Response
+     * @noinspection PhpUnused
      */
-    public function actionIndex()
+    public function actionPortalLogin(string $cu = null ): Response
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->render('index');
+        if (!$cu) {
+            return $this->redirect(['site/usuario-invalido']);
         }
 
-        $this->actionLogin();
+        $usuario = Usuario::find()
+            ->where(['TokenPortal' => $cu])
+            ->one();
+
+        if (!$usuario) {
+            return $this->redirect(['site/usuario-invalido']);
+        }
+
+        /** @noinspection PhpParamsInspection */
+        Yii::$app->user->login($usuario, 1800);
+
+        Yii::$app->session->regenerateID(true);
+
+        return $this->redirect(['site/index']);
     }
 
     /**
-     * Logs in a user.
+     * display unauthorizedpage
      *
-     * @return false
-     * @throws Exception
-     */
-    public function actionLogin(): bool
+     * @return string
+     * @noinspection PhpUnused
+    */
+    public function actionUsuarioInvalido(): string
     {
+        $this->layout = 'public';
 
-        if (!(isset($_GET['cu'])&&(trim($_GET['cu'])!='')))
-            throw new Exception('No se recibieron todos los datos del usuario');
-
-
-        $usuario = Usuario::find()->where(['Llave' => $_GET['cu']])->one();
-
-        if ($usuario == null){
-            throw new Exception('Los datos no coinciden con un usuario registrado');
-        }
-
-        if (Yii::$app->user->login($usuario)) {
-            $this->redirect('index.php');
-        } else {
-            throw new Exception('Ocurrio un problema al realizar el login');
-        }
-        return false;
+        return $this->render('usuario-invalido');
     }
+
+    /**
+     * Displays homepage.
+     *
+     * @return string
+     */
+    public function actionIndex(): string
+    {
+        $usuario = Yii::$app->user->identity;
+
+        $modulos = Modulo::find()
+            ->alias('m')
+            ->innerJoin(
+                'seguridad.UsuarioModulo um',
+                'um.IdModulo = m.IdModulo'
+            )
+            ->where(['um.IdUsuario' => $usuario['IdUsuario']])
+            ->andWhere(['m.Visible' => true])
+            ->andWhere(['m.CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->orderBy('m.Orden')
+            ->all();
+
+        return $this->render('index', [
+            'modulos' => $modulos
+        ]);
+    }
+
 
     /**
      * Logs out the current user.
      *
-     * @return Response
+     * @return string
+     * @noinspection PhpUnused
      */
-    public function actionLogout(): Response
+    public function actionLogout(): string
     {
         Yii::$app->user->logout();
-
-        return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact(): Response|string
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail(Yii::$app->params['adminEmail'])) {
-                Yii::$app->session->setFlash('success', 'Thank you for contacting us. We will respond to you as soon as possible.');
-            } else {
-                Yii::$app->session->setFlash('error', 'There was an error sending your message.');
-            }
-
-            return $this->refresh();
-        }
-
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
+        $this->layout = 'public';
+        return $this->render('logout');
     }
 
     /**
      * Displays about page.
      *
      * @return string
+     * @noinspection PhpUnused
      */
     public function actionAbout(): string
     {
         return $this->render('about');
     }
 
-    /**
-     * Signs user up.
-     *
-     * @return Response|string
-     */
-    public function actionSignup(): Response|string
-    {
-        $model = new SignupForm();
-        if ($model->load(Yii::$app->request->post()) && $model->signup()) {
-            Yii::$app->session->setFlash('success', 'Thank you for registration. Please check your inbox for verification email.');
-            return $this->goHome();
-        }
-
-        return $this->render('signup', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Requests password reset.
-     *
-     * @return Response|string
-     */
-    public function actionRequestPasswordReset(): Response|string
-    {
-        $model = new PasswordResetRequestForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail()) {
-                Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
-
-                return $this->goHome();
-            }
-
-            Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for the provided email address.');
-        }
-
-        return $this->render('requestPasswordResetToken', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Resets password.
-     *
-     * @param string $token
-     * @return Response|string
-     * @throws BadRequestHttpException
-     */
-    public function actionResetPassword(string $token): Response|string
-    {
-        try {
-            $model = new ResetPasswordForm($token);
-        } catch (InvalidArgumentException $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
-
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
-            Yii::$app->session->setFlash('success', 'New password saved.');
-
-            return $this->goHome();
-        }
-
-        return $this->render('resetPassword', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Verify email address
-     *
-     * @param string $token
-     * @return Response
-     *@throws BadRequestHttpException
-     */
-    public function actionVerifyEmail(string $token): Response
-    {
-        try {
-            $model = new VerifyEmailForm($token);
-        } catch (InvalidArgumentException $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
-        if (($user = $model->verifyEmail()) && Yii::$app->user->login($user)) {
-            Yii::$app->session->setFlash('success', 'Your email has been confirmed!');
-            return $this->goHome();
-        }
-
-        Yii::$app->session->setFlash('error', 'Sorry, we are unable to verify your account with provided token.');
-        return $this->goHome();
-    }
-
-    /**
-     * Resend verification email
-     *
-     * @return Response|string
-     */
-    public function actionResendVerificationEmail(): Response|string
-    {
-        $model = new ResendVerificationEmailForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail()) {
-                Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
-                return $this->goHome();
-            }
-            Yii::$app->session->setFlash('error', 'Sorry, we are unable to resend verification email for the provided email address.');
-        }
-
-        return $this->render('resendVerificationEmail', [
-            'model' => $model
-        ]);
-    }
 }

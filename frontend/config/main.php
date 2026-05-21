@@ -24,13 +24,19 @@ return [
             'csrfParam' => '_csrf-frontend',
         ],
         'user' => [
-            'identityClass' => 'common\models\Usuario',
-            'enableAutoLogin' => true,
+            'identityClass' => 'common\models\seguridad\Usuario',
+            'enableAutoLogin' => false,
+            'authTimeout' => 1800,
+            'loginUrl' => ['site/usuario-invalido'],
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
         'session' => [
             // this is the name of the session cookie used for login on the frontend
             'name' => 'advanced-frontend',
+            'timeout' => 1800,
+        ],
+        'userContext' => [
+            'class' => 'common\components\UserContext'
         ],
         'assetManager' => [
             'bundles' => [
