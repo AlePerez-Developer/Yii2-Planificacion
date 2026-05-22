@@ -111,3 +111,20 @@ $this->params['breadcrumbs'][] = [
         </div>
     </div>
 </div>
+
+<style>
+    #dticTableContainer {
+
+    }
+    .dtic-table tbody tr{
+        border-radius:20px;
+        margin-bottom:14px;
+        background:linear-gradient(135deg,#fff,var(--soft));
+
+    }
+
+    .dtic-table tbody tr:hover{
+        box-shadow:0 10px 25px rgba(0,0,0,.2);
+        transition:.25s;
+    }
+</style>

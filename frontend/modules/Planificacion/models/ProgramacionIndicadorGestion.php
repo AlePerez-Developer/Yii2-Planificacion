@@ -73,7 +73,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
         return self::find()->alias('P')
             ->select([
                 'P.IdProgramacionIndicadorGestio',
-                'CONCAT(Ld.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
+                'L.Llave',
                 'L.Descripcion',
                 'P.MetaProgramada as Meta',
                 'G.IdGestion',

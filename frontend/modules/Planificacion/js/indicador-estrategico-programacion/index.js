@@ -2,7 +2,7 @@
 let tablas = {};
 let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion/"
 $(document).ready(function () {
-    cargarIndicadores();
+    //cargarIndicadores();
 });
 
 /* ============================

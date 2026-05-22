@@ -9,6 +9,7 @@ use app\modules\Planificacion\models\PeiGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\services\IndicadorEstrategicoService;
 use app\controllers\BaseController;
+use app\modules\Planificacion\services\LlavePresupuestariaService;
 use common\models\Estado;
 use yii\db\Exception;
 use yii\db\Expression;
@@ -24,12 +25,15 @@ use yii\web\Response;
 class IndicadorEstrategicoProgramacionController extends BaseController
 {
     private IndicadorEstrategicoService $serviceIndicadorEstrategico;
+    private LlavePresupuestariaService $serviceLlavePresupuestaria;
 
     public function __construct($id, $module,
                                 IndicadorEstrategicoService $serviceIndicadorEstrategico,
+                                LlavePresupuestariaService $serviceLlavePresupuestaria,
         $config = [])
     {
         $this->serviceIndicadorEstrategico = $serviceIndicadorEstrategico;
+        $this->serviceLlavePresupuestaria = $serviceLlavePresupuestaria;
         parent::__construct($id, $module, $config);
     }
 
@@ -147,7 +151,7 @@ class IndicadorEstrategicoProgramacionController extends BaseController
         $data = LlavePresupuestaria::find()->alias('l')
             ->select([
                 'l.IdLlavePresupuestaria',
-                'CONCAT(Ld.Da,\'-\',Lu.Ue,\'-\',Lpr.Codigo,\'-\',Lpy.Codigo,\'-\',La.Codigo) AS Llave',
+                'l.Llave',
                 'l.Descripcion',
                 'Meta' => new Expression('0'),
             ])
@@ -208,8 +212,115 @@ class IndicadorEstrategicoProgramacionController extends BaseController
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => '',
         ];
+    }
+
+    public function actionGuardarMeta()
+    {
+        $id = Yii::$app->request->post('id');
+        $valor = Yii::$app->request->post('valor');
+
+        $modelo = ProgramacionIndicadorGestion::findOne($id);
+
+        if ($modelo) { $modelo->MetaProgramada = $valor; }
 
 
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
+        }
+
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar los datos del objetivo $modelo->Descripcion", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
+        }
+
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => '',
+        ];
+    }
+
+    public function actionCalcularMeta()
+    {
+        $idIndicadorEstrategico = Yii::$app->request->post('idIndicadorEstrategico');
+        $total = ProgramacionIndicadorGestion::find()
+            ->where([
+                'IdIndicadorEstrategico' => $idIndicadorEstrategico
+            ])
+            ->sum('MetaProgramada') ?? 0;
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => $total,
+        ];
+    }
+
+    public function actionListarLlaves()
+    {
+        return $this->withTryCatch(function () {
+            $idGestion = Yii::$app->request->post('idGestion');
+            $idIndicadorEstrategico = Yii::$app->request->post('idIndicador');
+
+            $data = $this->serviceLlavePresupuestaria->listAllbyProgramacion($idIndicadorEstrategico,$idGestion);
+            return ResponseHelper::success($data, 'Listado de Indicadores Estrategicos obtenido.');
+        });
+    }
+
+    public function actionCambiarEstado()
+    {
+        return $this->withTryCatch(function () {
+            $idLlavePresupuestaria = Yii::$app->request->post('idLlavePresupuestaria');
+            $idIndicadorEstrategico = Yii::$app->request->post('idIndicadorEstrategico');
+            $idGestion = Yii::$app->request->post('idGestion');
+
+            $existe = ProgramacionIndicadorGestion::find()->where([
+                'IdIndicadorEstrategico'  => $idIndicadorEstrategico,
+                'IdGestion'   => $idGestion,
+                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
+            ])->exists();
+            $data = 0;
+
+            if (!$existe) {
+                $modelo = new ProgramacionIndicadorGestion([
+                    'IdIndicadorEstrategico'  => $idIndicadorEstrategico,
+                    'IdGestion'   => $idGestion,
+                    'IdLlavePresupuestaria' => $idLlavePresupuestaria,
+                    'MetaProgramada'      => 0,
+                    'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
+                ]);
+                $modelo->save(false);
+                $data = 1;
+
+            } else {
+                ProgramacionIndicadorGestion::deleteAll([
+                    'IdIndicadorEstrategico' => $idIndicadorEstrategico,
+                    'IdGestion' => $idGestion,
+                    'IdLlavePresupuestaria' => $idLlavePresupuestaria
+                ]);
+            }
+
+            return [
+                'message' => Yii::$app->params['PROCESO_CORRECTO'],
+                'data' => $data,
+            ];
+        });
+    }
+
+    public function actionEliminar()
+    {
+        return $this->withTryCatch(function () {
+            $idLlave = Yii::$app->request->post('idLlave');
+
+
+            $existe = ProgramacionIndicadorGestion::find()->where(['IdProgramacionIndicadorGestio' => $idLlave])->exists();
+
+            if ($existe) {
+                ProgramacionIndicadorGestion::deleteAll(['IdProgramacionIndicadorGestio' => $idLlave]);
+            }
+
+            return [
+                'message' => Yii::$app->params['PROCESO_CORRECTO'],
+                'data' => '',
+            ];
+        });
     }
 
 }

@@ -6,6 +6,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use common\models\Estado;
 use common\models\Usuario;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "LlavesPresupuestarias".
@@ -30,6 +31,7 @@ use common\models\Usuario;
  * @property Actividad $idActividad
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
+ * @property ProgramacionIndicadorGestion[] $programacionesIndicadoresGestiones
  *
  */
 class LlavePresupuestaria extends ActiveRecord
@@ -121,12 +123,12 @@ class LlavePresupuestaria extends ActiveRecord
 
     public static function listOne(string $id): ?LlavePresupuestaria
     {
-        return self::findOne(['IdLlavePresupuestaria' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdLlavePresupuestaria' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listOneComplete(string $id): array|ActiveRecord
     {
-        $modelo =  self::find()->alias('Ll')
+        $modelo = self::find()->alias('Ll')
             ->joinWith('proyecto.programa Pr', true, 'INNER JOIN')
             ->where(['IdLlavePresupuestaria' => $id])
             ->andWhere(['!=', 'Ll.CodigoEstado', Estado::ESTADO_ELIMINADO])
@@ -142,6 +144,38 @@ class LlavePresupuestaria extends ActiveRecord
             'esOrganizacional' => $modelo['esOrganizacional'],
             'FechaInicio' => $modelo['FechaInicio'],
         ];
+    }
+
+    public static function listAllbyProgramacion(string $idIndicadorEstrategico, string $idGestion): array
+    {
+        return LlavePresupuestaria::find()
+            ->alias('lp')
+            ->select([
+                'lp.IdLlavePresupuestaria',
+                'lp.Llave',
+                'lp.Descripcion',
+                'Estado' => new Expression("
+            CASE 
+                WHEN pig.IdProgramacionIndicadorGestio IS NOT NULL 
+                THEN 1 
+                ELSE 0 
+            END
+        ")
+            ])
+            ->leftJoin(
+                ['pig' => ProgramacionIndicadorGestion::tableName()],
+                'pig.IdLlavePresupuestaria = lp.IdLlavePresupuestaria
+         AND pig.IdIndicadorEstrategico = :idIndicador
+         AND pig.IdGestion = :idGestion',
+                [
+                    ':idIndicador' => $idIndicadorEstrategico,
+                    ':idGestion' => $idGestion
+                ]
+            )
+            ->orderBy(['lp.Llave' => SORT_ASC])
+            ->asArray()
+            ->all();
+
     }
 
     /**
@@ -173,7 +207,7 @@ class LlavePresupuestaria extends ActiveRecord
      */
     public function finalizar(): void
     {
-        $this->FechaFin =  date('d-m-Y H:i:s');
+        $this->FechaFin = date('d-m-Y H:i:s');
     }
 
 
@@ -239,5 +273,16 @@ class LlavePresupuestaria extends ActiveRecord
     public function getCodigoUsuario(): ActiveQuery
     {
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
+    }
+
+    /**
+     * Gets query for [[ProgramacionesIndicadoresGestiones]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getProgramacionesIndicadoresGestiones(): ActiveQuery
+    {
+        return $this->hasMany(ProgramacionIndicadorGestion::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
     }
 }

@@ -4,10 +4,16 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion/index.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion/programacion.js",[
     'depends' => [
         JqueryAsset::class
     ]
+]);
+
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion/dt-declaration.js",[
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
 if (isset($idObjEstrategico)) {
@@ -35,6 +41,71 @@ $this->params['breadcrumbs'][] = [
     'label' => '/ Programacion de indicadores estrategicos',
 ];
 ?>
+<div id="divTabla" class="card-body">
+    <div class="card-dtic-style">
+
+        <div id="dticTableLoading" class="p-4">
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+        </div>
+
+        <div class="p-2" id="dticTableContainer" style="display:none;">
+            <table id="oso" class="table w-100 dtic-table"></table>
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- Modal Fijo en la Vista -->
+<div class="modal fade" id="modalProgramacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <!-- 'xl' para que la DataTable interna tenga espacio -->
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalLabel">
+                    <i class="fa fa-list-alt"></i> Detalle de Programación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Información de contexto (opcional) -->
+                <div class="alert alert-light border mb-3">
+                    <strong>Indicador:</strong> <span id="txtIndicador"></span> |
+                    <strong>Gestión:</strong> <span id="txtGestion"></span>
+                </div>
+
+                <!-- Inputs ocultos para persistencia -->
+                <input type="hidden" id="modal_idIndicador">
+                <input type="hidden" id="modal_idGestion">
+                <input type="hidden" id="modal_tableIdOriginal">
+
+                <!-- Tabla Detalle -->
+                <div class="table-responsive">
+                    <table id="tblModalDetalle" class="table table-striped table-bordered w-100">
+                        <thead>
+                        <tr>
+                            <th>Llave Presupuestaria</th>
+                            <th>Descripcion</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar y Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 
 <div class="container-fluid mt-3">
 
@@ -48,74 +119,13 @@ $this->params['breadcrumbs'][] = [
 </div>
 
 <style>
-    /* ===== ACCORDION ===== */
 
-    :root{
-        --primary:#2563eb;
-        --soft:#eaf2ff;
-        --text:#0f172a;
-        --muted:#64748b;
-        --success:#16a34a;
-    }
-
-    .acc-item{
-        border-radius:20px;
-        margin-bottom:14px;
-        background:linear-gradient(135deg,#fff,var(--soft));
-        box-shadow:0 10px 25px rgba(0,0,0,.05);
-        transition:.25s;
-    }
-
-    .acc-item:hover{
-        transform:translateY(-6px);
-        box-shadow:0 18px 40px rgba(0,0,0,.12);
-    }
-
-    .acc-header{
-        padding:18px;
-        cursor:pointer;
-        position:relative;
-    }
-
-    /* META ARRIBA IZQUIERDA */
-    .meta-box-left{
-        display:flex;
-        gap:6px;
-    }
-
-    .meta-badge{
-        background:#2563eb;
-        color: #fff;
-        border-radius:999px;
-        padding:4px 10px;
-        font-size:13px;
-        font-weight:700;
-    }
-
-    .meta-badge-incompleta{
-        background-color: ;
-    }
-
-    .dtic-item-sub{
-        display:flex;
-        align-items:center;
-        gap:8px;
-        flex-wrap:wrap;
-    }
-
-    /* DESCRIPCION */
-    .acc-desc{
-        font-size:15px;
-        font-weight:800;
-        margin:6px 0 10px;
-    }
-
-    /* FOOTER */
     .acc-footer{
         display:flex;
         justify-content:space-between;
         align-items:flex-end;
     }
+
 
     /* KPI */
     .kpi-circle{
@@ -130,6 +140,20 @@ $this->params['breadcrumbs'][] = [
         font-weight:800;
         font-size:14px;
         animation:kpiFade .6s ease;
+    }
+
+    .meta-box-left{
+        display:flex;
+        gap:6px;
+    }
+
+    .meta-badge{
+        background:#2563eb;
+        color: #fff;
+        border-radius:999px;
+        padding:4px 10px;
+        font-size:13px;
+        font-weight:700;
     }
 
     /* RESULTADOS */
@@ -155,11 +179,19 @@ $this->params['breadcrumbs'][] = [
         text-align: center;
     }
 
-    /* BODY */
-    .acc-body{
-        display:none;
-        padding:15px;
-        background:#fff;
+    .dtic-item-sub{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
+    /* Quita el padding de la celda que contiene el hijo para que el slide sea fluido */
+    td.no-padding {
+        padding: 0 !important;
+    }
+    div.slider {
+        overflow: hidden;
     }
 
     /* ===== TABS ===== */
@@ -175,13 +207,18 @@ $this->params['breadcrumbs'][] = [
         padding:10px;
         border:none;
         border-radius:10px;
-        background:#f1f5f9;
+        background:#f1f5f9; !important;
         font-weight:700;
     }
 
     .tab-btn.active{
-        background:#2563eb;
-        color:#fff;
+        background:#2563eb; !important;
+        color:#fff; !important;
+    }
+
+    .nav-tabs .nav-link.active {
+        background:#2563eb; !important;
+        color:#fff; !important;
     }
 
     /* ===== TAB CONTENT ===== */
@@ -214,19 +251,27 @@ $this->params['breadcrumbs'][] = [
         background:#fff7ed;
     }
 
-    /* ===== LOADER ===== */
 
-    .acc-skeleton{
-        height:90px;
-        border-radius:14px;
-        margin-bottom:10px;
-        background:linear-gradient(90deg,#eee,#fff,#eee);
-        background-size:200% 100%;
-        animation:loading 1.2s infinite;
+    /* ========  input  =========*/
+    /* Estado normal (parece texto simple) */
+    .input-editable-smart {
+        transition: all 0.2s ease;
+        font-weight: bold;
+        outline: none;
+        box-shadow: none !important;
     }
 
-    @keyframes loading{
-        from{background-position:200%}
-        to{background-position:-200%}
+    /* Cuando se le quita el readonly (se activa) */
+    .input-editable-smart:not([readonly]) {
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
     }
+
+    /* Animación de éxito */
+    .input-editable-smart.is-valid {
+        background-color: #d4edda !important;
+        transition: background-color 0.5s;
+    }
+
+
+
 </style>

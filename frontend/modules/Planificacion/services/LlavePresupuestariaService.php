@@ -73,6 +73,16 @@ class LlavePresupuestariaService
     }
 
     /**
+     * @param string $idIndicadorEstrategico
+     * @param string $idGestion
+     * @return array
+     */
+    public function listAllbyProgramacion(string $idIndicadorEstrategico, string $idGestion): array
+    {
+        return LlavePresupuestaria::listAllbyProgramacion($idIndicadorEstrategico, $idGestion);
+    }
+
+    /**
      * @param LlavePresupuestariaForm $form
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
