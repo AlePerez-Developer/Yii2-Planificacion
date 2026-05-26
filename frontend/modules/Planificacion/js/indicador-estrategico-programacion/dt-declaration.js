@@ -3,7 +3,7 @@ let dt_progind
 $(document).ready(function () {
 
     function format(d) {
-        // Usamos el ID del indicador para que NUNCA se repitan los IDs en el DOM
+        // Usamos el ID del indicador para que NUNCA se repitan los ID en el DOM
         let id = d.IdIndicadorEstrategico;
         return `
             <div class="slider" style="display:none">
@@ -14,13 +14,13 @@ $(document).ready(function () {
                         <div class="table-loading"></div>
                     </div>
                     <!-- Contenedor de tabs único -->
-                    <div id="tabs_container_${id}" style="display:none; min-height: 300px;; height: 500px">
+                    <div id="tabs_container_${id}" style="display:none; min-height: 300px; height: auto">
                     </div>
                 </div>
             </div>`;
     }
 
-    dt_progind = $("#oso").DataTable({
+    dt_progind = $("#tablaListaIndicadores").DataTable({
         initComplete: function () {
             $("#dticTableLoading").hide();
             $("#dticTableContainer").fadeIn(250);
@@ -72,19 +72,19 @@ $(document).ready(function () {
                         
                         <!-- DESC -->
                         <div class="dtic-item-sub">
-                            Linea Base: ${row["LineaBase"]}
+                            OBJETIVO:   <b>${row["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["Codigo"]}</b>   -   ${row["objetivosEstrategicos"]["Objetivo"]}
                         </div>
                         
-                        <!-- DESC -->
+                                                <!-- DESC -->
                         <div class="dtic-item-sub">
-                            Objetivo:   ${row["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["Codigo"]}   -   ${row["objetivosEstrategicos"]["Objetivo"]}
+                            Linea Base: ${row["LineaBase"]}
                         </div>  
                         
                         <div class="acc-footer">                                    
                             <div class="meta-box-left dtic-item-sub">
-                                <span><strong>Meta Global</strong></span>
+                                <span class="meta-badge-text">Meta Global</span>
                                 <span class="meta-badge">${row["Meta"]}</span>
-                                <span><strong>Meta Programada</strong></span>
+                                <span class="meta-badge-text">Meta Programada</span>
                                 <span id="metaProg_${row["IdIndicadorEstrategico"]}" 
                                         class="meta-badge ${colorClass}" 
                                         data-meta-global="${metaGlobal}">
@@ -107,7 +107,7 @@ $(document).ready(function () {
     });
 
     // Add event listener for opening and closing details
-    $('#oso tbody').on('click', 'td.expandible', function () {
+    $('#tablaListaIndicadores tbody').on('click', 'td.expandible', function () {
         let tr = $(this).closest('tr');
         let row = dt_progind.row(tr);
 
@@ -218,7 +218,7 @@ $(document).ready(function () {
         let btn = $(this);
         let idIndicador = btn.data('idindicador');
         let idGestion = btn.data('idgestion');
-        let paneId = btn.data('pane');
+        //let paneId = btn.data('pane');
         let tableId = btn.data('tableid');
 
         // 3. Inicializar o Recargar la DataTable de esa Gestión
@@ -281,6 +281,7 @@ $(document).ready(function () {
                                     data-toggle="tooltip" 
                                     data-llave = ${row['IdProgramacionIndicadorGestio']}
                                     data-id = ${tableId}
+                                    data-idindicador =  ${row['IDIndicadorEstrategico']}
                                     title="Click! para cambiar el estado del registro">
                                 <span class="btn_text">Quitar</span>
                               </button>`;
@@ -299,6 +300,8 @@ $(document).ready(function () {
     function initTableModal(idIndicador, idGestion) {
         if ($.fn.DataTable.isDataTable('#tblModalDetalle')) {
             $('#tblModalDetalle').DataTable().destroy();
+            // ¡PASO 1! Limpiamos el selector viejo que haya quedado en el header antes de volver a crear la tabla
+            $('#tblModalDetalle thead select').remove();
         }
 
         $('#tblModalDetalle').DataTable({
@@ -307,20 +310,46 @@ $(document).ready(function () {
                     .columns([0])
                     .every(function () {
                         let column = this;
+
+                        // Evitamos duplicar si por alguna razón no se borró en el destroy
+                        if ($(column.header()).find('select').length > 0) {
+                            return;
+                        }
+
                         let select = $(
-                            '</br><select><option value="">Buscar...</option></select>'
+                            '</br><select class="form-control form-control-sm"><option value="">Buscar DA...</option></select>'
                         )
                             .appendTo($(column.header()))
                             .on("change", function () {
                                 let val = $.fn.dataTable.util.escapeRegex($(this).val());
-                                column.search(val ? "^" + val + "$" : "", true, false).draw();
+                                // ¡PASO 2! Modificamos la expresión regular:
+                                // Antes era "^" + val + "$" (exacto). Ahora es "^" + val (que empiece con...)
+                                column.search(val ? "^" + val : "", true, false).draw();
                             });
+
+                        // Creamos un Set para guardar solo los prefijos únicos (ej.: "01", "05")
+                        let prefijosUnicos = new Set();
+
                         column
                             .data()
-                            .unique()
-                            .sort()
                             .each(function (d, j) {
-                                select.append('<option value="' + d + '">' + d + "</option>");
+                                if (d) {
+                                    // ¡PASO 3! Cortamos el string para obtener solo los primeros 2 caracteres
+                                    let prefijo = d.substring(0, 2);
+
+                                    // Opcional: Validamos que sea un número entre 01 y 28
+                                    let num = parseInt(prefijo, 10);
+                                    if (!isNaN(num) && num >= 1 && num <= 28) {
+                                        prefijosUnicos.add(prefijo);
+                                    }
+                                }
+                            });
+
+                        // Convertimos el Set a Array, lo ordenamos alfabéticamente y llenamos el select
+                        Array.from(prefijosUnicos)
+                            .sort()
+                            .forEach(function (prefijo) {
+                                select.append('<option value="' + prefijo + '">' + prefijo + "</option>");
                             });
                     });
             },
@@ -334,7 +363,7 @@ $(document).ready(function () {
                     className: 'dt-small dt-center',
                     orderable: false,
                     data: 'Llave',
-                    width: 100
+                    width: 180
                 },
                 {
                     className: 'dt-small dt-left',
@@ -348,20 +377,20 @@ $(document).ready(function () {
                     render: function (data, type, row) {
                         return ( (type === 'display') && (row["Estado"] === '0'))
                             ? `<button id="btnEstado" type="button" class="btn btn-outline-success btn-sm btnEstado"
-                                    data-idindicador= ${ $('#modal_idIndicador').val() }
-                                    data-idgestion= ${ $('#modal_idGestion').val() }
-                                    data-idllave = ${ row['IdLlavePresupuestaria'] }
-                                    data-toggle="tooltip" 
-                                    title="Click! para cambiar el estado del registro">
-                                <span class="btn_text">Agregar</span>
-                              </button>`
+                                data-idindicador= ${ $('#modal_idIndicador').val() }
+                                data-idgestion= ${ $('#modal_idGestion').val() }
+                                data-idllave = ${ row['IdLlavePresupuestaria'] }
+                                data-toggle="tooltip" 
+                                title="Click! para cambiar el estado del registro">
+                            <span class="btn_text">Agregar</span>
+                          </button>`
                             : `<button id="btnEstado" type="button" class="btn btn-outline-danger btn-sm btnEstado"
-                                    data-idindicador= ${ $('#modal_idIndicador').val() }
-                                    data-idgestion= ${ $('#modal_idGestion').val() }
-                                    data-idllave = ${ row['IdLlavePresupuestaria'] }
-                                    data-toggle="tooltip" title="Click! para cambiar el estado del registro">
-                                <span class="btn_text">Quitar</span>
-                              </button>` ;
+                                data-idindicador= ${ $('#modal_idIndicador').val() }
+                                data-idgestion= ${ $('#modal_idGestion').val() }
+                                data-idllave = ${ row['IdLlavePresupuestaria'] }
+                                data-toggle="tooltip" title="Click! para cambiar el estado del registro">
+                            <span class="btn_text">Quitar</span>
+                          </button>` ;
                     },
                     visible: true
                 }

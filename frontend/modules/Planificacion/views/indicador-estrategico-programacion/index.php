@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = [
         </div>
 
         <div class="p-2" id="dticTableContainer" style="display:none;">
-            <table id="oso" class="table w-100 dtic-table"></table>
+            <table id="tablaListaIndicadores" class="table w-100 dtic-table"></table>
         </div>
 
     </div>
@@ -65,15 +65,14 @@ $this->params['breadcrumbs'][] = [
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modalLabel">
-                    <i class="fa fa-list-alt"></i> Detalle de Programación
+                    <i class="fa fa-list-alt"></i> Seleccion de llaves presupuestarias
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Información de contexto (opcional) -->
                 <div class="alert alert-light border mb-3">
-                    <strong>Indicador:</strong> <span id="txtIndicador"></span> |
-                    <strong>Gestión:</strong> <span id="txtGestion"></span>
+                    <h3>Listado de llaves presupuestarias</h3>
                 </div>
 
                 <!-- Inputs ocultos para persistencia -->
@@ -86,7 +85,7 @@ $this->params['breadcrumbs'][] = [
                     <table id="tblModalDetalle" class="table table-striped table-bordered w-100">
                         <thead>
                         <tr>
-                            <th>Llave Presupuestaria</th>
+                            <th>Llave</th>
                             <th>Descripcion</th>
                             <th>Acciones</th>
                         </tr>
@@ -120,10 +119,10 @@ $this->params['breadcrumbs'][] = [
 
 <style>
 
-    .acc-footer{
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-end;
+    .acc-footer {
+        display: flex;
+        /* justify-content: space-between; <-- ESTA LÍNEA DEBE ELIMINARSE */
+        align-items: center; /* <-- CAMBIADO de 'flex-end' a 'center' */
     }
 
 
@@ -142,9 +141,10 @@ $this->params['breadcrumbs'][] = [
         animation:kpiFade .6s ease;
     }
 
-    .meta-box-left{
-        display:flex;
-        gap:6px;
+    .meta-box-left {
+        display: flex;
+        gap: 6px;
+        align-items: center; /* Asegura que los textos y círculos estén centrados entre sí */
     }
 
     .meta-badge{
@@ -155,13 +155,19 @@ $this->params['breadcrumbs'][] = [
         font-size:13px;
         font-weight:700;
     }
+    .meta-badge-text{
+        font-weight: bold;
+        color: black;
+    }
 
     /* RESULTADOS */
-    .result-box{
-        display:flex;
-        flex-direction:column;
-        align-items:flex-end;
-        gap:4px;
+    /* BLOQUE DE RESULTADOS (Derecha) - MODIFICADO */
+    .result-box {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* Mantiene el texto de los botones alineado a la derecha */
+        gap: 4px;
+        margin-left: auto; /* <-- ESTA LÍNEA ES CLAVE: empuja este bloque a la derecha */
     }
 
     .result-top{
@@ -169,13 +175,15 @@ $this->params['breadcrumbs'][] = [
         gap:4px;
     }
 
-    .badge-result{
-        background:#8DBE5A;
-        color:#fff;
-        border-radius:10px;
-        padding:4px 8px;
-        font-size:11px;
-        width: 120px;
+    .badge-result {
+        background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
+        color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
+        border: 1.5px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        width: 140px;
         text-align: center;
     }
 

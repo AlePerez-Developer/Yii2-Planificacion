@@ -38,6 +38,7 @@ $(document).ready(function () {
         let objectBtn = $(this)
         const idLlave = objectBtn.data('llave');
         const id = objectBtn.data('id');
+        const idindicador = objectBtn.data('idindicador')
 
 
         const datos = new FormData();
@@ -62,11 +63,13 @@ $(document).ready(function () {
                         successMsg: mensajeAccion('eliminar'),
                         reloadTable: $('#' + id).DataTable()
                     });
+                    actualizarSumaGlobal(idindicador)
                 } catch (err) {
                     console.error("Error al procesar:", err);
                 }
             }
         });
+
     });
 
     // 1. Al hacer CLICK: Habilitar y Seleccionar todo
@@ -82,7 +85,7 @@ $(document).ready(function () {
 
 // 2. Al presionar ENTER: Guardar
     $(document).on('keypress', '.input-editable-smart', function (e) {
-        if (e.which == 13) { // Tecla Enter
+        if (e.which === 13) { // Tecla Enter
             const input = $(this);
             const nuevoValor = input.val();
             const idRegistro = input.data('id');
