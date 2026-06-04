@@ -1,6 +1,6 @@
 /* =====================================================
            DATATABLE ULTRA PRO 2026
-        ===================================================== */
+===================================================== */
 
 :root{
     --primary:#2563eb;
@@ -48,12 +48,9 @@
 
 /* ================= TOOLBAR ================= */
 
-.dataTables_wrapper .row:first-child{
-    padding:18px 24px 8px;
-}
-
-.dataTables_filter label,
-.dataTables_length label{
+.dt-search label,
+.dt-length label,
+.dt-info{
     font-weight:700;
     color:#334155;
     display:flex;
@@ -62,13 +59,14 @@
     margin:0;
 }
 
-.dataTables_filter{
+.dt-search{
     display:flex;
     align-items:center;
+    margin-left: 40px;
     gap:10px;
 }
 
-.dataTables_filter input{
+.dt-search input{
     border:1px solid var(--line) !important;
     border-radius:16px !important;
     padding:11px 16px !important;
@@ -78,39 +76,36 @@
     transition:.18s;
 }
 
-.dataTables_filter input:focus{
+.dt-search input:focus{
     border-color:var(--primary) !important;
     box-shadow:0 0 0 4px rgba(37,99,235,.12);
     outline:none !important;
 }
 
-.dataTables_length select{
-    border-radius:14px !important;
-    border:1px solid var(--line) !important;
-    padding:8px 36px 8px 12px !important;
-    background:#fff;
-    box-shadow:0 3px 10px rgba(0,0,0,.03);
-}
-
 .dt-length {
-    margin-right: 40px;
+    display: flex;
+    margin-right: 25px;
+    border-radius: 14px !important;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,.03);
+    border: 1px solid var(--line) !important;
+    padding: 12px 15px 12px 15px;
 }
 
-.dt-length label{
-    font-size: 13px;
+.dt-length select {
+    margin-left: 10px;
+    border-radius: 14px !important;
+    border: 1px solid var(--line) !important;
+    padding: 8px 36px 8px 12px !important;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,.03);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-.dt-search label{
-    font-size: 13px;
-}
-
-.dt-search{
-    margin-left: 40px;
-}
-
-.dt-info{
-    margin-left: 40px;
-    font-size: 13px;
+.dt-length select:focus {
+    border-color: #86b7fe !important; /* Azul suave de Bootstrap */
+    outline: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,.03), 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important; /* Mantiene tu sombra base + el resplandor azul */
 }
 
 /* refresh integrado */
@@ -216,10 +211,6 @@
     color:var(--muted);
     line-height:1.4;
     display: flex;
-}
-
-.dtic-item-sub2 div {
-    text-transform: lowercase;
 }
 
 /* ================= BOTONES ================= */

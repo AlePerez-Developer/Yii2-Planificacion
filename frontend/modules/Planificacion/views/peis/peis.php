@@ -95,7 +95,6 @@ $this->params['breadcrumbs'][] = [
                 <div class="card-dtic-style-title">
                     Planes Estratégicos Institucionales
                 </div>
-
             </div>
 
             <div id="dticTableLoading" class="p-4">
@@ -112,7 +111,61 @@ $this->params['breadcrumbs'][] = [
     </div>
 </div>
 
+<div id="tabs_container_${id}" style=" min-height: 300px; height: auto">
+    <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Home</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Profile</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Contact</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#pills-disabled" type="button" role="tab" aria-controls="pills-disabled" aria-selected="false" disabled>Disabled</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+            <div style="background-color: red; height: 300px"></div>
+        </div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+            <div style="background-color: green; height: 300px"></div>
+        </div>
+        <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab" tabindex="0">
+            <div style="background-color: blue; height: 300px"></div>
+        </div>
+        <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">
+            <div style="background-color: purple; height: 300px"></div>
+        </div>
+    </div>
+</div>
+
+
+
 <style>
+
+
+.nav-pills{
+    gap: 5px;
+}
+.nav-item {
+    border:0;
+    border-radius:22px;
+    box-shadow:
+            0 10px 30px rgba(15,23,42,.06),
+            0 2px 8px rgba(15,23,42,.03);
+}
+
+
+.nav-item:hover{
+    background-color: #e6e6e6;
+}
+
+
+
+
     #dticTableContainer {
 
     }
