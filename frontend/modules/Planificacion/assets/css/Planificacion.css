@@ -1,4 +1,4 @@
-.closed .vertical {
+/*.closed .vertical {
     transition: all 0.5s ease-in-out;
     transform: rotate(-90deg);
 }
@@ -52,7 +52,7 @@
     margin-left: -1.5px;
     top: 50%;
     margin-top: -10px;
-}
+}*/
 
 .btnEstado {
     height: 30px;

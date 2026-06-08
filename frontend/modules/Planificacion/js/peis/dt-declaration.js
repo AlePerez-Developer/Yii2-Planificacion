@@ -28,7 +28,7 @@ $(document).ready(function () {
 
             {
                 data: "CodigoUsuario",
-                className: "text-center",
+                className: "dt-dtic-text-center",
                 width: "60px",
                 orderable: false,
                 searchable: false,

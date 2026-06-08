@@ -33,6 +33,14 @@ $this->params['actions'] =
              Nuevo registro
         </span>
      </button>
+     
+<button class="btn-custom closed" id="toggleBtn">
+  <span class="circle">
+    <span class="horizontal"></span>
+    <span class="vertical"></span>
+  </span>
+  <span class="btn-text">Nuevo Registro</span>
+</button>
 
      <a href="" id="btnReportePdf" class="btn btn-outline-danger btn-sm">
         <i class="fas fa-file-pdf"></i> Exportar
@@ -163,21 +171,108 @@ $this->params['breadcrumbs'][] = [
     background-color: #e6e6e6;
 }
 
+/* --- ESTILO BASE DEL BOTÓN AZUL --- */
+.btn-custom {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    gap: 12px;
+
+    border-radius: 15px !important;;
+    background-color: #0d6efd; /* Color primario de Bootstrap */
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
+
+}
+
+/* Hover con la sombra azulada que querías */
+.btn-custom:hover {
+    box-shadow: 0 8px 20px rgb(47 89 197);
+    transform: translateY(-1px);
+}
+
+.btn-custom:active {
+    transform: translateY(1px);
+}
+
+/* --- EL CÍRCULO DEL ICONO --- */
+.circle {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.2); /* Fondo sutil para el círculo */
+    border-radius: 100%;
+    display: inline-block;
+    vertical-align: middle;
+    transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover .circle {
+    background-color: rgba(255, 255, 255, 0.3); /* Resalta el círculo en hover */
+}
+
+/* --- LAS LÍNEAS (Estructura limpia) --- */
+.horizontal, .vertical {
+    position: absolute;
+    background-color: whitesmoke;
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center; /* Se aseguran de girar exactamente sobre su propio centro */
+}
+
+/* Medidas de la Cruz */
+.horizontal {
+    width: 12px;
+    height: 2px;
+    margin-top: -1px;  /* Centrado perfecto exacto (mitad de la altura) */
+    margin-left: -6px; /* Centrado perfecto exacto (mitad del ancho) */
+}
+
+.vertical {
+    width: 2px;
+    height: 12px;
+    margin-top: -6px;
+    margin-left: -1px;
+}
 
 
+/* ========================================================
+   ANIMACIÓN FLUIDA (Tu lógica de giro + Mi control de opacidad)
+   ======================================================== */
 
-    #dticTableContainer {
+/* ========================================================
+   ANIMACIÓN CORREGIDA (El guion termina en horizontal)
+   ======================================================== */
 
-    }
-    .dtic-table tbody tr{
-        border-radius:20px;
-        margin-bottom:14px;
-        background:linear-gradient(135deg,#fff,var(--soft));
+/* --- ESTADO: CLOSED (Muestra la Cruz) --- */
+.closed .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(0deg); /* Posición vertical original */
+    opacity: 1;
+}
+.closed .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(0deg); /* Posición horizontal original */
+    opacity: 1;
+}
 
-    }
+/* --- ESTADO: OPENED (La vertical gira y se oculta, la horizontal mantiene su forma) --- */
+.opened .vertical {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(90deg); /* Gira 90° para acostarse sobre la horizontal */
+    opacity: 0;               /* Se desvanece suavemente en el proceso */
+}
+.opened .horizontal {
+    transition: all 0.5s ease-in-out;
+    transform: rotate(180deg); /* Gira media vuelta completa (180°). Hace el efecto de giro pero vuelve a quedar horizontal */
+    opacity: 1;                /* Se mantiene visible como el guion final */
+}
 
-    .dtic-table tbody tr:hover{
-        box-shadow:0 10px 25px rgba(0,0,0,.2);
-        transition:.25s;
-    }
+
 </style>
