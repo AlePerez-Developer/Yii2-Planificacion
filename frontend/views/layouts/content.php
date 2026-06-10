@@ -87,7 +87,7 @@ $actions = $this->params['actions']
                             ?>
 
                             <?php if ($actions): ?>
-                                <div class="mb-2">
+                                <div class="mb-2 breadcrumb-actions">
                                     <?= $actions ?>
                                 </div>
                             <?php endif; ?>

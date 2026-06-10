@@ -1,22 +1,24 @@
 $(document).ready(function () {
-    let idPei = '00000000-0000-0000-0000-000000000000';
+    const PEI_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idPei = PEI_EMPTY_GUID;
     let baseUrl = "index.php?r=Planificacion/peis/"
     let dtEvents = $('#tablaListaPeis')
+    let btnToggleForm = $('#btnMostrarCrear');
 
     function reiniciarCampos() {
         $('#formPei *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formPei').trigger("reset");
-        idPei = '00000000-0000-0000-0000-000000000000';
+        idPei = PEI_EMPTY_GUID;
     }
 
     function mensajeAccion(accion) {
-        return `Los datos de la Política Estratégica se ${accion}ron correctamente.`;
+        return `Los datos del Pei se ${accion}on correctamente.`;
     }
 
     $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
+        btnToggleForm.removeClass('opened').addClass('closed')
         reiniciarCampos();
         $("#divDatos").hide(500);
         $("#divTabla").show(500);
@@ -35,7 +37,7 @@ $(document).ready(function () {
         datos.append("gestionInicio", $("#gestionInicio").val());
         datos.append("gestionFin", $("#gestionFin").val());
 
-        const hasCode =  idPei !== '00000000-0000-0000-0000-000000000000';
+        const hasCode =  idPei !== PEI_EMPTY_GUID;
         let accion = hasCode ? 'actualizar' : 'guardar'
 
         try {
@@ -52,12 +54,9 @@ $(document).ready(function () {
         }
     });
 
-    $('#gestionInicio').on('change keyup', function () {
-        $('#gestionFin').valid();
-    });
-
-    $('#gestionFin').on('change keyup', function () {
-        $('#gestionInicio').valid();
+    $('#gestionInicio, #gestionFin').on('change keyup', function () {
+        const target = this.id === 'gestionInicio' ? '#gestionFin' : '#gestionInicio';
+        $(target).valid();
     });
 
     $(document).on('click', '#refresh', function(){
@@ -71,10 +70,10 @@ $(document).ready(function () {
     dtEvents.on('click', '.btn-toggle-estado', async function(){
         let objectBtn = $(this);
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let idPei = dt_row["IdPei"];
+        let rowId = dt_row["IdPei"];
 
         const datos = new FormData();
-        datos.append("idPei", idPei);
+        datos.append("idPei", rowId);
 
         try {
             await ajaxPromise({
@@ -96,20 +95,21 @@ $(document).ready(function () {
     dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let idPei = dt_row["IdPei"];
+        let rowId = dt_row["IdPei"];
 
         const datos = new FormData();
-        datos.append("idPei", idPei);
+        datos.append("idPei", rowId);
 
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
             text: "¿Está seguro de eliminar el PEI seleccionado?",
+            theme: 'bootstrap-5',
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
-            cancelButtonText: 'Cancelar'
+            cancelButtonText: 'Cancelar',
         }).then(async function (resultado) {
             if (resultado.value) {
                 try {
@@ -149,6 +149,7 @@ $(document).ready(function () {
                 $("#fechaAprobacion").val(pei["FechaAprobacion"]);
                 $("#gestionInicio").val(pei["GestionInicio"]);
                 $("#gestionFin").val(pei["GestionFin"]);
+
                 $("#btnMostrarCrear").trigger('click');
             });
         } catch (err) {
@@ -221,15 +222,15 @@ $(document).ready(function () {
         }
     });
 
-    $.validator.addMethod("MayorQue",
-        function (value, element, param) {
-            let $otherElement = $(param);
-            return parseInt(value, 10) > parseInt($otherElement.val(), 10);
-        });
+    $.validator.addMethod("MayorQue", function (value, element, param) {
+        const valActual = parseInt(value, 10) || 0;
+        const valComparar = parseInt($(param).val(), 10) || 0;
+        return valActual > valComparar;
+    });
 
-    $.validator.addMethod("MenorQue",
-        function (value, element, param) {
-            let $otherElement = $(param);
-            return parseInt(value, 10) < parseInt($otherElement.val(), 10);
-        });
+    $.validator.addMethod("MenorQue", function (value, element, param) {
+        const valActual = parseInt(value, 10) || 0;
+        const valComparar = parseInt($(param).val(), 10) || 0;
+        return valActual < valComparar;
+    });
 })
