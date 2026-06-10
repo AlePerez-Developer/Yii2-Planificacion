@@ -3,9 +3,9 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\dao\IndicadorEstrategicoDao;
 use app\modules\Planificacion\formModels\IndicadorEstrategicoForm;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\dao\IndicadorEstrategicoDao;
 use app\modules\Planificacion\models\IndicadorEstrategico;
 use yii\db\StaleObjectException;
 use common\models\Estado;
@@ -15,6 +15,27 @@ use Yii;
 
 class IndicadorEstrategicoService
 {
+    private ObjetivoEstrategicoService $serviceObjEstrategico;
+    private CatCategoriaIndicadorService $serviceCategoriaIndicador;
+    private CatTipoResultadoService $serviceTipoResultado;
+    private CatUnidadIndicadorService  $serviceUnidadIndicador;
+
+    private AccionEstrategicaService $serviceAccionEstrategica;
+
+    public function __construct(ObjetivoEstrategicoService $serviceObjEstrategico,
+                                CatCategoriaIndicadorService $serviceCategoriaIndicador,
+                                CatTipoResultadoService $serviceTipoResultado,
+                                CatUnidadIndicadorService $serviceUnidadIndicador,
+                                AccionEstrategicaService $serviceAccionEstrategica)
+    {
+        $this->serviceObjEstrategico = $serviceObjEstrategico;
+        $this->serviceCategoriaIndicador = $serviceCategoriaIndicador;
+        $this->serviceTipoResultado = $serviceTipoResultado;
+        $this->serviceUnidadIndicador = $serviceUnidadIndicador;
+        $this->serviceAccionEstrategica = $serviceAccionEstrategica;
+    }
+
+
     /**
      * Lista un array de Indicadores Estrategicos no eliminados
      *
@@ -55,6 +76,19 @@ class IndicadorEstrategicoService
     }
 
     /**
+     * @param IndicadorEstrategicoForm $form
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function validarGuardar(IndicadorEstrategicoForm $form): array
+    {
+        $this->validarEntidades($form);
+
+        return $this->guardar($form);
+    }
+
+    /**
      * Guarda un nuevo REGISTRO.
      *
      * @param IndicadorEstrategicoForm $form
@@ -68,15 +102,32 @@ class IndicadorEstrategicoService
             'IdTipoResultado' => $form->idTipoResultado,
             'IdCategoriaIndicador' => $form->idCategoriaIndicador,
             'IdUnidadIndicador' => $form->idUnidadIndicador,
+            'IdAccionEstrategica' => $form->idAccionEstrategica,
             'Codigo'  => $form->codigo,
             'Meta'  => $form->meta,
             'Descripcion'  => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
             'LineaBase'  => $form->lineaBase,
+            'AccionDescripcion'  => $form->accionDescripcion,
             'CodigoEstado'    => Estado::ESTADO_VIGENTE,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
         return $this->validarProcesarModelo($modelo);
+    }
+
+    /**
+     * @param string $id
+     * @param IndicadorEstrategicoForm $form
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     * @throws Throwable
+     */
+    public function validarActualizar(string $id, IndicadorEstrategicoForm $form): array
+    {
+        $this->validarEntidades($form);
+
+        return $this->actualizar($id, $form);
     }
 
     /**
@@ -98,10 +149,12 @@ class IndicadorEstrategicoService
         $modelo->IdTipoResultado = $form->idTipoResultado;
         $modelo->IdCategoriaIndicador = $form->idCategoriaIndicador;
         $modelo->IdUnidadIndicador = $form->idUnidadIndicador;
+        $modelo->IdAccionEstrategica = $form->idAccionEstrategica;
         $modelo->Codigo = $form->codigo;
         $modelo->Meta = $form->meta;
         $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
         $modelo->LineaBase = $form->lineaBase;
+        $modelo->AccionDescripcion = $form->accionDescripcion;
 
         return $this->validarProcesarModelo($modelo);
     }
@@ -172,7 +225,7 @@ class IndicadorEstrategicoService
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $modelo->getAttributes(array('IdIndicadorEstrategico','IdObjEstrategico','IdTipoResultado','IdCategoriaIndicador', 'IdUnidadIndicador', 'Codigo', 'Meta', 'Descripcion', 'LineaBase')),
+            'data' => $modelo->getAttributes(array('IdIndicadorEstrategico','IdObjEstrategico','IdTipoResultado','IdCategoriaIndicador', 'IdUnidadIndicador', 'IdAccionEstrategica', 'Codigo', 'Meta', 'Descripcion', 'LineaBase', 'AccionDescripcion')),
         ];
     }
 
@@ -208,7 +261,7 @@ class IndicadorEstrategicoService
         }
 
         if (!$modelo->save(false)) {
-            Yii::error("Error al guardar los datos del objetivo $modelo->Codigo", __METHOD__);
+            Yii::error("Error al guardar los datos del Indicador Estrategico $modelo->Codigo", __METHOD__);
             throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 
@@ -240,5 +293,25 @@ class IndicadorEstrategicoService
     public function validarId(string $id, string $idObjEstrategico): bool
     {
         return IndicadorEstrategicoDao::validarId($id, $idObjEstrategico);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validarEntidades(IndicadorEstrategicoForm $form): void
+    {
+        $validaciones = [
+            'ObjetivoEstrategico' => $this->serviceObjEstrategico->validarId($form->idObjEstrategico),
+            'UnidadIndicador' => $this->serviceUnidadIndicador->validarId($form->idUnidadIndicador),
+            'TipoResultado' => $this->serviceTipoResultado->validarId($form->idTipoResultado),
+            'CategoriaIndicador' => $this->serviceCategoriaIndicador->validarId($form->idCategoriaIndicador),
+            'AccionEstrategica' => $this->serviceAccionEstrategica->validarId($form->idAccionEstrategica),
+        ];
+
+        foreach ($validaciones as $nombre => $valido) {
+            if (!$valido) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], "$nombre inválido", 400);
+            }
+        }
     }
 }

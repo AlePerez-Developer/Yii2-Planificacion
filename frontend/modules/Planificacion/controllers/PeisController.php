@@ -73,7 +73,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * Accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -84,7 +84,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para agregar un nuevo registro.
+     * Accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -105,7 +105,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para actualizar los valores de un registro existente.
+     * Accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -127,7 +127,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para alternar el estado de un registro V/C.
+     * Accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -141,7 +141,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para soft delete de un registro
+     * Accion para soft delete de un registro
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -155,7 +155,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * accion para buscar un registro en especifico
+     * Accion para buscar un registro en específico
      *
      * @return array
      * @noinspection PhpUnused
@@ -169,7 +169,7 @@ class PeisController extends BaseController
     }
 
     /**
-     * obtiene y valida si se recibio el codigo por el request
+     * Obtiene y válida si se recibio el codigo por el request
      *
      * return string
      * @throws ValidationException

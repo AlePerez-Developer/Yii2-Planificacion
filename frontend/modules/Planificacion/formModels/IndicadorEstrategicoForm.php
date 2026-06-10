@@ -23,18 +23,20 @@ class IndicadorEstrategicoForm extends Model
     public int $meta;
     public string $descripcion;
     public int $lineaBase;
+    public string $accionDescripcion;
     public string $idTipoResultado;
     public string $idCategoriaIndicador;
     public string $idUnidadIndicador;
+    public string $idAccionEstrategica;
 
 
     public function rules(): array
     {
         return [
-            [['idObjEstrategico', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador'], 'string', 'max' => 36],
-            [['idObjEstrategico', 'codigo', 'meta', 'descripcion', 'lineaBase', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador'], 'required'],
+            [['idObjEstrategico', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'string', 'max' => 36],
+            [['idObjEstrategico', 'codigo', 'meta', 'descripcion', 'lineaBase', 'accionDescripcion', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'required'],
             [['codigo', 'meta', 'lineaBase'], 'integer'],
-            [['descripcion'], 'string', 'max' => 500],
+            [['descripcion', 'accionDescripcion'], 'string', 'max' => 500],
         ];
     }
 

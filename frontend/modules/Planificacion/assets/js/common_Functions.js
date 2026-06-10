@@ -255,6 +255,34 @@ function populateS2UnidadesIndicadores(select2) {
     });
 }
 
+function populateS2AccionesEstrategicas(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/accion-estrategica/listar-todo-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdAccionEstrategica"],
+                        text: item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
 function populateS2Da(select2) {
     $.ajax({
         method: "POST",

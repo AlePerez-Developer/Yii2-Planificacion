@@ -1,20 +1,20 @@
 $(document).ready(function () {
-    const PEI_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
-    let idPei = PEI_EMPTY_GUID;
-    let baseUrl = "index.php?r=Planificacion/peis/"
-    let dtEvents = $('#tablaListaPeis')
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idAccionEstrategica = ID_EMPTY_GUID;
+    let baseUrl = "index.php?r=Planificacion/accion-estrategica/"
+    let dtEvents = $('#tablaListaAccionesEstrategicas')
     let btnToggleForm = $('#btnMostrarCrear');
 
     function reiniciarCampos() {
-        $('#formPei *').filter(':input').each(function () {
+        $('#formAccionEstrategica *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
-        $('#formPei').trigger("reset");
-        idPei = PEI_EMPTY_GUID;
+        $('#formAccionEstrategica').trigger("reset");
+        idAccionEstrategica = ID_EMPTY_GUID;
     }
 
     function mensajeAccion(accion) {
-        return `Los datos del Pei se ${accion}on correctamente.`;
+        return `Los datos de la accion estrategica se ${accion}on correctamente.`;
     }
 
     $("#btnCancelar").click(function () {
@@ -28,16 +28,12 @@ $(document).ready(function () {
         const btn = $(this);
         const btnCancel = $('#btnCancelar')
 
-        if (!$("#formPei").valid()) return;
+        if (!$("#formAccionEstrategica").valid()) return;
 
         const datos = new FormData();
-        datos.append('idPei', idPei)
+        datos.append('idAccionEstrategica', idAccionEstrategica)
         datos.append("descripcion", $("#descripcion").val());
-        datos.append("fechaAprobacion", $("#fechaAprobacion").val());
-        datos.append("gestionInicio", $("#gestionInicio").val());
-        datos.append("gestionFin", $("#gestionFin").val());
-
-        const hasCode =  idPei !== PEI_EMPTY_GUID;
+        const hasCode =  idAccionEstrategica !== ID_EMPTY_GUID;
         let accion = hasCode ? 'actualizar' : 'guardar'
 
         try {
@@ -47,20 +43,15 @@ $(document).ready(function () {
                 spinnerBtn: btn,
                 cancelBtn: btnCancel,
                 successMsg: mensajeAccion(accion),
-                reloadTable: dt_pei
+                reloadTable: dt_accion
             });
         } catch (err) {
             console.error("Error al procesar:", err);
         }
     });
 
-    $('#gestionInicio, #gestionFin').on('change keyup', function () {
-        const target = this.id === 'gestionInicio' ? '#gestionFin' : '#gestionInicio';
-        $(target).valid();
-    });
-
     $(document).on('click', '#refresh', function(){
-        dt_pei.ajax.reload();
+        dt_accion.ajax.reload();
     })
 
     /* =============================================
@@ -69,11 +60,11 @@ $(document).ready(function () {
      */
     dtEvents.on('click', '.btn-toggle-estado', async function(){
         let objectBtn = $(this);
-        const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let rowId = dt_row["IdPei"];
+        const dt_row = dt_accion.row(objectBtn.closest('tr')).data()
+        let rowId = dt_row["IdAccionEstrategica"];
 
         const datos = new FormData();
-        datos.append("idPei", rowId);
+        datos.append("idAccionEstrategica", rowId);
 
         try {
             await ajaxPromise({
@@ -94,16 +85,17 @@ $(document).ready(function () {
     =============================================*/
     dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
-        const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        let rowId = dt_row["IdPei"];
+        const dt_row = dt_accion.row(objectBtn.closest('tr')).data()
+        let rowId = dt_row["IdAccionEstrategica"];
 
         const datos = new FormData();
-        datos.append("idPei", rowId);
+        datos.append("idAccionEstrategica", rowId);
 
         Swal.fire({
             icon: "warning",
             title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar el PEI seleccionado?",
+            text: "¿Está seguro de eliminar la accion estrategica seleccionada?",
+            theme: 'bootstrap-5',
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             confirmButtonText: 'Borrar',
@@ -117,7 +109,7 @@ $(document).ready(function () {
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_pei
+                        reloadTable: dt_accion
                     });
                 } catch (err) {
                     console.error("Error al procesar:", err);
@@ -131,11 +123,11 @@ $(document).ready(function () {
     =============================================*/
     dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this)
-        const dt_row = dt_pei.row(objectBtn.closest('tr')).data()
-        idPei = dt_row["IdPei"];
+        const dt_row = dt_accion.row(objectBtn.closest('tr')).data()
+        idAccionEstrategica = dt_row["IdAccionEstrategica"];
 
         const datos = new FormData();
-        datos.append("idPei", idPei);
+        datos.append("idAccionEstrategica", idAccionEstrategica);
 
         try {
             await ajaxPromise({
@@ -143,11 +135,8 @@ $(document).ready(function () {
                 data: datos,
                 spinnerBtn: objectBtn,
             }).then((data) => {
-                let pei = data.data
-                $("#descripcion").val(pei["Descripcion"]);
-                $("#fechaAprobacion").val(pei["FechaAprobacion"]);
-                $("#gestionInicio").val(pei["GestionInicio"]);
-                $("#gestionFin").val(pei["GestionFin"]);
+                let accion = data.data
+                $("#descripcion").val(accion["Descripcion"]);
 
                 $("#btnMostrarCrear").trigger('click');
             });
@@ -160,28 +149,12 @@ $(document).ready(function () {
      * Validacion del form
      */
 
-    $( "#formPei" ).validate( {
+    $( "#formAccionEstrategica" ).validate( {
         rules: {
             descripcion: {
                 required: true,
                 minlength: 2,
                 maxlength: 500
-            },
-            fechaAprobacion:{
-                required: true,
-                date: true
-            },
-            gestionInicio:{
-                required: true,
-                digits: true,
-                min:2001,
-                MenorQue: "#gestionFin"
-            },
-            gestionFin:{
-                required: true,
-                digits: true,
-                min:2002,
-                MayorQue: "#gestionInicio"
             }
         },
         messages: {
@@ -189,22 +162,6 @@ $(document).ready(function () {
                 required: "Debe ingresar una descripcion para el PEI",
                 minlength: "La descripcion debe tener almenos 2 letras",
                 maxlength: "La descripcion debe tener maximo 500 letras"
-            },
-            fechaAprobacion: {
-                required: "Debe ingresar la fecha de aprobacion del PEI",
-                date: "Debe ingresar una fecha valida"
-            },
-            gestionInicio: {
-                required: "Debe ingresar la gestion de inicio del PEI",
-                digits: "Solo debe ingresar el numero de año",
-                min:"Debe ingresar un año valido mayor al 2000",
-                MenorQue: "La gestion de incio debe ser menor que la gestion de fin"
-            },
-            gestionFin: {
-                required: "Debe ingresar la gestion final del PEI",
-                digits: "Solo debe ingresar el numero de año",
-                min:"Debe ingresar un año valido mayor al 2000",
-                MayorQue:"La gestion final debe ser mayor que la gestion de inicio"
             }
         },
         errorElement: "div",
@@ -219,17 +176,5 @@ $(document).ready(function () {
         unhighlight: function (element) {
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
-    });
-
-    $.validator.addMethod("MayorQue", function (value, element, param) {
-        const valActual = parseInt(value, 10) || 0;
-        const valComparar = parseInt($(param).val(), 10) || 0;
-        return valActual > valComparar;
-    });
-
-    $.validator.addMethod("MenorQue", function (value, element, param) {
-        const valActual = parseInt(value, 10) || 0;
-        const valComparar = parseInt($(param).val(), 10) || 0;
-        return valActual < valComparar;
     });
 })

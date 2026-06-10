@@ -16,9 +16,11 @@ use yii\db\ActiveQuery;
  * @property int $Meta
  * @property string $Descripcion
  * @property int $LineaBase
+ * @property string $AccionDescripcion
  * @property string $IdTipoResultado
  * @property string $IdCategoriaIndicador
  * @property string $IdUnidadIndicador
+ * @property string $IdAccionEstrategica
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
@@ -26,6 +28,7 @@ use yii\db\ActiveQuery;
  * @property CatCategoriaIndicador $catCategoriasIndicadores
  * @property CatTipoResultado $catTiposResultados
  * @property CatUnidadIndicador $catUnidadesIndicadores
+ * @property AccionEstrategica $accionEstrategica
  * @property Estado $estados
  * @property IndicadorEstrategicoProgramacionGestion[] $indicadorEstrategicoProgramacionGestions
  * @property ObjetivoEstrategico $objetivosEstrategicos
@@ -47,12 +50,12 @@ class IndicadorEstrategico extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdIndicadorEstrategico', 'IdObjEstrategico', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador'], 'string', 'max' => 36],
-            [['IdObjEstrategico', 'Codigo', 'Meta', 'Descripcion', 'LineaBase', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdIndicadorEstrategico', 'IdObjEstrategico', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador', 'IdAccionEstrategica'], 'string', 'max' => 36],
+            [['IdObjEstrategico', 'Codigo', 'Meta', 'Descripcion', 'LineaBase', 'AccionDescripcion', 'IdTipoResultado', 'IdCategoriaIndicador', 'IdUnidadIndicador', 'IdAccionEstrategica', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['Meta', 'LineaBase'], 'integer', 'min' => 0],
             [['Codigo'], 'integer', 'min' => 1],
             [['FechaHoraRegistro'], 'safe'],
-            [['Descripcion'], 'string', 'max' => 500],
+            [['Descripcion', 'AccionDescripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdIndicadorEstrategico'], 'unique'],
@@ -61,6 +64,7 @@ class IndicadorEstrategico extends ActiveRecord
             [['IdTipoResultado'], 'exist', 'skipOnError' => true, 'targetClass' => CatTipoResultado::class, 'targetAttribute' => ['IdTipoResultado' => 'IdTipoResultado']],
             [['IdCategoriaIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => CatCategoriaIndicador::class, 'targetAttribute' => ['IdCategoriaIndicador' => 'IdCategoriaIndicador']],
             [['IdUnidadIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => CatUnidadIndicador::class, 'targetAttribute' => ['IdUnidadIndicador' => 'IdUnidadIndicador']],
+            [['IdAccionEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AccionEstrategica::class, 'targetAttribute' => ['IdAccionEstrategica' => 'IdAccionEstrategica']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
         ];
@@ -260,6 +264,17 @@ class IndicadorEstrategico extends ActiveRecord
     public function getCatUnidadesIndicadores(): ActiveQuery
     {
         return $this->hasOne(CatUnidadIndicador::class, ['IdUnidadIndicador' => 'IdUnidadIndicador']);
+    }
+
+    /**
+     * Gets a query for [[CatUnidadesIndicadores]].
+     *
+     * @return ActiveQuery
+     * @noinspection PhpUnused
+     */
+    public function getAccionesEstrategicas(): ActiveQuery
+    {
+        return $this->hasOne(AccionEstrategica::class, ['IdAccionEstrategica' => 'IdAccionEstrategica']);
     }
 
     /**

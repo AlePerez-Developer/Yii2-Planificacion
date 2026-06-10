@@ -1,31 +1,29 @@
 <?php
+
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\services\IndicadorEstrategicoService;
-use app\modules\Planificacion\formModels\IndicadorEstrategicoForm;
+use app\modules\Planificacion\services\AccionEstrategicaService;
+use app\modules\Planificacion\formModels\AccionEstrategicaForm;
 use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use Mpdf\MpdfException;
-use Mpdf\Mpdf;
 use Yii;
 
 /**
  * @noinspection PhpUnused
  */
-class IndicadorEstrategicoController extends BaseController
+class AccionEstrategicaController extends BaseController
 {
-    private IndicadorEstrategicoService $service;
+    private AccionEstrategicaService $service;
 
-    public function __construct($id, $module,
-                                IndicadorEstrategicoService $service,
-                                $config = [])
+    public function __construct($id, $module, AccionEstrategicaService $service, $config = [])
     {
         $this->service = $service;
         parent::__construct($id, $module, $config);
     }
+
     public function behaviors(): array
     {
         return [
@@ -67,7 +65,7 @@ class IndicadorEstrategicoController extends BaseController
 
     public function actionIndex(): string
     {
-        return $this->render('indicadorEstrategico');
+        return $this->render('index');
     }
 
     /**
@@ -75,11 +73,26 @@ class IndicadorEstrategicoController extends BaseController
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
+     *
      */
     public function actionListarTodo(): array
     {
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
+
+    /**
+     * Accion para listar todos los registros del modelo para el llenado de Select2.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     *
+     */
+    public function actionListarTodoS2(): array
+    {
+        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarAccionesS2($search)) ;
+    }
+
 
     /**
      * Accion para agregar un nuevo registro.
@@ -92,13 +105,12 @@ class IndicadorEstrategicoController extends BaseController
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
 
-            $form = new IndicadorEstrategicoForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            $form = new AccionEstrategicaForm();
+            $form->load($request->post(), '');
+            if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-
-            return $this->service->validarGuardar($form);
+            return $this->service->guardar($form);
         });
     }
 
@@ -114,13 +126,14 @@ class IndicadorEstrategicoController extends BaseController
             $request = Yii::$app->request;
 
             $id = $this->obtenerId();
-            $form = new IndicadorEstrategicoForm();
+            $form = new AccionEstrategicaForm();
 
-            if (!$form->load($request->post(), '') || !$form->validate()) {
+            $form->load($request->post(), '');
+            if (!$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
 
-            return $this->service->validarActualizar($id, $form);
+            return $this->service->actualizar($id, $form);
         });
     }
 
@@ -169,47 +182,15 @@ class IndicadorEstrategicoController extends BaseController
     /**
      * Obtiene y válida si se recibio él, id por el request
      *
-     * @return string
+     * return string
      * @throws ValidationException
      */
     private function obtenerId(): string
     {
-        $id = Yii::$app->request->post('idIndicadorEstrategico');
+        $id = Yii::$app->request->post('idAccionEstrategica');
         if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de indicador estrategico no enviado.', 404);
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Id de Área Estratégica no enviado.', 404);
         }
         return $id;
-    }
-
-    /**
-     * Accion para buscar un registro en específico
-     *
-     * @return bool
-     * @noinspection PhpUnused
-     */
-    public function actionVerificarCodigo(): bool
-    {
-        $id = Yii::$app->request->post('idIndicadorEstrategico');
-        if (!isset($id)) {
-            return false;
-        }
-
-        $codigo = Yii::$app->request->post('codigo');
-        if (!isset($codigo)) {
-            return false;
-        }
-
-        return $this->service->verificarCodigo($id,$codigo);
-    }
-
-    /**
-     * @throws MpdfException
-     * @noinspection PhpUnused
-     */
-    public function actionReporte(): void
-    {
-        $mpdf = new Mpdf();
-        $mpdf->SetMargins(0, 0,32);
-        $mpdf->Output();
     }
 }

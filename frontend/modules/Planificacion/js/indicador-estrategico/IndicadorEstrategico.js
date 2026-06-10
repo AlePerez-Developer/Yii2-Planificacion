@@ -1,6 +1,9 @@
 $(document).ready(function(){
-    let idIndicadorEstrategico = '00000000-0000-0000-0000-000000000000'
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idIndicadorEstrategico = ID_EMPTY_GUID
     let baseUrl = "index.php?r=Planificacion/indicador-estrategico/"
+    let dtEvents = $('#tablaListaIndicadoresEstrategicos')
+    let btnToggleForm = $('#btnMostrarCrear');
 
     function ReiniciarCampos(){
         $('#formIndicadorEstrategico *').filter(':input').each(function () {
@@ -12,21 +15,19 @@ $(document).ready(function(){
         indicadorEstrategico_s2CategoriaIndicador.val(null).trigger('change')
         indicadorEstrategico_s2TipoResultado.val(null).trigger('change')
         indicadorEstrategico_s2UnidadIndicador.val(null).trigger('change')
-        idIndicadorEstrategico = '00000000-0000-0000-0000-000000000000'
+        indicadorEstrategico_s2AccionEstrategica.val(null).trigger('change')
+        idIndicadorEstrategico = ID_EMPTY_GUID
     }
 
     function mensajeAccion(accion) {
-        return `Los datos del Indicador Estratégico se ${accion}ron correctamente.`;
+        return `Los datos del Indicador Estratégico se ${accion}on correctamente.`;
     }
 
     $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
+        btnToggleForm.removeClass('opened').addClass('closed')
         ReiniciarCampos();
         $("#divDatos").hide(500);
         $("#divTabla").show(500)
-        /*dt_indEstrategico.rows().every(function () {
-            this["child"](indicadorEstrategico_format(this.data())).show();
-        });*/
     });
 
     $("#btnGuardar").click(async function () {
@@ -35,28 +36,31 @@ $(document).ready(function(){
 
         if (!$("#formIndicadorEstrategico").valid()) return;
 
-        const hasCode =  idIndicadorEstrategico !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
-
         const idObjEstrategico = indicadorEstrategico_s2ObjEstrategico.select2('data')[0].id
-
         const idUnidadIndicador = indicadorEstrategico_s2UnidadIndicador.select2('data')[0].id
         const idCategoriaIndicador = indicadorEstrategico_s2CategoriaIndicador.select2('data')[0].id
         const idTipoResultado = indicadorEstrategico_s2TipoResultado.select2('data')[0].id
+        const idAccionEstrategica = indicadorEstrategico_s2AccionEstrategica.select2('data')[0].id
         const codigo = $("#codigo").val();
         const meta = $("#meta").val();
         const lineaBase = $("#lineaBase").val();
         const descripcion = $("#descripcion").val();
+        const accionDescripcion = $('#accionDescripcion')
         const datos = new FormData();
         datos.append('idIndicadorEstrategico',idIndicadorEstrategico)
         datos.append("idObjEstrategico", idObjEstrategico);
         datos.append("idUnidadIndicador", idUnidadIndicador);
         datos.append("idCategoriaIndicador", idCategoriaIndicador);
         datos.append("idTipoResultado", idTipoResultado);
+        datos.append('idAccionEstrategica',idAccionEstrategica)
         datos.append("codigo", codigo);
         datos.append("meta", meta);
         datos.append("lineaBase", lineaBase);
         datos.append("descripcion", descripcion);
+        datos.append("accionDescripcion", accionDescripcion);
+
+        const hasCode =  idIndicadorEstrategico !== ID_EMPTY_GUID;
+        let accion = hasCode ? 'actualizar' : 'guardar'
 
         try {
             await ajaxPromise({
@@ -73,25 +77,21 @@ $(document).ready(function(){
     });
 
     $(document).on('click', '#refresh', function(){
-        dt_indEstrategico.ajax.reload(/*function () {
-            dt_indEstrategico.rows().every(function () {
-                this["child"](indicadorEstrategico_format(this.data())).show();
-            });
-        }, false*/);
+        dt_indEstrategico.ajax.reload();
     })
 
     /* =============================================
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    $(document).on('click', 'tbody #btnEstado', async function(){
+    dtEvents.on('click', '.btn-toggle-estado', async function(){
 
         let objectBtn = $(this);
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
-        let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+        let rowId = dt_row["IdIndicadorEstrategico"];
 
         const datos = new FormData();
-        datos.append("idIndicadorEstrategico", idIndicadorEstrategico);
+        datos.append("idIndicadorEstrategico", rowId);
 
         try {
             await ajaxPromise({
@@ -100,7 +100,7 @@ $(document).ready(function(){
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
             }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
+                cambiarEstadoBtnDtic(objectBtn, data.data);
             })
         } catch (err) {
             console.error("Error al procesar:", err);
@@ -110,13 +110,13 @@ $(document).ready(function(){
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
+    dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
-        let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+        let rowId = dt_row["IdIndicadorEstrategico"];
 
         const datos = new FormData();
-        datos.append("idIndicadorEstrategico", idIndicadorEstrategico);
+        datos.append("idIndicadorEstrategico", rowId);
 
         Swal.fire({
             icon: "warning",
@@ -147,7 +147,7 @@ $(document).ready(function(){
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
+    dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this);
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
         idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
@@ -167,9 +167,11 @@ $(document).ready(function(){
                 $("#meta").val(obj["Meta"]);
                 $("#lineaBase").val(obj["LineaBase"]);
                 $("#descripcion").val(obj["Descripcion"]);
+                $('#accionDescripcion').val(obj["AccionDescripcion"]);
                 indicadorEstrategico_s2TipoResultado.val(obj["IdTipoResultado"]).trigger('change')
                 indicadorEstrategico_s2CategoriaIndicador.val(obj["IdCategoriaIndicador"]).trigger('change')
                 indicadorEstrategico_s2UnidadIndicador.val(obj["IdUnidadIndicador"]).trigger('change')
+                indicadorEstrategico_s2AccionEstrategica.val(obj["IdAccionEstrategica"]).trigger('change')
                 $("#btnMostrarCrear").trigger('click');
             });
         } catch (err) {
@@ -219,6 +221,11 @@ $(document).ready(function(){
                 minlength: 2,
                 maxlength: 500,
             },
+            accionDescripcion: {
+                required: true,
+                minlength: 2,
+                maxlength: 500,
+            },
             idTipoResultado: {
                 required: true,
             },
@@ -228,6 +235,9 @@ $(document).ready(function(){
             idUnidadIndicador: {
                 required: true,
             },
+            idAccionEstrategica: {
+                required: true
+            }
         },
         messages: {
             idObjEstrategico: {
@@ -255,6 +265,11 @@ $(document).ready(function(){
                 minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
                 maxlength: "La descripcion del indicador debe tener maximo 500 caracteres",
             },
+            accionDescripcion: {
+                required: "Debe ingresar la descripcion de la accion estrategica",
+                minlength: "La descripcion debe tener por lo menos 2 caracteres",
+                maxlength: "La descripcion debe tener maximo 500 caracteres",
+            },
             idTipoResultado: {
                 required: "Debe seleccionar una opcion para el tipo de resultado",
             },
@@ -264,6 +279,9 @@ $(document).ready(function(){
             idUnidadIndicador: {
                 required: "Debe seleccionar una opcion para la unidad del indicador",
             },
+            idAccionEstrategica: {
+                required: "Debe seleccionar una opcion para la unidad del indicador",
+            }
         },
         errorElement: "div",
 
@@ -278,7 +296,4 @@ $(document).ready(function(){
             $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
         }
     } );
-
-
-
 })

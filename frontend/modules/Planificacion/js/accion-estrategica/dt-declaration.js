@@ -1,7 +1,7 @@
-let dt_indEstrategico;
-
+let dt_accion
 $(document).ready(function () {
-    dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
+
+    dt_accion = $("#tablaListaAccionesEstrategicas").DataTable({
         initComplete: function () {
             $("div.dt-search").append(`
             <button id="refreshTable" class="btn-refresh">
@@ -18,12 +18,12 @@ $(document).ready(function () {
             cache: false,
             contentType: false,
             processData: false,
-            url: 'index.php?r=Planificacion/indicador-estrategico/listar-todo',
+            url: 'index.php?r=Planificacion/accion-estrategica/listar-todo',
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
                 MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_indEstrategico.processing(false);
+                dt_accion.processing(false);
             }
         },
         columns: [
@@ -37,48 +37,23 @@ $(document).ready(function () {
                     return `<div class="badge-codigo">${data}</div>`;
                 }
             },
-            {data: "Codigo", visible:false},
+
             {
                 data: null,
-                className: 'expandible',
                 render: function (data, type, row) {
+
                     if (type !== "display") {
                         return row["Descripcion"];
                     }
 
                     return `
-                        <div style="display: flex;align-items:center;">
-                            <span class="dtic-item-main mr-2">Indicador N° </span>
-                                <div class="kpi-circle">
-                                    ${row["Codigo"]}
-                                </div>                                
-                        </div>
-                        
-                        <div class="dtic-item-main">
-                            ${row["Descripcion"]}
-                        </div>
-                        
-                        <div class="dtic-item-sub">
-                            accion estrategica desde ${row["LineaBase"]} hasta ${row["Meta"]} 
-                        </div>
-                        
-                        <div class="dtic-item-sub2 mt-2" style="display: flex; gap: 6px; border: 1px solid; padding: 5px; border-radius: 16px">
-                            <span style="font-weight: bold">Objetivo:</span> <span> ${row["objetivosEstrategicos"]["Objetivo"]} </span>  
-                            <span style="font-weight: bold">Producto:</span> <span> ${row["objetivosEstrategicos"]["Producto"]} </span>  
-                        </div>
-                        <div class="dtic-item-sub2 mt-2" style="display: flex; gap: 6px; border: 1px solid; padding: 5px; border-radius: 16px">
-                            <span style="font-weight: bold">Ind-Descripcion:</span> <span> ${row["objetivosEstrategicos"]["Indicador_Descripcion"]} </span>  
-                            <span style="font-weight: bold">Formula:</span> <span> ${row["objetivosEstrategicos"]["Indicador_Formula"]} </span>  
-                        </div>
-                        
-                        <div class="acc-footer mt-2" style="display: flex; gap: 10px">
-                            <span class="badge-result">${row["catUnidadesIndicadores"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["catTiposResultados"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["catCategoriasIndicadores"]["Descripcion"]}</span>
-                        </div>                        
-                        `;
+                    <div class="dtic-item-main">
+                        ${row["Descripcion"]}
+                    </div>
+                `;
                 }
             },
+
             {
                 data: "CodigoEstado",
                 className: "text-center",
@@ -98,7 +73,7 @@ $(document).ready(function () {
                 },
             },
             {
-                data: "IdIndicadorEstrategico",
+                data: "IdAccionEstrategica",
                 className: "text-center",
                 width: "140px",
                 orderable: false,
@@ -120,12 +95,12 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "#refreshTable", function () {
-        dt_indEstrategico.ajax.reload();
+        dt_accion.ajax.reload();
     });
 
-    dt_indEstrategico.on('order.dt search.dt', function () {
+    dt_accion.on('order.dt search.dt', function () {
         let i = 1;
-        dt_indEstrategico.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
+        dt_accion.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
             this.data(i++);
         });
     }).draw();
