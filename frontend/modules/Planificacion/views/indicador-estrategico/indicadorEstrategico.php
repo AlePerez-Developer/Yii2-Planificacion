@@ -138,7 +138,7 @@ $this->params['breadcrumbs'][] = [
                             <div class="col-4">
                                 <div class="form-group">
                                     <label for="accionDescripcion">Descripcion</label>
-                                    <input type="text" class="form-control input-sm num dtic-input" id="accionDescripcion"
+                                    <input type="text" class="form-control input-sm txt dtic-input" id="accionDescripcion"
                                            name="accionDescripcion" placeholder="Descripcion de la accion" >
                                 </div>
                             </div>

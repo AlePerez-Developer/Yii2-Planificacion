@@ -45,7 +45,7 @@ $(document).ready(function(){
         const meta = $("#meta").val();
         const lineaBase = $("#lineaBase").val();
         const descripcion = $("#descripcion").val();
-        const accionDescripcion = $('#accionDescripcion')
+        const accionDescripcion = $('#accionDescripcion').val();
         const datos = new FormData();
         datos.append('idIndicadorEstrategico',idIndicadorEstrategico)
         datos.append("idObjEstrategico", idObjEstrategico);
