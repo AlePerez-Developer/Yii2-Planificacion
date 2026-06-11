@@ -8,6 +8,8 @@ $nombreCompleto =
     $persona->Nombres . ' ' .
     $persona->Paterno . ' ' .
     $persona->Materno;
+$colorModulo = Yii::$app->userContext->colorModulo();
+$modulo = Yii::$app->userContext->moduloActivo();
 
 ?>
 
@@ -51,6 +53,7 @@ $nombreCompleto =
 </div>
 
 <style>
+
 
     .user-panel-custom {
 
@@ -167,8 +170,8 @@ $nombreCompleto =
     }
 
     .user-panel-custom {
-
-        border-top: 3px solid #3c8dbc;
+        border-top: 5px solid <?= $colorModulo ?>;
+        border-left:2px solid <?= $colorModulo ?>;
     }
 
 

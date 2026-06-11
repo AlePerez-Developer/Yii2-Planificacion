@@ -20,6 +20,9 @@ use hail812\adminlte\widgets\Menu;
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <?= $this->render('partials/_user_modules') ?>
+            </div>
             <?php
             echo Menu::widget([
                     'items' => [

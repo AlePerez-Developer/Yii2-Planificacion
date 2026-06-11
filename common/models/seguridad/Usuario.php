@@ -91,6 +91,14 @@ class Usuario extends ActiveRecord implements IdentityInterface
         );
     }
 
+    public function getModulosPermitidos(): array
+    {
+        return Modulo::find()
+            ->where(['CodigoEstado' => 'V'])
+            ->orderBy('Orden')
+            ->all();
+    }
+
     /**
      * Finds an identity by the given ID.
      * @param string $id the ID to be looked for

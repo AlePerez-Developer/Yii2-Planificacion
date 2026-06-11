@@ -4,7 +4,9 @@ namespace frontend\controllers;
 use common\models\Estado;
 use common\models\seguridad\Modulo;
 use common\models\seguridad\Usuario;
+use common\models\seguridad\UsuarioContextoActivo;
 use yii\captcha\CaptchaAction;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\ErrorAction;
@@ -33,7 +35,7 @@ class SiteController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'log-out', 'about'],
+                        'actions' => ['index', 'log-out', 'about', 'seleccionar-modulo'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -130,6 +132,46 @@ class SiteController extends Controller
 
         return $this->render('index', [
             'modulos' => $modulos
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function actionSeleccionarModulo($id): Response
+    {
+        $contexto = UsuarioContextoActivo::find()
+            ->where([
+                'IdUsuario' => Yii::$app->user->id
+            ])
+            ->one();
+
+        if (!$contexto) {
+
+            $contexto = new UsuarioContextoActivo();
+
+            $contexto->IdUsuario = Yii::$app->user->id;
+        }
+
+        $contexto->IdModulo = $id;
+        $contexto->CodigoEstado = Estado::ESTADO_VIGENTE;
+        $contexto->FechaHoraActualizacion = date('Y-m-d H:i:s');
+        $contexto->Usuario=Yii::$app->user->identity->IdUsuario;
+
+
+        if (!$contexto->save()) {
+
+            echo '<pre>';
+
+            print_r($contexto->errors);
+
+            die();
+        }
+
+        $modulo = Modulo::findOne($id);
+
+        return $this->redirect([
+            $modulo->DashboardRoute
         ]);
     }
 

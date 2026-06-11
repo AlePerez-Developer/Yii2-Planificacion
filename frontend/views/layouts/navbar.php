@@ -2,10 +2,10 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+$colorModulo = Yii::$app->userContext->colorModulo();
 ?>
 <!-- Navbar -->
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+<nav class="main-header navbar navbar-expand navbar-white navbar-light" style="background-color: <?= $colorModulo ?> !important;">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -14,27 +14,36 @@ use yii\helpers\Url;
         <li class="nav-item d-none d-sm-inline-block">
             <a href="<?=\yii\helpers\Url::home()?>" class="nav-link">Home</a>
         </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="#" class="nav-link">Contact</a>
-        </li>
-        <li class="nav-item dropdown d-none d-sm-inline-block" id="contexto-poa-dropdown" data-contexto-poa-url="<?= Url::to(['/Planificacion/estado-poa/listar-todo']) ?>">
-            <a href="#" class="nav-link d-flex align-items-center" id="contextoPoaToggle" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                <i class="fas fa-cog me-2"></i>
-                <span>Contexto POA</span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="contextoPoaToggle" id="contextoPoaMenu" style="min-width: 16rem; max-width: 18rem;">
-                <div class="d-flex align-items-center mb-2">
-                    <span class="text-muted text-uppercase fw-semibold small">Contexto POA</span>
-                    <button type="button" class="btn btn-link btn-sm ms-auto text-secondary" id="contextoPoaRefresh" title="Actualizar contexto">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button type="button" class="btn btn-link btn-sm text-secondary" id="contextoPoaClose" title="Cerrar panel">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="text-muted small d-none" id="contextoPoaFeedback"></div>
-                <ul class="list-unstyled mb-0" id="contextoPoaList"></ul>
-            </div>
+
+        <li class="navbar-context">
+
+            <?= Html::dropDownList(
+                    'gestion',
+                    null,
+                    [],
+                    [
+                            'class' => 'form-control form-control-sm'
+                    ]
+            ) ?>
+
+            <?= Html::dropDownList(
+                    'estado',
+                    null,
+                    [],
+                    [
+                            'class' => 'form-control form-control-sm'
+                    ]
+            ) ?>
+
+            <?= Html::dropDownList(
+                    'llave',
+                    null,
+                    [],
+                    [
+                            'class' => 'form-control form-control-sm'
+                    ]
+            ) ?>
+
         </li>
     </ul>
 
@@ -164,6 +173,24 @@ use yii\helpers\Url;
     </ul>
 </nav>
 <!-- /.navbar -->
+
+<style>
+    .navbar-context {
+
+        display: flex;
+
+        gap: 10px;
+
+        margin-left: 20px;
+    }
+
+    .navbar-context select {
+
+        min-width: 180px;
+    }
+</style>
+
+
 <?php
 $this->registerJsFile(
     '@web/js/contexto-poa/ContextoPoaNavbar.js',

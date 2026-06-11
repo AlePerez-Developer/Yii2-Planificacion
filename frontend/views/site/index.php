@@ -18,7 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <a
                     href="<?= Url::to([
-                        $modulo->DashboardRoute
+                            'site/seleccionar-modulo',
+                            'id' => $modulo->IdModulo
                     ]) ?>"
                     class="module-card-link"
             >

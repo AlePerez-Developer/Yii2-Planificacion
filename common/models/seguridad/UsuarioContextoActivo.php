@@ -24,7 +24,7 @@ use common\models\Estado;
  * @property LlavePresupuestaria $idLlavPresupuestaria
  * @property PeiGestion $idGestion
  * @property EstadosPoa $idEstadoPoa
- * @property Modulo $idModulo
+ * @property Modulo $Modulo
  * @property Usuario $idUsuario
  * @property Usuario $usuario
  * @property Estado $codigoEstado
@@ -117,7 +117,7 @@ class UsuarioContextoActivo extends ActiveRecord
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getIdModulo(): ActiveQuery
+    public function getModulo(): ActiveQuery
     {
         return $this->hasOne(Modulo::class, ['IdModulo' => 'IdModulo']);
     }

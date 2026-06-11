@@ -27,7 +27,7 @@ $actions = $this->params['actions']
 ?>
 
 <div class="content-wrapper content-wrapper-pro">
-
+    <?= $this->render('partials/_module_menu') ?>
     <!-- HEADER -->
     <section class="content-header pt-3 pb-2">
 

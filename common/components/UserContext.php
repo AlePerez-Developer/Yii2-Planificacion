@@ -1,24 +1,47 @@
 <?php
+namespace common\components;
 
+use common\models\seguridad\UsuarioContextoActivo;
+use Yii;
+use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\web\User;
 
 class UserContext
 {
-    public static function usuario(): User|IdentityInterface|null
+    public function usuario(): User|IdentityInterface|null
     {
         return Yii::$app->user->identity;
     }
 
-    public static function persona()
+    public function contexto(): array|ActiveRecord|null
     {
-        return self::usuario()->persona;
+        if (Yii::$app->user->isGuest) {
+            return null;
+        }
+
+        return UsuarioContextoActivo::find()
+            ->where([
+                'IdUsuario' => Yii::$app->user->id
+            ])
+            ->one();
     }
 
-    public static function nombreCompleto(): string
+    public function moduloActivo()
     {
-        $p = self::persona();
+        $contexto = $this->contexto();
 
-        return "{$p->Nombres} {$p->Paterno} {$p->Materno}";
+        return $contexto?->modulo;
+    }
+
+    public function colorModulo(): string
+    {
+        $modulo = $this->moduloActivo();
+
+        if (!$modulo) {
+            return '#ffffff';
+        }
+
+        return $modulo->Color ?: '#ffffff';
     }
 }
