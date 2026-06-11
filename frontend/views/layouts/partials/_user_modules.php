@@ -65,7 +65,26 @@ $modulos = Yii::$app->user->identity->getModulosPermitidos();
 
     .sidebar-collapse .module-text {
 
-        display: none;
+        /*display: none;*/
+
+        opacity: 0;
+
+        width: 0;
+
+        overflow: hidden;
+    }
+
+    .sidebar-collapse .main-sidebar:hover .module-text {
+
+        opacity: 1;
+
+        width: auto;
+    }
+
+    .sidebar-modules{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .sidebar-collapse .sidebar-module-item {
