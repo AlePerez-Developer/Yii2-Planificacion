@@ -39,7 +39,6 @@ return [
             'class' => 'common\components\UserContext'
         ],
         'assetManager' => [
-            'linkAssets' => true,
             'bundles' => [
                 'yii\bootstrap4\BootstrapPluginAsset' => [
                     'js'=>[]
