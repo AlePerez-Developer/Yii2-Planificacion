@@ -1,7 +1,6 @@
 <?php
 
 use yii\web\JqueryAsset;
-use yii\helpers\Html;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
@@ -196,7 +195,7 @@ $this->params['breadcrumbs'][] = [
         .badge-result {
             background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
             color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
-            border: 1.5px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
+            border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
             border-radius: 20px;
             padding: 6px 16px;
             font-size: 13px;

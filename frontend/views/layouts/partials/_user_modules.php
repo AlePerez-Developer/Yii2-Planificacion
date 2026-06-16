@@ -49,11 +49,7 @@ $modulos = Yii::$app->user->identity->getModulosPermitidos();
     <?php endforeach; ?>
 
 </div>
-<script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
-</script>
+
 
 <style>
     .module-text {
