@@ -1,0 +1,158 @@
+.acc-footer {
+    display: flex;
+    align-items: center;
+}
+
+
+.kpi-circle{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    background:#64748b;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:14px;
+    animation:kpiFade .6s ease;
+}
+
+.meta-box-left {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.meta-badge{
+    background:#2563eb;
+    color: #fff;
+    border-radius:999px;
+    padding:4px 10px;
+    font-size:13px;
+    font-weight:700;
+}
+.meta-badge-text{
+    font-weight: bold;
+    color: black;
+}
+
+
+.result-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.result-top{
+    display:flex;
+    gap:4px;
+}
+
+.badge-result {
+    background: #ffffff;
+    color: #61942e;
+    border: 1px solid #8DBE5A;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 140px;
+    text-align: center;
+}
+
+.dtic-item-sub{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+
+td.no-padding {
+    padding: 0 !important;
+}
+div.slider {
+    overflow: hidden;
+}
+
+/* ===== TABS ===== */
+
+.tabs-nav{
+    display:flex;
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.tab-btn{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#f1f5f9; !important;
+    font-weight:700;
+}
+
+.tab-btn.active{
+    background:#2563eb; !important;
+    color:#fff; !important;
+}
+
+.nav-tabs .nav-link.active {
+    background:#2563eb; !important;
+    color:#fff; !important;
+}
+
+/* ===== TAB CONTENT ===== */
+
+.tab-pane{ display:none; }
+.tab-pane.active{ display:block; }
+
+/* ===== TABLE ===== */
+
+.table-container{
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+
+.table-scroll{
+    max-height:260px;
+    overflow:auto;
+}
+
+.inputMeta,
+.inputMetaNueva{
+    text-align:center;
+    font-weight:700;
+}
+
+
+
+.fila-nueva{
+    background:#fff7ed;
+}
+
+
+.input-editable-smart {
+    transition: all 0.2s ease;
+    font-weight: bold;
+    outline: none;
+    box-shadow: none !important;
+}
+
+
+.input-editable-smart:not([readonly]) {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+
+
+.input-editable-smart.is-valid {
+    background-color: #d4edda !important;
+    transition: background-color 0.5s;
+}
+
+
+

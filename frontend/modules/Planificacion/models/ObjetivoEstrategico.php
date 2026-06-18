@@ -124,7 +124,7 @@ class ObjetivoEstrategico extends ActiveRecord
         return self::findOne(['IdObjEstrategico' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
-    public static function listAll(string $search = '%%'): ActiveQuery
+    public static function listAll(string $search = "" ): ActiveQuery
     {
         $query = self::find()->alias('O')
             ->select([

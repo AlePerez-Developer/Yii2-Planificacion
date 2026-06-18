@@ -1,3 +1,4 @@
+/*global idObjEstrategico*/
 let dt_indEstrategicoAccion;
 
 $(document).ready(function () {
@@ -13,6 +14,9 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             url: 'index.php?r=Planificacion/indicador-estrategico/listar-todo',
+            data: {
+                'idObjEstrategico':idObjEstrategico
+            },
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
