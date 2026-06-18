@@ -8,6 +8,7 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
+use yii\web\Request;
 
 /**
  * @noinspection PhpUnused
@@ -75,7 +76,8 @@ class IndicadorEstrategicoAccionController extends BaseController
     public function actionListarObjsEstrategicos(): array
     {
         return $this->withTryCatch(function () {
-            $request = $_REQUEST;
+            $request = Yii::$app->request;
+
             $q = $this->getSearchParam($request);
 
             return $this->objetivoEstrategicoService->listarObjEstrategicosS2($q);
@@ -85,12 +87,19 @@ class IndicadorEstrategicoAccionController extends BaseController
 
     }
 
-    private function getSearchParam(array $request)
+    /**
+     * Obtiene el parámetro de búsqueda de Select2
+     * @param Request $request
+     * @return string
+     */
+    private function getSearchParam(Request $request): string
     {
-        $id = Yii::$app->request->post('q');
+        $id = $request->post('q');
+
         if (!$id) {
-            $id = '%%';
+            return '';
         }
+
         return $id;
     }
 }

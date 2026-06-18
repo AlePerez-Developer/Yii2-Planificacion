@@ -68,7 +68,7 @@ class ObjetivoEstrategico extends ActiveRecord
     }
 
     /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
+     * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
      * @used-by rules()
@@ -126,7 +126,7 @@ class ObjetivoEstrategico extends ActiveRecord
 
     public static function listAll(string $search = '%%'): ActiveQuery
     {
-        return self::find()->alias('O')
+        $query = self::find()->alias('O')
             ->select([
                 'O.IdObjEstrategico',
                 'CONCAT(Ae.Codigo,Pe.Codigo,O.Codigo) AS Compuesto',
@@ -148,12 +148,22 @@ class ObjetivoEstrategico extends ActiveRecord
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Ae.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Pe.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andwhere(['like', 'O.Objetivo', $search,false])
+            //->andwhere(['like', 'O.Objetivo', $search,false])
             ->andWhere(['o.IdPei' => Yii::$app->contexto->getPei()]);
+
+        if (!empty($search)) {
+            $query->andWhere([
+                'or',
+                ['like', 'CONCAT(Ae.Codigo, Pe.Codigo, O.Codigo)', $search ],
+                ['like', 'O.Objetivo', $search]
+            ]);
+        }
+
+        return $query;
     }
 
     /**
-     * alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C.
      *
      * @return void
      */
