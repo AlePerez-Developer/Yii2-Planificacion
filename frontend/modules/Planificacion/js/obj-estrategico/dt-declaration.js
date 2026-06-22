@@ -46,31 +46,45 @@ $(document).ready(function () {
                     }
 
                     return `
-                    <div class="dtic-item-main">
-                        Codigo: ${row["Compuesto"]}
+
+                    <div class="dtic-code-container">
+                        <span class="dtic-code-text">Objetivo:  </span>
+                            <div class="dtic-code-badge">
+                                ${row["Compuesto"]}
+                            </div>                                  
                     </div>
+
                     
-                    <div class="dtic-item-sub">
-                        <b>OBJETIVO:</b> ${row["Objetivo"]}
+                    <div class="dtic-item-main">
+                        ${row["Objetivo"]}
                     </div>
                     
                     <div class="dtic-item-sub">
                         <b>PRODUCTO:</b> ${row["Producto"]}
                     </div>
                   
-                    <div class="dtic-item-sub">
-                        <b>Gestión:</b> ${row["pei"]["GestionInicio"]} - ${row["pei"]["GestionFin"]}
+                    <div class="dtic-item-sub2 group-container">
+                        <div class="sub-group-container">
+                            <div class="item-container"> 
+                                <div>AREA</div>
+                                <div>< ${row["areaEstrategica"]["Codigo"]} ></div>
+                            </div>
+                            <div>${row["areaEstrategica"]["Descripcion"]}</div>
+                        </div>
+                        <div class="sub-group-container">
+                            <div class="item-container"> 
+                                <div>POLITICA</div>
+                                <div>< ${row["politicaEstrategica"]["Codigo"]} ></div>
+                            </div>
+                            <div>${row["politicaEstrategica"]["Descripcion"]}</div>
+                        </div>
                     </div>
                     
                     <div class="dtic-item-sub">
-                        <b>Area:</b> ${row["areaEstrategica"]["Codigo"]} - ${row["areaEstrategica"]["Descripcion"]}
-                    </div>
-
-                    <div class="dtic-item-sub">
-                        <b>Politica:</b> ${row["politicaEstrategica"]["Codigo"]} - ${row["politicaEstrategica"]["Descripcion"]}
+                        <b>Gestión:</b> ${row["pei"]["GestionInicio"]} - ${row["pei"]["GestionFin"]}
                     </div>
                     <div class="dtic-item-sub">
-                        <small>${row["Indicador_Descripcion"]} - ${row["Indicador_Formula"]}</small>
+                        <small>(${row["Indicador_Descripcion"]} - ${row["Indicador_Formula"]})</small>
                     </div>                    
                 `;
                 }

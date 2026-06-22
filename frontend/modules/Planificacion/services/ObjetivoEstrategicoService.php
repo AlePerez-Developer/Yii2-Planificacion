@@ -14,8 +14,20 @@ use Yii;
 
 class ObjetivoEstrategicoService
 {
+    private PoliticaEstrategicaService $servicePoliticaEstrategica;
+    private AreaEstrategicaService $serviceAreaEstrategica;
+
+    public function __construct(
+                                AreaEstrategicaService $serviceAreaEstrategica,
+                                PoliticaEstrategicaService $servicePoliticaEstrategica,
+    )
+    {
+        $this->serviceAreaEstrategica = $serviceAreaEstrategica;
+        $this->servicePoliticaEstrategica = $servicePoliticaEstrategica;
+    }
+
     /**
-     * lista un array de Objetivos Estrategicos no eliminados
+     * Lista un array de Objetivos Estrategicos no eliminados
      *
      * @return array of Objetivos
      */
@@ -29,7 +41,7 @@ class ObjetivoEstrategicoService
     }
 
     /**
-     * lista un array de Areas Estrategicas no eliminados
+     * Lista un array de Áreas Estrategicas no eliminados
      * @param string $search
      * @return array of Areas
      */
@@ -43,7 +55,7 @@ class ObjetivoEstrategicoService
     }
 
     /**
-     * obtiene un Objetivo Estrategico en base a un codigo.
+     * Obtiene un Objetivo Estrategico con base en un codigo.
      *
      * @param string $id
      * @return ObjetivoEstrategico|null
@@ -51,6 +63,33 @@ class ObjetivoEstrategicoService
     public  function listarUno(string $id): ?ObjetivoEstrategico
     {
         return ObjetivoEstrategico::listOne($id);
+    }
+
+
+    /**
+     * @param ObjetivoEstrategicoForm $form
+     * @return array ['message' => string, 'data' => string]
+     * @throws Exception
+     * @throws ValidationException
+     */
+    public function validarGuardar(ObjetivoEstrategicoForm $form): array
+    {
+        $this->validarEntidades($form);
+
+        return $this->guardar($form);
+    }
+
+    /**
+     * @throws Exception
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws StaleObjectException
+     */
+    public function validarActualizar(string $id, ObjetivoEstrategicoForm $form): array
+    {
+        $this->validarEntidades($form);
+
+        return $this->actualizar($id, $form);
     }
 
     /**
@@ -155,7 +194,7 @@ class ObjetivoEstrategicoService
     }
 
     /**
-     * Obtiene el modelo segun el codigo enviado.
+     * Obtiene el modelo según el codigo enviado.
      *
      * @param string $id
      * @return array
@@ -177,7 +216,7 @@ class ObjetivoEstrategicoService
 
 
     /**
-     * Obtiene el modelo segun el codigo enviado y valida si existe.
+     * Obtiene el modelo según el codigo enviado y válida si existe.
      *
      * @param string $id
      * @return ObjetivoEstrategico|null
@@ -218,7 +257,7 @@ class ObjetivoEstrategicoService
     }
 
     /**
-     *  Recibe un codigo y verifica si esta en uso.
+     *  Recibe un codigo y verifica si está en uso.
      *
      * @param string $id
      * @param string $idAreaEstrategica
@@ -240,5 +279,22 @@ class ObjetivoEstrategicoService
     public function validarId(string $id): bool
     {
         return ObjEstrategicoDao::validarId($id);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validarEntidades(ObjetivoEstrategicoForm $form): void
+    {
+        $validaciones = [
+            'areaEstrategica' => $this->serviceAreaEstrategica->validarId($form->idAreaEstrategica),
+            'politicaEstrategica' => $this->servicePoliticaEstrategica->validarId($form->idPoliticaEstrategica, $form->idAreaEstrategica),
+        ];
+
+        foreach ($validaciones as $nombre => $valido) {
+            if (!$valido) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], "$nombre inválido", 400);
+            }
+        }
     }
 }

@@ -1,6 +1,9 @@
-let objEstrategico_s2AreaEstrategica = $('#areasEstrategicas')
-let objEstrategico_s2PoliticaEstrategica = $('#politicasEstrategicas')
+let objEstrategico_s2AreaEstrategica
+let objEstrategico_s2PoliticaEstrategica
 $(document).ready(function() {
+
+    objEstrategico_s2AreaEstrategica = $('#areasEstrategicas')
+    objEstrategico_s2PoliticaEstrategica = $('#politicasEstrategicas')
 
     populateS2Areas(objEstrategico_s2AreaEstrategica)
 

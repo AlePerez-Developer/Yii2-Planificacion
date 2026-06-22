@@ -1,18 +1,20 @@
 let urlProgramar
 
-$(document).ready(function(){
-    let idObjEstrategico = '00000000-0000-0000-0000-000000000000'
+$(document).ready(function () {
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idObjEstrategico = ID_EMPTY_GUID
     let baseUrl = "index.php?r=Planificacion/obj-estrategico/"
     let dtEvents = $('#tablaListaObjEstrategicos')
+    let btnToggleForm = $('#btnMostrarCrear');
 
-    function ReiniciarCampos(){
+    function ReiniciarCampos() {
         $('#formObjEstrategico *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formObjEstrategico').trigger("reset");
         objEstrategico_s2PoliticaEstrategica.val(null).trigger('change')
         objEstrategico_s2AreaEstrategica.val(null).trigger('change')
-        idObjEstrategico = '00000000-0000-0000-0000-000000000000'
+        idObjEstrategico = ID_EMPTY_GUID
     }
 
     function mensajeAccion(accion) {
@@ -20,17 +22,26 @@ $(document).ready(function(){
     }
 
     $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
+        btnToggleForm.removeClass('opened').addClass('closed')
         ReiniciarCampos();
         $("#divDatos").hide(500);
         $("#divTabla").show(500);
     });
 
-    objEstrategico_s2AreaEstrategica.change(function () {
+    objEstrategico_s2AreaEstrategica.on('change', async function () {
+        let idAreaEstrategica = $(this).val();
+
         objEstrategico_s2PoliticaEstrategica.val(null).trigger('change');
-        if ($(this).val() !== null) {
+
+        if (idAreaEstrategica) {
+
             objEstrategico_s2PoliticaEstrategica.prop("disabled", false);
-            populateS2Politicas($(this).val(),objEstrategico_s2PoliticaEstrategica,null)
+
+            await populateS2Politicas(
+                idAreaEstrategica,
+                objEstrategico_s2PoliticaEstrategica
+            );
+
         } else {
             objEstrategico_s2PoliticaEstrategica.prop("disabled", true);
         }
@@ -41,9 +52,6 @@ $(document).ready(function(){
         const btnCancel = $('#btnCancelar')
 
         if (!$("#formObjEstrategico").valid()) return;
-
-        const hasCode =  idObjEstrategico !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
 
         const idAreaEstrategica = objEstrategico_s2AreaEstrategica.select2('data')[0].id
         const idPoliticaEstrategica = objEstrategico_s2PoliticaEstrategica.select2('data')[0].id
@@ -62,6 +70,9 @@ $(document).ready(function(){
         datos.append("descripcion", descripcion);
         datos.append("formula", formula);
 
+        const hasCode = idObjEstrategico !== ID_EMPTY_GUID;
+        let accion = hasCode ? 'actualizar' : 'guardar'
+
         try {
             await ajaxPromise({
                 url: baseUrl + accion,
@@ -76,7 +87,7 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on('click', '#refresh', function(){
+    $(document).on('click', '#refresh', function () {
         dt_objEstrategico.ajax.reload();
     })
 
@@ -85,14 +96,14 @@ $(document).ready(function(){
      * CAMBIA EL ESTADO DEL REGISTRO
      * =============================================
      */
-    dtEvents.on('click', '.btn-toggle-estado', async function(){
+    dtEvents.on('click', '.btn-toggle-estado', async function () {
 
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
-        let idObjEstrategico = dt_row["IdObjEstrategico"];
+        let rowId = dt_row["IdObjEstrategico"];
 
         const datos = new FormData();
-        datos.append("idObjEstrategico", idObjEstrategico);
+        datos.append("idObjEstrategico", rowId);
 
         try {
             await ajaxPromise({
@@ -111,13 +122,13 @@ $(document).ready(function(){
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    dtEvents.on('click', '.btn-delete', function(){
+    dtEvents.on('click', '.btn-delete', function () {
         let objectBtn = $(this)
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
-        let idObjEstrategico = dt_row["IdObjEstrategico"];
+        let rowId = dt_row["IdObjEstrategico"];
 
         const datos = new FormData();
-        datos.append("idObjEstrategico", idObjEstrategico);
+        datos.append("idObjEstrategico", rowId);
 
         Swal.fire({
             icon: "warning",
@@ -148,36 +159,39 @@ $(document).ready(function(){
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    dtEvents.on('click', '.btn-edit', async function(){
+    dtEvents.on('click', '.btn-edit', async function () {
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data()
         idObjEstrategico = dt_row["IdObjEstrategico"];
 
         const datos = new FormData();
         datos.append("idObjEstrategico", idObjEstrategico);
-
+        IniciarSpiner(objectBtn);
         try {
             await ajaxPromise({
                 url: baseUrl + "buscar",
                 data: datos,
-                spinnerBtn: objectBtn,
-            }).then((data) => {
+            }).then(async (data) => {
                 let obj = data.data
-                objEstrategico_s2AreaEstrategica.val(obj["IdAreaEstrategica"]).trigger('change')
-                populateS2Politicas(obj["IdAreaEstrategica"],objEstrategico_s2PoliticaEstrategica,obj["IdPoliticaEstrategica"])
+                objEstrategico_s2AreaEstrategica.val(obj["IdAreaEstrategica"]).trigger('change.select2');
+                objEstrategico_s2PoliticaEstrategica.prop("disabled", false);
+                await populateS2Politicas(obj["IdAreaEstrategica"], objEstrategico_s2PoliticaEstrategica, obj["IdPoliticaEstrategica"])
+
                 $("#codigo").val(obj["Codigo"]);
                 $("#objetivo").val(obj["Objetivo"]);
                 $("#producto").val(obj["Producto"]);
                 $("#descripcion").val(obj["Indicador_Descripcion"]);
                 $("#formula").val(obj["Indicador_Formula"]);
+                DetenerSpiner(objectBtn);
                 $("#btnMostrarCrear").trigger('click');
             });
         } catch (err) {
             console.error("Error al procesar:", err);
+            DetenerSpiner(objectBtn);
         }
     });
 
-    dtEvents.on('click', '.btn-programar', async function(){
+    dtEvents.on('click', '.btn-programar', async function () {
         let objectBtn = $(this);
         const dt_row = dt_objEstrategico.row(objectBtn.closest('tr')).data();
         let idObjEstrategico = dt_row["IdObjEstrategico"];
@@ -190,7 +204,7 @@ $(document).ready(function(){
     /**
      * Validacion del form
      */
-    $( "#formObjEstrategico" ).validate( {
+    $("#formObjEstrategico").validate({
         rules: {
             areasEstrategicas: {
                 required: true,
@@ -208,39 +222,39 @@ $(document).ready(function(){
                     type: "post",
                     dataType: "json",
                     data: {
-                        codigo: function() {
+                        codigo: function () {
                             return $('#codigo').val(); // valor actual del campo
                         },
-                        idAreaEstrategica: function (){
+                        idAreaEstrategica: function () {
                             let area = $('#areasEstrategicas').select2('data')
                             return area[0].id
                         },
-                        idPoliticaEstrategica: function (){
+                        idPoliticaEstrategica: function () {
                             let politica = $('#politicasEstrategicas').select2('data')
                             return politica[0].id
                         },
-                        idObjEstrategico: function (){
+                        idObjEstrategico: function () {
                             return idObjEstrategico
                         }
                     }
                 }
             },
-            objetivo:{
+            objetivo: {
                 required: true,
                 minlength: 2,
                 maxlength: 500,
             },
-            producto:{
+            producto: {
                 required: true,
                 minlength: 2,
                 maxlength: 500,
             },
-            descripcion:{
+            descripcion: {
                 required: true,
                 minlength: 2,
                 maxlength: 500,
             },
-            formula:{
+            formula: {
                 required: true,
                 minlength: 2,
                 maxlength: 500,
@@ -284,15 +298,15 @@ $(document).ready(function(){
         },
         errorElement: "div",
 
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
+        errorPlacement: function (error, element) {
+            error.addClass("invalid-feedback");
             error.insertAfter(element);
         },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        highlight: function (element) {
+            $(element).addClass("is-invalid").removeClass("is-valid");
         },
         unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+            $(element).addClass("is-valid").removeClass("is-invalid");
         }
-    } );
+    });
 })

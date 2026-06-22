@@ -109,18 +109,18 @@ function populateS2Areas(select2) {
     });
 }
 
-function populateS2Politicas(idAreaEsteategica, select2, val) {
-    $.ajax({
+function populateS2Politicas(idAreaEsteategica, select2, val = null) {
+    return $.ajax({
         method: "POST",
         dataType: 'json',
-        delay: 100,
         data: {
             idAreaEstrategica: idAreaEsteategica
         },
         cache: true,
         url: 'index.php?r=Planificacion/politica-estrategica/listar-politicas-s2',
+
         success: function(data){
-            select2.empty();
+            select2.html('');
 
             $.each(data["data"], function(index, item) {
                 select2.append(
@@ -131,7 +131,11 @@ function populateS2Politicas(idAreaEsteategica, select2, val) {
                 );
             });
 
-            select2.val(null).trigger('change');
+            if (val) {
+                select2.val(val).trigger('change');
+            } else {
+                select2.val(null).trigger('change');
+            }
         },
         error: function (xhr) {
             const data = JSON.parse(xhr.responseText)

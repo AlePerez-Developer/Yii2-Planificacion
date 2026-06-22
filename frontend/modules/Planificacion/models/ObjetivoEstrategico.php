@@ -148,7 +148,6 @@ class ObjetivoEstrategico extends ActiveRecord
             ->andWhere(['!=', 'P.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Ae.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Pe.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            //->andwhere(['like', 'O.Objetivo', $search,false])
             ->andWhere(['o.IdPei' => Yii::$app->contexto->getPei()]);
 
         if (!empty($search)) {

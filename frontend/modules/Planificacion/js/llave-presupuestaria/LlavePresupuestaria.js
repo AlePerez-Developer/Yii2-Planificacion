@@ -48,12 +48,12 @@ $(document).ready(function () {
                 idPrograma,
                 llavePresupuestaria_s2Actividad
             );
-
         } else {
 
             llavePresupuestaria_s2Proyecto.prop("disabled", true);
             llavePresupuestaria_s2Actividad.prop("disabled", true);
         }
+
     })
 
     $('#da, #ue, #programa, #proyecto, #actividad').change(function() {

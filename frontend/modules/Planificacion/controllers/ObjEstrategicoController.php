@@ -2,14 +2,13 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\services\PoliticaEstrategicaService;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
 use app\modules\Planificacion\formModels\ObjetivoEstrategicoForm;
-use app\modules\Planificacion\services\AreaEstrategicaService;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use Mpdf\MpdfException;
+use yii\web\Request;
 use Mpdf\Mpdf;
 use Yii;
 
@@ -19,18 +18,12 @@ use Yii;
 class ObjEstrategicoController extends BaseController
 {
     private ObjetivoEstrategicoService $service;
-    private PoliticaEstrategicaService $servicePoliticaEstrategica;
-    private AreaEstrategicaService $serviceAreaEstrategica;
 
     public function __construct($id, $module,
                                 ObjetivoEstrategicoService $service,
-                                AreaEstrategicaService $serviceAreaEstrategica,
-                                PoliticaEstrategicaService $servicePoliticaEstrategica,
                                 $config = [])
     {
         $this->service = $service;
-        $this->serviceAreaEstrategica = $serviceAreaEstrategica;
-        $this->servicePoliticaEstrategica = $servicePoliticaEstrategica;
         parent::__construct($id, $module, $config);
     }
 
@@ -88,7 +81,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
+     * Accion para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -99,7 +92,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo para el llenado de Select2.
+     * Accion para listar todos los registros del modelo para el llenado de Select2.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -107,13 +100,16 @@ class ObjEstrategicoController extends BaseController
      */
     public function actionListarObjEstrategicosS2(): array
     {
-        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        return $this->withTryCatch(fn() => $this->service->listarObjEstrategicosS2($search)) ;
+        $request = Yii::$app->request;
+
+        $q = $this->getSearchParam($request);
+
+        return $this->withTryCatch(fn() => $this->service->listarObjEstrategicosS2($q)) ;
     }
 
 
     /**
-     * accion para agregar un nuevo registro.
+     * Accion para agregar un nuevo registro.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -123,19 +119,18 @@ class ObjEstrategicoController extends BaseController
         return $this->withTryCatch(function () {
             $request = Yii::$app->request;
             $form = new ObjetivoEstrategicoForm();
+
             $form->idPei = yii::$app->contexto->getPei();
-            if (!$form->load($request->post(), '') || !$form->validate()
-                || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)
-                || !$this->servicePoliticaEstrategica->validarId($form->idPoliticaEstrategica, $form->idAreaEstrategica)
-            ) {
+
+            if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
-            return $this->service->guardar($form);
+            return $this->service->validarGuardar($form);
         });
     }
 
     /**
-     * accion para actualizar los valores de un registro existente.
+     * Accion para actualizar los valores de un registro existente.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -146,22 +141,21 @@ class ObjEstrategicoController extends BaseController
             $request = Yii::$app->request;
 
             $id = $this->obtenerId();
+
             $form = new ObjetivoEstrategicoForm();
             $form->idPei = yii::$app->contexto->getPei();
 
-            if (!$form->load($request->post(), '') || !$form->validate()
-                || !$this->serviceAreaEstrategica->validarId($form->idAreaEstrategica)
-                || !$this->servicePoliticaEstrategica->validarId($form->idPoliticaEstrategica, $form->idAreaEstrategica))
+            if (!$form->load($request->post(), '') || !$form->validate())
             {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
             }
 
-            return $this->service->actualizar($id,$form);
+            return $this->service->validarActualizar($id,$form);
         });
     }
 
     /**
-     * accion para alternar el estado de un registro V/C.
+     * Accion para alternar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -175,7 +169,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para soft delete de un registro
+     * Accion para soft delete de un registro
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -189,7 +183,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para buscar un registro en especifico
+     * Accion para buscar un registro en específico
      *
      * @return array
      * @noinspection PhpUnused
@@ -203,7 +197,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * obtiene y valida si se recibio el codigo por el request
+     * Obtiene y válida si se recibio el codigo por el request
      *
      * return string
      * @throws ValidationException
@@ -218,7 +212,7 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
-     * accion para verificar un codigo ingresado
+     * Accion para verificar un codigo ingresado
      *
      * @return bool
      * @noinspection PhpUnused
@@ -259,4 +253,22 @@ class ObjEstrategicoController extends BaseController
 
         $mpdf->Output();
     }
+
+    /**
+     * Obtiene el parámetro de búsqueda de Select2
+     * @param Request $request
+     * @return string
+     */
+    private function getSearchParam(Request $request): string
+    {
+        $id = $request->post('q');
+
+        if (!$id) {
+            return '';
+        }
+
+        return $id;
+    }
+
+
 }

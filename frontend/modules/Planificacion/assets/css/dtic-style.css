@@ -44,11 +44,13 @@
 
 /* --- CONTENEDOR DE LA TARJETA DEL FORMULARIO --- */
 .card-dtic-form {
-    border: none !important; /* Quita el borde tosco de Bootstrap */
-    border-radius: 16px !important; /* Bordes suaves como tu contenedor principal */
-    box-shadow: 0 10px 24px 1px rgb(181 181 181) !important; /* Sombra sutil de elevación */
-    overflow: hidden;
     background-color: #ffffff;
+    background:var(--card);
+    border:1px solid var(--shadow-hover);
+    border-radius:22px;
+    box-shadow: 0 10px 24px 1px rgb(211 211 211) !important;
+    overflow:hidden;
+
 }
 
 /* --- CABECERA --- */
@@ -58,8 +60,6 @@
     font-weight: 600 !important;
     font-size: 1.1rem;
     padding: 16px 24px !important;
-    border-bottom: 1px solid #E5E7EB !important;
-    border-top: 1px solid #dcdcdc !important;
 }
 
 .card-dtic-form-body {
@@ -334,8 +334,33 @@
     font-weight:800;
 }
 
+.dtic-code-container{
+    display: flex;
+    align-items:center;
+}
+
+.dtic-code-text{
+    font-size: 1rem !important;
+    font-weight: 800;
+    margin-right: 5px;
+}
+
+.dtic-code-badge {
+    border-radius: 12px;
+    padding: 5px 10px 5px 10px !important;
+    background: #0dcaf0;
+    color: #212529 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700 !important;
+    font-size: 16px;
+    letter-spacing: 3px;
+    animation: kpiFade .6s ease;
+}
+
 .dtic-item-main{
-    font-size:18px;
+    font-size:1rem;
     font-weight:800;
     color:var(--text);
     margin-bottom:5px;
@@ -346,6 +371,7 @@
     color:var(--muted);
     line-height:1.55;
     display: flex;
+    gap: 5px !important;
 }
 
 .dtic-item-sub2{
@@ -428,28 +454,6 @@
     background-color: #ffc9c9;
     box-shadow: 0 6px 16px rgb(214 143 143);
     transform: translateY(-1px);
-}
-
-.btn-programar {
-    border:0;
-    border-radius:999px;
-    min-width:150px;
-    height:42px;
-    padding:0 16px;
-    font-size:12px;
-    font-weight:800;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    transition:.18s;
-    background-color:#ADD8E6;
-    color: #4A5C62     ;
-}
-
-.btn-programar:hover{
-    transform:translateY(-2px);
-    box-shadow:0 10px 18px rgba(0,0,0,.08);
 }
 
 /* ================= FOOTER ================= */
@@ -652,12 +656,43 @@
 
 /*---------varios----------*/
 
-
-
-.select2-selection span {
-    font-size: 13px !important;
-}
-
 .select2-container {
     font-size: 13px !important;
 }
+
+span .select2-selection.select2-selection--single{
+    height: 43px !important;
+    border-radius: 8px !important;
+}
+
+/* Forzar al contenedor del texto a ser una caja posicionada */
+.select2-selection__rendered {
+    position: relative !important;
+    padding-right: 40px !important; /* Espacio para que el texto no pise la 'X' */
+    display: block !important;
+    height: 43px !important;
+    padding-top: 7px;
+}
+
+/* Posicionar la 'X' de forma absoluta respecto al contenedor del texto */
+.select2-selection__clear {
+    position: absolute !important;
+    right: 25px !important; /* Ajusta la distancia desde el borde derecho */
+    top: 50% !important;
+    transform: translateY(-50%) !important; /* Centrado vertical exacto */
+    background: transparent !important; /* Elimina fondos grises */
+    color: #999 !important; /* Color gris suave para la equis */
+    font-size: 22px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    float: none !important;
+}
+
+/* Cambio de color sutil al pasar el mouse por encima */
+.select2-selection__clear:hover {
+    color: #d82022 !important; /* Color rojo o el que prefieras al hacer hover */
+}
+

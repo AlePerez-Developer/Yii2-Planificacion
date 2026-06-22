@@ -1,22 +1,15 @@
 <?php
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
+use app\modules\Planificacion\assets\PlanificacionAsset;
 
-app\modules\Planificacion\assets\PlanificacionAsset::register($this);
-/*
-$this->registerJs("
-     urlProgramar = '" . \yii\helpers\Url::to(['programar-indicadores/index']) . "';
-", \yii\web\View::POS_HEAD);*/
+PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js",[
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/obj-estrategico/s2-declaration.js", [
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
-
-$this->registerJs("
-    urlProgramar = '" . Url::to(['indicador-estrategico-programacion/index']) . "';
-");
 
 $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js", [
     'depends' => [
@@ -24,11 +17,21 @@ $this->registerJsFile("@planificacionModule/js/obj-estrategico/dt-declaration.js
     ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/obj-estrategico/s2-declaration.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/obj-estrategico/ObjEstrategico.js",[
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
+
+$this->registerCssFile("@planificacionModule/css/obj-estrategico/style.css", [
+        'depends' => [
+                PlanificacionAsset::class
+        ]
+]);
+
+$this->registerJs("
+    urlProgramar = '" . Url::to(['indicador-estrategico-programacion/index']) . "';
+");
 
 $this->title = 'Planificación Institucional';
 
@@ -39,46 +42,45 @@ $this->params['icon'] = 'fas fa-clipboard-list';
 $this->params['iconColor'] = 'info';
 
 $this->params['actions'] =
-    '<button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-        <span class="icon closed">
-            <span class="circle" style="margin-right: 4px">
+        '<button id="btnMostrarCrear"  class="btn-crear closed" >
+            <span class="circle">
                 <span class="horizontal"></span>
                 <span class="vertical"></span>
             </span>
-             Nuevo objetivo
-        </span>
-     </button>
+            <span class="btn-text">Nuevo Registro</span>
+        </button>
 
-     <a href="" id="btnReportePdf" class="btn btn-outline-danger btn-sm">
-        <i class="fas fa-file-pdf"></i> Exportar
-     </a>';
+         <button id="btnReportePdf" class="btn-reporte">
+            <i class="fas fa-file-pdf"></i>
+             <span class="btn-text">Exportar</span>
+         </button>';
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ Objetivos estrategicos institucionales',
+    'label' => '/ Obj. Estrategicos institucionales',
 ];
 ?>
 <div class="card ">
+
     <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 80rem;">
-                <div class="card-header bg-gradient-primary">Ingreso Datos</div>
-                <div class="card-body">
+            <div class="card-dtic-form" style="width: 120rem;">
+                <div class="card-header card-dtic-form-header">Ingreso Datos</div>
+                <div class="card-body card-dtic-form-body">
                     <form id="formObjEstrategico" action="" method="post">
-
-                        <div class="row mb-3">
+                        <div class="row mb-3" style="display: flex; align-items: flex-start !important;" >
                             <div class="col-4">
-                                <label for="areasEstrategicas" class="lblTitulo">Seleccione una Area Estrategica</label>
-                                <select id="areasEstrategicas" name="areasEstrategicas" class="form-control codigo_group">
+                                <label for="areasEstrategicas" class="lblTitulo">Seleccione una Área Estrategica</label>
+                                <select id="areasEstrategicas" name="areasEstrategicas" class="form-control codigo_group dtic-input">
                                 </select>
                             </div>
                             <div class="col-4">
                                 <label for="politicasEstrategicas" class="lblTitulo">Seleccione una Politica Estrategica</label>
-                                <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control codigo_group">
+                                <select id="politicasEstrategicas" name="politicasEstrategicas" class="form-control codigo_group dtic-input">
                                 </select>
                             </div>
                             <div class="col-4">
                                 <label for="codigo">Codigo de Objetivo Estrategico (OE)</label>
-                                <input type="text" class="form-control input-sm num codigo_group" id="codigo" name="codigo" maxlength="1"  placeholder="Codigo" style="width: 100px"  >
+                                <input type="text" class="form-control input-sm num codigo_group dtic-input" id="codigo" name="codigo" maxlength="1"  placeholder="Codigo">
                             </div>
                         </div>
 
@@ -86,13 +88,13 @@ $this->params['breadcrumbs'][] = [
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="objetivo" class="control-label">Descripcion del objetivo estrategico</label>
-                                    <textarea class="form-control input-sm txt" id="objetivo" name="objetivo" rows="3" placeholder="Descripcion del objetivo estrategico"></textarea>
+                                    <textarea class="form-control input-sm dtic-input txt" id="objetivo" name="objetivo" rows="3" placeholder="Descripcion del objetivo estrategico"></textarea>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
                                     <label for="producto" class="control-label">Resultado/Producto esperado</label>
-                                    <textarea class="form-control input-sm txt" id="producto" name="producto" rows="3" placeholder="Resultado/Producto esperado"></textarea>
+                                    <textarea class="form-control input-sm dtic-input txt" id="producto" name="producto" rows="3" placeholder="Resultado/Producto esperado"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -103,21 +105,20 @@ $this->params['breadcrumbs'][] = [
                                 <div class="row">
                                     <div class="col-6">
                                         <label for="descripcion" class="control-label">Descripcion</label>
-                                        <textarea class="form-control input-sm txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
+                                        <textarea class="form-control input-sm dtic-input txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
                                     </div>
                                     <div class="col-6">
                                         <label for="formula" class="control-label">Formula</label>
-                                        <textarea class="form-control input-sm txt" id="formula" name="formula" rows="3" placeholder="Formula del indicador"></textarea>
+                                        <textarea class="form-control input-sm dtic-input txt" id="formula" name="formula" rows="3" placeholder="Formula del indicador"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </form>
                 </div>
-                <div class="card-footer text-center">
-                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
-                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><span class='fa fa-times-circle'></span> Cancelar </button>
+                <div class="card-footer card-dtic-form-footer">
+                    <button id="btnGuardar" name="btnGuardar" class='btn-guardar'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn-cancel'><span class='fa fa-times-circle'></span> Cancelar </button>
                 </div>
             </div>
         </div>
@@ -125,23 +126,20 @@ $this->params['breadcrumbs'][] = [
 
     <div id="divTabla" class="card-body">
         <div class="card-dtic-style">
-
             <div class="card-dtic-style-header">
                 <div class="card-dtic-style-title">
                     Objetivos Estratégicos Institucionales
                 </div>
             </div>
-
             <div id="dticTableLoading" class="p-4">
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
             </div>
-
             <div class="p-2" id="dticTableContainer" style="display:none;">
                 <table id="tablaListaObjEstrategicos" class="table w-100 dtic-table"></table>
             </div>
-
         </div>
     </div>
+
 </div>
