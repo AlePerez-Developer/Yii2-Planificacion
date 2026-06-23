@@ -1,8 +1,45 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+
+$contexto = Yii::$app->userContext->contexto();
 $colorModulo = Yii::$app->userContext->colorModulo();
+$moduloActivo = Yii::$app->userContext->moduloActivo();
+$usuario = Yii::$app->user->identity;
+
+$dashboardUrl = ['site/index'];
+
+$gestiones = [];
+$estadosPoa = [];
+$llaves = [];
+
+if ($moduloActivo) {
+    $dashboardUrl = [$moduloActivo->DashboardRoute];
+
+    $gestiones = ArrayHelper::map(
+            Yii::$app->user->identity->getGestionesPermitidas(),
+            'IdGestion',
+            'Gestion'
+    );
+
+    if ($contexto?->IdGestion) {
+        $estadosPoa = ArrayHelper::map(
+                $usuario->getEstadosPoaPermitidos($contexto->IdGestion),
+                'IdEstadoPoa',
+                'Codigo'
+        );
+    }
+
+    if ($contexto?->IdGestion && $contexto?->IdEstadoPoa) {
+        $llaves = ArrayHelper::map(
+                $usuario->getLlavesPermitidas($contexto->IdGestion, $contexto->IdEstadoPoa),
+                'IdLlavePresupuestaria',
+                'Llave'
+        );
+    }
+}
 ?>
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="background-color: <?= $colorModulo ?> !important;">
@@ -11,38 +48,78 @@ $colorModulo = Yii::$app->userContext->colorModulo();
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="<?=\yii\helpers\Url::home()?>" class="nav-link">Home</a>
+        <li class="nav-item">
+            <?= Html::a(
+                    'Dashboard',
+                    $dashboardUrl,
+                    ['class' => 'nav-link']
+            ) ?>
         </li>
 
         <li class="navbar-context">
 
-            <?= Html::dropDownList(
-                    'gestion',
-                    null,
-                    [],
-                    [
-                            'class' => 'form-control form-control-sm'
-                    ]
-            ) ?>
 
-            <?= Html::dropDownList(
-                    'estado',
-                    null,
-                    [],
-                    [
-                            'class' => 'form-control form-control-sm'
-                    ]
-            ) ?>
+            <?php if ($moduloActivo): ?>
 
-            <?= Html::dropDownList(
-                    'llave',
-                    null,
-                    [],
-                    [
-                            'class' => 'form-control form-control-sm'
-                    ]
-            ) ?>
+                <div class="navbar-context">
+
+                    <div class="context-field">
+                        <label>Gestión</label>
+                        <?= Html::dropDownList(
+                                'IdGestion',
+                                Yii::$app->userContext->contexto()?->IdGestion,
+                                $gestiones,
+                                [
+                                        'class' => 'form-control form-control-sm context-select',
+                                        'prompt' => 'Seleccione',
+                                        'id' => 'select-gestion',
+                                        'onchange' => "if(this.value){ window.location.href='" . Url::to(['/site/cambiar-gestion']) . "&id=' + this.value; }",
+                                ]
+                        ) ?>
+                    </div>
+
+                    <div class="context-field">
+                        <label>Estado POA</label>
+                        <?= Html::dropDownList(
+                                'IdEstadoPoa',
+                                $contexto?->IdEstadoPoa,
+                                $estadosPoa,
+                                [
+                                        'class' => 'form-control form-control-sm context-select',
+                                        'prompt' => 'Seleccione',
+                                        'id' => 'select-estado-poa',
+                                        'disabled' => empty($contexto?->IdGestion),
+                                        'onchange' => "if(this.value){ window.location.href='" . Url::to(['/site/cambiar-estado-poa']) . "&id=' + this.value; }",
+                                ]
+                        ) ?>
+                    </div>
+
+                    <div class="context-field context-field-lg">
+                        <label>Llave Presupuestaria</label>
+                        <?= Html::dropDownList(
+                                'IdLlavePresupuestaria',
+                                $contexto?->IdLlavePresupuestaria,
+                                $llaves,
+                                [
+                                        'class' => 'form-control form-control-sm context-select',
+                                        'prompt' => 'Seleccione',
+                                        'id' => 'select-llave',
+                                        'disabled' => empty($contexto?->IdGestion) || empty($contexto?->IdEstadoPoa),
+                                        'onchange' => "if(this.value){ window.location.href='" . Url::to(['/site/cambiar-llave']) . "&id=' + this.value; }",
+                                ]
+                        ) ?>
+                    </div>
+
+                </div>
+
+            <?php else: ?>
+
+                <div class="navbar-no-module">
+                    <i class="fas fa-info-circle"></i>
+                    Seleccione un módulo para comenzar
+                </div>
+
+            <?php endif; ?>
 
         </li>
     </ul>
@@ -243,3 +320,64 @@ $this->registerCss('
     }
 ');
 ?>
+
+<style>
+    .navbar-no-module {
+
+
+
+        margin-left: 20px;
+
+        font-size: 14px;
+
+        font-weight: 500;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+    }
+
+    .navbar-context {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: 20px;
+    }
+
+    .context-field {
+        display: flex;
+        flex-direction: column;
+        min-width: 180px;
+    }
+
+    .context-field-lg {
+        min-width: 310px;
+    }
+
+    .context-field label {
+        color: rgba(255,255,255,.9);
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        line-height: 1;
+    }
+
+    .context-select {
+        height: 30px;
+        border-radius: 7px;
+        border: 1px solid rgba(255,255,255,.35);
+        font-size: 13px;
+    }
+
+    .navbar-no-module {
+        color: #ffffff;
+        margin-left: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>

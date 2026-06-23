@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use common\models\Estado;
@@ -32,10 +33,15 @@ class SiteController extends Controller
                     [
                         'actions' => ['portal-login', 'usuario-invalido', 'error'],
                         'allow' => true,
-                        'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'log-out', 'about', 'seleccionar-modulo'],
+                        'actions' => ['index',
+                            'logout',
+                            'about',
+                            'seleccionar-modulo',
+                            'cambiar-gestion',
+                            'cambiar-estado-poa',
+                            'cambiar-llave'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -44,7 +50,7 @@ class SiteController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'log-out' => ['post'],
+                    'logout' => ['post'],
                 ],
             ],
         ];
@@ -74,7 +80,7 @@ class SiteController extends Controller
      * @return Response
      * @noinspection PhpUnused
      */
-    public function actionPortalLogin(string $cu = null ): Response
+    public function actionPortalLogin(string $cu = null): Response
     {
         if (!$cu) {
             return $this->redirect(['site/usuario-invalido']);
@@ -88,9 +94,15 @@ class SiteController extends Controller
             return $this->redirect(['site/usuario-invalido']);
         }
 
-        /** @noinspection PhpParamsInspection */
-        Yii::$app->user->login($usuario, 1800);
+        if (!Yii::$app->user->isGuest) {
+            Yii::$app->user->logout(false);
+        }
 
+        UsuarioContextoActivo::deleteAll([
+            'IdUsuario' => $usuario->IdUsuario
+        ]);
+
+        Yii::$app->user->login($usuario, 1800);
         Yii::$app->session->regenerateID(true);
 
         return $this->redirect(['site/index']);
@@ -101,7 +113,7 @@ class SiteController extends Controller
      *
      * @return string
      * @noinspection PhpUnused
-    */
+     */
     public function actionUsuarioInvalido(): string
     {
         $this->layout = 'public';
@@ -155,8 +167,8 @@ class SiteController extends Controller
 
         $contexto->IdModulo = $id;
         $contexto->CodigoEstado = Estado::ESTADO_VIGENTE;
-        $contexto->FechaHoraActualizacion = date('Y-m-d H:i:s');
-        $contexto->Usuario=Yii::$app->user->identity->IdUsuario;
+        $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
+        $contexto->Usuario = Yii::$app->user->identity->IdUsuario;
 
 
         if (!$contexto->save()) {
@@ -173,6 +185,74 @@ class SiteController extends Controller
         return $this->redirect([
             $modulo->DashboardRoute
         ]);
+    }
+
+    public function actionCambiarGestion($id): Response
+    {
+
+        $contexto = UsuarioContextoActivo::findOne([
+            'IdUsuario' => Yii::$app->user->id
+        ]);
+
+        if ($contexto) {
+            $contexto->IdGestion = $id;
+            $contexto->IdEstadoPoa = null;
+            $contexto->IdLlavePresupuestaria = null;
+            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
+            //$contexto->save(false);
+            if (!$contexto->save()) {
+
+                echo '<pre>';
+
+                print_r($contexto->errors);
+
+                die();
+            }
+        }
+
+        return $this->redirectDashboardModulo();
+    }
+
+    public function actionCambiarEstadoPoa($id): Response
+    {
+        $contexto = UsuarioContextoActivo::findOne([
+            'IdUsuario' => Yii::$app->user->id
+        ]);
+
+        if ($contexto) {
+            $contexto->IdEstadoPoa = $id;
+            $contexto->IdLlavePresupuestaria = null;
+            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
+            $contexto->save(false);
+        }
+
+        return $this->redirectDashboardModulo();
+    }
+
+    public function actionCambiarLlave($id): Response
+    {
+        $contexto = UsuarioContextoActivo::findOne([
+            'IdUsuario' => Yii::$app->user->id
+        ]);
+
+        if ($contexto) {
+            $contexto->IdLlavePresupuestaria = $id;
+            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
+            $contexto->save(false);
+        }
+
+        return $this->redirectDashboardModulo();
+    }
+
+    private function redirectDashboardModulo(): Response
+    {
+        $modulo = Yii::$app->userContext->moduloActivo();
+
+        if (!$modulo) {
+            return $this->redirect(['site/index']);
+        }
+
+        return $this->redirect([$modulo->DashboardRoute]);
     }
 
 

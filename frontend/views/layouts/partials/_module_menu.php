@@ -1,5 +1,7 @@
 <?php
 
+use yii\helpers\Url;
+
 $modulo = Yii::$app->userContext->moduloActivo();
 
 if (!$modulo) {
@@ -14,7 +16,7 @@ $menus = $modulo->menus;
 
     <?php foreach ($menus as $menu): ?>
 
-        <a href="<?= \yii\helpers\Url::to([$menu->Ruta]) ?>">
+        <a href="<?= Url::to([$menu->Ruta]) ?>">
 
             <?= $menu->Nombre ?>
 

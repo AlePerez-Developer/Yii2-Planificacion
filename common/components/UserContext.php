@@ -44,4 +44,19 @@ class UserContext
 
         return $modulo->Color ?: '#ffffff';
     }
+
+    public function gestionActiva()
+    {
+        return $this->contexto()?->gestion;
+    }
+
+    public function estadoPoaActivo()
+    {
+        return $this->contexto()?->estadoPoa;
+    }
+
+    public function llaveActiva()
+    {
+        return $this->contexto()?->llavePresupuestaria;
+    }
 }

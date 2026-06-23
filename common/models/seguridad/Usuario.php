@@ -1,7 +1,10 @@
 <?php
 
 namespace common\models\seguridad;
-
+use common\models\seguridad\EstadosPoa;
+use app\modules\Planificacion\models\LlavePresupuestaria;
+use app\modules\Planificacion\models\PeiGestion;
+use common\models\Estado;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use common\models\Persona;
@@ -96,6 +99,60 @@ class Usuario extends ActiveRecord implements IdentityInterface
         return Modulo::find()
             ->where(['CodigoEstado' => 'V'])
             ->orderBy('Orden')
+            ->all();
+    }
+
+    public function getGestionesPermitidas()
+    {
+        return PeiGestion::find()
+            ->alias('g')
+            ->innerJoin(
+                'seguridad.UsuarioDaGestionEstado uge',
+                'uge.IdGestion = g.IdGestion'
+            )
+            ->where([
+                'uge.IdUsuario' => $this->IdUsuario,
+                'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'g.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->orderBy(['g.Gestion' => SORT_DESC])
+            ->all();
+    }
+
+    public function getEstadosPoaPermitidos($idGestion)
+    {
+        return EstadosPoa::find()
+            ->alias('e')
+            ->innerJoin(
+                'seguridad.UsuarioDaGestionEstado uge',
+                'uge.IdEstadoPoa = e.IdEstadoPoa'
+            )
+            ->where([
+                'uge.IdUsuario' => $this->IdUsuario,
+                'uge.IdGestion' => $idGestion,
+                'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'e.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->orderBy(['e.Codigo' => SORT_ASC])
+            ->all();
+    }
+
+    public function getLlavesPermitidas($idGestion, $idEstadoPoa)
+    {
+        return LlavePresupuestaria::find()
+            ->alias('l')
+            ->innerJoin(
+                'seguridad.UsuarioDaGestionEstado uge',
+                'uge.IdDa = l.IdDa'
+            )
+            ->where([
+                'uge.IdUsuario' => $this->IdUsuario,
+                'uge.IdGestion' => $idGestion,
+                'uge.IdEstadoPoa' => $idEstadoPoa,
+                'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'l.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->orderBy(['l.Llave' => SORT_ASC])
             ->all();
     }
 

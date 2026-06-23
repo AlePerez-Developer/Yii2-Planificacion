@@ -1,139 +1,77 @@
 <?php
 
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 $moduloActivo = Yii::$app->userContext->moduloActivo();
-
+$contexto = Yii::$app->userContext->contexto();
 $modulos = Yii::$app->user->identity->getModulosPermitidos();
 
-
-
-
+$colorModulo = $moduloActivo?->Color ?? '#6c757d';
 ?>
 
 <div class="sidebar-modules">
 
     <div class="sidebar-section-title">
-        MODULOS
+        MÓDULOS
     </div>
 
     <?php foreach ($modulos as $modulo): ?>
 
         <?php
-        $activo =
-                $moduloActivo &&
-                $moduloActivo->IdModulo === $modulo->IdModulo;
+        $activo = $moduloActivo && strtoupper($moduloActivo->IdModulo) === strtoupper($modulo->IdModulo);
         ?>
 
         <a
-            href="<?= Url::to([
-                    '/site/seleccionar-modulo',
-                    'id' => $modulo->IdModulo
-            ]) ?>"
-            class="sidebar-module-item <?= $activo ? 'active' : '' ?>"
-            data-toggle="tooltip"
-            title="<?= $modulo->Nombre ?>"
-            style="<?= $activo
-                    ? 'border-left:4px solid ' . $modulo->Color
-                    : '' ?>"
+                href="<?= Url::to(['/site/seleccionar-modulo', 'id' => $modulo->IdModulo]) ?>"
+                class="sidebar-module-item <?= $activo ? 'active' : '' ?>"
+                title="<?= Html::encode($modulo->Nombre) ?>"
+                data-toggle="tooltip"
+                style="<?= $activo ? 'border-left-color:' . Html::encode($modulo->Color) : '' ?>"
         >
-
-            <i class="<?= $modulo->Icono ?>"></i>
+            <i class="<?= Html::encode($modulo->Icono) ?>"></i>
 
             <span class="module-text">
-                <?= $modulo->Nombre ?>
+                <?= Html::encode($modulo->Nombre) ?>
             </span>
-
         </a>
 
     <?php endforeach; ?>
 
+    <?php if ($contexto && $contexto->IdGestion): ?>
+
+        <div
+                class="sidebar-context"
+                style="border-left-color: <?= Html::encode($colorModulo) ?>"
+        >
+
+            <div class="sidebar-context-title">
+                Contexto activo
+            </div>
+
+            <div class="context-row">
+                <span class="context-label">Gestión</span>
+                <span class="context-value">
+                    <?= Html::encode($contexto->gestion?->Gestion ?? '-') ?>
+                </span>
+            </div>
+
+            <div class="context-row">
+                <span class="context-label">Estado POA</span>
+                <span class="context-value">
+                    <?= Html::encode($contexto->estadoPoa?->Codigo ?? '-') ?>
+                </span>
+            </div>
+
+            <div class="context-row">
+                <span class="context-label">Llave</span>
+                <span class="context-value context-value-llave">
+                    <?= Html::encode($contexto->llavePresupuestaria?->Llave ?? '-') ?>
+                </span>
+            </div>
+
+        </div>
+
+    <?php endif; ?>
+
 </div>
-
-
-<style>
-    .module-text {
-
-        margin-left: 8px;
-
-        transition: all .3s ease;
-    }
-
-    .sidebar-collapse .module-text {
-
-        /*display: none;*/
-
-        opacity: 0;
-
-        width: 0;
-
-        overflow: hidden;
-    }
-
-    .sidebar-collapse .main-sidebar:hover .module-text {
-
-        opacity: 1;
-
-        width: auto;
-    }
-
-    .sidebar-modules{
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .sidebar-collapse .sidebar-module-item {
-
-        display: flex;
-
-        justify-content: center;
-
-        align-items: center;
-    }
-
-    .sidebar-collapse .sidebar-section-title {
-
-        display: none;
-    }
-
-    .sidebar-section-title {
-
-        color: #bfc9d4;
-
-        font-size: 11px;
-
-        letter-spacing: 1px;
-
-        margin: 20px 15px 10px;
-
-        font-weight: bold;
-    }
-
-    .sidebar-module-item {
-
-        display: block;
-
-        color: #ffffff;
-
-        padding: 10px 15px;
-
-        text-decoration: none;
-
-        transition: .2s;
-    }
-
-    .sidebar-module-item:hover {
-
-        background: rgba(255, 255, 255, .08);
-
-        color: #ffffff;
-    }
-
-    .sidebar-module-item.active {
-
-        background: rgba(255, 255, 255, .08);
-
-        font-weight: 600;
-    }
-</style>

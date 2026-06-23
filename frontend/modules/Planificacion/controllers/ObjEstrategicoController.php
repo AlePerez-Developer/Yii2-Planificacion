@@ -199,7 +199,7 @@ class ObjEstrategicoController extends BaseController
     /**
      * Obtiene y válida si se recibio el codigo por el request
      *
-     * return string
+     * @return string
      * @throws ValidationException
      */
     private function obtenerId(): string

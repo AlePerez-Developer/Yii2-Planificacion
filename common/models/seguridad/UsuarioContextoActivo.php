@@ -21,9 +21,9 @@ use common\models\Estado;
  * @property string $FechaHoraRegistro
  * @property string $Usuario
  *
- * @property LlavePresupuestaria $idLlavPresupuestaria
- * @property PeiGestion $idGestion
- * @property EstadosPoa $idEstadoPoa
+ * @property LlavePresupuestaria $LlavPresupuestaria
+ * @property PeiGestion $Gestion
+ * @property EstadosPoa $EstadoPoa
  * @property Modulo $Modulo
  * @property Usuario $idUsuario
  * @property Usuario $usuario
@@ -84,7 +84,7 @@ class UsuarioContextoActivo extends ActiveRecord
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getIdLlavePresupuestaria(): ActiveQuery
+    public function getLlavePresupuestaria(): ActiveQuery
     {
         return $this->hasOne(LlavePresupuestaria::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
     }
@@ -95,7 +95,7 @@ class UsuarioContextoActivo extends ActiveRecord
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getIdGestion(): ActiveQuery
+    public function getGestion(): ActiveQuery
     {
         return $this->hasOne(PeiGestion::class, ['IdGestion' => 'IdGestion']);
     }
@@ -106,7 +106,7 @@ class UsuarioContextoActivo extends ActiveRecord
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getIdEstadoPoa(): ActiveQuery
+    public function getEstadoPoa(): ActiveQuery
     {
         return $this->hasOne(EstadosPoa::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
     }
