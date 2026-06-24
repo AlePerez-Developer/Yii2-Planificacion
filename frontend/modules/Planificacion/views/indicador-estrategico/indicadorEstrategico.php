@@ -1,8 +1,9 @@
 <?php
 
+use app\modules\Planificacion\assets\PlanificacionAsset;
 use yii\web\JqueryAsset;
 
-app\modules\Planificacion\assets\PlanificacionAsset::register($this);
+PlanificacionAsset::register($this);
 
 
 $this->registerJsFile("@planificacionModule/js/indicador-estrategico/dt-declaration.js", [
@@ -20,6 +21,12 @@ $this->registerJsFile("@planificacionModule/js/indicador-estrategico/s2-declarat
 $this->registerJsFile("@planificacionModule/js/indicador-estrategico/IndicadorEstrategico.js", [
         'depends' => [
                 JqueryAsset::class
+        ]
+]);
+
+$this->registerCssFile("@planificacionModule/css/indicador-estrategico/style.css", [
+        'depends' => [
+                PlanificacionAsset::class
         ]
 ]);
 
@@ -52,11 +59,13 @@ $this->params['breadcrumbs'][] = [
 ?>
 
 <div class="card ">
+
     <div id="divDatos" class="card-body" style="display: none">
         <div class="col d-flex justify-content-center">
-            <div class="card card-dtic-form" style="width: 120rem;">
+            <div class="card-dtic-form" style="width: 120rem;">
                 <div class="card-header card-dtic-form-header">Ingreso Datos</div>
                 <div class="card-body card-dtic-form-body">
+
                     <form id="formIndicadorEstrategico" action="" method="post">
                         <div class="row">
                             <div class="col-12">
@@ -144,6 +153,7 @@ $this->params['breadcrumbs'][] = [
                         </div>
 
                     </form>
+
                 </div>
                 <div class="card-footer card-dtic-form-footer">
                     <button id="btnGuardar" name="btnGuardar" class='btn-guardar'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
@@ -175,37 +185,3 @@ $this->params['breadcrumbs'][] = [
         </div>
     </div>
 </div>
-
-    <style>
-
-        .kpi-circle {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: #64748b;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 14px;
-            animation: kpiFade .6s ease;
-        }
-
-        .badge-result {
-            background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
-            color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
-            border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            width: 140px;
-            text-align: center;
-        }
-
-
-    </style>
-
-
-<?php include_once "modalProgramarGestion.php"; ?>

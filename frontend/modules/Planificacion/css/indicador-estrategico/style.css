@@ -1,0 +1,20 @@
+.group-container{
+    gap: 5px !important;
+}
+
+.sub-group-container{
+    gap: 5px !important;
+    padding: 5px !important;
+}
+
+.badge-result {
+    background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
+    color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
+    border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    width: 120px;
+    text-align: center;
+}

@@ -135,9 +135,11 @@ class IndicadorEstrategico extends ActiveRecord
                 'I.Meta',
                 'I.Descripcion',
                 'I.LineaBase',
+                'I.AccionDescripcion',
                 'C.IdCategoriaIndicador',
                 'T.IdTipoResultado',
                 'U.IdUnidadIndicador',
+                'Ac.IdAccionEstrategica',
                 'I.CodigoEstado',
                 'I.CodigoUsuario',
             ])
@@ -147,6 +149,7 @@ class IndicadorEstrategico extends ActiveRecord
             ->joinWith('catCategoriasIndicadores C', true, 'INNER JOIN')
             ->joinWith('catTiposResultados T', true, 'INNER JOIN')
             ->joinWith('catUnidadesIndicadores U', true, 'INNER JOIN')
+            ->joinWith('accionesEstrategicas Ac', true, 'INNER JOIN')
             ->where(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])

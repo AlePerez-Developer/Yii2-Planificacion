@@ -1,6 +1,6 @@
 let dt_indEstrategico;
-
 $(document).ready(function () {
+
     dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
         initComplete: function () {
             $("div.dt-search").append(`
@@ -26,6 +26,7 @@ $(document).ready(function () {
                 dt_indEstrategico.processing(false);
             }
         },
+
         columns: [
             {
                 data: "CodigoUsuario",
@@ -40,18 +41,17 @@ $(document).ready(function () {
             {data: "Codigo", visible:false},
             {
                 data: null,
-                className: 'expandible',
                 render: function (data, type, row) {
                     if (type !== "display") {
                         return row["Descripcion"];
                     }
 
                     return `
-                        <div style="display: flex;align-items:center;">
-                            <span class="dtic-item-main mr-2">Indicador N° </span>
-                                <div class="kpi-circle">
-                                    ${row["Codigo"]}
-                                </div>                                
+                        <div class="dtic-code-container">
+                            <span class="dtic-code-text">Indicador N°</span>
+                            <div class="dtic-code-badge">
+                                ${row["Codigo"]}
+                            </div>                                  
                         </div>
                         
                         <div class="dtic-item-main">
@@ -59,17 +59,31 @@ $(document).ready(function () {
                         </div>
                         
                         <div class="dtic-item-sub">
-                            accion estrategica desde ${row["LineaBase"]} hasta ${row["Meta"]} 
+                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["AccionDescripcion"]} ${row["Meta"]}  
                         </div>
                         
-                        <div class="dtic-item-sub2 mt-2" style="display: flex; gap: 6px; border: 1px solid; padding: 5px; border-radius: 16px">
-                            <span style="font-weight: bold">Objetivo:</span> <span> ${row["objetivosEstrategicos"]["Objetivo"]} </span>  
-                            <span style="font-weight: bold">Producto:</span> <span> ${row["objetivosEstrategicos"]["Producto"]} </span>  
+                        <div class="dtic-item-sub2 group-container">
+                            <div class="sub-group-container">
+                                <div class="item-container"> 
+                                    <div>Objetivo</div>
+                                </div>
+                                <div>${row["objetivosEstrategicos"]["Objetivo"]}</div>
+                            </div>
+                            <div class="sub-group-container">
+                                <div class="item-container"> 
+                                    <div>Producto</div>
+                                </div>
+                                <div>${row["objetivosEstrategicos"]["Producto"]}</div>
+                            </div>
                         </div>
-                        <div class="dtic-item-sub2 mt-2" style="display: flex; gap: 6px; border: 1px solid; padding: 5px; border-radius: 16px">
-                            <span style="font-weight: bold">Ind-Descripcion:</span> <span> ${row["objetivosEstrategicos"]["Indicador_Descripcion"]} </span>  
-                            <span style="font-weight: bold">Formula:</span> <span> ${row["objetivosEstrategicos"]["Indicador_Formula"]} </span>  
+                                               
+                        <div class="dtic-item-sub2">
+                            <small><b>Ind-Descripcion:</b> ${row["objetivosEstrategicos"]["Indicador_Descripcion"]}</small>
                         </div>
+                        <div class="dtic-item-sub2">
+                            <small><b>Formula:</b> ${row["objetivosEstrategicos"]["Indicador_Formula"]}</small>
+                        </div>
+
                         
                         <div class="acc-footer mt-2" style="display: flex; gap: 10px">
                             <span class="badge-result">${row["catUnidadesIndicadores"]["Descripcion"]}</span>

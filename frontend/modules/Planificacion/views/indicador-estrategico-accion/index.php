@@ -45,9 +45,6 @@ $this->params['breadcrumbs'][] = [
 ?>
 <div class="card ">
 
-
-
-
     <div  class="card-body">
         <div class="card-dtic-style">
             <div class="card-dtic-style-header">

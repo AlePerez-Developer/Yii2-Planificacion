@@ -12,7 +12,6 @@ $(document).ready(function () {
             $("#dticTableLoading").hide();
             $("#dticTableContainer").fadeIn(250);
         },
-
         ajax: {
             method: "POST",
             dataType: 'json',
@@ -34,6 +33,7 @@ $(document).ready(function () {
                 className: "text-center",
                 width: "60px",
                 orderable: false,
+                searchable: false,
                 render: function (data) {
                     return `<div class="badge-codigo">${data}</div>`;
                 }
