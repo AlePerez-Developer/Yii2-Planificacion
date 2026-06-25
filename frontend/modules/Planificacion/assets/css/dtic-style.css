@@ -681,11 +681,6 @@
     font-size: 13px !important;
 }
 
-span .select2-selection.select2-selection--single{
-    height: 43px !important;
-    border-radius: 8px !important;
-}
-
 /* Forzar al contenedor del texto a ser una caja posicionada */
 .select2-selection__rendered {
     position: relative !important;

@@ -1,57 +1,57 @@
+let indicadorEstrategicoAccion_s2ObjEstrategico = $('#idObjEstrategico')
 $(document).ready(function () {
-    $('#idObjEstrategico').select2({
+        indicadorEstrategicoAccion_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
         placeholder: "Selecciones un objetivo estrategico",
         allowClear: true,
-        ajax: {
-            type: "POST",
-            url: "index.php?r=Planificacion/indicador-estrategico-accion/listar-objs-estrategicos",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                    q: params.term, // search term
-                    page: params.page
-                };
-            },
-            processResults: function (response) {
-                if (response.success && response.data) {
-                    let dataArray = Array.isArray(response.data) ? response.data : [response.data];
+        templateResult: select2ObjHtmlFormat,
+        templateSelection: select2ObjHtmlFormat,
+        matcher: select2ObjMatchSearch
+    });
 
-                    return {
-                        results: $.map(dataArray, function (item) {
-                            return {
-                                id: item.IdObjEstrategico,
-                                text: item.Objetivo,
-                                producto: item.Producto,
-                                compuesto: item.Compuesto
-                            };
-                        })
-                    };
-                } else {
-                    return { results: [] };
-                }
-            },
-        },
-        templateResult: mapperFormatoHtml,
-        templateSelection: mapperFormatoHtml
-    })
-})
+    // 2. Llenarlo DESPUÉS de inicializado
+    populateS2ObjEstrategico(indicadorEstrategicoAccion_s2ObjEstrategico);
 
-function mapperFormatoHtml(repo) {
-    if (repo.loading) {
-        return repo.text;
-    }
-    if (repo.id === "")
-    {
-        return repo.text
-    }
-
-    return $(`
+    function select2ObjHtmlFormat(repo) {
+        if (repo.loading) {
+            return repo.text;
+        }
+        if (repo.id === "")
+        {
+            return repo.text
+        }
+        return $(`
         <div class='mi-render-select2'>
-            <div class='titulo-producto' style='font-weight: bold; color: #333;'>Codigo:   ${repo.compuesto} </div>
-            <div class='titulo-producto' style='font-weight: bold; color: #333;'>  ${repo.text} </div>
-            <div class='subtitulo-producto' style='font-weight: normal; color: #333;'>  ${repo.producto} </div>
+            <div class='titulo-producto'>Codigo: ${repo.compuesto} </div>
+            <div class='titulo-producto'> ${repo.text} </div>
+            <div class='subtitulo-producto'>  ${repo.producto} </div>
         </div>
     `)
-}
+    }
+
+    function select2ObjMatchSearch(params, data) {
+
+        if (typeof data.text === 'undefined') {
+            return null;
+        }
+
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+
+        let busqueda = params.term.toLowerCase();
+
+        let texto = (data.text || '').toLowerCase();
+        let compuesto = (data.compuesto || '').toLowerCase();
+        let producto = (data.producto || '').toLowerCase();
+
+        if (texto.indexOf(busqueda) > -1 ||
+            compuesto.indexOf(busqueda) > -1 ||
+            producto.indexOf(busqueda) > -1) {
+
+            return data;
+        }
+
+        return null;
+    }
+})

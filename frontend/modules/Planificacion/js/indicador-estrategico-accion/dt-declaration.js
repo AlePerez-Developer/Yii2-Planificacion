@@ -4,19 +4,25 @@ let dt_indEstrategicoAccion;
 $(document).ready(function () {
     dt_indEstrategicoAccion = $("#tablaListaIndicadoresEstrategicosAccion").DataTable({
         initComplete: function () {
+            $("div.dt-search").append(`
+            <button id="refreshTable" class="btn-refresh">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </button>`
+            );
+
             $("#dticTableLoading").hide();
             $("#dticTableContainer").fadeIn(250);
         },
         ajax: {
             method: "POST",
             dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
-            url: 'index.php?r=Planificacion/indicador-estrategico/listar-todo',
             data: {
-                'idObjEstrategico':idObjEstrategico
+                'idObjEstrategico':"idObjEstrategico"
             },
+            cache: false,
+
+
+            url: 'index.php?r=Planificacion/indicador-estrategico-accion/listar-indicadores',
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
@@ -24,6 +30,7 @@ $(document).ready(function () {
                 dt_indEstrategicoAccion.processing(false);
             }
         },
+
         columns: [
             {
                 data: "CodigoUsuario",
@@ -38,18 +45,17 @@ $(document).ready(function () {
             {data: "Codigo", visible:false},
             {
                 data: null,
-                className: 'expandible',
                 render: function (data, type, row) {
                     if (type !== "display") {
                         return row["Descripcion"];
                     }
 
                     return `
-                        <div style="display: flex;align-items:center;">
-                            <span class="dtic-item-main mr-2">Indicador N° </span>
-                                <div class="kpi-circle">
-                                    ${row["Codigo"]}
-                                </div>                                
+                        <div class="dtic-code-container">
+                            <span class="dtic-code-text">Indicador N°</span>
+                            <div class="dtic-code-badge">
+                                ${row["Codigo"]}
+                            </div>                                  
                         </div>
                         
                         <div class="dtic-item-main">
@@ -57,7 +63,7 @@ $(document).ready(function () {
                         </div>
                         
                         <div class="dtic-item-sub">
-                            accion estrategica desde ${row["LineaBase"]} hasta ${row["Meta"]} 
+                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["AccionDescripcion"]} ${row["Meta"]}  
                         </div>
                         
                         <div class="acc-footer mt-2" style="display: flex; gap: 10px">
@@ -85,7 +91,7 @@ $(document).ready(function () {
                         '    <span class="btn_text">Caducado</span>' +
                         '  </button>';
                 },
-            }
+            },
         ],
     });
 

@@ -16,8 +16,11 @@ $(document).ready(function() {
 
     indicadorEstrategico_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
-        placeholder: "Elija un objetivo estrategico",
+        placeholder: "Selecciones un objetivo estrategico",
         allowClear: true,
+        templateResult: select2HtmlFormat,
+        templateSelection: select2HtmlFormat,
+        matcher: select2MatchSearch
     })
 
     indicadorEstrategico_s2TipoResultado.select2({
@@ -43,4 +46,49 @@ $(document).ready(function() {
         placeholder: "Elija una accion estrategica",
         allowClear: true,
     })
+
+    function select2HtmlFormat(repo) {
+        if (repo.loading) {
+            return repo.text;
+        }
+        if (repo.id === "")
+        {
+            return repo.text
+        }
+        return $(`
+        <div class='mi-render-select2'>
+            <div class='titulo-producto'>Codigo: ${repo.compuesto} </div>
+            <div class='titulo-producto'> ${repo.text} </div>
+            <div class='subtitulo-producto'>  ${repo.producto} </div>
+        </div>
+    `)
+    }
+
+    function select2MatchSearch(params, data) {
+
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+
+        if (typeof data.text === 'undefined') {
+            return null;
+        }
+
+        let contenidoBusqueda = params.term.toLowerCase();
+
+        let texto = (data.text || '').toLowerCase();
+        let compuesto = (data.compuesto || '').toLowerCase();
+        let producto = (data.producto || '').toLowerCase();
+
+        if (texto.indexOf(contenidoBusqueda) > -1 ||
+            compuesto.indexOf(contenidoBusqueda) > -1 ||
+            producto.indexOf(contenidoBusqueda) > -1) {
+
+            return data;
+        }
+
+        return null;
+    }
+
 });
+

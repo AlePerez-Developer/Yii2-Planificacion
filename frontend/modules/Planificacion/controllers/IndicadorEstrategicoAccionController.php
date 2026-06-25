@@ -3,7 +3,9 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\controllers\BaseController;
+use app\modules\Planificacion\services\IndicadorEstrategicoService;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
+use app\modules\Planificacion\common\exceptions\ValidationException;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -15,11 +17,11 @@ use yii\web\Request;
  */
 class IndicadorEstrategicoAccionController extends BaseController
 {
-    private ObjetivoEstrategicoService $objetivoEstrategicoService;
+    private IndicadorEstrategicoService $indicadorEstrategicoService;
 
-    public function __construct($id, $module, ObjetivoEstrategicoService $objetivoEstrategicoService, $config = [])
+    public function __construct($id, $module, IndicadorEstrategicoService $indicadorEstrategicoService, $config = [])
     {
-        $this->objetivoEstrategicoService = $objetivoEstrategicoService;
+        $this->indicadorEstrategicoService = $indicadorEstrategicoService;
         parent::__construct($id, $module, $config);
     }
 
@@ -66,6 +68,35 @@ class IndicadorEstrategicoAccionController extends BaseController
     {
         return $this->render('index');
     }
+
+    public function actionListarIndicadores(): array
+    {
+        return $this->withTryCatch(function () {
+            $id = $this->obtenerId();
+            return $this->indicadorEstrategicoService->listarTodobyObj($id);
+        });
+    }
+
+
+
+
+
+
+    /**
+     * Obtiene y válida si se recibio el codigo por el request
+     *
+     * return string
+     * @throws ValidationException
+     */
+    private function obtenerId(): string
+    {
+        $id = Yii::$app->request->post('idObjEstrategico');
+        if (!$id) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo de objetivo no enviado.', 404);
+        }
+        return $id;
+    }
+
 
     /**
      *  Acción para listar registros

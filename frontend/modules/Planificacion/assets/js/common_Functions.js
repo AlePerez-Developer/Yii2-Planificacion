@@ -158,14 +158,20 @@ function populateS2ObjEstrategico(select2) {
             select2.empty();
 
             $.each(data["data"], function(index, item) {
-                select2.append(
-                    $('<option>', {
-                        value: item["IdObjEstrategico"],
-                        text: '(' + item["Compuesto"] + ') - ' + item["Objetivo"]
-                    })
-                );
-            });
+                let option = $('<option>', {
+                    value: item.IdObjEstrategico,
+                    text: item.Objetivo
+                });
 
+                option.data('data', {
+                    id: item.IdObjEstrategico,
+                    text: item.Objetivo,
+                    producto: item.Producto,
+                    compuesto: item.Compuesto
+                });
+
+                select2.append(option);
+            });
             select2.val(null).trigger('change');
         },
         error: function (xhr) {
