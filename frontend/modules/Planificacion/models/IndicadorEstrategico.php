@@ -74,7 +74,7 @@ class IndicadorEstrategico extends ActiveRecord
      * Válida que no exista otra política activa con el mismo código y área estratégica.
      *
      * @param string $attribute
-     * @used-by rules()
+     * @used-by      rules()
      * @noinspection PhpUnused
      */
     public function validateUniqueActiva(string $attribute): void
@@ -83,7 +83,7 @@ class IndicadorEstrategico extends ActiveRecord
             return;
         }
 
-        $id = $this->IdIndicadorEstrategico == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdIndicadorEstrategico;
+        $id = $this->IdIndicadorEstrategico == null ? '00000000-0000-0000-0000-000000000000' : $this->IdIndicadorEstrategico;
 
         $exists = self::find()
             ->where([
@@ -121,7 +121,7 @@ class IndicadorEstrategico extends ActiveRecord
 
     public static function listOne(string $id): ?IndicadorEstrategico
     {
-        return self::findOne(['IdIndicadorEstrategico' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdIndicadorEstrategico' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
     }
 
     public static function listAll(): ActiveQuery
@@ -154,53 +154,11 @@ class IndicadorEstrategico extends ActiveRecord
             ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'T.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO]);
-    }
-
-    public static function listAllbyObj(string $id): ActiveQuery
-    {
-        return self::find()->alias('I')
-            ->select([
-                'I.IdIndicadorEstrategico',
-                'O.IdObjEstrategico',
-                'CONCAT(a.Codigo,p.Codigo,O.Codigo) AS Compuesto',
-                'I.Codigo',
-                'I.Meta',
-                'I.Descripcion',
-                'I.LineaBase',
-                'C.IdCategoriaIndicador',
-                'T.IdTipoResultado',
-                'U.IdUnidadIndicador',
-                'I.CodigoEstado',
-                'I.CodigoUsuario',
-                'isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'
-            ])
-            ->joinWith('objetivosEstrategicos O', true, 'INNER JOIN')
-            ->joinWith('indicadorEstrategicoProgramacionGestions Ip', true, 'LEFT JOIN')
-            ->joinWith('objetivosEstrategicos.areaEstrategica a', true, 'INNER JOIN')
-            ->joinWith('objetivosEstrategicos.politicaEstrategica p', true, 'INNER JOIN')
-            ->joinWith('catCategoriasIndicadores C', true, 'INNER JOIN')
-            ->joinWith('catTiposResultados T', true, 'INNER JOIN')
-            ->joinWith('catUnidadesIndicadores U', true, 'INNER JOIN')
-            ->where(['I.IdObjEstrategico' => $id])
-            ->andWhere(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'objetivosEstrategicos.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'C.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'T.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'U.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->groupBy(['I.IdIndicadorEstrategico',
-                'O.IdObjEstrategico',
-                'a.Codigo','p.Codigo','O.Codigo',
-                'I.Codigo',
-                'I.Meta',
-                'I.Descripcion',
-                'I.LineaBase',
-                'C.IdCategoriaIndicador',
-                'T.IdTipoResultado',
-                'U.IdUnidadIndicador',
-                'I.CodigoEstado',
-                'I.CodigoUsuario']);
-
+            ->groupBy(['I.IdIndicadorEstrategico', 'O.IdObjEstrategico', 'a.Codigo', 'p.Codigo', 'O.Codigo',
+                'I.Codigo', 'I.Meta', 'I.Descripcion', 'I.LineaBase', 'I.AccionDescripcion',
+                'C.IdCategoriaIndicador', 'T.IdTipoResultado', 'U.IdUnidadIndicador', 'Ac.IdAccionEstrategica',
+                'I.CodigoEstado', 'I.CodigoUsuario']);
     }
 
     /**

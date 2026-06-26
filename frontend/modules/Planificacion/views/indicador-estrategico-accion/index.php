@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = [
                 <div class="card-dtic-style-title">
                     Objetivos Estrategicos
                 </div>
-                <div class="container">
+                <div class="">
                     <div class="row">
                         <div class="col">
                             <select id="idObjEstrategico" class="form-control dtic-input"></select>
@@ -90,8 +90,56 @@ $this->params['breadcrumbs'][] = [
     </div>
 </div>
 
+
+<!-- Modal Fijo en la Vista -->
+<div class="modal fade" id="modalProgramacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="overflow: auto">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalLabel">
+                    <i class="fa fa-list-alt"></i> Seleccion de llaves presupuestarias
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="alert alert-light border mb-3">
+                    <h3>Listado de llaves presupuestarias</h3>
+                </div>
+
+                <input type="hidden" id="modal_idIndicador">
+                <input type="hidden" id="modal_idGestion">
+                <input type="hidden" id="modal_tableIdOriginal">
+
+                <!-- Tabla Detalle -->
+                <div class="table-responsive">
+                    <table id="tblModalDetalle" class="table table-striped table-bordered w-100">
+                        <thead>
+                        <tr>
+                            <th>Llave</th>
+                            <th>Descripcion</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Cerrar y Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
 $cssCode = <<<CSS
+
+table.dataTable thead {
+    display: none;
+}
+
+
 /*******************Select2 css***********************/
 span .select2-selection.select2-selection--single{
     height: auto !important;
@@ -122,6 +170,10 @@ span .select2-selection.select2-selection--single{
 
 .select2-results__option{
     border-bottom: 1px dotted darkgrey;
+}
+
+.select2-results__options {
+    max-height: 390px !important; /* Aumenta o disminuye este valor */
 }
 
 /****************select2 datos css************************/

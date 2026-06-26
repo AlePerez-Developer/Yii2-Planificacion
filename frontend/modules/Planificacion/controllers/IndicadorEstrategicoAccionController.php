@@ -3,6 +3,8 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\controllers\BaseController;
+use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\services\IndicadorEstrategicoAccionService;
 use app\modules\Planificacion\services\IndicadorEstrategicoService;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
 use app\modules\Planificacion\common\exceptions\ValidationException;
@@ -17,10 +19,14 @@ use yii\web\Request;
  */
 class IndicadorEstrategicoAccionController extends BaseController
 {
+    private IndicadorEstrategicoAccionService $service;
     private IndicadorEstrategicoService $indicadorEstrategicoService;
 
-    public function __construct($id, $module, IndicadorEstrategicoService $indicadorEstrategicoService, $config = [])
+    public function __construct($id, $module, IndicadorEstrategicoAccionService $service,
+                                IndicadorEstrategicoService $indicadorEstrategicoService,
+                                $config = [])
     {
+        $this->service = $service;
         $this->indicadorEstrategicoService = $indicadorEstrategicoService;
         parent::__construct($id, $module, $config);
     }

@@ -4,22 +4,20 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\models\IndicadorEstrategico;
-use yii\db\Expression;
 
-class IndicadorEstrategicoAccionService
+class IndicadorEstrategicoProgramacionService
 {
     /**
      * Lista un array de Indicadores Estrategicos no eliminados según un, Id Objetivo Estrategico
      *
      * @return array of Indicadores Estategicos segun
      */
-    public function listarTodobyObjConProgramacionTotal(string $id): array
+    public function listarTodobyObjConProgramacion(string $id): array
     {
         $data = IndicadorEstrategico::listAll()
             ->addSelect(['isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'])
             ->joinWith('indicadorEstrategicoProgramacionGestions Ip', true, 'LEFT JOIN')
             ->andWhere(['I.IdObjEstrategico' => $id])
-            ->andHaving(['>=', 'COALESCE(SUM(Ip.MetaProgramada), 0)', new Expression('I.Meta')])
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 

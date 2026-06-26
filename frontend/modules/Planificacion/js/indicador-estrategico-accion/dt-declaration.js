@@ -2,6 +2,7 @@
 let dt_indEstrategicoAccion;
 
 $(document).ready(function () {
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
     dt_indEstrategicoAccion = $("#tablaListaIndicadoresEstrategicosAccion").DataTable({
         initComplete: function () {
             $("div.dt-search").append(`
@@ -13,11 +14,17 @@ $(document).ready(function () {
             $("#dticTableLoading").hide();
             $("#dticTableContainer").fadeIn(250);
         },
+        layout: {
+
+            topEnd: null
+        },
         ajax: {
             method: "POST",
             dataType: 'json',
-            data: {
-                'idObjEstrategico':"idObjEstrategico"
+            data: function () {
+                return {
+                    idObjEstrategico: indicadorEstrategicoAccion_s2ObjEstrategico.val() || ID_EMPTY_GUID
+                };
             },
             cache: false,
 
@@ -75,21 +82,18 @@ $(document).ready(function () {
                 }
             },
             {
-                data: "CodigoEstado",
+                data: null,
                 className: "text-center",
                 width: "90px",
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                    return (type === 'display')?
+                        '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
                         '    <span class="btn_text">Vigente</span>' +
                         '  </button>'
-                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>';
+                        :data
                 },
             },
         ],

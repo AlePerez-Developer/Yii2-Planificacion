@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\services\IndicadorEstrategicoProgramacionService;
 use app\modules\Planificacion\services\IndicadorEstrategicoService;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\services\LlavePresupuestariaService;
@@ -24,14 +25,17 @@ use Yii;
 
 class IndicadorEstrategicoProgramacionController extends BaseController
 {
+    private IndicadorEstrategicoProgramacionService $service;
     private IndicadorEstrategicoService $serviceIndicadorEstrategico;
     private LlavePresupuestariaService $serviceLlavePresupuestaria;
 
     public function __construct($id, $module,
+                                IndicadorEstrategicoProgramacionService $service,
                                 IndicadorEstrategicoService $serviceIndicadorEstrategico,
                                 LlavePresupuestariaService $serviceLlavePresupuestaria,
         $config = [])
     {
+        $this->service  = $service;
         $this->serviceIndicadorEstrategico = $serviceIndicadorEstrategico;
         $this->serviceLlavePresupuestaria = $serviceLlavePresupuestaria;
         parent::__construct($id, $module, $config);
@@ -93,7 +97,7 @@ class IndicadorEstrategicoProgramacionController extends BaseController
     {
         return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->serviceIndicadorEstrategico->listarTodobyObj($id);
+            return $this->service->listarTodobyObjConProgramacion($id);
         });
     }
 

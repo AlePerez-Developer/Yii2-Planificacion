@@ -57,11 +57,12 @@ class IndicadorEstrategicoService
      */
     public function listarTodobyObj(string $id): array
     {
-        $data = IndicadorEstrategico::listAllbyObj($id)
+        $data = IndicadorEstrategico::listAll()
+            ->andWhere(['I.IdObjEstrategico' => $id])
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
 
-        return ResponseHelper::success($data,'Listado de Indicadores Estrategicos obtenido.');
+        return ResponseHelper::success($data,'Listado de Indicadores Estrategicos por Objetivo obtenido.');
     }
 
     /**
