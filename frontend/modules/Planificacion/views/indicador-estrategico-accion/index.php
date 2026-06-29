@@ -92,12 +92,12 @@ $this->params['breadcrumbs'][] = [
 
 
 <!-- Modal Fijo en la Vista -->
-<div class="modal fade" id="modalProgramacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade" id="modalAsignacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content" style="overflow: auto">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="modalLabel">
-                    <i class="fa fa-list-alt"></i> Seleccion de llaves presupuestarias
+                    <i class="fa fa-list-alt"></i> Asignacion de accion estrategica
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -203,6 +203,29 @@ span .select2-selection.select2-selection--single{
     font-weight: 550;
     width: 110px;
     text-align: center;
+}
+
+.btn-programar {
+    min-width:150px;
+    height:42px;
+    border-radius:20px;
+    border: 1px solid #425d65;
+    padding:0 16px;
+    font-size:12px;
+    font-weight:800;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
+    background-color: #abdbff;
+    color: #2a3437;
+}
+
+.btn-programar:hover{
+    background-color: #90c4d3;
+    box-shadow: 0 6px 16px #8cb2bf;
+    transform: translateY(-1px);
 }
 CSS;
 

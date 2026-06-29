@@ -89,9 +89,9 @@ $(document).ready(function () {
                 searchable: false,
                 render: function (data, type, row) {
                     return (type === 'display')?
-                        '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
+                        '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Vigente</span>' +
+                        '    <span class="btn_text">Asignar Accion</span>' +
                         '  </button>'
                         :data
                 },
