@@ -104,29 +104,28 @@ $this->params['breadcrumbs'][] = [
             <div class="modal-body">
 
                 <div class="alert alert-light border mb-3">
-                    <h3>Listado de llaves presupuestarias</h3>
+                    <h3>Listado de acciones estrategicas</h3>
                 </div>
 
-                <input type="hidden" id="modal_idIndicador">
-                <input type="hidden" id="modal_idGestion">
-                <input type="hidden" id="modal_tableIdOriginal">
-
-                <!-- Tabla Detalle -->
-                <div class="table-responsive">
-                    <table id="tblModalDetalle" class="table table-striped table-bordered w-100">
-                        <thead>
-                        <tr>
-                            <th>Llave</th>
-                            <th>Descripcion</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                <div class="row" style="display: flex; align-items: center">
+                    <div class="col-8">
+                        <div class="form-group">
+                            <label for="idAccionEstrategica">Seleccione la Accion estrategica</label>
+                            <select class="form-control dtic-input" id="idAccionEstrategica" name="idAccionEstrategica">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="accionDescripcion">Descripcion</label>
+                            <input type="text" class="form-control input-sm txt dtic-input" id="accionDescripcion"
+                                   name="accionDescripcion" placeholder="Descripcion de la accion" >
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Cerrar y Actualizar</button>
+                <button type="button" class="btn btn-outline-info  guardar" data-bs-dismiss="modal">Cerrar y Actualizar</button>
             </div>
         </div>
     </div>

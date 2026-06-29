@@ -1,4 +1,5 @@
 let indicadorEstrategicoAccion_s2ObjEstrategico = $('#idObjEstrategico')
+let indicadorEstrategicoAccion_s2AccionEstrategica = $('#idAccionEstrategica')
 $(document).ready(function () {
         indicadorEstrategicoAccion_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
@@ -9,8 +10,15 @@ $(document).ready(function () {
         matcher: select2ObjMatchSearch
     });
 
-    // 2. Llenarlo DESPUÉS de inicializado
     populateS2ObjEstrategico(indicadorEstrategicoAccion_s2ObjEstrategico);
+
+    indicadorEstrategicoAccion_s2AccionEstrategica.select2({
+        theme: 'bootstrap4',
+        placeholder: "Elija una accion estrategica",
+        allowClear: true,
+    })
+
+    populateS2AccionesEstrategicas(indicadorEstrategicoAccion_s2AccionEstrategica)
 
     function select2ObjHtmlFormat(repo) {
         if (repo.loading) {

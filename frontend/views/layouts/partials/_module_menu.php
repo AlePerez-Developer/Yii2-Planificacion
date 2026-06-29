@@ -61,6 +61,7 @@ $menus = $modulo->menus;
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/estado-poa/index']) ?>">Estados Poa</a>
                     <a href="<?= Url::to(['/Planificacion/gasto/index']) ?>">Gastos</a>
+                    <a href="<?= Url::to(['/Planificacion/accion-estrategica/index']) ?>">Acciones Estrategicas</a>
                 </div>
             </div>
 

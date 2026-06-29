@@ -83,6 +83,49 @@ class IndicadorEstrategicoAccionController extends BaseController
         });
     }
 
+    public function actionGuardarAccion()
+    {
+
+        return $this->withTryCatch(function () {
+            $id = Yii::$app->request->post('id');
+            $accion = Yii::$app->request->post('accion');
+            $frase = Yii::$app->request->post('frase');
+
+            $modelo = $this->obtenerModeloValidado($id);
+            $modelo->IdAccionEstrategica = $accion;
+            $modelo->AccionDescripcion = $frase;
+
+            return $this->validarProcesarModelo($modelo);
+        });
+
+    }
+
+    private function obtenerModeloValidado(string $id): ?IndicadorEstrategico
+    {
+        $modelo = IndicadorEstrategico::findOne($id);
+        if (!$modelo) {
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
+        }
+        return $modelo;
+    }
+
+    public function validarProcesarModelo(IndicadorEstrategico $modelo): array
+    {
+        if (!$modelo->validate()) {
+            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
+        }
+
+        if (!$modelo->save(false)) {
+            Yii::error("Error al guardar los datos del Indicador Estrategico $modelo->Codigo", __METHOD__);
+            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
+        }
+
+        return [
+            'message' => Yii::$app->params['PROCESO_CORRECTO'],
+            'data' => '',
+        ];
+    }
+
 
 
 
