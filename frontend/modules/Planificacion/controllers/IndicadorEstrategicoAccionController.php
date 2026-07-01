@@ -2,17 +2,16 @@
 
 namespace app\modules\Planificacion\controllers;
 
-use app\controllers\BaseController;
-use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\services\IndicadorEstrategicoAccionService;
-use app\modules\Planificacion\services\IndicadorEstrategicoService;
-use app\modules\Planificacion\services\ObjetivoEstrategicoService;
+use app\modules\Planificacion\formModels\IndicadorEstrategicoAccionForm;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use Yii;
+use app\modules\Planificacion\services\IndicadorEstrategicoService;
+use yii\web\BadRequestHttpException;
+use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\web\BadRequestHttpException;
-use yii\web\Request;
+use Yii;
+
 
 /**
  * @noinspection PhpUnused
@@ -70,11 +69,22 @@ class IndicadorEstrategicoAccionController extends BaseController
         return parent::beforeAction($action);
     }
 
+    /**
+     * accion index.
+     *
+     * @return string
+     */
     public function actionIndex(): string
     {
         return $this->render('index');
     }
 
+    /**
+     * Accion para listar todos los registros del modelo.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
     public function actionListarIndicadores(): array
     {
         return $this->withTryCatch(function () {
@@ -83,53 +93,28 @@ class IndicadorEstrategicoAccionController extends BaseController
         });
     }
 
-    public function actionGuardarAccion()
+    /**
+     * Accion para agregar un nuevo registro.
+     *
+     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @noinspection PhpUnused
+     */
+    public function actionGuardarAccion(): array
     {
-
         return $this->withTryCatch(function () {
-            $id = Yii::$app->request->post('id');
-            $accion = Yii::$app->request->post('accion');
-            $frase = Yii::$app->request->post('frase');
+            $request = Yii::$app->request;
 
-            $modelo = $this->obtenerModeloValidado($id);
-            $modelo->IdAccionEstrategica = $accion;
-            $modelo->AccionDescripcion = $frase;
+            $id = $this->obtenerIdIndicador();
+            $form = new IndicadorEstrategicoAccionForm();
 
-            return $this->validarProcesarModelo($modelo);
+            if (!$form->load($request->post(), '') || !$form->validate()) {
+                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'],$form->getErrors(),400);
+            }
+
+            return $this->service->validarActualizar($id,$form);
         });
 
     }
-
-    private function obtenerModeloValidado(string $id): ?IndicadorEstrategico
-    {
-        $modelo = IndicadorEstrategico::findOne($id);
-        if (!$modelo) {
-            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
-        }
-        return $modelo;
-    }
-
-    public function validarProcesarModelo(IndicadorEstrategico $modelo): array
-    {
-        if (!$modelo->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
-        }
-
-        if (!$modelo->save(false)) {
-            Yii::error("Error al guardar los datos del Indicador Estrategico $modelo->Codigo", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
-    }
-
-
-
-
-
 
     /**
      * Obtiene y válida si se recibio el codigo por el request
@@ -146,40 +131,18 @@ class IndicadorEstrategicoAccionController extends BaseController
         return $id;
     }
 
-
     /**
-     *  Acción para listar registros
+     * Obtiene y válida si se recibio el codigo por el request
      *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     * @noinspection PhpUnused
+     * return string
+     * @throws ValidationException
      */
-    public function actionListarObjsEstrategicos(): array
+    private function obtenerIdIndicador(): string
     {
-        return $this->withTryCatch(function () {
-            $request = Yii::$app->request;
-
-            $q = $this->getSearchParam($request);
-
-            return $this->objetivoEstrategicoService->listarObjEstrategicosS2($q);
-
-        });
-
-
-    }
-
-    /**
-     * Obtiene el parámetro de búsqueda de Select2
-     * @param Request $request
-     * @return string
-     */
-    private function getSearchParam(Request $request): string
-    {
-        $id = $request->post('q');
-
+        $id = Yii::$app->request->post('idIndicadorEstrategico');
         if (!$id) {
-            return '';
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo de objetivo no enviado.', 404);
         }
-
         return $id;
     }
 }

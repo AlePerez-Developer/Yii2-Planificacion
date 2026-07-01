@@ -15,7 +15,6 @@ $(document).ready(function () {
             $("#dticTableContainer").fadeIn(250);
         },
         layout: {
-
             topEnd: null
         },
         ajax: {
@@ -37,7 +36,6 @@ $(document).ready(function () {
                 dt_indEstrategicoAccion.processing(false);
             }
         },
-
         columns: [
             {
                 data: "CodigoUsuario",
@@ -87,7 +85,7 @@ $(document).ready(function () {
                 width: "90px",
                 orderable: false,
                 searchable: false,
-                render: function (data, type, row) {
+                render: function (data, type) {
                     return (type === 'display')?
                         '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +

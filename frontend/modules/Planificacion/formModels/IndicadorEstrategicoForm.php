@@ -11,9 +11,11 @@ use yii\base\Model;
  * @property int $meta
  * @property string $descripcion
  * @property int $lineaBase
+ * @property string $accionDescripcion
  * @property string $idTipoResultado
  * @property string $idCategoriaIndicador
  * @property string $idUnidadIndicador
+ * @property string $idAccionEstrategica
  */
 
 class IndicadorEstrategicoForm extends Model

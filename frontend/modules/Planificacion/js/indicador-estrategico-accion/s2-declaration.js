@@ -15,6 +15,7 @@ $(document).ready(function () {
     indicadorEstrategicoAccion_s2AccionEstrategica.select2({
         theme: 'bootstrap4',
         placeholder: "Elija una accion estrategica",
+        dropdownParent: $('#modalAsignacion'),
         allowClear: true,
     })
 

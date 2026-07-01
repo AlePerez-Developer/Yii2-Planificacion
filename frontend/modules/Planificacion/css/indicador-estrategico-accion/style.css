@@ -1,0 +1,148 @@
+.btn-remove {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(135deg, var(--danger), #c62828);
+    color: #fff;
+
+    font-size: 12px;
+    cursor: pointer;
+    transition: .25s;
+
+    box-shadow: 0 4px 12px rgba(220, 53, 69, .20);
+}
+
+.btn-remove:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 53, 69, .45);
+}
+
+.btn-remove:active {
+    transform: scale(.96);
+}
+
+.modal-dialog {
+    height: auto !important;
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.modal-header-title {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center
+}
+
+table.dataTable thead {
+    display: none;
+}
+
+.page-icon.specific {
+    width: 46px !important;
+    height: 46px !important;
+    font-size: 18px !important;
+}
+
+
+/*******************Select2 css***********************/
+span .select2-selection.select2-selection--single {
+    height: auto !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+}
+
+.select2-selection__rendered {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: auto !important;
+}
+
+.mi-render-select2 {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    padding: 2px 0;
+    gap: 5px;
+    flex: 1;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 0 !important;
+}
+
+.select2-results__option {
+    border-bottom: 1px dotted darkgrey;
+}
+
+.select2-results__options {
+    max-height: 390px !important; /* Aumenta o disminuye este valor */
+}
+
+/****************select2 datos css************************/
+
+.titulo-producto {
+    font-weight: bold;
+    color: #333;
+}
+
+.subtitulo-producto {
+    font-weight: normal;
+    color: #333;
+}
+
+/************************Tabla css***********************/
+.dtic-item-main {
+    font-size: 14px !important;
+}
+
+.card-dtic-style.specific {
+    padding: 2px 50px 0 50px !important;
+}
+
+.badge-result {
+    background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
+    color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
+    border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 10px;
+    font-weight: 550;
+    width: 110px;
+    text-align: center;
+}
+
+.btn-programar{
+    min-width: 150px;
+    height: 42px;
+    border-radius: 22px;
+    border: 1px solid #425d65;
+    padding: 0 15px;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
+    background-color: #abdbff;
+    color: #2a3437;
+}
+
+.btn-programar:hover {
+    background-color: #90c4d3;
+    box-shadow: 0 6px 16px #8cb2bf;
+    transform: translateY(-1px);
+}

@@ -29,7 +29,7 @@ class PeiService
     }
 
     /**
-     * obtiene un pei en base a un codigo.
+     * Obtiene un pei en base a un codigo.
      *
      * @param string $id
      * @return Pei|null
@@ -185,7 +185,7 @@ class PeiService
     }
 
     /**
-     * Obtiene el modelo segun el codigo enviado.
+     * Obtiene el modelo según el codigo enviado.
      *
      * @param string $id
      * @return array
@@ -207,7 +207,7 @@ class PeiService
 
 
     /**
-     * Obtiene el modelo segun el codigo enviado y valida si existe.
+     * Obtiene el modelo según el codigo enviado y válida si existe.
      *
      * @param string $id
      * @return Pei|null

@@ -1,8 +1,9 @@
 <?php
 
 use yii\web\JqueryAsset;
+use app\modules\Planificacion\assets\PlanificacionAsset;
 
-app\modules\Planificacion\assets\PlanificacionAsset::register($this);
+PlanificacionAsset::register($this);
 
 $this->registerJsFile("@planificacionModule/js/indicador-estrategico-accion/dt-declaration.js", [
         'depends' => [
@@ -22,6 +23,12 @@ $this->registerJsFile("@planificacionModule/js/indicador-estrategico-accion/acci
         ]
 ]);
 
+$this->registerCssFile("@planificacionModule/css/indicador-estrategico-accion/style.css", [
+        'depends' => [
+                PlanificacionAsset::class
+        ]
+]);
+
 
 $this->title = 'Planificación Institucional';
 
@@ -31,27 +38,15 @@ $this->params['icon'] = 'fas fa-clipboard-list';
 
 $this->params['iconColor'] = 'info';
 
-$this->params['actions'] =
-    '<button id="btnMostrarCrear"  class="btn-crear closed" >
-              <span class="circle">
-                <span class="horizontal"></span>
-                <span class="vertical"></span>
-              </span>
-              <span class="btn-text">Nuevo Registro</span>
-        </button>
-
-         <button id="btnReportePdf" class="btn-reporte">
-            <i class="fas fa-file-pdf"></i>
-             <span class="btn-text">Exportar</span>
-         </button>';
+$this->params['actions'] = '';
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ Ind. Estrategicos'
+        'label' => '/ Ind. Estrategicos'
 ];
 ?>
 <div class="card ">
 
-    <div  class="card-body">
+    <div class="card-body">
         <div class="card-dtic-style">
             <div class="card-dtic-style-header">
                 <div class="card-dtic-style-title">
@@ -79,155 +74,74 @@ $this->params['breadcrumbs'][] = [
         </div>
     </div>
 
-    <div  class="card-body">
-        <div class="card-dtic-style">
-            <div class="card-dtic-style-header">
-                <div class="card-dtic-style-title">
-                    Indicadores Estratégicos Institucionales
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 
 <!-- Modal Fijo en la Vista -->
-<div class="modal fade" id="modalAsignacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal fade" id="modalAsignacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel"
+     aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="overflow: auto">
+        <div class="modal-content" style="overflow: hidden">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalLabel">
-                    <i class="fa fa-list-alt"></i> Asignacion de accion estrategica
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header-title">
+                    <div class="page-icon bg-info specific">
+                        <i class="fa fa-list-alt"></i>
+                    </div>
+                    <h5 class="modal-title" id="modalLabel">
+                        Asignacion de accion estrategica
+                    </h5>
+                </div>
+
+                <button type="button" class="btn-remove" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+
             </div>
             <div class="modal-body">
 
-                <div class="alert alert-light border mb-3">
-                    <h3>Listado de acciones estrategicas</h3>
-                </div>
+                <div class="card ">
 
-                <div class="row" style="display: flex; align-items: center">
-                    <div class="col-8">
-                        <div class="form-group">
-                            <label for="idAccionEstrategica">Seleccione la Accion estrategica</label>
-                            <select class="form-control dtic-input" id="idAccionEstrategica" name="idAccionEstrategica">
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label for="accionDescripcion">Descripcion</label>
-                            <input type="text" class="form-control input-sm txt dtic-input" id="accionDescripcion"
-                                   name="accionDescripcion" placeholder="Descripcion de la accion" >
+                    <div id="divTabla" class="card-body">
+                        <div class="card-dtic-style specific">
+
+                            <div class="card-dtic-style-header">
+                                <div class="card-dtic-style-title">
+                                    Listado de acciones estrategicas
+                                </div>
+                            </div>
+
+                            <div class="p-2" id="dticTableContainer">
+                                <form id="formAsignacionAccion" action="" method="post">
+                                    <div class="row" style="display: flex; align-items: center">
+                                        <div class="col-8">
+                                            <div class="form-group">
+                                                <label for="idAccionEstrategica">Seleccione la Accion estrategica</label>
+                                                <select class="form-control dtic-input" id="idAccionEstrategica"
+                                                        name="idAccionEstrategica">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label for="accionDescripcion">Descripcion</label>
+                                                <input type="text" class="form-control input-sm txt dtic-input"
+                                                       id="accionDescripcion"
+                                                       name="accionDescripcion" placeholder="Descripcion de la accion">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-info  guardar" data-bs-dismiss="modal">Cerrar y Actualizar</button>
+                <button type="button" class="btn-guardar  guardar" >Cerrar y
+                    Actualizar
+                </button>
             </div>
         </div>
     </div>
 </div>
-
-<?php
-$cssCode = <<<CSS
-
-table.dataTable thead {
-    display: none;
-}
-
-
-/*******************Select2 css***********************/
-span .select2-selection.select2-selection--single{
-    height: auto !important;
-    border-radius: 8px !important;
-    padding: 4px 8px !important;
-}
-
-.select2-selection__rendered{
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    height: auto !important;
-}
-
-.mi-render-select2{
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-    padding: 2px 0;
-    gap: 5px;
-    flex: 1;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: normal !important;
-    padding-left: 0 !important;
-}
-
-.select2-results__option{
-    border-bottom: 1px dotted darkgrey;
-}
-
-.select2-results__options {
-    max-height: 390px !important; /* Aumenta o disminuye este valor */
-}
-
-/****************select2 datos css************************/
-
-.titulo-producto{
-    font-weight: bold;
-    color: #333;
-}
-
-.subtitulo-producto{
-    font-weight: normal;
-    color: #333;
-}
-
-/************************Tabla css***********************/
-.dtic-item-main{
-    font-size: 14px !important;
-}
-
-.badge-result {
-    background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
-    color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
-    border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 10px;
-    font-weight: 550;
-    width: 110px;
-    text-align: center;
-}
-
-.btn-programar {
-    min-width:150px;
-    height:42px;
-    border-radius:20px;
-    border: 1px solid #425d65;
-    padding:0 16px;
-    font-size:12px;
-    font-weight:800;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
-    background-color: #abdbff;
-    color: #2a3437;
-}
-
-.btn-programar:hover{
-    background-color: #90c4d3;
-    box-shadow: 0 6px 16px #8cb2bf;
-    transform: translateY(-1px);
-}
-CSS;
-
-$this->registerCss($cssCode);
-?>
-
