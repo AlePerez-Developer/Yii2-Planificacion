@@ -67,19 +67,21 @@ class PeiGestion extends ActiveRecord
         ];
     }
 
+    /**
+     * @return ActiveQuery<PeiGestion>
+     */
     public static function listAll(): ActiveQuery
     {
-        return self::find()
+        return self::find()->alias('G')
             ->select([
-                'IdGestion',
+                'G.IdGestion',
                 'IdPei',
                 'Gestion'
             ])
             ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->orderBy(['Gestion' => SORT_ASC]);
+            ->groupBy(['G.IdGestion','G.IdPei','G.Gestion'])
+            ->orderBy(['G.Gestion' => SORT_ASC]);
     }
-
-
 
     /**
      * Gets query for [[IdPei]].
@@ -100,7 +102,7 @@ class PeiGestion extends ActiveRecord
      */
     public function getGestionProgramacion(): ActiveQuery
     {
-        return $this->hasMany(IndicadorEstrategicoProgramacionGestion::class, ['IdGestion' => 'IdGestion']);
+        return $this->hasMany(ProgramacionIndicadorGestion::class, ['IdGestion' => 'IdGestion']);
     }
 
     /**

@@ -1,6 +1,6 @@
 /*global idObjEstrategico*/
 let tablas = {};
-let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion/"
+let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion-anual/"
 $(document).ready(function () {
     //cargarIndicadores();
 });

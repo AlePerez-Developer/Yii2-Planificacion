@@ -124,6 +124,9 @@ class IndicadorEstrategico extends ActiveRecord
         return self::findOne(['IdIndicadorEstrategico' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
     }
 
+    /**
+     * @return ActiveQuery<IndicadorEstrategico>
+     */
     public static function listAll(): ActiveQuery
     {
         return self::find()->alias('I')
@@ -159,6 +162,28 @@ class IndicadorEstrategico extends ActiveRecord
                 'I.Codigo', 'I.Meta', 'I.Descripcion', 'I.LineaBase', 'I.AccionDescripcion',
                 'C.IdCategoriaIndicador', 'T.IdTipoResultado', 'U.IdUnidadIndicador', 'Ac.IdAccionEstrategica',
                 'I.CodigoEstado', 'I.CodigoUsuario']);
+    }
+
+    /**
+     * @return ActiveQuery<IndicadorEstrategico>
+     */
+    public static function listAllSimple() :ActiveQuery
+    {
+        return self::find()->alias('I')
+            ->select([
+                'I.IdIndicadorEstrategico',
+                'I.Codigo',
+                'I.Meta',
+                'I.Descripcion',
+                'I.LineaBase',
+                'I.AccionDescripcion',
+                'I.CodigoEstado',
+                'I.CodigoUsuario',
+            ])
+            ->where(['!=', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->groupBy(['I.IdIndicadorEstrategico', 'I.Codigo', 'I.Meta', 'I.Descripcion', 'I.LineaBase', 'I.AccionDescripcion',
+                'I.CodigoEstado', 'I.CodigoUsuario']
+            );
     }
 
     /**

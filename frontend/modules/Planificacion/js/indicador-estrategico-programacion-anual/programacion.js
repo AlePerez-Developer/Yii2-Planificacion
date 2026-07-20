@@ -1,24 +1,25 @@
 $(document).ready(function () {
-    let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion/"
+    let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion-anual/"
+
 
     function mensajeAccion(accion) {
-        return `Los datos de la Política Estratégica se ${accion}ron correctamente.`;
+        return `Los datos de la programacion se ${accion}ron correctamente.`;
     }
 
     /* =============================================
-            CAMBIA EL ESTADO DEL REGISTRO
-    ===============================================*/
+           CAMBIA EL ESTADO DEL REGISTRO
+   ===============================================*/
     $(document).on('click', 'tbody #btnEstado', async function () {
         const btn = $(this);
 
         const idLlavePresupuestaria = btn.data('idllave');
-        const idIndicadorEstrategico = btn.data('idindicador');
-        const idGestion = btn.data('idgestion');
+        const codigoIndicador = btn.data('indicador');
+        const gestion = btn.data('gestion');
 
         const datos = new FormData();
         datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
-        datos.append("idIndicadorEstrategico", idIndicadorEstrategico);
-        datos.append("idGestion", idGestion);
+        datos.append("codigoIndicador", codigoIndicador);
+        datos.append("gestion", gestion);
 
         try {
             await ajaxPromise({
@@ -36,13 +37,19 @@ $(document).ready(function () {
 
     $(document).on('click', 'tbody .btnQuitar', function () {
         let objectBtn = $(this)
-        const idLlave = objectBtn.data('llave');
-        const id = objectBtn.data('id');
-        const idindicador = objectBtn.data('idindicador')
+
+        const tabla = objectBtn.closest('table');
+        const codigo = objectBtn.data('codigoindicador');
+        const gestion = objectBtn.data('gestion');
+
+        const dt_table = tabla.DataTable();
+        const dt_row = dt_table.row(objectBtn.closest('tr')).data();
+        let rowId = dt_row["IdProgramacionIndicadorGestio"];
+        let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
 
 
         const datos = new FormData();
-        datos.append("idLlave", idLlave);
+        datos.append("idProgramacion", rowId);
 
         Swal.fire({
             icon: "warning",
@@ -61,122 +68,139 @@ $(document).ready(function () {
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: $('#' + id).DataTable()
+                        reloadTable: dt_table
                     });
-                    actualizarSumaGlobal(idindicador)
+                    actualizarSumaGlobal(idIndicadorEstrategico)
+                    actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion)
                 } catch (err) {
                     console.error("Error al procesar:", err);
                 }
             }
         });
-
     });
 
-    // 1. Al hacer CLICK: Habilitar y Seleccionar todo
-    $(document).on('click', '.input-editable-smart', function () {
+
+    $(document).on('click', '.input-meta', function () {
         const input = $(this);
 
         if (input.prop('readonly')) {
             input.prop('readonly', false)
                 .css({'background-color': '#fff', 'border-color': '#80bdff'})
-                .select(); // Selecciona todo el texto automáticamente
+                .select();
         }
     });
 
-// 2. Al presionar ENTER: Guardar
-    $(document).on('keypress', '.input-editable-smart', function (e) {
-        if (e.which === 13) { // Tecla Enter
-            const input = $(this);
-            const nuevoValor = input.val();
-            const idRegistro = input.data('id');
-            const idIndicador = input.data('idindicador')
+    $(document).on('keypress', '.input-meta', function (e) {
+        if (e.which === 13) {
+            const objectInput = $(this);
+            const meta = objectInput.val();
+
+            const tabla = objectInput.closest('table');
+
+            const dt_table = tabla.DataTable();
+            const dt_row = dt_table.row(objectInput.closest('tr')).data();
+            let rowId = dt_row["IdProgramacionIndicadorGestio"];
+            let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+
+            const codigo = objectInput.data('codigoindicador');
+            const gestion = objectInput.data('gestion')
+
 
             e.preventDefault();
 
-            // Bloqueo visual mientras procesa
-            input.prop('disabled', true);
+            objectInput.prop('disabled', true);
 
             $.ajax({
-                url: 'index.php?r=Planificacion/indicador-estrategico-programacion/guardar-meta',
+                url: baseUrl + 'guardar-meta',
                 method: 'POST',
-                data: {id: idRegistro, valor: nuevoValor},
+                data: {
+                    idProgramacion: rowId,
+                    meta: meta,
+                },
                 success: function (resp) {
                     if (resp.message === 'ok') {
-                        // Volver al estado readonly exitoso
-                        input.prop('readonly', true)
+                        objectInput.prop('readonly', true)
                             .prop('disabled', false)
                             .css({'background-color': 'transparent', 'border-color': 'transparent'})
                             .addClass('is-valid');
 
-                        setTimeout(() => input.removeClass('is-valid'), 2000);
+                        setTimeout(() => objectInput.removeClass('is-valid'), 1000);
 
-                        // Recalcular sumas si tienes la función lista
-                        actualizarSumaGlobal(idIndicador);
+                        // Recalcular sumas
+                        actualizarSumaGlobal(idIndicadorEstrategico);
+                        actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion);
                     } else {
                         alert("Error: " + resp.mensaje);
-                        input.prop('disabled', false).focus();
+                        objectInput.prop('disabled', false).focus();
                     }
                 },
                 error: function () {
-                    input.prop('disabled', false).focus();
+                    objectInput.prop('disabled', false).focus();
                 }
             });
         }
     });
 
-    function actualizarSumaGlobal(idIndicadorEstrategico)
-    {
-        console.log(idIndicadorEstrategico)
+    function actualizarSumaGlobal(idIndicadorEstrategico) {
+        const badge = $(`#metaProg_${idIndicadorEstrategico}`);
         $.ajax({
-            url: 'index.php?r=Planificacion/indicador-estrategico-programacion/calcular-meta',
+            url: 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/calcular-meta',
             method: 'POST',
             data: {idIndicadorEstrategico: idIndicadorEstrategico},
             success: function (resp) {
                 const nuevoTotal = parseFloat(resp.data);
-                const badge = $(`#metaProg_${idIndicadorEstrategico}`);
                 const metaGlobal = parseFloat(badge.data('meta-global'))
 
                 badge.html(nuevoTotal);
 
-                // 2. Limpiar clases de colores previas
                 badge.removeClass('bg-warning bg-danger bg-info');
-
-                // 3. Aplicar nueva lógica de colores
                 if (metaGlobal > nuevoTotal) {
                     badge.addClass('bg-danger');
                 } else if (metaGlobal === nuevoTotal) {
                     badge.addClass('bg-info');
                 } else {
-                    // Meta < MetaProgramada (Exceso)
                     badge.addClass('bg-warning');
                 }
 
-                // 4. Feedback visual (Opcional: un pequeño parpadeo)
                 badge.fadeOut(100).fadeIn(100);
+            },
+            error: function () {
+                badge.prop('disabled', false).focus();
+            }
+        });
+    }
 
+    function actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion) {
+        const badge = $(`#sum_tbl_${codigo}_${gestion}`);
+        $.ajax({
+            url: 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/calcular-meta-gestion',
+            method: 'POST',
+            data: {idIndicadorEstrategico: idIndicadorEstrategico, gestion: gestion},
+            success: function (resp) {
+                const nuevoTotal = parseFloat(resp.data);
 
+                badge.html(nuevoTotal);
+                badge.fadeOut(100).fadeIn(100);
             },
             error: function () {
                 input.prop('disabled', false).focus();
             }
         });
-
     }
 
-// 3. Al perder el FOCO (Blur): Volver a readonly sin guardar si no se presionó Enter
-    $(document).on('blur', '.input-editable-smart', function () {
+    $(document).on('blur', '.input-meta', function () {
+        console.log('se usaaaa')
         $(this).prop('readonly', true)
             .css({'background-color': 'transparent', 'border-color': 'transparent'});
     });
 
     function cambiarEstado(objectBtn, data) {
         if (data === 0) {
-            objectBtn.addClass('btn-outline-success').removeClass('btn-outline-danger');
+            objectBtn.addClass('estado-on').removeClass('estado-off');
             objectBtn.find('.btn_text').html('Agregar')
         } else {
-            objectBtn.removeClass('btn-outline-success').addClass('btn-outline-danger')
+            objectBtn.removeClass('estado-on').addClass('estado-off')
             objectBtn.find('.btn_text').html('Quitar')
         }
     }
-
 })

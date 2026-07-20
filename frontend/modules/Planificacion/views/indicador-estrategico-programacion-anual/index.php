@@ -5,19 +5,19 @@ use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion/programacion.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion-anual/programacion.js",[
     'depends' => [
         JqueryAsset::class
     ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion/dt-declaration.js",[
+$this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacion-anual/dt-declaration.js",[
         'depends' => [
                 JqueryAsset::class
         ]
 ]);
 
-$this->registerCssFile('@planificacionModule/css/indicador-estrategico-programacion/style.css',[
+$this->registerCssFile('@planificacionModule/css/indicador-estrategico-programacion-anual/style.css',[
         'depends' => [
                 PlanificacionAsset::class
 ]]);
@@ -42,28 +42,31 @@ $this->params['breadcrumbs'][] = [
 ];
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ Programacion de metas',
+    'label' => '/ Programacion Anual',
 ];
 ?>
 
-<div id="divTabla" class="card-body">
-    <div class="card-dtic-style">
+<div class="card ">
 
-        <div id="dticTableLoading" class="p-4">
-            <div class="table-loading"></div>
-            <div class="table-loading"></div>
-            <div class="table-loading"></div>
+    <div id="divTabla" class="card-body">
+        <div class="card-dtic-style">
+
+            <div id="dticTableLoading" class="p-4">
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+            </div>
+
+            <div class="p-2" id="dticTableContainer" style="display:none;">
+                <table id="tablaListaIndicadores" class="table w-100 dtic-table"></table>
+            </div>
+
         </div>
-
-        <div class="p-2" id="dticTableContainer" style="display:none;">
-            <table id="tablaListaIndicadores" class="table w-100 dtic-table"></table>
-        </div>
-
     </div>
 </div>
 
 <!-- Modal Fijo en la Vista -->
-<div class="modal fade" id="modalProgramacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal fade" id="modalLlaves" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content" style="overflow: auto">
             <div class="modal-header bg-primary text-white">
@@ -78,8 +81,8 @@ $this->params['breadcrumbs'][] = [
                     <h3>Listado de llaves presupuestarias</h3>
                 </div>
 
-                <input type="hidden" id="modal_idIndicador">
-                <input type="hidden" id="modal_idGestion">
+                <input type="hidden" id="modal_Indicador">
+                <input type="hidden" id="modal_Gestion">
                 <input type="hidden" id="modal_tableIdOriginal">
 
                 <!-- Tabla Detalle -->
@@ -97,8 +100,14 @@ $this->params['breadcrumbs'][] = [
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Cerrar y Actualizar</button>
+                <button type="button" class="btn-guardar" data-bs-dismiss="modal">Cerrar y Actualizar</button>
             </div>
         </div>
     </div>
 </div>
+
+
+<style>
+
+
+</style>

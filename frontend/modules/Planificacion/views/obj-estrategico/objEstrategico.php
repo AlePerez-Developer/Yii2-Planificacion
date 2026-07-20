@@ -30,7 +30,7 @@ $this->registerCssFile("@planificacionModule/css/obj-estrategico/style.css", [
 ]);
 
 $this->registerJs("
-    urlProgramar = '" . Url::to(['indicador-estrategico-programacion/index']) . "';
+    urlProgramar = '" . Url::to(['indicador-estrategico-programacion-anual/index']) . "';
 ");
 
 $this->title = 'Planificación Institucional';

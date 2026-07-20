@@ -68,7 +68,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
         ];
     }
 
-    public static function listAllbyGestion(string $idIndicadorEstrategico, string $idGestion): ActiveQuery
+    public static function listAllbyGestion(): ActiveQuery
     {
         return self::find()->alias('P')
             ->select([
@@ -77,7 +77,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
                 'L.Descripcion',
                 'P.MetaProgramada as Meta',
                 'G.IdGestion',
-                'I.IDIndicadorEstrategico',
+                'I.IdIndicadorEstrategico',
                 'L.IdLlavePresupuestaria',
             ])
             ->joinWith('gestion G', true, 'INNER JOIN')
@@ -89,8 +89,14 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             ->joinWith('llavePresupuestaria.proyecto Lpy', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.actividad La', true, 'INNER JOIN')
             ->where(['!=', 'G.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['P.IdGestion' => $idGestion])
-            ->andWhere(['P.IdIndicadorEstrategico' => $idIndicadorEstrategico]);
+            ->groupBy(['P.IdProgramacionIndicadorGestio', 'L.Llave', 'L.Descripcion', 'P.MetaProgramada',
+                    'G.IdGestion', 'I.IDIndicadorEstrategico', 'L.IdLlavePresupuestaria',]
+            );
+    }
+
+    public static function listOne(string $id): ?ProgramacionIndicadorGestion
+    {
+        return self::findOne(['IdProgramacionIndicadorGestio' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
     }
 
     /**

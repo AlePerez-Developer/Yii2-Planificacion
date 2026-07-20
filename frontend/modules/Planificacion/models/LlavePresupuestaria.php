@@ -155,18 +155,18 @@ class LlavePresupuestaria extends ActiveRecord
                 'lp.Llave',
                 'lp.Descripcion',
                 'Estado' => new Expression("
-            CASE 
-                WHEN pig.IdProgramacionIndicadorGestio IS NOT NULL 
-                THEN 1 
-                ELSE 0 
-            END
-        ")
+                    CASE 
+                        WHEN pig.IdProgramacionIndicadorGestio IS NOT NULL 
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ")
             ])
             ->leftJoin(
                 ['pig' => ProgramacionIndicadorGestion::tableName()],
                 'pig.IdLlavePresupuestaria = lp.IdLlavePresupuestaria
-         AND pig.IdIndicadorEstrategico = :idIndicador
-         AND pig.IdGestion = :idGestion',
+                    AND pig.IdIndicadorEstrategico = :idIndicador
+                    AND pig.IdGestion = :idGestion',
                 [
                     ':idIndicador' => $idIndicadorEstrategico,
                     ':idGestion' => $idGestion
@@ -175,7 +175,6 @@ class LlavePresupuestaria extends ActiveRecord
             ->orderBy(['lp.Llave' => SORT_ASC])
             ->asArray()
             ->all();
-
     }
 
     /**
