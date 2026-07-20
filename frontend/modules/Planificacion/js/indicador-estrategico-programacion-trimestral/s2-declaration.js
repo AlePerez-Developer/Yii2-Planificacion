@@ -1,7 +1,7 @@
-let objInstitucional_s2ObjEstrategico = $('#idObjEstrategico');
+let programacionTrimestral_s2ObjEstrategico = $('#idObjEstrategico');
 
 $(document).ready(function () {
-    objInstitucional_s2ObjEstrategico.select2({
+    programacionTrimestral_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
         placeholder: 'Seleccione un objetivo estratégico',
         allowClear: true,
@@ -11,7 +11,7 @@ $(document).ready(function () {
         matcher: select2ObjMatchSearch
     });
 
-    populateS2ObjEstrategico(objInstitucional_s2ObjEstrategico);
+    populateS2ObjEstrategico(programacionTrimestral_s2ObjEstrategico);
 
     function select2ObjHtmlFormat(repo) {
         if (repo.loading || repo.id === '') {

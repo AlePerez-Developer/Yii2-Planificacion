@@ -50,7 +50,7 @@ $menus = $modulo->menus;
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico/index']) ?>">Manejar Indicadores</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Programacion Anual</a>
-                    <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Programacion Trimestral</a>
+                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
                 </div>

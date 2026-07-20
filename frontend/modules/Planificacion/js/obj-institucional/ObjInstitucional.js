@@ -1,49 +1,69 @@
-$(document).ready(function(){
-    let idObjInstitucional = '00000000-0000-0000-0000-000000000000'
+$(document).ready(function () {
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    const baseUrl = 'index.php?r=Planificacion/obj-institucional/';
+    const dtEvents = $('#tablaListaObjInstitucionales');
+    const btnToggleForm = $('#btnMostrarCrear');
 
-    let baseUrl = "index.php?r=Planificacion/obj-institucional/"
+    let idObjInstitucional = ID_EMPTY_GUID;
 
-    function ReiniciarCampos(){
-        $('#formObjInstitucional *').filter(':input').each(function () {
-            $(this).removeClass('is-invalid is-valid');
-        });
-        $('#formObjInstitucional').trigger("reset");
-        objInstitucional_s2ObjEstrategico.val(null).trigger('change')
-        idObjInstitucional = '00000000-0000-0000-0000-000000000000'
+    $('#gestion').val(new Date().getFullYear());
+
+    function normalizarCodigo() {
+        const input = $('#codigo');
+        const valor = input.val().replace(/\D/g, '').slice(0, 2);
+
+        if (valor !== '') {
+            input.val(valor.padStart(2, '0'));
+        }
+    }
+
+    function reiniciarCampos() {
+        $('#formObjInstitucional *:input').removeClass('is-invalid is-valid');
+        $('#formObjInstitucional').trigger('reset');
+        objInstitucional_s2ObjEstrategico.val(null).trigger('change');
+        $('#gestion').val(new Date().getFullYear());
+        idObjInstitucional = ID_EMPTY_GUID;
     }
 
     function mensajeAccion(accion) {
-        return `Los datos del Objetivo Institucional se ${accion}ron correctamente.`;
+        const mensajes = {
+            guardar: 'Los datos del objetivo institucional se guardaron correctamente.',
+            actualizar: 'Los datos del objetivo institucional se actualizaron correctamente.',
+            eliminar: 'El objetivo institucional se eliminó correctamente.'
+        };
+
+        return mensajes[accion] || 'Proceso realizado correctamente.';
     }
 
-    $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
-        ReiniciarCampos();
-        $("#divDatos").hide(500);
-        $("#divTabla").show(500);
+    $('#codigo').on('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 2);
+    }).on('blur', normalizarCodigo);
+
+    $('#btnCancelar').on('click', function () {
+        btnToggleForm.removeClass('opened').addClass('closed');
+        reiniciarCampos();
+        $('#divDatos').hide(500);
+        $('#divTabla').show(500);
     });
 
-    $("#btnGuardar").click(async function () {
+    $('#btnGuardar').on('click', async function () {
+        normalizarCodigo();
+
+        if (!$('#formObjInstitucional').valid()) {
+            return;
+        }
+
         const btn = $(this);
-        const btnCancel = $('#btnCancelar')
-
-        if (!$("#formObjInstitucional").valid()) return;
-
-        const hasCode =  idObjInstitucional !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
-
-        const idObjEstrategico = objInstitucional_s2ObjEstrategico.select2('data')[0].id
-        const codigo = $("#codigo").val();
-        const objetivo = $("#objetivo").val();
-        const producto = $("#producto").val();
-        const gestion = new Date().getFullYear().toString()
+        const btnCancel = $('#btnCancelar');
+        const accion = idObjInstitucional === ID_EMPTY_GUID ? 'guardar' : 'actualizar';
         const datos = new FormData();
-        datos.append("idObjInstitucional", idObjInstitucional);
-        datos.append("idObjEstrategico", idObjEstrategico);
-        datos.append("codigo", codigo);
-        datos.append("objetivo", objetivo);
-        datos.append("producto", producto);
-        datos.append("gestion", gestion);
+
+        datos.append('idObjInstitucional', idObjInstitucional);
+        datos.append('idObjEstrategico', objInstitucional_s2ObjEstrategico.val());
+        datos.append('codigo', $('#codigo').val());
+        datos.append('objetivo', $('#objetivo').val());
+        datos.append('producto', $('#producto').val());
+        datos.append('gestion', $('#gestion').val());
 
         try {
             await ajaxPromise({
@@ -54,196 +74,201 @@ $(document).ready(function(){
                 successMsg: mensajeAccion(accion),
                 reloadTable: dt_objInstitucional
             });
-        } catch (err) {
-            console.error("Error al procesar:", err);
+        } catch (error) {
+            console.error('Error al procesar el objetivo institucional:', error);
         }
     });
 
-    $(document).on('click', '#refresh', function(){
-        dt_objInstitucional.ajax.reload();
-    })
+    $(document).on('click', '#refresh', function () {
+        dt_objInstitucional.ajax.reload(null, false);
+    });
 
-
-    /* =============================================
-     * CAMBIA EL ESTADO DEL REGISTRO
-     * =============================================
-     */
-    $(document).on('click', 'tbody #btnEstado', async function(){
-
-        let objectBtn = $(this);
-        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data()
-        let idObjInstitucional = dt_row["IdObjInstitucional"];
-
+    dtEvents.on('click', '.btn-toggle-estado', async function () {
+        const objectBtn = $(this);
+        const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
         const datos = new FormData();
-        datos.append("idObjInstitucional", idObjInstitucional);
+
+        datos.append('idObjInstitucional', registro.IdObjInstitucional);
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "cambiar-estado",
+            const respuesta = await ajaxPromise({
+                url: baseUrl + 'cambiar-estado',
                 data: datos,
                 spinnerBtn: objectBtn,
-                successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
-            })
-        } catch (err) {
-            console.error("Error al procesar:", err);
+                successMsg: 'Estado actualizado correctamente.'
+            });
+
+            cambiarEstadoBtn(objectBtn, respuesta.data);
+        } catch (error) {
+            console.error('Error al cambiar el estado:', error);
         }
     });
 
-    /*=============================================
-    ELIMINA DE LA BD UN REGISTRO
-    =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
-        let objectBtn = $(this)
-        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data()
-        let idObjInstitucional = dt_row["IdObjInstitucional"];
-
+    dtEvents.on('click', '.btn-delete', function () {
+        const objectBtn = $(this);
+        const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
         const datos = new FormData();
-        datos.append("idObjInstitucional", idObjInstitucional);
+
+        datos.append('idObjInstitucional', registro.IdObjInstitucional);
 
         Swal.fire({
-            icon: "warning",
-            title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar el Objetivo Institucional seleccionado?",
+            icon: 'warning',
+            title: 'Confirmación de eliminación',
+            text: '¿Está seguro de eliminar el objetivo institucional seleccionado?',
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: '#3085d6',
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
         }).then(async function (resultado) {
-            if (resultado.value) {
-                try {
-                    await ajaxPromise({
-                        url: baseUrl + "eliminar",
-                        data: datos,
-                        spinnerBtn: objectBtn,
-                        successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_objInstitucional
-                    });
-                } catch (err) {
-                    console.error("Error al procesar:", err);
-                }
+            if (!resultado.value && !resultado.isConfirmed) {
+                return;
+            }
+
+            try {
+                await ajaxPromise({
+                    url: baseUrl + 'eliminar',
+                    data: datos,
+                    spinnerBtn: objectBtn,
+                    successMsg: mensajeAccion('eliminar'),
+                    reloadTable: dt_objInstitucional
+                });
+            } catch (error) {
+                console.error('Error al eliminar:', error);
             }
         });
     });
 
-    /*=============================================
-    BUSCA EL REGISTRO SELECCIONADO EN LA BD
-    =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
-        let objectBtn = $(this);
-        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data()
-        idObjInstitucional = dt_row["IdObjInstitucional"];
-
+    dtEvents.on('click', '.btn-edit', async function () {
+        const objectBtn = $(this);
+        const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
         const datos = new FormData();
-        datos.append("idObjInstitucional", idObjInstitucional);
+
+        idObjInstitucional = registro.IdObjInstitucional;
+        datos.append('idObjInstitucional', idObjInstitucional);
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "buscar",
+            const respuesta = await ajaxPromise({
+                url: baseUrl + 'buscar',
                 data: datos,
-                spinnerBtn: objectBtn,
-            }).then((data) => {
-                let obj = data.data
-                objInstitucional_s2ObjEstrategico.val(obj["IdObjEstrategico"]).trigger('change')
-                $("#codigo").val(obj["Codigo"]);
-                $("#objetivo").val(obj["Objetivo"]);
-                $("#producto").val(obj["Producto"]);
-                $("#btnMostrarCrear").trigger('click');
+                spinnerBtn: objectBtn
             });
-        } catch (err) {
-            console.error("Error al procesar:", err);
+
+            const obj = respuesta.data;
+
+            objInstitucional_s2ObjEstrategico
+                .val(obj.IdObjEstrategico)
+                .trigger('change.select2');
+
+            $('#codigo').val(obj.Codigo);
+            $('#objetivo').val(obj.Objetivo);
+            $('#producto').val(obj.Producto);
+            $('#gestion').val(obj.Gestion);
+
+            $('#btnMostrarCrear').trigger('click');
+        } catch (error) {
+            console.error('Error al buscar el registro:', error);
         }
     });
 
-    $(document).on('click', 'tbody #btnProgramar', async function(){
-        let objectBtn = $(this);
-        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data();
-        let idObjInstitucional = dt_row["IdObjInstitucional"];
-
-        // redirección
-        window.location.href = urlProgramar + '&id=' + idObjInstitucional;
-    })
-
-
-    /**
-     * Validacion del form
-     */
-    $( "#formObjInstitucional" ).validate( {
+    $('#formObjInstitucional').validate({
         rules: {
-            objsEstrategicos: {
-                required: true,
+            idObjEstrategico: {
+                required: true
             },
             codigo: {
                 required: true,
                 digits: true,
-                minlength: 3,
-                maxlength: 3,
-                require_from_group: [2, ".codigo_group"],
+                minlength: 2,
+                maxlength: 2,
                 remote: {
-                    url: baseUrl + "verificar-codigo",
-                    type: "post",
-                    dataType: "json",
+                    url: baseUrl + 'verificar-codigo',
+                    type: 'post',
+                    dataType: 'json',
                     data: {
-                        codigo: function() {
-                            return $('#codigo').val(); // valor actual del campo
+                        codigo: function () {
+                            return $('#codigo').val();
                         },
-                        idObjEstrategico: function (){
-                            let objEstrategico = $('#objsEstrategicos').select2('data')
-                            return objEstrategico[0].id
+                        idObjEstrategico: function () {
+                            return objInstitucional_s2ObjEstrategico.val() || '';
                         },
-                        idObjInstitucional: function (){
-                            return idObjInstitucional
+                        idObjInstitucional: function () {
+                            return idObjInstitucional;
                         }
                     }
                 }
             },
-            objetivo:{
-                required: true,
-                minlength: 2,
-                maxlength: 500,
-            },
-            producto:{
-                required: true,
-                minlength: 2,
-                maxlength: 500,
-            },
-        },
-        messages: {
-            objsEstrategicos: {
-                required: "Debe seleccionar una opcion de Objetivo Estrategico",
-            },
-            codigo: {
-                required: "Debe ingresar un codigo de objetico institucional (OI)",
-                digits: "Solo se permite numeros enteros",
-                minlength: "El codigo debe ser de 3 caracteres",
-                maxlength: "El codigo debe ser de 3 caracteres",
-                require_from_group: "Debe seleccionar un area y una politica antes de validar el codigo de objetivo",
-                remote: "El codigo ingresado ya se encuentra en uso con el area y politica seleccionadas"
-            },
             objetivo: {
-                required: "Debe ingresar la descripcion del objetivo institucional",
-                minlength: "El objetivo debe tener por lo menos 2 caracteres",
-                maxlength: "El objetivo debe tener maximo 500 caracteres",
+                required: true,
+                minlength: 2,
+                maxlength: 200
             },
             producto: {
-                required: "Debe ingresar el resultado esperado del objetivo institucional",
-                minlength: "El resultado debe tener por lo menos 2 caracteres",
-                maxlength: "El resultad debe tener maximo 500 caracteres",
+                required: true,
+                minlength: 2,
+                maxlength: 200
             },
+            gestion: {
+                required: true,
+                digits: true,
+                range: [2000, 2100]
+            }
         },
-        errorElement: "div",
+        messages: {
+            idObjEstrategico: {
+                required: 'Debe seleccionar un objetivo estratégico.'
+            },
+            codigo: {
+                required: 'Debe ingresar el código del objetivo institucional.',
+                digits: 'El código solo puede contener números.',
+                minlength: 'El código debe tener exactamente 2 dígitos.',
+                maxlength: 'El código debe tener exactamente 2 dígitos.',
+                remote: 'El código ya está registrado para el objetivo estratégico seleccionado.'
+            },
+            objetivo: {
+                required: 'Debe ingresar el objetivo institucional.',
+                minlength: 'El objetivo debe tener al menos 2 caracteres.',
+                maxlength: 'El objetivo permite como máximo 200 caracteres.'
+            },
+            producto: {
+                required: 'Debe ingresar el resultado o producto esperado.',
+                minlength: 'El producto debe tener al menos 2 caracteres.',
+                maxlength: 'El producto permite como máximo 200 caracteres.'
+            },
+            gestion: {
+                required: 'Debe ingresar la gestión.',
+                digits: 'La gestión debe ser un número entero.',
+                range: 'La gestión debe estar entre 2000 y 2100.'
+            }
+        },
+        errorElement: 'div',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback');
 
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
+            if (element.hasClass('select2-hidden-accessible')) {
+                error.insertAfter(element.next('.select2'));
+                return;
+            }
+
             error.insertAfter(element);
         },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        highlight: function (element) {
+            $(element).addClass('is-invalid').removeClass('is-valid');
+
+            if ($(element).hasClass('select2-hidden-accessible')) {
+                $(element).next('.select2').find('.select2-selection')
+                    .addClass('is-invalid')
+                    .removeClass('is-valid');
+            }
         },
         unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+            $(element).addClass('is-valid').removeClass('is-invalid');
+
+            if ($(element).hasClass('select2-hidden-accessible')) {
+                $(element).next('.select2').find('.select2-selection')
+                    .addClass('is-valid')
+                    .removeClass('is-invalid');
+            }
         }
-    } );
-})
+    });
+});

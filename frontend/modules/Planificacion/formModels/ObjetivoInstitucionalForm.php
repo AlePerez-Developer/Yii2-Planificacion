@@ -4,33 +4,23 @@ namespace app\modules\Planificacion\formModels;
 
 use yii\base\Model;
 
-/**
- *
- * @property integer $codigo
- * @property string $objetivo
- * @property string $producto
- * @property string $gestion
- * @property string $idObjEstrategico
- *
- */
 class ObjetivoInstitucionalForm extends Model
 {
-
-    public int $codigo;
-    public string $objetivo;
-    public string $producto;
-    public string $gestion;
-    public string $idObjEstrategico;
-
+    public ?string $idObjEstrategico = null;
+    public ?string $codigo = null;
+    public ?string $objetivo = null;
+    public ?string $producto = null;
+    public ?int $gestion = null;
 
     public function rules(): array
     {
         return [
-            [['codigo', 'objetivo', 'producto', 'idObjEstrategico'], 'required'],
-            [['gestion'], 'integer'],
+            [['idObjEstrategico', 'codigo', 'objetivo', 'producto', 'gestion'], 'required'],
             [['idObjEstrategico'], 'string', 'max' => 36],
-            [['objetivo', 'producto' ], 'string', 'max' => 500],
-            [['codigo'], 'integer', 'min' => 100, 'max' => 999,]
+            [['codigo'], 'match', 'pattern' => '/^\d{2}$/', 'message' => 'El código debe tener exactamente 2 dígitos.'],
+            [['objetivo', 'producto'], 'string', 'min' => 2, 'max' => 200],
+            [['gestion'], 'integer', 'min' => 2000, 'max' => 2100],
+            [['codigo', 'objetivo', 'producto'], 'filter', 'filter' => static fn($value) => trim((string)$value)],
         ];
     }
 }

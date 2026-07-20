@@ -1,0 +1,213 @@
+#tablaListaIndicadoresTrimestrales > thead {
+    display: none;
+}
+
+.programacion-trimestral-header {
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.selector-objetivo-wrapper {
+    width: min(760px, 100%);
+}
+
+.programacion-empty-state {
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #64748b;
+    text-align: center;
+}
+
+.programacion-empty-state i {
+    font-size: 38px;
+    color: #94a3b8;
+}
+
+/* Select2: mismo formato visual de IndicadorEstrategicoAccion */
+span .select2-selection.select2-selection--single {
+    height: auto !important;
+    min-height: 48px;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+}
+
+.select2-selection__rendered {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: auto !important;
+}
+
+.mi-render-select2 {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    padding: 2px 0;
+    line-height: 1.2;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 0 !important;
+}
+
+.select2-results__option {
+    border-bottom: 1px dotted darkgrey;
+}
+
+.select2-results__options {
+    max-height: 390px !important;
+}
+
+.titulo-producto {
+    font-weight: bold;
+    color: #333;
+}
+
+.subtitulo-producto {
+    font-weight: normal;
+    color: #333;
+}
+
+.dtic-control::before {
+    content: '\f067';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+tr.shown .dtic-control::before {
+    content: '\f068';
+}
+
+.badge-programacion-anual {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-programacion-anual.completa {
+    color: #246a35;
+    border: 1px solid #8dbe5a;
+    background: #f0f9e8;
+}
+
+.tab-container {
+    display: none;
+    min-height: 220px;
+}
+
+.nav-pills {
+    gap: 5px;
+}
+
+.nav-item,
+.dtic-tab {
+    border: 0 !important;
+    border-radius: 22px !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .06), 0 2px 8px rgba(15, 23, 42, .03);
+}
+
+.meta-badge {
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dtic-gestion-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 12px !important;
+    padding: 0 12px;
+}
+
+.dtic-gestion-table > tbody > tr > td {
+    padding: 9px 10px !important;
+    vertical-align: middle;
+    transition: background-color .2s ease, border-color .2s ease;
+    border-top: 2px solid !important;
+    border-bottom: 2px solid !important;
+}
+
+.dtic-gestion-table > tbody > tr > td:first-child {
+    border-left: 2px solid !important;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.dtic-gestion-table > tbody > tr > td:last-child {
+    border-right: 2px solid !important;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.dtic-gestion-table > tbody > tr.programacion-completa > td {
+    background-color: #edf9ef !important;
+    border-color: #69b879 !important;
+}
+
+.dtic-gestion-table > tbody > tr.programacion-pendiente > td {
+    background-color: #fff1f1 !important;
+    border-color: #e58a8a !important;
+}
+
+.input-meta-trimestre {
+    width: 100%;
+    min-width: 74px;
+    text-align: right;
+    cursor: pointer;
+    border-color: transparent;
+    background: transparent;
+    font-weight: 700;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.input-meta-trimestre:not([readonly]) {
+    background: #fff !important;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .18) !important;
+}
+
+.meta-programada,
+.total-trimestral {
+    font-weight: 800;
+}
+
+.total-badge {
+    display: inline-block;
+    min-width: 54px;
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-weight: 800;
+}
+
+.total-badge.completa {
+    color: #20652f;
+    background: #d8f0dc;
+}
+
+.total-badge.pendiente {
+    color: #8f2727;
+    background: #f8d7da;
+}
+
+@media (max-width: 768px) {
+    .programacion-trimestral-header {
+        flex-direction: column;
+    }
+
+    .selector-objetivo-wrapper {
+        width: 100%;
+    }
+}

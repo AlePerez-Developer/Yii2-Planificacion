@@ -2,14 +2,12 @@
 
 namespace app\modules\Planificacion\models;
 
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 use common\models\Estado;
 use common\models\Usuario;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "ObjetivosInstitucionales".
- *
  * @property string $IdObjInstitucional
  * @property string $IdObjEstrategico
  * @property string $Codigo
@@ -19,35 +17,26 @@ use common\models\Usuario;
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
- *
- * @property Estado $codigoEstado
- * @property Usuario $codigoUsuario
- * @property ObjetivoEstrategico $idObjEstrategico
- * @property ObjetivoEspecifico[] $objetivosEspecificos
  */
 class ObjetivoInstitucional extends ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function tableName(): string
     {
         return 'ObjetivosInstitucionales';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules(): array
     {
         return [
-            [['IdObjInstitucional', 'IdObjEstrategico'], 'string', 'max' => 36],
             [['IdObjEstrategico', 'Codigo', 'Objetivo', 'Producto', 'Gestion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['Gestion', 'Codigo'], 'integer'],
-            [['FechaHoraRegistro'], 'safe'],
-            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['IdObjInstitucional', 'IdObjEstrategico'], 'string', 'max' => 36],
+            [['Codigo'], 'string', 'length' => 2],
+            [['Codigo'], 'match', 'pattern' => '/^\d{2}$/'],
             [['Objetivo', 'Producto'], 'string', 'max' => 200],
+            [['Gestion'], 'integer'],
             [['CodigoEstado'], 'string', 'max' => 1],
+            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['FechaHoraRegistro'], 'safe'],
             [['IdObjInstitucional'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
@@ -55,139 +44,66 @@ class ObjetivoInstitucional extends ActiveRecord
         ];
     }
 
-    /**
-     * Valida que no exista otra política activa con el mismo código y área estratégica.
-     *
-     * @param string $attribute
-     * @used-by rules()
-     * @noinspection PhpUnused
-     */
-    public function validateUniqueActiva(string $attribute): void
+    public static function listOne(string $id): ?self
     {
-        if ($this->CodigoEstado !== 'V') {
-            return;
-        }
-
-        $id = $this->IdObjInstitucional == null  ? '00000000-0000-0000-0000-000000000000' : $this->IdObjInstitucional;
-
-        $exists = self::find()
-            ->where([
-                'Codigo' => $this->Codigo,
-                'IdObjetivoEstrategico' => $this->IdObjInstitucional,
-                'CodigoEstado' => 'V',
-            ])
-            ->andWhere(['<>', 'IdObjInstitucional', $id]) // Evita conflicto consigo mismo en update
-            ->exists();
-
-        if ($exists) {
-            $this->addError($attribute, 'El Codigo  de Objetivo institucional ya existe');
-        }
+        return self::find()
+            ->where(['IdObjInstitucional' => $id])
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->one();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels(): array
+    public static function listAll(string $search = ''): ActiveQuery
     {
-        return [
-            'IdObjInstitucional' => 'Id Obj Institucional',
-            'IdObjEstrategico' => 'Id Obj Estrategico',
-            'Codigo' => 'Codigo',
-            'Objetivo' => 'Objetivo',
-            'Producto' => 'Producto',
-            'Gestion' => 'Gestion',
-            'CodigoEstado' => 'Codigo Estado',
-            'FechaHoraRegistro' => 'Fecha Hora Registro',
-            'CodigoUsuario' => 'Codigo Usuario',
-        ];
-    }
-
-    public static function listOne(string $id): ?ObjetivoInstitucional
-    {
-        return self::findOne(['IdObjInstitucional' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
-    }
-
-    public static function listAll(string $search = '%%'): ActiveQuery
-    {
-        return self::find()->alias('O')
+        $query = self::find()->alias('OI')
             ->select([
-                'O.IdObjInstitucional',
-                'CONCAT(a.Codigo,p.Codigo,Oe.Codigo, \'-\',O.Codigo) AS Compuesto',
-                'O.Codigo',
-                'O.Objetivo',
-                'O.Producto',
-                'O.Gestion',
-                'O.CodigoEstado',
-                'O.CodigoUsuario',
-                'Oe.IdObjEstrategico',
+                'OI.IdObjInstitucional',
+                'OI.IdObjEstrategico',
+                "CONCAT(OE.Compuesto, '-', OI.Codigo) AS Compuesto",
+                'OI.Codigo',
+                'OI.Objetivo',
+                'OI.Producto',
+                'OI.Gestion',
+                'OI.CodigoEstado',
+                'OI.CodigoUsuario',
+                'OE.Objetivo AS ObjetivoEstrategico',
+                'OE.Producto AS ProductoEstrategico',
             ])
-            ->joinWith('objetivoEstrategico Oe', true, 'INNER JOIN')
-            ->joinWith('objetivoEstrategico.areaEstrategica a', true, 'INNER JOIN')
-            ->joinWith('objetivoEstrategico.politicaEstrategica p', true, 'INNER JOIN')
-            ->where(['!=', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['!=', 'Oe.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andwhere(['like', 'O.Objetivo', $search,false]);
+            ->innerJoin(
+                ['OE' => ObjetivoEstrategico::listAll()],
+                'OE.IdObjEstrategico = OI.IdObjEstrategico'
+            )
+            ->where(['<>', 'OI.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+
+        if ($search !== '') {
+            $query->andWhere([
+                'or',
+                ['like', 'OI.Codigo', $search],
+                ['like', 'OI.Objetivo', $search],
+                ['like', 'OI.Producto', $search],
+                ['like', 'OE.Objetivo', $search],
+            ]);
+        }
+
+        return $query;
     }
 
-    /**
-     * alterna el estado del modelo V/C.
-     *
-     * @return void
-     */
     public function cambiarEstado(): void
     {
-        $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
+        $this->CodigoEstado = $this->CodigoEstado === Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
     }
 
-    /**
-     * realiza el soft delete de un registro.
-     *
-     * @return void
-     */
     public function eliminar(): void
     {
         $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
     }
 
-    /**
-     * Gets a query for [[CodigoEstado]].
-     *
-     * @return ActiveQuery
-     */
-    public function getCodigoEstado(): ActiveQuery
-    {
-        return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
-    }
-
-    /**
-     * Gets a query for [[CodigoUsuario]].
-     *
-     * @return ActiveQuery
-     */
-    public function getCodigoUsuario(): ActiveQuery
-    {
-        return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
-    }
-
-    /**
-     * Gets a query for [[IdObjEstrategico]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     *
-     */
     public function getObjetivoEstrategico(): ActiveQuery
     {
         return $this->hasOne(ObjetivoEstrategico::class, ['IdObjEstrategico' => 'IdObjEstrategico']);
     }
 
-    /**
-     * Gets a query for [[ObjetivosEspecificos]].
-     *
-     * @return ActiveQuery
-     */
     public function getObjetivosEspecificos(): ActiveQuery
     {
         return $this->hasMany(ObjetivoEspecifico::class, ['IdObjInstitucional' => 'IdObjInstitucional']);
