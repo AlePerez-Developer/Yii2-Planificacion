@@ -20,9 +20,9 @@ class PlanificacionAsset extends AssetBundle
         'js/Validacion.js',
         'js/Planificacion.js',
         'js/common_Functions.js',
-        'js/dt_Configuration.js',
         'js/msg_Functions.js',
-        'js/ajax_Template.js'
+        'js/ajax_Template.js',
+        'js/dt_Configuration.js'
     ];
     public $depends = [
         AppAsset::class,

@@ -4,12 +4,10 @@
 
 .programacion-trimestral-header {
     align-items: flex-start;
-    gap: 18px;
+    gap: 20px;
 }
 
-.selector-objetivo-wrapper {
-    width: min(760px, 100%);
-}
+
 
 .programacion-empty-state {
     min-height: 190px;
@@ -39,7 +37,12 @@ span .select2-selection.select2-selection--single {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
-    height: auto !important;
+    height: 70px !important;
+}
+
+.select2-selection__placeholder{
+    font-size: 18px !important;
+    color: #7086bd;
 }
 
 .mi-render-select2 {
@@ -76,7 +79,7 @@ span .select2-selection.select2-selection--single {
 
 .dtic-control::before {
     content: '\f067';
-    font-family: 'Font Awesome 5 Free';
+    font-family: 'Font Awesome 5 Free', serif;
     font-weight: 900;
 }
 

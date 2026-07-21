@@ -2,6 +2,80 @@
     height: 30px !important ;
 }
 
+.programacion-empty-state {
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #64748b;
+    text-align: center;
+}
+
+.programacion-empty-state i {
+    font-size: 38px;
+    color: #94a3b8;
+}
+
+.titulo-producto {
+    font-weight: bold;
+    color: #333;
+}
+
+.subtitulo-producto {
+    font-weight: normal;
+    color: #333;
+}
+
+
+/**************************select2******************/
+
+/* Select2: mismo formato visual de IndicadorEstrategicoAccion */
+span .select2-selection.select2-selection--single {
+    height: auto !important;
+    min-height: 48px;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+}
+
+.select2-selection__rendered {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: 70px !important;
+}
+
+.select2-selection__placeholder{
+    font-size: 18px !important;
+    color: #7086bd;
+}
+
+.mi-render-select2 {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    padding: 2px 0;
+    line-height: 1.2;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 0 !important;
+}
+
+.select2-results__option {
+    border-bottom: 1px dotted darkgrey;
+}
+
+.select2-results__options {
+    max-height: 390px !important;
+}
+
+
+/********************table**************************/
+
 #tablaListaIndicadores > thead {
     display: none;
 }

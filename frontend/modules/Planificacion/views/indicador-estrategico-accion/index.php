@@ -45,26 +45,23 @@ $this->params['breadcrumbs'][] = [
 ];
 ?>
 <div class="card ">
-
     <div class="card-body">
         <div class="card-dtic-style">
-            <div class="card-dtic-style-header">
-                <div class="card-dtic-style-title">
-                    Objetivos Estrategicos
-                </div>
-                <div class="">
-                    <div class="row">
-                        <div class="col">
-                            <select id="idObjEstrategico" class="form-control dtic-input"></select>
-                        </div>
-                    </div>
-                </div>
 
+            <div class="card-dtic-style-header">
+                <div class="card-dtic-style-title">Objetivos Estrategicos</div>
+                <select id="idObjEstrategico" class="form-control dtic-input"></select>
             </div>
+
             <div id="dticTableLoading" class="p-4">
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
                 <div class="table-loading"></div>
+            </div>
+
+            <div id="mensajeInicial" class="programacion-empty-state">
+                <i class="fas fa-bullseye"></i>
+                <span>Seleccione un objetivo estratégico para mostrar sus indicadores programados.</span>
             </div>
 
             <div class="p-2" id="dticTableContainer" style="display:none;">
@@ -73,7 +70,6 @@ $this->params['breadcrumbs'][] = [
             <label for="idObjEstrategico"></label>
         </div>
     </div>
-
 </div>
 
 

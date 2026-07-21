@@ -1,9 +1,9 @@
 let indicadorEstrategicoAccion_s2ObjEstrategico = $('#idObjEstrategico')
 let indicadorEstrategicoAccion_s2AccionEstrategica = $('#idAccionEstrategica')
 $(document).ready(function () {
-        indicadorEstrategicoAccion_s2ObjEstrategico.select2({
+    indicadorEstrategicoAccion_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
-        placeholder: "Selecciones un objetivo estrategico",
+        placeholder: "Seleccione un objetivo estrategico",
         allowClear: true,
         templateResult: select2ObjHtmlFormat,
         templateSelection: select2ObjHtmlFormat,

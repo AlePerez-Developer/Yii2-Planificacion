@@ -1,27 +1,25 @@
 /*global idObjEstrategico*/
 let dt_listaIndicadores
+let openedRow = null;
 
-$(document).ready(function () {
-    let openedRow = null;
-
-    /***********Datatable Lista Indicadores***************/
-    function format(d) {
-        let id = d.Codigo;
-        return `
-            <div class="slider" style="display:none">
-                <div class="p-3">
-                    <!-- Loader específico para este indicador -->
-                    <div id="loader_${id}" class="p-4">
-                        <div class="table-loading"></div>
-                        <div class="table-loading"></div>
-                    </div>
-                    <!-- Contenedor de tabs único -->
-                    <div id="tabs_container_${id}" class="tab-container">
-                    </div>
+function format(d) {
+    let id = d.Codigo;
+    return `
+        <div class="slider" style="display:none">
+            <div class="p-3">
+                <!-- Loader específico para este indicador -->
+                <div id="loader_${id}" class="p-4">
+                    <div class="table-loading"></div>
+                    <div class="table-loading"></div>
                 </div>
-            </div>`;
-    }
+                <!-- Contenedor de tabs único -->
+                <div id="tabs_container_${id}" class="tab-container">
+                </div>
+            </div>
+        </div>`;
+}
 
+function inicializarTablaIndicadores() {
     dt_listaIndicadores = $("#tablaListaIndicadores").DataTable({
         initComplete: function () {
             $("div.dt-search").append(`
@@ -36,8 +34,8 @@ $(document).ready(function () {
         ajax: {
             method: "POST",
             dataType: "json",
-            data: {
-                'idObjEstrategico': idObjEstrategico
+            data: function () {
+                return {idObjEstrategico: programacionAnual_s2ObjEstrategico.select2('data')[0]?.id};
             },
             url: "index.php?r=Planificacion/indicador-estrategico-programacion-anual/listar-indicadores",
             dataSrc: "data",
@@ -67,9 +65,9 @@ $(document).ready(function () {
                     const metaGlobal = parseFloat(row["Meta"]);
                     const metaProgramada = parseFloat(row["MetaProgramada"]);
 
-                    let colorClass = 'bg-warning';
-                    if (metaGlobal > metaProgramada) colorClass = 'bg-danger';
-                    if (metaGlobal === metaProgramada) colorClass = 'bg-info';
+                    let colorClass = 'bg-warning'; let texto = "Excedente"
+                    if (metaGlobal > metaProgramada) { colorClass = 'bg-danger'; texto = "Pendiente"; }
+                    if (metaGlobal === metaProgramada) { colorClass = 'bg-info'; texto = "Completa" }
 
                     if (type !== "display") {
                         return row["Descripcion"];
@@ -103,11 +101,12 @@ $(document).ready(function () {
                                 <span class="meta-badge-text">Meta Global</span>
                                 <span class="meta-badge">${row["Meta"]}</span>
                                 <span class="meta-badge-text">Meta Programada</span>
-                                <span id="metaProg_${row["IdIndicadorEstrategico"]}" 
+                                <span id="metaProg_${row["Codigo"]}" 
                                         class="meta-badge ${colorClass}" 
                                         data-meta-global="${metaGlobal}">
                                     ${row["MetaProgramada"]}
                                 </span>
+                                <span id="metaTxt_${row["Codigo"]}" class="meta-badge ${colorClass}">${texto}</span>
                             </div>
     
                             <div class="result-box">
@@ -132,8 +131,10 @@ $(document).ready(function () {
             this.data(i++);
         });
     }).draw();
+}
 
-    $('#tablaListaIndicadores tbody').on('click', 'td.expandible', function () {
+$(document).ready(function () {
+    $(document).on('click', '#tablaListaIndicadores tbody td.expandible', function () {
         const tr = $(this).closest('tr');
         const currentRow = dt_listaIndicadores.row(tr);
 
@@ -171,7 +172,6 @@ $(document).ready(function () {
                 tr.removeClass('shown');
             });
     }
-
 
     function cargarTabs(idIndicadorEstrategico, codigoIndicador) {
         let contenedor = $("#tabs_container_" + codigoIndicador);
@@ -286,7 +286,7 @@ $(document).ready(function () {
                 {
                     className: 'dt-small dt-estado dt-center',
                     data: 'Meta',
-                    width: 100,
+                    width: 150,
                     render: function (data) {
                         return `
                             <input type="number" 
@@ -294,7 +294,7 @@ $(document).ready(function () {
                                    class="form-control form-control-sm input-meta" 
                                    value="${data}" 
                                    data-codigoindicador="${codigoIndicador}"
-                                   data-gestion="${gestion}">
+                                   data-gestion="${gestion}" data-como="1">
                             `;
                     }
                 },
@@ -345,8 +345,7 @@ $(document).ready(function () {
         $('#modalLlaves').modal('show');
     });
 
-    function initTableModal(codigoIndicador, gestion)
-    {
+    function initTableModal(codigoIndicador, gestion) {
         const dt_ModalDetalle = $('#tblModalDetalle')
 
         if ($.fn.DataTable.isDataTable('#tblModalDetalle')) {
@@ -443,6 +442,7 @@ $(document).ready(function () {
             ]
         });
     }
+
 })
 
 $('#modalLlaves').on('hidden.bs.modal', function () {

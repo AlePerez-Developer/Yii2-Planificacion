@@ -29,12 +29,12 @@ $this->params['breadcrumbs'][] = ['label' => '/ Programación trimestral'];
 <div class="card">
     <div class="card-body">
         <div class="card-dtic-style">
-            <div class="card-dtic-style-header programacion-trimestral-header">
-                <div class="card-dtic-style-title">Objetivos Estratégicos</div>
-                <div class="selector-objetivo-wrapper">
-                    <select id="idObjEstrategico" class="form-control dtic-input"></select>
-                </div>
+
+            <div class="card-dtic-style-header">
+                <div class="card-dtic-style-title">Objetivos Estrategicos </div>
+                <select id="idObjEstrategico" class="form-control dtic-input"></select>
             </div>
+
 
             <div id="dticTableLoading" class="p-4" style="display:none;">
                 <div class="table-loading"></div>
@@ -53,3 +53,4 @@ $this->params['breadcrumbs'][] = ['label' => '/ Programación trimestral'];
         </div>
     </div>
 </div>
+<label for="idObjEstrategico"></label>

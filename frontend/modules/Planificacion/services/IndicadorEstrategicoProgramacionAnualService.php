@@ -6,6 +6,7 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\dao\ProgramacionAnualDao;
 use app\modules\Planificacion\models\PeiGestion;
 use yii\db\StaleObjectException;
 use common\models\Estado;
@@ -195,6 +196,10 @@ class IndicadorEstrategicoProgramacionAnualService
     {
         $modelo = ProgramacionIndicadorGestion::findOne($idProgramacion);
 
+        if (ProgramacionAnualDao::enUso($modelo)){
+            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'La programacion ya se encuentra desglosada en trimestres',500);
+        }
+
         $modelo?->delete();
 
         return [
@@ -227,11 +232,14 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * @param string $idIndicadorEstrategico
+     * @param string $codigo
+     * @param string $pei
      * @return array
+     * @throws ValidationException
      */
-    public function calcularMeta(string $idIndicadorEstrategico): array
+    public function calcularMeta(string $codigo, string $pei): array
     {
+        $idIndicadorEstrategico = $this->obtenerIdIndicador($codigo, $pei);
         $total = ProgramacionIndicadorGestion::find()
             ->where([
                 'IdIndicadorEstrategico' => $idIndicadorEstrategico
@@ -330,6 +338,7 @@ class IndicadorEstrategicoProgramacionAnualService
      */
     private function obtenerIdIndicador(int $codigo, string $pei): string
     {
+        /** @var IndicadorEstrategico|null $modelo */
         $modelo = IndicadorEstrategico::listAllSimple()
             ->addSelect(['O.IdObjEstrategico'])
             ->joinWith('objetivosEstrategicos O', true, 'INNER JOIN')
@@ -355,6 +364,7 @@ class IndicadorEstrategicoProgramacionAnualService
      */
     private function obtenerIdGestion(int $gestion, string $pei): string
     {
+        /** @var PeiGestion|null $modelo */
         $modelo = PeiGestion::listAll()
             ->andWhere(['G.Gestion' => $gestion])
             ->andWhere(['G.IdPei' => $pei])

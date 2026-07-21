@@ -189,8 +189,9 @@ class IndicadorEstrategicoProgramacionAnualController extends BaseController
     public function actionCalcularMeta(): array
     {
         return $this->withTryCatch(function () {
-            $idIndicadorEstrategico = $this->obtenerIdIndicador();
-            return $this->service->calcularMeta($idIndicadorEstrategico);
+            $pei = Yii::$app->contexto->getPei();
+            $codigo = $this->obtenerCodigoIndicador();
+            return $this->service->calcularMeta($codigo, $pei);
         });
     }
 
@@ -280,8 +281,8 @@ class IndicadorEstrategicoProgramacionAnualController extends BaseController
     private function obtenerMeta(): string
     {
         $id = Yii::$app->request->post('meta');
-        if (!$id) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'La meta no fue enviada.', 400);
+        if ($id === '' || !is_numeric($id) || $id < 0) {
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'La meta no fue enviada o es inválida.', 400);
         }
         return (string)$id;
     }

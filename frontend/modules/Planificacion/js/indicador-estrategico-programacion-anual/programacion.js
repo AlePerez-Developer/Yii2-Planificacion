@@ -1,6 +1,37 @@
 $(document).ready(function () {
     let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion-anual/"
 
+    programacionAnual_s2ObjEstrategico.on('change', function(){
+        const idObjEstrategico = programacionAnual_s2ObjEstrategico.select2('data')[0]?.id
+        const placeHolder = $('#mensajeInicial')
+        const loader = $('#dticTableLoading')
+        const container = $('#dticTableContainer')
+        const dt_table = $('#tablaListaIndicadores')
+
+        if (!idObjEstrategico){
+            container.hide();
+            loader.hide();
+            placeHolder.show();
+            return;
+        }
+
+        openedRow = null;
+        placeHolder.hide();
+
+        loader.show();
+        container.hide();
+
+        if ($.fn.DataTable.isDataTable(dt_table)) {
+            dt_listaIndicadores.ajax.reload();
+        } else {
+            inicializarTablaIndicadores();
+        }
+
+        dt_listaIndicadores.one('draw', function () {
+            loader.hide();
+            container.fadeIn(180);
+        });
+    })
 
     function mensajeAccion(accion) {
         return `Los datos de la programacion se ${accion}ron correctamente.`;
@@ -70,7 +101,7 @@ $(document).ready(function () {
                         successMsg: mensajeAccion('eliminar'),
                         reloadTable: dt_table
                     });
-                    actualizarSumaGlobal(idIndicadorEstrategico)
+                    actualizarSumaGlobal(codigo)
                     actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion)
                 } catch (err) {
                     console.error("Error al procesar:", err);
@@ -85,7 +116,6 @@ $(document).ready(function () {
 
         if (input.prop('readonly')) {
             input.prop('readonly', false)
-                .css({'background-color': '#fff', 'border-color': '#80bdff'})
                 .select();
         }
     });
@@ -94,7 +124,6 @@ $(document).ready(function () {
         if (e.which === 13) {
             const objectInput = $(this);
             const meta = objectInput.val();
-
             const tabla = objectInput.closest('table');
 
             const dt_table = tabla.DataTable();
@@ -104,11 +133,7 @@ $(document).ready(function () {
 
             const codigo = objectInput.data('codigoindicador');
             const gestion = objectInput.data('gestion')
-
-
             e.preventDefault();
-
-            objectInput.prop('disabled', true);
 
             $.ajax({
                 url: baseUrl + 'guardar-meta',
@@ -121,13 +146,12 @@ $(document).ready(function () {
                     if (resp.message === 'ok') {
                         objectInput.prop('readonly', true)
                             .prop('disabled', false)
-                            .css({'background-color': 'transparent', 'border-color': 'transparent'})
                             .addClass('is-valid');
 
                         setTimeout(() => objectInput.removeClass('is-valid'), 1000);
 
                         // Recalcular sumas
-                        actualizarSumaGlobal(idIndicadorEstrategico);
+                        actualizarSumaGlobal(codigo);
                         actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion);
                     } else {
                         alert("Error: " + resp.mensaje);
@@ -141,12 +165,13 @@ $(document).ready(function () {
         }
     });
 
-    function actualizarSumaGlobal(idIndicadorEstrategico) {
-        const badge = $(`#metaProg_${idIndicadorEstrategico}`);
+    function actualizarSumaGlobal(codigo) {
+        const badge = $(`#metaProg_${codigo}`);
+        const badgeTxt = $(`#metaTxt_${codigo}`);
         $.ajax({
             url: 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/calcular-meta',
             method: 'POST',
-            data: {idIndicadorEstrategico: idIndicadorEstrategico},
+            data: {codigoIndicador: codigo},
             success: function (resp) {
                 const nuevoTotal = parseFloat(resp.data);
                 const metaGlobal = parseFloat(badge.data('meta-global'))
@@ -154,15 +179,21 @@ $(document).ready(function () {
                 badge.html(nuevoTotal);
 
                 badge.removeClass('bg-warning bg-danger bg-info');
+                badgeTxt.removeClass('bg-warning bg-danger bg-info');
+
+                let texto = 'Excedente'
                 if (metaGlobal > nuevoTotal) {
-                    badge.addClass('bg-danger');
+                    badge.addClass('bg-danger'); badgeTxt.addClass('bg-danger'); texto = 'Pendiente';
                 } else if (metaGlobal === nuevoTotal) {
-                    badge.addClass('bg-info');
+                    badge.addClass('bg-info'); badgeTxt.addClass('bg-info'); texto = 'Completa';
                 } else {
-                    badge.addClass('bg-warning');
+                    badge.addClass('bg-warning'); badgeTxt.addClass('bg-warning');
                 }
 
+                badgeTxt.html(texto);
+
                 badge.fadeOut(100).fadeIn(100);
+                badgeTxt.fadeOut(100).fadeIn(100);
             },
             error: function () {
                 badge.prop('disabled', false).focus();
@@ -189,9 +220,7 @@ $(document).ready(function () {
     }
 
     $(document).on('blur', '.input-meta', function () {
-        console.log('se usaaaa')
-        $(this).prop('readonly', true)
-            .css({'background-color': 'transparent', 'border-color': 'transparent'});
+        $(this).prop('readonly', true).prop('disabled', false)
     });
 
     function cambiarEstado(objectBtn, data) {

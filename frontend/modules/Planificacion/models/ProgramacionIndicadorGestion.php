@@ -141,4 +141,14 @@ class ProgramacionIndicadorGestion extends ActiveRecord
     {
         return $this->hasOne(LlavePresupuestaria::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
     }
+
+    /**
+     * Gets query for [[ProgramacionesIndicadoresTrimestres]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProgramacionesIndicadoresTrimestres(): ActiveQuery
+    {
+        return $this->hasMany(ProgramacionIndicadorTrimestre::class, ['IdProgramacionIndicadorGestio' => 'IdProgramacionIndicadorGestio']);
+    }
 }
