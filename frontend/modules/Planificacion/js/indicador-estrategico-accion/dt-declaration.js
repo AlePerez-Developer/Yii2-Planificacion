@@ -1,5 +1,9 @@
 /*global idObjEstrategico*/
 let dt_indEstrategicoAccion;
+function inicializarTablaIndAcciones()
+{
+
+}
 
 $(document).ready(function () {
     const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';

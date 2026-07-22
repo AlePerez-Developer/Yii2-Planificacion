@@ -58,11 +58,11 @@ function cargarTabGestionActiva(indicador) {
                                     <tr>
                                         <th>Código compuesto</th>
                                         <th>Descripción</th>
-                                        <th>Meta programada</th>
-                                        <th>1er trimestre</th>
-                                        <th>2do trimestre</th>
-                                        <th>3er trimestre</th>
-                                        <th>4to trimestre</th>
+                                        <th>Meta Trim.</th>
+                                        <th>1er Trim.</th>
+                                        <th>2do Trim.</th>
+                                        <th>3er Trim.</th>
+                                        <th>4to Trim.</th>
                                         <th>Total</th>
                                     </tr>
                                 </thead>
@@ -136,7 +136,7 @@ function crearColumnaTrimestre(numero, atributo) {
     return {
         data: atributo,
         className: 'dt-center',
-        width: 105,
+        width: 110,
         render: function (data, type, row) {
             if (type !== 'display') return data;
 
@@ -179,6 +179,13 @@ $(document).on('blur', '.input-meta-trimestre:not([readonly])', function () {
 
 function guardarMetaTrimestral(input) {
     if (input.data('guardando')) return;
+
+    const tabla = input.closest('table');
+
+    const dt_table = tabla.DataTable();
+    const tr = input.closest('tr')
+    const dt_row = dt_table.row(tr).data();
+
 
     const meta = Number.parseInt(input.val(), 10);
     const original = Number.parseInt(input.data('original'), 10);
@@ -227,6 +234,7 @@ function guardarMetaTrimestral(input) {
         },
         complete: function () {
             input.data('guardando', false).prop('disabled', false).prop('readonly', true);
+            actualizarEstadoFila(tr,dt_row)
         }
     });
 }

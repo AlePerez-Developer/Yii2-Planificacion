@@ -15,39 +15,36 @@ $(document).ready(function () {
 
     indicadorEstrategicoAccion_s2ObjEstrategico.on('change', async function () {
         const idObjEstrategico = indicadorEstrategicoAccion_s2ObjEstrategico.select2('data')[0]?.id
-        const placeHolder = $('#mensajeInicial')
-        const loader = $('#dticTableLoading')
-        const container = $('#dticTableContainer')
+        const holder = $('#mensajeInicial')
+        const load = $('#dticTableLoading')
+        const contain = $('#dticTableContainer')
         const dt_table = $('#tablaListaIndicadores')
 
         if (!idObjEstrategico){
-            container.hide();
-            loader.hide();
-            placeHolder.show();
+            contain.hide();
+            load.hide();
+            holder.show();
             return;
         }
 
         openedRow = null;
-        placeHolder.hide();
+        holder.hide();
 
-        loader.show();
-        container.hide();
+        load.show();
+        contain.hide();
 
         if ($.fn.DataTable.isDataTable(dt_table)) {
             dt_indEstrategicoAccion.ajax.reload();
         } else {
-            inicializarTablaIndicadores();
+            inicializarTablaIndAcciones();
         }
 
         dt_indEstrategicoAccion.one('draw', function () {
-            loader.hide();
-            container.fadeIn(180);
+            load.hide();
+            contain.fadeIn(180);
         });
 
-
         dt_indEstrategicoAccion.ajax.reload();
-
-
     })
 
     dtEvents.on('click', '.btn-programar', async function () {

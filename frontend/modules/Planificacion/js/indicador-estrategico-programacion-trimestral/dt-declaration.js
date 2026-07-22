@@ -33,17 +33,47 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
                 data: null,
                 className: 'expandible',
                 render: function (data, type, row) {
-                    if (type !== 'display') return row.Codigo;
+                    const metaGlobal = parseFloat(row["Meta"]);
+                    const metaProgramada = parseFloat(row["MetaProgramada"]);
+
+                    let colorClass = 'bg-warning'; let texto = "Excedente"
+                    if (metaGlobal > metaProgramada) { colorClass = 'bg-danger'; texto = "Pendiente"; }
+                    if (metaGlobal === metaProgramada) { colorClass = 'bg-info'; texto = "Completa" }
+
+                    if (type !== "display") {
+                        return row["Descripcion"];
+                    }
 
                     return `
-                        <div class="dtic-item-main">
-                            <div class="dtic-item-title">${row.Codigo} - ${row.Descripcion}</div>
-                            <div class="dtic-item-sub2">
-                                <span><strong>Meta:</strong> ${row.Meta}</span>
-                                <span><strong>Programada:</strong> ${row.MetaProgramada}</span>
-                                <span><strong>Unidad:</strong> ${row.Unidad || '-'}</span>
+                        <div class="dtic-code-container">
+                            <span class="dtic-code-text">Indicador N°</span>
+                            <div class="dtic-code-badge">
+                                ${row["Codigo"]}
+                            </div>                                  
+                        </div>
+                        
+                        <div class="dtic-item-sub">
+                            ${row["Descripcion"]}
+                        </div>
+                        
+                          
+                        
+                        <div class="acc-footer">                                    
+                            <div class="meta-box-left dtic-item-sub">
+                                <span class="meta-badge-text">Meta Global</span>
+                                <span class="meta-badge">${row["Meta"]}</span>
+                                <span class="meta-badge-text">Meta Programada</span>
+                                <span id="metaProg_${row["Codigo"]}" 
+                                        class="meta-badge ${colorClass}" 
+                                        data-meta-global="${metaGlobal}">
+                                    ${row["MetaProgramada"]}
+                                </span>
+                                <span id="metaTxt_${row["Codigo"]}" class="meta-badge ${colorClass}">${texto}</span>
                             </div>
-                        </div>`;
+    
+          
+                        </div>                         
+                    `;
                 }
             },
             {
@@ -58,12 +88,6 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
                 }
             }
         ],
-        order: [[1, 'asc']],
-        responsive: false,
-        autoWidth: false,
-        paging: false,
-        searching: false,
-        info: false
     });
 
     $('#tablaListaIndicadoresTrimestrales tbody').on('click', 'td.expandible', function () {

@@ -7,6 +7,40 @@
     gap: 20px;
 }
 
+.meta-badge{
+    background:#2563eb;
+    color: #fff;
+    border-radius:999px;
+    padding:4px 10px;
+    font-size:13px;
+    font-weight:700;
+}
+
+#tablaListaIndicadores > thead {
+    display: none;
+}
+
+.dtic-item-sub2{
+    gap: 5px;
+}
+
+.acc-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meta-box-left {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.meta-badge-text{
+    font-weight: bold;
+    color: black;
+}
+
 
 
 .programacion-empty-state {

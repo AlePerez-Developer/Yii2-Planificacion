@@ -79,14 +79,14 @@ span .select2-selection.select2-selection--single {
     padding: 4px 8px !important;
 }
 
-.select2-selection__rendered {
+#idObjEstrategico + span .select2-selection__rendered {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
     height: 70px !important;
 }
 
-.select2-selection__placeholder{
+#idObjEstrategico +span  .select2-selection__placeholder{
     font-size: 18px !important;
     color: #7086bd;
 }
