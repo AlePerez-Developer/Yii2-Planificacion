@@ -1,23 +1,33 @@
 <?php
+
 namespace app\modules\Planificacion\dao;
 
-use yii\db\Query;
+use app\modules\Planificacion\models\ObjetivoEspecifico;
+use common\models\Estado;
 
 class ObjEspecificoDao
 {
-    /*=====================================================
-         Genera un nuevo codigo de Objetivo Especifico
-    =======================================================*/
-    static public function GenerarCodigoObjEspecifico()
+    public static function enUso(ObjetivoEspecifico $modelo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoObjEspecifico) as CodigoObj')
-            ->from('ObjetivosEspecificos')
-            ->one();
-        if ($codigo['CodigoObj']){
-            return  $codigo['CodigoObj'] + 1;
-        } else {
-            return 1;
-        }
+        return $modelo->getIndicadoresPoa()->exists();
+    }
+
+    public static function verificarCodigo(
+        string $id,
+        string $idObjInstitucional,
+        string $idLlavePresupuestaria,
+        int $gestion,
+        string $codigo
+    ): bool {
+        return !ObjetivoEspecifico::find()
+            ->where([
+                'IdObjInstitucional' => $idObjInstitucional,
+                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
+                'Gestion' => $gestion,
+                'Codigo' => $codigo,
+            ])
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['<>', 'IdObjEspecifico', $id])
+            ->exists();
     }
 }

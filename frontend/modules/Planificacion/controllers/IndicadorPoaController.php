@@ -4,44 +4,27 @@ namespace app\modules\Planificacion\controllers;
 
 use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\formModels\ObjetivoEspecificoForm;
-use app\modules\Planificacion\models\ObjetivoInstitucional;
-use app\modules\Planificacion\services\ObjetivoEspecificoService;
+use app\modules\Planificacion\formModels\IndicadorPoaForm;
+use app\modules\Planificacion\models\ObjetivoEspecifico;
+use app\modules\Planificacion\services\IndicadorPoaService;
 use Yii;
-use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
-class ObjEspecificoController extends BaseController
+class IndicadorPoaController extends BaseController
 {
-    public function __construct(
-        $id,
-        $module,
-        private ObjetivoEspecificoService $service,
-        $config = []
-    ) {
+    public function __construct($id, $module, private IndicadorPoaService $service, $config = [])
+    {
         parent::__construct($id, $module, $config);
     }
 
     public function behaviors(): array
     {
         return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [[
-                    'actions' => [
-                        'index', 'listar-todo', 'listar-objetivos-institucionales-s2',
-                        'guardar', 'actualizar', 'buscar', 'eliminar',
-                        'cambiar-estado', 'verificar-codigo',
-                    ],
-                    'allow' => true,
-                    'roles' => ['@'],
-                ]],
-            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
                     'listar-todo' => ['POST'],
-                    'listar-objetivos-institucionales-s2' => ['POST'],
+                    'listar-objetivos-especificos-s2' => ['POST'],
                     'guardar' => ['POST'],
                     'actualizar' => ['POST'],
                     'buscar' => ['POST'],
@@ -65,17 +48,16 @@ class ObjEspecificoController extends BaseController
         return $this->withTryCatch(fn() => $this->service->listarTodo($idLlave, $gestion));
     }
 
-    public function actionListarObjetivosInstitucionalesS2(): array
+    public function actionListarObjetivosEspecificosS2(): array
     {
-        [, $gestion] = $this->obtenerContextoActivo();
+        [$idLlave, $gestion] = $this->obtenerContextoActivo();
 
-        $data = ObjetivoInstitucional::listAll()
-            ->andWhere(['OI.Gestion' => $gestion])
+        $data = ObjetivoEspecifico::listAll($idLlave, $gestion)
             ->select([
-                'id' => 'OI.IdObjInstitucional',
-                'text' => 'OI.Objetivo',
+                'id' => 'OE.IdObjEspecifico',
+                'text' => 'OE.Objetivo',
                 'compuesto' => 'Compuesto',
-                'producto' => 'OI.Producto',
+                'producto' => 'OE.Producto',
             ])
             ->orderBy(['Compuesto' => SORT_ASC])
             ->asArray()
@@ -120,21 +102,18 @@ class ObjEspecificoController extends BaseController
 
     public function actionVerificarCodigo(): bool
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
         $request = Yii::$app->request;
 
         return $this->service->verificarCodigo(
-            (string)$request->post('idObjEspecifico', '00000000-0000-0000-0000-000000000000'),
-            (string)$request->post('idObjInstitucional', ''),
-            $idLlave,
-            $gestion,
-            (string)$request->post('codigo', '')
+            (string)$request->post('idIndicadorPoa', '00000000-0000-0000-0000-000000000000'),
+            (string)$request->post('idObjEspecifico', ''),
+            (int)$request->post('codigo', 0)
         );
     }
 
-    private function cargarFormulario(): ObjetivoEspecificoForm
+    private function cargarFormulario(): IndicadorPoaForm
     {
-        $form = new ObjetivoEspecificoForm();
+        $form = new IndicadorPoaForm();
 
         if (!$form->load(Yii::$app->request->post(), '') || !$form->validate()) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
@@ -145,12 +124,10 @@ class ObjEspecificoController extends BaseController
 
     private function obtenerId(): string
     {
-        $id = (string)Yii::$app->request->post('idObjEspecifico', '');
-
+        $id = (string)Yii::$app->request->post('idIndicadorPoa', '');
         if ($id === '') {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'No se recibió el identificador.', 400);
         }
-
         return $id;
     }
 
@@ -158,14 +135,10 @@ class ObjEspecificoController extends BaseController
     {
         $contexto = Yii::$app->userContext->contexto();
         $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
-        $gestion = (string)($contexto->IdGestion ?? 0);
+        $gestion = (int)($contexto->Gestion ?? 0);
 
         if ($idLlave === '' || $gestion <= 0) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'Debe seleccionar una gestión y una llave presupuestaria en el contexto activo.',
-                400
-            );
+            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Debe seleccionar gestión y llave presupuestaria.', 400);
         }
 
         return [$idLlave, $gestion];
