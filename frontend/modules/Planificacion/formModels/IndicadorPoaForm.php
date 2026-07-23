@@ -4,26 +4,37 @@ namespace app\modules\Planificacion\formModels;
 
 use yii\base\Model;
 
+/**
+ *
+ * @property string $idObjEspecifico
+ * @property int $codigo
+ * @property int $meta
+ * @property string $descripcion
+ * @property int $lineaBase
+  * @property string $idTipoResultado
+ * @property string $idCategoriaIndicador
+ * @property string $idUnidadIndicador
+  */
+
 class IndicadorPoaForm extends Model
 {
-    public ?string $idObjEspecifico = null;
-    public ?int $codigo = null;
-    public ?string $descripcion = null;
-    public ?int $meta = null;
-    public ?string $tipo = null;
-    public ?string $categoria = null;
-    public ?string $unidad = null;
+    public string $idObjEspecifico;
+    public int $codigo;
+    public int $meta;
+    public string $descripcion;
+    public int $lineaBase;
+    public string $idTipoResultado;
+    public string $idCategoriaIndicador;
+    public string $idUnidadIndicador;
+
 
     public function rules(): array
     {
         return [
-            [['idObjEspecifico', 'codigo', 'descripcion', 'meta', 'tipo', 'categoria', 'unidad'], 'required'],
-            [['idObjEspecifico'], 'string', 'max' => 36],
-            [['codigo'], 'integer', 'min' => 1],
-            [['meta'], 'integer', 'min' => 0],
-            [['descripcion'], 'string', 'min' => 2, 'max' => 500],
-            [['tipo', 'categoria', 'unidad'], 'string', 'max' => 20],
-            [['descripcion', 'tipo', 'categoria', 'unidad'], 'filter', 'filter' => static fn($value) => trim((string)$value)],
+            [['idObjEspecifico', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador'], 'string', 'max' => 36],
+            [['idObjEspecifico', 'codigo', 'meta', 'descripcion', 'lineaBase', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador'], 'required'],
+            [['codigo', 'meta', 'lineaBase'], 'integer'],
+            [['descripcion'], 'string', 'max' => 500],
         ];
     }
 }

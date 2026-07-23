@@ -135,7 +135,9 @@ class IndicadorPoaController extends BaseController
     {
         $contexto = Yii::$app->userContext->contexto();
         $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
-        $gestion = (int)($contexto->Gestion ?? 0);
+        $gestion = (int)($contexto->IdGestion ?? 0);
+
+
 
         if ($idLlave === '' || $gestion <= 0) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Debe seleccionar gestión y llave presupuestaria.', 400);

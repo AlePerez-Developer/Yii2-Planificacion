@@ -12,9 +12,9 @@ use Yii;
 
 class ObjetivoEspecificoService
 {
-    public function listarTodo(string $idLlavePresupuestaria, int $gestion): array
+    public function listarTodo(): array
     {
-        $data = ObjetivoEspecifico::listAll($idLlavePresupuestaria, $gestion)
+        $data = ObjetivoEspecifico::listAll()
             ->orderBy(['Compuesto' => SORT_ASC])
             ->asArray()
             ->all();
@@ -22,10 +22,24 @@ class ObjetivoEspecificoService
         return ResponseHelper::success($data, 'Listado de objetivos específicos obtenido.');
     }
 
+    /**
+     * Lista un array de Áreas Estrategicas no eliminados
+     * @param string $search
+     * @return array of ObjInstitucionales
+     */
+    public function listarObjEspecificosS2(string $search): array
+    {
+        $data = ObjetivoEspecifico::listAll()
+            ->orderBy(['Compuesto' => SORT_ASC])
+            ->asArray()->all();
+
+        return ResponseHelper::success($data, 'Listado de Objetivos especificos obtenido.');
+    }
+
     public function guardar(
         ObjetivoEspecificoForm $form,
         string $idLlavePresupuestaria,
-        int $gestion
+        string $idGestion
     ): array {
         $modelo = new ObjetivoEspecifico([
             'IdObjInstitucional' => $form->idObjInstitucional,
@@ -33,7 +47,9 @@ class ObjetivoEspecificoService
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
             'Producto' => mb_strtoupper($form->producto, 'UTF-8'),
-            'Gestion' => $gestion,
+            'Indicador_Formula' => mb_strtoupper($form->formula, 'UTF-8'),
+            'Indicador_Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
+            'IdGestion' => $idGestion,
             'CodigoEstado' => Estado::ESTADO_VIGENTE,
             'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario,
         ]);
@@ -45,20 +61,24 @@ class ObjetivoEspecificoService
         string $id,
         ObjetivoEspecificoForm $form,
         string $idLlavePresupuestaria,
-        int $gestion
+        string $gestion
     ): array {
         $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
         $modelo->setAttributes([
             'IdObjInstitucional' => $form->idObjInstitucional,
+            'IdLlavePresupuestaria' => $idLlavePresupuestaria,
+            'IdGestion' => $gestion,
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
             'Producto' => mb_strtoupper($form->producto, 'UTF-8'),
+            'Indicador_Formula' => mb_strtoupper($form->formula, 'UTF-8'),
+            'Indicador_Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
         ]);
 
         return $this->procesar($modelo);
     }
 
-    public function cambiarEstado(string $id, string $idLlavePresupuestaria, int $gestion): array
+    public function cambiarEstado(string $id, string $idLlavePresupuestaria, string $gestion): array
     {
         $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
         $modelo->cambiarEstado();
@@ -67,7 +87,7 @@ class ObjetivoEspecificoService
         return ['message' => Yii::$app->params['PROCESO_CORRECTO'], 'data' => $modelo->CodigoEstado];
     }
 
-    public function eliminar(string $id, string $idLlavePresupuestaria, int $gestion): array
+    public function eliminar(string $id, string $idLlavePresupuestaria, string  $gestion): array
     {
         $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
 
@@ -83,14 +103,14 @@ class ObjetivoEspecificoService
         return $this->procesar($modelo);
     }
 
-    public function obtenerModelo(string $id, string $idLlavePresupuestaria, int $gestion): array
+    public function obtenerModelo(string $id, string $idLlavePresupuestaria, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
+        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $idGestion);
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => $modelo->getAttributes([
-                'IdObjEspecifico', 'IdObjInstitucional', 'Codigo', 'Objetivo', 'Producto',
+                'IdObjEspecifico', 'IdObjInstitucional', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Formula', 'Indicador_Descripcion',
             ]),
         ];
     }
@@ -110,9 +130,9 @@ class ObjetivoEspecificoService
     private function obtenerModeloValidado(
         string $id,
         string $idLlavePresupuestaria,
-        int $gestion
+        string $idGestion
     ): ObjetivoEspecifico {
-        $modelo = ObjetivoEspecifico::listAll($idLlavePresupuestaria, $gestion)
+        $modelo = ObjetivoEspecifico::listAll()
             ->andWhere(['OE.IdObjEspecifico' => $id])
             ->one();
 

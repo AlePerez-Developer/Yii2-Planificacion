@@ -7,82 +7,153 @@ PlanificacionAsset::register($this);
 $this->registerJsFile('@planificacionModule/js/indicador-poa/s2-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/indicador-poa/dt-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/indicador-poa/index.js', ['depends' => [JqueryAsset::class]]);
+$this->registerCssFile("@planificacionModule/css/indicador-poa/style.css", [
+        'depends' => [
+                PlanificacionAsset::class
+        ]
+]);
+
 
 $this->title = 'Planificación Institucional';
-$this->params['subtitle'] = 'Indicadores POA';
-$this->params['icon'] = 'fas fa-chart-line';
-$this->params['iconColor'] = 'primary';
-$this->params['breadcrumbs'][] = ['label' => '/ Indicadores POA'];
+
+$this->params['subtitle'] = 'Administración de Indicadores presupuestarios institucionales';
+
+$this->params['icon'] = 'fas fa-clipboard-list';
+
+$this->params['iconColor'] = 'info';
+
+$this->params['actions'] =
+        '<button id="btnMostrarCrear"  class="btn-crear closed" >
+              <span class="circle">
+                <span class="horizontal"></span>
+                <span class="vertical"></span>
+              </span>
+              <span class="btn-text">Nuevo Registro</span>
+        </button>
+
+         <button id="btnReportePdf" class="btn-reporte">
+            <i class="fas fa-file-pdf"></i>
+             <span class="btn-text">Exportar</span>
+         </button>';
+
+$this->params['breadcrumbs'][] = [
+        'label' => '/ Ind. presupuestarios'
+];
 ?>
 
-<div class="card">
-    <div class="card-header">
-        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary" type="button">
-            <span class="icon closed"><span class="circle"><span class="horizontal"></span><span class="vertical"></span></span>
-                Agregar indicador POA
-            </span>
-        </button>
-    </div>
+<div class="card ">
 
-    <div id="divDatos" class="card-body" style="display:none;">
-        <div class="card-dtic-style">
-            <div class="card-dtic-style-header"><div class="card-dtic-style-title">Datos de indicador POA</div></div>
-            <div class="p-3">
+    <div id="divDatos" class="card-body" style="display: none">
+        <div class="col d-flex justify-content-center">
+            <div class="card-dtic-form" style="width: 120rem;">
+                <div class="card-header card-dtic-form-header">Ingreso Datos</div>
+                <div class="card-body card-dtic-form-body">
 
-<form id="formIndicadorPoa" autocomplete="off">
-    <div class="form-group">
-        <label for="idObjEspecifico">Objetivo específico</label>
-        <select id="idObjEspecifico" name="idObjEspecifico" class="form-control dtic-input" style="width:100%;"></select>
-    </div>
-    <div class="row">
-        <div class="col-md-2"><div class="form-group">
-            <label for="codigo">Código</label>
-            <input id="codigo" name="codigo" type="number" min="1" class="form-control dtic-input">
-        </div></div>
-        <div class="col-md-2"><div class="form-group">
-            <label for="meta">Meta</label>
-            <input id="meta" name="meta" type="number" min="0" class="form-control dtic-input">
-        </div></div>
-        <div class="col-md-3"><div class="form-group">
-            <label for="tipo">Tipo</label>
-            <select id="tipo" name="tipo" class="form-control dtic-input"></select>
-        </div></div>
-        <div class="col-md-2"><div class="form-group">
-            <label for="categoria">Categoría</label>
-            <select id="categoria" name="categoria" class="form-control dtic-input"></select>
-        </div></div>
-        <div class="col-md-3"><div class="form-group">
-            <label for="unidad">Unidad</label>
-            <select id="unidad" name="unidad" class="form-control dtic-input"></select>
-        </div></div>
-    </div>
-    <div class="form-group">
-        <label for="descripcion">Descripción del indicador</label>
-        <textarea id="descripcion" name="descripcion" class="form-control dtic-input" rows="4" maxlength="500"></textarea>
-    </div>
-</form>
+                    <form id="formIndicadorPoa" autocomplete="off">
 
-            </div>
-            <div class="card-footer text-center">
-                <button id="btnGuardar" type="button" class="btn btn-primary bg-gradient-primary">
-                    <i class="fa fa-check-circle"></i> <span class="btn_text">Guardar</span>
-                </button>
-                <button id="btnCancelar" type="button" class="btn btn-danger">
-                    <i class="fa fa-times-circle"></i> Cancelar
-                </button>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="idObjEspecifico">Seleccione el objetivo estrategico</label>
+                                    <select class="form-control objEstrategico codigo_group dtic-input"
+                                            id="idObjEspecifico" name="idObjEspecifico">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="codigo">Codigo indicador</label>
+                                    <input type="text" class="form-control input-sm num codigo_group dtic-input"
+                                           id="codigo" name="codigo" maxlength="3"
+                                           placeholder="Codigo indicador">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="meta">Meta indicador</label>
+                                    <input type="text" class="form-control input-sm num dtic-input" id="meta"
+                                           name="meta"
+                                           placeholder="Meta del indicador">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="lineaBase">Linea base</label>
+                                    <input type="text" class="form-control input-sm num dtic-input" id="lineaBase"
+                                           name="lineaBase" placeholder="Meta del indicador">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label for="descripcion" class="control-label">Descripcion del indicador</label>
+                                <textarea class="form-control input-sm txt dtic-input" id="descripcion"
+                                          name="descripcion"
+                                          rows="4" placeholder="Descripcion del indicador"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="idTipoResultado">Seleccione el resultado</label>
+                                    <select class="form-control dtic-input" id="idTipoResultado" name="idTipoResultado">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="idCategoriaIndicador">Seleccione el tipo de indicador</label>
+                                    <select class="form-control dtic-input" id="idCategoriaIndicador"
+                                            name="idCategoriaIndicador">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label for="idUnidadIndicador">Seleccione la unidad</label>
+                                    <select class="form-control dtic-input" id="idUnidadIndicador"
+                                            name="idUnidadIndicador">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+                <div class="card-footer card-dtic-form-footer">
+                    <button id="btnGuardar" name="btnGuardar" class='btn-guardar'><i class='fa fa-check-circle'></i>
+                        <span class='btn_text'> Guardar </span></button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn-cancel'><span
+                                class='fa fa-times-circle'></span> Cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+
     <div id="divTabla" class="card-body">
         <div class="card-dtic-style">
-            <div class="card-dtic-style-header"><div class="card-dtic-style-title">Listado de indicadores POA</div></div>
-            <div id="dticTableLoading" class="p-4">
-                <div class="table-loading"></div><div class="table-loading"></div><div class="table-loading"></div>
+            <div class="card-dtic-style-header">
+                <div class="card-dtic-style-title">
+                    Indicadores Estratégicos Institucionales
+                </div>
             </div>
-            <div id="dticTableContainer" class="p-2" style="display:none;">
+
+            <div id="dticTableLoading" class="p-4">
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+            </div>
+
+            <div class="p-2" id="dticTableContainer" style="display:none;">
                 <table id="tablaListaIndicadoresPoa" class="table w-100 dtic-table"></table>
             </div>
+
         </div>
     </div>
 </div>

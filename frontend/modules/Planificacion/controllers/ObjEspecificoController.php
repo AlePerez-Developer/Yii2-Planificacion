@@ -10,6 +10,7 @@ use app\modules\Planificacion\services\ObjetivoEspecificoService;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\web\Request;
 
 class ObjEspecificoController extends BaseController
 {
@@ -29,7 +30,7 @@ class ObjEspecificoController extends BaseController
                 'class' => AccessControl::class,
                 'rules' => [[
                     'actions' => [
-                        'index', 'listar-todo', 'listar-objetivos-institucionales-s2',
+                        'index', 'listar-todo', 'listar-obj-especificos-s2',
                         'guardar', 'actualizar', 'buscar', 'eliminar',
                         'cambiar-estado', 'verificar-codigo',
                     ],
@@ -41,7 +42,7 @@ class ObjEspecificoController extends BaseController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'listar-todo' => ['POST'],
-                    'listar-objetivos-institucionales-s2' => ['POST'],
+                    'listar-objetivos-especificos-s2' => ['POST'],
                     'guardar' => ['POST'],
                     'actualizar' => ['POST'],
                     'buscar' => ['POST'],
@@ -61,27 +62,15 @@ class ObjEspecificoController extends BaseController
 
     public function actionListarTodo(): array
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
-        return $this->withTryCatch(fn() => $this->service->listarTodo($idLlave, $gestion));
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
-    public function actionListarObjetivosInstitucionalesS2(): array
+    public function actionListarObjEspecificosS2(): array
     {
-        [, $gestion] = $this->obtenerContextoActivo();
+        $request = Yii::$app->request;
 
-        $data = ObjetivoInstitucional::listAll()
-            ->andWhere(['OI.Gestion' => $gestion])
-            ->select([
-                'id' => 'OI.IdObjInstitucional',
-                'text' => 'OI.Objetivo',
-                'compuesto' => 'Compuesto',
-                'producto' => 'OI.Producto',
-            ])
-            ->orderBy(['Compuesto' => SORT_ASC])
-            ->asArray()
-            ->all();
-
-        return ['data' => $data];
+        $q = $this->getSearchParam($request);
+        return $this->withTryCatch(fn() => $this->service->listarObjEspecificosS2($q)) ;
     }
 
     public function actionGuardar(): array
@@ -169,5 +158,21 @@ class ObjEspecificoController extends BaseController
         }
 
         return [$idLlave, $gestion];
+    }
+
+    /**
+     * Obtiene el parámetro de búsqueda de Select2
+     * @param Request $request
+     * @return string
+     */
+    private function getSearchParam(Request $request): string
+    {
+        $id = $request->post('q');
+
+        if (!$id) {
+            return '';
+        }
+
+        return $id;
     }
 }

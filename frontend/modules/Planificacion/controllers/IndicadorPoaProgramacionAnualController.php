@@ -90,10 +90,9 @@ class IndicadorPoaProgramacionAnualController extends BaseController
     {
         $contexto = Yii::$app->userContext->contexto();
         $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
-        $gestion = (int)($contexto->Gestion ?? 0);
         $idGestion = (string)($contexto->IdGestion ?? '');
 
-        if ($idLlave === '' || $gestion <= 0 || $idGestion === '') {
+        if ($idLlave === '' ||  $idGestion === '') {
             throw new ValidationException(
                 Yii::$app->params['ERROR_ENVIO_DATOS'],
                 'Debe seleccionar una gestión y una llave presupuestaria.',
@@ -101,6 +100,6 @@ class IndicadorPoaProgramacionAnualController extends BaseController
             );
         }
 
-        return [$idLlave, $gestion, $idGestion];
+        return [$idLlave, $idGestion];
     }
 }

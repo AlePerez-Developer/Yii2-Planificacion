@@ -3,13 +3,8 @@ $(document).ready(function () {
     const baseUrl = 'index.php?r=Planificacion/indicador-poa/';
     let id = EMPTY;
 
-    inicializarTablaIndicadoresPoa();
 
-    // Reutiliza aquí exactamente las funciones que llenan Tipo, Categoría y Unidad
-    // del CRUD IndicadorEstrategico.
-    if (typeof populateS2TiposIndicador === 'function') populateS2TiposIndicador($('#tipo'));
-    if (typeof populateS2CategoriasIndicador === 'function') populateS2CategoriasIndicador($('#categoria'));
-    if (typeof populateS2UnidadesIndicador === 'function') populateS2UnidadesIndicador($('#unidad'));
+
 
     $('#btnMostrarCrear').on('click', () => mostrarFormulario());
     $('#btnCancelar').on('click', () => ocultarFormulario());
@@ -21,9 +16,10 @@ $(document).ready(function () {
         datos.append('codigo', $('#codigo').val());
         datos.append('descripcion', $('#descripcion').val());
         datos.append('meta', $('#meta').val());
-        datos.append('tipo', $('#tipo').val());
-        datos.append('categoria', $('#categoria').val());
-        datos.append('unidad', $('#unidad').val());
+        datos.append('lineaBase', $('#lineaBase').val());
+        datos.append('idTipoResultado', $('#idTipoResultado').val());
+        datos.append('idCategoriaIndicador', $('#idCategoriaIndicador').val());
+        datos.append('idUnidadIndicador', $('#idUnidadIndicador').val());
 
         await ajaxPromise({
             url: baseUrl + (id === EMPTY ? 'guardar' : 'actualizar'),
@@ -47,9 +43,10 @@ $(document).ready(function () {
         $('#codigo').val(data.Codigo);
         $('#descripcion').val(data.Descripcion);
         $('#meta').val(data.Meta);
-        $('#tipo').val(data.Tipo).trigger('change');
-        $('#categoria').val(data.Categoria).trigger('change');
-        $('#unidad').val(data.Unidad).trigger('change');
+        $('#lineaBase').val(data.LineaBase);
+        $('#idTipoResultado').val(data.IdTipoResultado).trigger('change');
+        $('#idCategoriaIndicador').val(data.IdCategoriaIndicador).trigger('change');
+        $('#idUnidadIndicador').val(data.IdUnidadIndicador).trigger('change');
         mostrarFormulario(false);
     });
 
@@ -62,7 +59,7 @@ $(document).ready(function () {
             spinnerBtn: btn,
             successMsg: 'Estado actualizado correctamente.'
         });
-        cambiarEstadoBtn(btn, response.data);
+        cambiarEstadoBtnDtic(btn, response.data);
     });
 
     $('#tablaListaIndicadoresPoa').on('click', '.btn-delete', function () {

@@ -7,72 +7,108 @@ PlanificacionAsset::register($this);
 $this->registerJsFile('@planificacionModule/js/obj-especifico/s2-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/obj-especifico/dt-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/obj-especifico/index.js', ['depends' => [JqueryAsset::class]]);
+$this->registerCssFile("@planificacionModule/css/obj-especifico/style.css", ['depends' => [PlanificacionAsset::class]
+]);
+
 
 $this->title = 'Planificación Institucional';
-$this->params['subtitle'] = 'Objetivos específicos';
-$this->params['icon'] = 'fas fa-crosshairs';
-$this->params['iconColor'] = 'primary';
+$this->params['subtitle'] = 'Administracion de objetivos específicos';
+$this->params['icon'] = 'fas fa-clipboard-list';
+$this->params['iconColor'] = 'info';
+$this->params['actions'] =
+        '<button id="btnMostrarCrear"  class="btn-crear closed" >
+            <span class="circle">
+                <span class="horizontal"></span>
+                <span class="vertical"></span>
+            </span>
+            <span class="btn-text">Nuevo Registro</span>
+        </button>
+
+         <button id="btnReportePdf" class="btn-reporte">
+            <i class="fas fa-file-pdf"></i>
+             <span class="btn-text">Exportar</span>
+         </button>';
 $this->params['breadcrumbs'][] = ['label' => '/ Objetivos específicos'];
 ?>
 
 <div class="card">
-    <div class="card-header">
-        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary" type="button">
-            <span class="icon closed"><span class="circle"><span class="horizontal"></span><span class="vertical"></span></span>
-                Agregar objetivo específico
-            </span>
-        </button>
-    </div>
+    <div id="divDatos" class="card-body" style="display: none">
+        <div class="col d-flex justify-content-center">
+            <div class="card-dtic-form" style="width: 120rem;">
+                <div class="card-header card-dtic-form-header">Ingreso Datos</div>
+                <div class="card-body card-dtic-form-body">
 
-    <div id="divDatos" class="card-body" style="display:none;">
-        <div class="card-dtic-style">
-            <div class="card-dtic-style-header"><div class="card-dtic-style-title">Datos de objetivo específico</div></div>
-            <div class="p-3">
+                    <form id="formObjEspecifico" autocomplete="off">
+                        <div class="form-group">
+                            <label for="idObjInstitucional">Objetivo institucional</label>
+                            <select id="idObjInstitucional" name="idObjInstitucional" class="form-control dtic-input"
+                                    style="width:100%;"></select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="codigo">Código</label>
+                                    <input id="codigo" name="codigo" type="text" maxlength="2" inputmode="numeric"
+                                           class="form-control dtic-input" placeholder="01">
+                                    <small class="form-text text-muted">Formato: 01, 02, 03, 22, 33…</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="objetivo">Objetivo específico</label>
+                                    <textarea id="objetivo" name="objetivo" class="form-control dtic-input" rows="4"
+                                              maxlength="500"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="producto">Resultado / producto esperado</label>
+                                    <textarea id="producto" name="producto" class="form-control dtic-input" rows="4"
+                                              maxlength="500"></textarea>
+                                </div>
+                            </div>
+                        </div>
 
-<form id="formObjEspecifico" autocomplete="off">
-    <div class="form-group">
-        <label for="idObjInstitucional">Objetivo institucional</label>
-        <select id="idObjInstitucional" name="idObjInstitucional" class="form-control dtic-input" style="width:100%;"></select>
-    </div>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="codigo">Código</label>
-                <input id="codigo" name="codigo" type="text" maxlength="2" inputmode="numeric"
-                       class="form-control dtic-input" placeholder="01">
-                <small class="form-text text-muted">Formato: 01, 02, 03, 22, 33…</small>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6"><div class="form-group">
-            <label for="objetivo">Objetivo específico</label>
-            <textarea id="objetivo" name="objetivo" class="form-control dtic-input" rows="4" maxlength="200"></textarea>
-        </div></div>
-        <div class="col-md-6"><div class="form-group">
-            <label for="producto">Resultado / producto esperado</label>
-            <textarea id="producto" name="producto" class="form-control dtic-input" rows="4" maxlength="200"></textarea>
-        </div></div>
-    </div>
-</form>
+                        <div class="contenedor">
+                            <div class="ltc">Datos del indicador del objetivo</div>
+                            <div class="square">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="descripcion" class="control-label">Descripcion</label>
+                                        <textarea class="form-control input-sm dtic-input txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="formula" class="control-label">Formula</label>
+                                        <textarea class="form-control input-sm dtic-input txt" id="formula" name="formula" rows="3" placeholder="Formula del indicador"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
 
-            </div>
-            <div class="card-footer text-center">
-                <button id="btnGuardar" type="button" class="btn btn-primary bg-gradient-primary">
-                    <i class="fa fa-check-circle"></i> <span class="btn_text">Guardar</span>
-                </button>
-                <button id="btnCancelar" type="button" class="btn btn-danger">
-                    <i class="fa fa-times-circle"></i> Cancelar
-                </button>
+                </div>
+                <div class="card-footer card-dtic-form-footer">
+                    <button id="btnGuardar" name="btnGuardar" class='btn-guardar'><i class='fa fa-check-circle'></i>
+                        <span class='btn_text'> Guardar </span></button>
+                    <button id="btnCancelar" name="btnCancelar" class='btn-cancel'><span
+                                class='fa fa-times-circle'></span> Cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="divTabla" class="card-body">
         <div class="card-dtic-style">
-            <div class="card-dtic-style-header"><div class="card-dtic-style-title">Listado de objetivos específicos</div></div>
+            <div class="card-dtic-style-header">
+                <div class="card-dtic-style-title">Listado de objetivos específicos</div>
+            </div>
             <div id="dticTableLoading" class="p-4">
-                <div class="table-loading"></div><div class="table-loading"></div><div class="table-loading"></div>
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
+                <div class="table-loading"></div>
             </div>
             <div id="dticTableContainer" class="p-2" style="display:none;">
                 <table id="tablaListaObjEspecificos" class="table w-100 dtic-table"></table>

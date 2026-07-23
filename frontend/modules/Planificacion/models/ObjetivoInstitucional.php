@@ -173,7 +173,7 @@ class ObjetivoInstitucional extends ActiveRecord
     }
 
     /**
-     * Gets query for [[ObjetivosEstrategicos]].
+     * Gets query for [[PeiGestion]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused

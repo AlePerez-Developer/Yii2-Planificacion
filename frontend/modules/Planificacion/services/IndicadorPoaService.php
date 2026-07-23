@@ -15,7 +15,7 @@ class IndicadorPoaService
     public function listarTodo(string $idLlavePresupuestaria, int $gestion): array
     {
         $data = IndicadorPoa::listAll($idLlavePresupuestaria, $gestion)
-            ->orderBy(['OE.Compuesto' => SORT_ASC, 'IP.Codigo' => SORT_ASC])
+            ->orderBy(['Oe.Codigo' => SORT_ASC, 'I.Codigo' => SORT_ASC])
             ->asArray()
             ->all();
 
@@ -31,9 +31,10 @@ class IndicadorPoaService
             'Codigo' => $form->codigo,
             'Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
             'Meta' => $form->meta,
-            'Tipo' => $form->tipo,
-            'Categoria' => $form->categoria,
-            'Unidad' => $form->unidad,
+            'LineaBase' => $form->lineaBase,
+            'IdTipoResultado' => $form->idTipoResultado,
+            'IdCategoriaIndicador' => $form->idCategoriaIndicador,
+            'IdUnidadIndicador' => $form->idUnidadIndicador,
             'CodigoEstado' => Estado::ESTADO_VIGENTE,
             'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario,
         ]);
@@ -55,9 +56,10 @@ class IndicadorPoaService
             'Codigo' => $form->codigo,
             'Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
             'Meta' => $form->meta,
-            'Tipo' => $form->tipo,
-            'Categoria' => $form->categoria,
-            'Unidad' => $form->unidad,
+            'LineaBase' => $form->lineaBase,
+            'IdTipoResultado' => $form->idTipoResultado,
+            'IdCategoriaIndicador' => $form->idCategoriaIndicador,
+            'IdUnidadIndicador' => $form->idUnidadIndicador,
         ]);
 
         return $this->procesar($modelo);
@@ -95,7 +97,7 @@ class IndicadorPoaService
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => $modelo->getAttributes([
                 'IdIndicadorPoa', 'IdObjEspecifico', 'Codigo', 'Descripcion',
-                'Meta', 'Tipo', 'Categoria', 'Unidad',
+                'Meta', 'LineaBase', 'IdTipoResultado', 'IdCategoriaIndicador','IdUnidadIndicador'
             ]),
         ];
     }
@@ -127,7 +129,7 @@ class IndicadorPoaService
     private function obtenerModeloValidado(string $id, string $idLlavePresupuestaria, int $gestion): IndicadorPoa
     {
         $modelo = IndicadorPoa::listAll($idLlavePresupuestaria, $gestion)
-            ->andWhere(['IP.IdIndicadorPoa' => $id])
+            ->andWhere(['I.IdIndicadorPoa' => $id])
             ->one();
 
         if ($modelo === null) {

@@ -38,7 +38,7 @@ class ObjInstitucionalController extends BaseController
                 'rules' => [
                     [
                         'actions' => [
-                            'index', 'listar-todo', 'verificar-codigo', 'guardar',
+                            'index', 'listar-todo', 'listar-obj-institucionales-s2', 'verificar-codigo', 'guardar',
                             'actualizar', 'eliminar', 'cambiar-estado', 'buscar',
                         ],
                         'allow' => true,

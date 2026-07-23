@@ -6,47 +6,45 @@ $(document).ready(function () {
         placeholder: 'Seleccione un objetivo institucional',
         allowClear: true,
         width: '100%',
-        templateResult: formato,
-        templateSelection: formato,
-        matcher: buscar
+        templateResult: select2ObjHtmlFormat,
+        templateSelection: select2ObjHtmlFormat,
+        matcher: select2ObjMatchSearch
     });
 
-    $.ajax({
-        url: 'index.php?r=Planificacion/obj-especifico/listar-objetivos-institucionales-s2',
-        method: 'POST',
-        dataType: 'json',
-        success: function (response) {
-            objEspecifico_s2ObjInstitucional.empty().append(new Option('', '', false, false));
-            (response.data || []).forEach(item => {
-                const option = new Option(item.text, item.id, false, false);
-                $(option).data({compuesto: item.compuesto, producto: item.producto});
-                objEspecifico_s2ObjInstitucional.append(option);
-            });
-            objEspecifico_s2ObjInstitucional.trigger('change');
-        },
-        error: manejarErrorDataTable
-    });
+    populateS2ObjInstitucional(objEspecifico_s2ObjInstitucional)
 
-    function formato(repo) {
-        if (repo.loading || !repo.id) return repo.text;
-        const element = repo.element ? $(repo.element) : null;
-        const compuesto = repo.compuesto || element?.data('compuesto') || '';
-        const producto = repo.producto || element?.data('producto') || '';
+    function select2ObjHtmlFormat(repo) {
+        if (repo.loading || repo.id === '') {
+            return repo.text;
+        }
 
-        return $(`<div class="mi-render-select2">
-            <div class="titulo-producto">Código: ${compuesto}</div>
-            <div class="titulo-producto">${repo.text || ''}</div>
-            <div class="subtitulo-producto">${producto}</div>
-        </div>`);
+        return $(
+            `<div class="mi-render-select2">
+                <div class="titulo-producto">Código: ${repo.compuesto || ''}</div>
+                <div class="titulo-producto">${repo.text || ''}</div>
+                <div class="subtitulo-producto">${repo.producto || ''}</div>
+            </div>`
+        );
     }
 
-    function buscar(params, data) {
-        if ($.trim(params.term) === '') return data;
-        const term = params.term.toLowerCase();
-        const element = data.element ? $(data.element) : null;
+    function select2ObjMatchSearch(params, data) {
+        if (typeof data.text === 'undefined') {
+            return null;
+        }
+
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+
+        const busqueda = params.term.toLowerCase();
         const texto = (data.text || '').toLowerCase();
-        const compuesto = (data.compuesto || element?.data('compuesto') || '').toLowerCase();
-        const producto = (data.producto || element?.data('producto') || '').toLowerCase();
-        return texto.includes(term) || compuesto.includes(term) || producto.includes(term) ? data : null;
+        const compuesto = (data.compuesto || '').toLowerCase();
+        const producto = (data.producto || '').toLowerCase();
+
+        return texto.includes(busqueda)
+        || compuesto.includes(busqueda)
+        || producto.includes(busqueda)
+            ? data
+            : null;
     }
 });

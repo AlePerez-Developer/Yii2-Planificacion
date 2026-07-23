@@ -3,7 +3,7 @@ $(document).ready(function () {
     const baseUrl = 'index.php?r=Planificacion/obj-especifico/';
     let id = EMPTY;
 
-    inicializarTablaObjEspecificos();
+
 
     $('#codigo').on('input', function () {
         this.value = this.value.replace(/\D/g, '').slice(0, 2);
@@ -31,6 +31,8 @@ $(document).ready(function () {
         datos.append('codigo', $('#codigo').val());
         datos.append('objetivo', $('#objetivo').val());
         datos.append('producto', $('#producto').val());
+        datos.append('formula', $('#formula').val());
+        datos.append('descripcion', $('#descripcion').val());
 
         await ajaxPromise({
             url: baseUrl + (id === EMPTY ? 'guardar' : 'actualizar'),
@@ -54,6 +56,8 @@ $(document).ready(function () {
         $('#codigo').val(data.Codigo);
         $('#objetivo').val(data.Objetivo);
         $('#producto').val(data.Producto);
+        $('#formula').val(data.Indicador_Formula);
+        $('#descripcion').val(data.Indicador_Descripcion);
         $('#divTabla').hide(300);
         $('#divDatos').show(300);
     });
@@ -67,7 +71,7 @@ $(document).ready(function () {
             spinnerBtn: btn,
             successMsg: 'Estado actualizado correctamente.'
         });
-        cambiarEstadoBtn(btn, response.data);
+        cambiarEstadoBtnDtic(btn, response.data);
     });
 
     $('#tablaListaObjEspecificos').on('click', '.btn-delete', function () {

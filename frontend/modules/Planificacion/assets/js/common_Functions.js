@@ -181,6 +181,74 @@ function populateS2ObjEstrategico(select2) {
     });
 }
 
+function populateS2ObjInstitucional(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-institucional/listar-obj-institucionales-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                let option = $('<option>', {
+                    value: item.IdObjInstitucional,
+                    text: item.Objetivo
+                });
+
+                option.data('data', {
+                    id: item.IdObjInstitucional,
+                    text: item.Objetivo,
+                    producto: item.Producto,
+                    compuesto: item.Compuesto
+                });
+
+                select2.append(option);
+            });
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
+function populateS2ObjEspecifico(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/obj-especifico/listar-obj-especificos-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                let option = $('<option>', {
+                    value: item.IdObjEspecifico,
+                    text: item.Objetivo
+                });
+
+                option.data('data', {
+                    id: item.IdObjEspecifico,
+                    text: item.Objetivo,
+                    producto: item.Producto,
+                    compuesto: item.Compuesto
+                });
+
+                select2.append(option);
+            });
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
 function populateS2TiposResultados(select2) {
     $.ajax({
         method: "POST",
