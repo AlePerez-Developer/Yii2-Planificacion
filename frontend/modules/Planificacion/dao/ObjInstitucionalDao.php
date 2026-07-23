@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\dao;
 
 use app\modules\Planificacion\models\ObjetivoInstitucional;
 use common\models\Estado;
+use Yii;
 
 class ObjInstitucionalDao
 {
@@ -25,5 +26,12 @@ class ObjInstitucionalDao
             ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['<>', 'IdObjInstitucional', $id])
             ->exists();
+    }
+
+    static function validarId(string $id): bool
+    {
+        $contexto = Yii::$app->userContext->contexto();
+        $gestion = $contexto?->IdGestion;
+        return ObjetivoInstitucional::find()->where(['IdObjInstitucional' => $id, 'Gestion' => $gestion, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
 }

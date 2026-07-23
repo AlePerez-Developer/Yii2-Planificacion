@@ -30,6 +30,10 @@ class __Application {
      * @var mixed|object|null
      */
     public mixed $contexto;
+    /**
+     * @var mixed|object|null
+     */
+    public mixed $userContext;
 }
 
 /**

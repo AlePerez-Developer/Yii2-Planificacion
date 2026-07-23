@@ -1,27 +1,16 @@
 $(document).ready(function () {
     const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idObjInstitucional = ID_EMPTY_GUID;
     const baseUrl = 'index.php?r=Planificacion/obj-institucional/';
     const dtEvents = $('#tablaListaObjInstitucionales');
     const btnToggleForm = $('#btnMostrarCrear');
 
-    let idObjInstitucional = ID_EMPTY_GUID;
-
-    $('#gestion').val(new Date().getFullYear());
-
-    function normalizarCodigo() {
-        const input = $('#codigo');
-        const valor = input.val().replace(/\D/g, '').slice(0, 2);
-
-        if (valor !== '') {
-            input.val(valor.padStart(2, '0'));
-        }
-    }
-
     function reiniciarCampos() {
-        $('#formObjInstitucional *:input').removeClass('is-invalid is-valid');
+        $('#formObjInstitucional *').filter(':input').each(function () {
+            $(this).removeClass('is-invalid is-valid');
+        });
         $('#formObjInstitucional').trigger('reset');
         objInstitucional_s2ObjEstrategico.val(null).trigger('change');
-        $('#gestion').val(new Date().getFullYear());
         idObjInstitucional = ID_EMPTY_GUID;
     }
 
@@ -35,10 +24,6 @@ $(document).ready(function () {
         return mensajes[accion] || 'Proceso realizado correctamente.';
     }
 
-    $('#codigo').on('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 2);
-    }).on('blur', normalizarCodigo);
-
     $('#btnCancelar').on('click', function () {
         btnToggleForm.removeClass('opened').addClass('closed');
         reiniciarCampos();
@@ -47,23 +32,24 @@ $(document).ready(function () {
     });
 
     $('#btnGuardar').on('click', async function () {
-        normalizarCodigo();
+        const btn = $(this);
+        const btnCancel = $('#btnCancelar');
 
         if (!$('#formObjInstitucional').valid()) {
             return;
         }
 
-        const btn = $(this);
-        const btnCancel = $('#btnCancelar');
-        const accion = idObjInstitucional === ID_EMPTY_GUID ? 'guardar' : 'actualizar';
+
         const datos = new FormData();
 
         datos.append('idObjInstitucional', idObjInstitucional);
-        datos.append('idObjEstrategico', objInstitucional_s2ObjEstrategico.val());
+        datos.append('idObjEstrategico', objInstitucional_s2ObjEstrategico.select2('data')[0].id);
         datos.append('codigo', $('#codigo').val());
         datos.append('objetivo', $('#objetivo').val());
         datos.append('producto', $('#producto').val());
-        datos.append('gestion', $('#gestion').val());
+
+        const hasCode = idObjInstitucional !== ID_EMPTY_GUID;
+        let accion = hasCode ? 'actualizar' : 'guardar'
 
         try {
             await ajaxPromise({
@@ -80,36 +66,45 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '#refresh', function () {
-        dt_objInstitucional.ajax.reload(null, false);
+        dt_objInstitucional.ajax.reload();
     });
 
+    /* =============================================
+     * CAMBIA EL ESTADO DEL REGISTRO
+     * =============================================
+     */
     dtEvents.on('click', '.btn-toggle-estado', async function () {
         const objectBtn = $(this);
-        const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
-        const datos = new FormData();
+        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data();
+        let rowId = dt_row["IdObjInstitucional"];
 
-        datos.append('idObjInstitucional', registro.IdObjInstitucional);
+        const datos = new FormData();
+        datos.append('idObjInstitucional', rowId);
 
         try {
-            const respuesta = await ajaxPromise({
+            await ajaxPromise({
                 url: baseUrl + 'cambiar-estado',
                 data: datos,
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.'
-            });
-
-            cambiarEstadoBtn(objectBtn, respuesta.data);
+            }).then((data) => {
+                cambiarEstadoBtn(objectBtn, data.data);
+            })
         } catch (error) {
             console.error('Error al cambiar el estado:', error);
         }
     });
 
+    /*=============================================
+    ELIMINA DE LA BD UN REGISTRO
+    =============================================*/
     dtEvents.on('click', '.btn-delete', function () {
         const objectBtn = $(this);
-        const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
-        const datos = new FormData();
+        const dt_row = dt_objInstitucional.row(objectBtn.closest('tr')).data();
+        let rowId = dt_row["IdObjInstitucional"];
 
-        datos.append('idObjInstitucional', registro.IdObjInstitucional);
+        const datos = new FormData();
+        datos.append('idObjInstitucional', rowId);
 
         Swal.fire({
             icon: 'warning',
@@ -121,24 +116,25 @@ $(document).ready(function () {
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
         }).then(async function (resultado) {
-            if (!resultado.value && !resultado.isConfirmed) {
-                return;
-            }
-
-            try {
-                await ajaxPromise({
-                    url: baseUrl + 'eliminar',
-                    data: datos,
-                    spinnerBtn: objectBtn,
-                    successMsg: mensajeAccion('eliminar'),
-                    reloadTable: dt_objInstitucional
-                });
-            } catch (error) {
-                console.error('Error al eliminar:', error);
+            if (resultado.value) {
+                try {
+                    await ajaxPromise({
+                        url: baseUrl + "eliminar",
+                        data: datos,
+                        spinnerBtn: objectBtn,
+                        successMsg: mensajeAccion('eliminar'),
+                        reloadTable: dt_objInstitucional
+                    });
+                } catch (err) {
+                    console.error("Error al procesar:", err);
+                }
             }
         });
     });
 
+    /*=============================================
+    BUSCA EL REGISTRO SELECCIONADO EN LA BD
+    =============================================*/
     dtEvents.on('click', '.btn-edit', async function () {
         const objectBtn = $(this);
         const registro = dt_objInstitucional.row(objectBtn.closest('tr')).data();
@@ -147,27 +143,27 @@ $(document).ready(function () {
         idObjInstitucional = registro.IdObjInstitucional;
         datos.append('idObjInstitucional', idObjInstitucional);
 
+        IniciarSpiner(objectBtn);
         try {
-            const respuesta = await ajaxPromise({
-                url: baseUrl + 'buscar',
+            await ajaxPromise({
+                url: baseUrl + "buscar",
                 data: datos,
-                spinnerBtn: objectBtn
+            }).then(async (data) => {
+                let obj = data.data
+                objInstitucional_s2ObjEstrategico
+                    .val(obj.IdObjEstrategico)
+                    .trigger('change.select2');
+
+                $("#codigo").val(obj["Codigo"]);
+                $("#objetivo").val(obj["Objetivo"]);
+                $("#producto").val(obj["Producto"]);
+
+                DetenerSpiner(objectBtn);
+                $("#btnMostrarCrear").trigger('click');
             });
-
-            const obj = respuesta.data;
-
-            objInstitucional_s2ObjEstrategico
-                .val(obj.IdObjEstrategico)
-                .trigger('change.select2');
-
-            $('#codigo').val(obj.Codigo);
-            $('#objetivo').val(obj.Objetivo);
-            $('#producto').val(obj.Producto);
-            $('#gestion').val(obj.Gestion);
-
-            $('#btnMostrarCrear').trigger('click');
         } catch (error) {
-            console.error('Error al buscar el registro:', error);
+            console.error("Error al procesar:", error);
+            DetenerSpiner(objectBtn);
         }
     });
 
@@ -201,17 +197,12 @@ $(document).ready(function () {
             objetivo: {
                 required: true,
                 minlength: 2,
-                maxlength: 200
+                maxlength: 500
             },
             producto: {
                 required: true,
                 minlength: 2,
-                maxlength: 200
-            },
-            gestion: {
-                required: true,
-                digits: true,
-                range: [2000, 2100]
+                maxlength: 500
             }
         },
         messages: {
@@ -234,41 +225,19 @@ $(document).ready(function () {
                 required: 'Debe ingresar el resultado o producto esperado.',
                 minlength: 'El producto debe tener al menos 2 caracteres.',
                 maxlength: 'El producto permite como máximo 200 caracteres.'
-            },
-            gestion: {
-                required: 'Debe ingresar la gestión.',
-                digits: 'La gestión debe ser un número entero.',
-                range: 'La gestión debe estar entre 2000 y 2100.'
             }
         },
-        errorElement: 'div',
+        errorElement: "div",
+
         errorPlacement: function (error, element) {
-            error.addClass('invalid-feedback');
-
-            if (element.hasClass('select2-hidden-accessible')) {
-                error.insertAfter(element.next('.select2'));
-                return;
-            }
-
+            error.addClass("invalid-feedback");
             error.insertAfter(element);
         },
         highlight: function (element) {
-            $(element).addClass('is-invalid').removeClass('is-valid');
-
-            if ($(element).hasClass('select2-hidden-accessible')) {
-                $(element).next('.select2').find('.select2-selection')
-                    .addClass('is-invalid')
-                    .removeClass('is-valid');
-            }
+            $(element).addClass("is-invalid").removeClass("is-valid");
         },
         unhighlight: function (element) {
-            $(element).addClass('is-valid').removeClass('is-invalid');
-
-            if ($(element).hasClass('select2-hidden-accessible')) {
-                $(element).next('.select2').find('.select2-selection')
-                    .addClass('is-valid')
-                    .removeClass('is-invalid');
-            }
+            $(element).addClass("is-valid").removeClass("is-invalid");
         }
     });
 });

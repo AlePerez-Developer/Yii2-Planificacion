@@ -109,6 +109,9 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
         });
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function obtenerIdGestionContexto(): string
     {
         $contexto = Yii::$app->userContext->contexto();
@@ -125,6 +128,9 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
         return (string)$idGestion;
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function obtenerIdObjEstrategico(): string
     {
         $id = Yii::$app->request->post('idObjEstrategico');
@@ -138,6 +144,9 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
         return (string)$id;
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function obtenerIdIndicadorEstrategico(): string
     {
         $id = Yii::$app->request->post('idIndicadorEstrategico');
@@ -151,6 +160,9 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
         return (string)$id;
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function obtenerIdProgramacion(): string
     {
         $id = Yii::$app->request->post('idProgramacionIndicadorGestio');
@@ -164,6 +176,9 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
         return (string)$id;
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function obtenerTrimestre(): int
     {
         $trimestre = filter_var(Yii::$app->request->post('trimestre'), FILTER_VALIDATE_INT);
