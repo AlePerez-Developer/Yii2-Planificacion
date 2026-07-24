@@ -61,12 +61,11 @@ class IndicadorEstrategicoProgramacionAnualController extends BaseController
     /**
      * accion index.
      *
-     * @param string $id
      * @return string
      */
-    public function actionIndex(string $id): string
+    public function actionIndex(): string
     {
-        return $this->render('index', ['idObjEstrategico' => $id]);
+        return $this->render('index');
     }
 
     /**

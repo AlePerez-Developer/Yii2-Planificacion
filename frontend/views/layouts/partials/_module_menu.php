@@ -49,7 +49,7 @@ $menus = $modulo->menus;
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico/index']) ?>">Manejar Indicadores</a>
                     <div class="dropdown-divider"></div>
-                    <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Programacion Anual</a>
+                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-anual/index']) ?>">Programacion Anual</a>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
@@ -83,9 +83,9 @@ $menus = $modulo->menus;
         <div class="forms-row">
 
             <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Form 1</a>
-            <a href="<?= Url::to(['/Planificacion/obj-institucional/index']) ?>">Form 2</a>
-            <a href="<?= Url::to(['/Planificacion/obj-especifico/index']) ?>">Form 3</a>
-            <a href="#">Form 4</a>
+            <a href="">Form 2</a>
+            <a href="<?= Url::to(['/Planificacion/obj-institucional/index']) ?>">Form 3</a>
+            <a href="<?= Url::to(['/Planificacion/obj-especifico/index']) ?>">Form 4</a>
             <a href="#">Form 5</a>
             <a href="#">Form 6</a>
             <a href="#">Form 7</a>

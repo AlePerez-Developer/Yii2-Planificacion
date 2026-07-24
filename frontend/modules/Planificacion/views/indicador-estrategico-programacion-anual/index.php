@@ -17,10 +17,6 @@ $this->registerJsFile("@planificacionModule/js/indicador-estrategico-programacio
 $this->registerCssFile('@planificacionModule/css/indicador-estrategico-programacion-anual/style.css', [
         'depends' => [PlanificacionAsset::class]]);
 
-if (isset($idObjEstrategico)) {
-    $this->registerJsVar('idObjEstrategico', $idObjEstrategico);
-}
-
 $this->title = 'Planificación Institucional';
 
 $this->params['subtitle'] = 'Programacion de indicadores estrategicos';
