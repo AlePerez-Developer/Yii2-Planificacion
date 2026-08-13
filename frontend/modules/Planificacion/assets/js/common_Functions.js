@@ -367,7 +367,7 @@ function populateS2Da(select2) {
         dataType: 'json',
         delay: 100,
         cache: true,
-        url: 'index.php?r=Planificacion/da/listar-das-s2',
+        url: 'index.php?r=Planificacion/da/listar-todo',
         success: function(data){
             select2.empty();
 

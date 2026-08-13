@@ -5,6 +5,7 @@
 
 # phpstorm project files
 .idea
+.continueignore
 
 # netbeans project files
 nbproject

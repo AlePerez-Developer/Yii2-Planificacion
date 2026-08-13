@@ -32,6 +32,7 @@ $(document).ready(function () {
         datos.append('idUe', idUe)
         datos.append("ue", $("#ue").val());
         datos.append("descripcion", $("#descripcion").val());
+        datos.append("idDa", $("#idDa").val());
 
         const hasCode =  idUe !== '00000000-0000-0000-0000-000000000000';
         let accion = hasCode ? 'actualizar' : 'guardar'
