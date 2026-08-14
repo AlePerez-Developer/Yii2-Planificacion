@@ -35,8 +35,8 @@ if ($moduloActivo) {
     if ($contexto?->IdGestion && $contexto?->IdEstadoPoa) {
         $llaves = ArrayHelper::map(
                 $usuario->getLlavesPermitidas($contexto->IdGestion, $contexto->IdEstadoPoa),
-                'IdLlavePresupuestaria',
-                'Llave'
+                'IdUnidadEjecutora',
+                'Compuesto'
         );
     }
 }
@@ -98,7 +98,7 @@ if ($moduloActivo) {
                         <label>Llave Presupuestaria</label>
                         <?= Html::dropDownList(
                                 'IdLlavePresupuestaria',
-                                $contexto?->IdLlavePresupuestaria,
+                                $contexto?->IdUnidadEjecutora,
                                 $llaves,
                                 [
                                         'class' => 'form-control form-control-sm context-select',

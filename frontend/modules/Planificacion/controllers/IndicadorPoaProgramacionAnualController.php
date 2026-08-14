@@ -45,10 +45,10 @@ class IndicadorPoaProgramacionAnualController extends BaseController
             ->select([
                 'id' => 'OE.IdObjEspecifico',
                 'text' => 'OE.Objetivo',
-                'compuesto' => 'Compuesto',
+                //'compuesto' => 'Compuesto',
                 'producto' => 'OE.Producto',
             ])
-            ->orderBy(['Compuesto' => SORT_ASC])
+            //->orderBy(['Compuesto' => SORT_ASC])
             ->asArray()
             ->all();
 
@@ -89,7 +89,7 @@ class IndicadorPoaProgramacionAnualController extends BaseController
     private function obtenerContextoActivo(): array
     {
         $contexto = Yii::$app->userContext->contexto();
-        $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
+        $idLlave = (string)($contexto->IdUnidadEjecutora ?? '');
         $idGestion = (string)($contexto->IdGestion ?? '');
 
         if ($idLlave === '' ||  $idGestion === '') {

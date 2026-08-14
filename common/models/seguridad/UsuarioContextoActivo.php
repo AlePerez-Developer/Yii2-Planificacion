@@ -2,8 +2,8 @@
 
 namespace common\models\seguridad;
 
-use app\modules\Planificacion\models\LlavePresupuestaria;
 use app\modules\Planificacion\models\PeiGestion;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use common\models\Estado;
@@ -15,13 +15,13 @@ use common\models\Estado;
  * @property string|null $IdModulo
  * @property string|null $IdGestion
  * @property string|null $IdEstadoPoa
- * @property string|null $IdLlavePresupuestaria
+ * @property string|null $IdUnidadEjecutora
  * @property string|null $FechaHoraActualizacion
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $Usuario
  *
- * @property LlavePresupuestaria $LlavPresupuestaria
+ * @property UnidadEjecutora $unidadEjecutora
  * @property PeiGestion $Gestion
  * @property EstadosPoa $EstadoPoa
  * @property Modulo $Modulo
@@ -46,11 +46,11 @@ class UsuarioContextoActivo extends ActiveRecord
     {
         return [
             [['IdUsuario', 'CodigoEstado', 'Usuario'], 'required'],
-            [['IdUsuario', 'IdModulo', 'IdGestion', 'IdEstadoPoa', 'IdLlavePresupuestaria', 'Usuario'], 'string', 'max' => 36],
+            [['IdUsuario', 'IdModulo', 'IdGestion', 'IdEstadoPoa', 'IdUnidadEjecutora', 'Usuario'], 'string', 'max' => 36],
             [['FechaHoraActualizacion', 'FechaHoraRegistro'], 'safe'],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['IdUsuario'], 'unique'],
-            [['IdLlavePresupuestaria'], 'exist', 'skipOnError' => true, 'targetClass' => LlavePresupuestaria::class, 'targetAttribute' => ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']],
+            [['IdUnidadEjecutora'], 'exist', 'skipOnError' => true, 'targetClass' => UnidadEjecutora::class, 'targetAttribute' => ['IdUnidadEjecutora' => 'IdUnidadEjecutora']],
             [['IdGestion'], 'exist', 'skipOnError' => true, 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdGestion' => 'IdGestion']],
             [['IdModulo'], 'exist', 'skipOnError' => true, 'targetClass' => Modulo::class, 'targetAttribute' => ['IdModulo' => 'IdModulo']],
             [['IdEstadoPoa'], 'exist', 'skipOnError' => true, 'targetClass' => EstadosPoa::class, 'targetAttribute' => ['IdEstadoPoa' => 'IdEstadoPoa']],
@@ -70,7 +70,7 @@ class UsuarioContextoActivo extends ActiveRecord
             'IdModulo' => 'Id Modulo',
             'IdGestion' => 'Id Gestion',
             'IdEstadoPoa' => 'Id Estado Poa',
-            'IdLlavePresupuestaria' => 'Id Llave Presupuestaria',
+            'IdUnidadEjecutora' => 'Unidad Ejecutora',
             'FechaHoraActualizacion' => 'Fecha Hora Actualizacion',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
@@ -79,14 +79,14 @@ class UsuarioContextoActivo extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[IdLlavePresupuestaria]].
+     * Gets a query for [[IdUnidadEjecutora]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getLlavePresupuestaria(): ActiveQuery
+    public function getUnidadEjecutora(): ActiveQuery
     {
-        return $this->hasOne(LlavePresupuestaria::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
+        return $this->hasOne(UnidadEjecutora::class, ['IdUnidadEjecutora' => 'IdUnidadEjecutora']);
     }
 
     /**

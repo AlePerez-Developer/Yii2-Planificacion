@@ -144,7 +144,7 @@ class UnidadEjecutoraService
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $modelo->getAttributes(array('IdUe', 'IdDa', 'Ue', 'Descripcion')),
+            'data' => $modelo->getAttributes(array('IdUnidadEjecutora', 'IdDa', 'Ue', 'Descripcion')),
         ];
     }
 

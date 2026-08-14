@@ -119,6 +119,9 @@ class ObjetivoEspecifico extends ActiveRecord
     {
         $contexto = Yii::$app->userContext->contexto();
 
+        $llave = LlavePresupuestaria::find()->where(['IdDa' => $contexto->unidadEjecutora?->IdDa])
+                ->andWhere(['esOrganizacional' => 1])->one();
+
         return self::find()->alias('Oe')
             ->select([
                 'Oe.IdObjEspecifico',
@@ -144,7 +147,7 @@ class ObjetivoEspecifico extends ActiveRecord
             ->andWhere(['!=', 'Oi.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['!=', 'Oes.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['Oe.IdGestion' => $contexto?->IdGestion])
-            ->andWhere(['Oe.IdLlavePresupuestaria' => $contexto?->IdLlavePresupuestaria])
+            ->andWhere(['Oe.IdLlavePresupuestaria' => $llave->IdLlavePresupuestaria])
             ->groupBy(['Oe.idObjEspecifico',
                 'Oi.IdObjInstitucional',
                 'Oes.IdObjEstrategico',

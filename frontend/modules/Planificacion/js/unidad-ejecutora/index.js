@@ -1,14 +1,17 @@
 $(document).ready(function () {
-    let idUe = '00000000-0000-0000-0000-000000000000';
-    let baseUrl = "index.php?r=Planificacion/ue/"
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+    let idUe = ID_EMPTY_GUID
+    let baseUrl = "index.php?r=Planificacion/unidad-ejecutora/"
     let dtEvents = $('#tablaListaUes')
+    let btnToggleForm = $('#btnMostrarCrear');
 
     function reiniciarCampos() {
         $('#formUe *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
+        unidadEjecutora_s2Da.val(null).trigger('change')
         $('#formUe').trigger("reset");
-        idUe = '00000000-0000-0000-0000-000000000000';
+        idUe = ID_EMPTY_GUID
     }
 
     function mensajeAccion(accion) {
@@ -16,7 +19,7 @@ $(document).ready(function () {
     }
 
     $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
+        btnToggleForm.removeClass('opened').addClass('closed')
         reiniciarCampos();
         $("#divDatos").hide(500);
         $("#divTabla").show(500);
@@ -29,7 +32,7 @@ $(document).ready(function () {
         if (!$("#formUe").valid()) return;
 
         const datos = new FormData();
-        datos.append('idUe', idUe)
+        datos.append('idUnidadEjecutora', idUe)
         datos.append("ue", $("#ue").val());
         datos.append("descripcion", $("#descripcion").val());
         datos.append("idDa", $("#idDa").val());
@@ -62,10 +65,10 @@ $(document).ready(function () {
     dtEvents.on('click', '.btn-toggle-estado', async function(){
         let objectBtn = $(this);
         const dt_row = dt_ue.row(objectBtn.closest('tr')).data()
-        let idUe = dt_row["IdUe"];
+        let idUe = dt_row["IdUnidadEjecutora"];
 
         const datos = new FormData();
-        datos.append("idUe", idUe);
+        datos.append("idUnidadEjecutora", idUe);
 
         try {
             await ajaxPromise({
@@ -87,10 +90,10 @@ $(document).ready(function () {
     dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_ue.row(objectBtn.closest('tr')).data()
-        let idUe = dt_row["IdUe"];
+        let idUe = dt_row["IdUnidadEjecutora"];
 
         const datos = new FormData();
-        datos.append("idUe", idUe);
+        datos.append("idUnidadEjecutora", idUe);
 
         Swal.fire({
             icon: "warning",
@@ -124,24 +127,27 @@ $(document).ready(function () {
     dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this)
         const dt_row = dt_ue.row(objectBtn.closest('tr')).data()
-        idUe = dt_row["IdUe"];
+        idUe = dt_row["IdUnidadEjecutora"];
 
         const datos = new FormData();
-        datos.append("idUe", idUe);
+        datos.append("idUnidadEjecutora", idUe);
 
+        IniciarSpiner(objectBtn);
         try {
             await ajaxPromise({
                 url: baseUrl + "buscar",
-                data: datos,
-                spinnerBtn: objectBtn,
+                data: datos
             }).then((data) => {
                 let ue = data.data
+                unidadEjecutora_s2Da.val(ue["IdDa"]).trigger('change.select2');
                 $("#ue").val(ue["Ue"]);
                 $("#descripcion").val(ue["Descripcion"]);
+                DetenerSpiner(objectBtn);
                 $("#btnMostrarCrear").trigger('click');
             });
         } catch (err) {
             console.error("Error al procesar:", err);
+            DetenerSpiner(objectBtn);
         }
     });
 
@@ -155,15 +161,21 @@ $(document).ready(function () {
                 required: true,
                 minlength: 3,
                 maxlength: 3,
+                require_from_group: [2, ".codigo_group"],
+                pattern: /^\d{3}$/,
                 remote: {
                     url: baseUrl + "verificar-codigo",
                     type: "post",
                     dataType: "json",
                     data: {
+                        idDa: function () {
+                            let idDa = $('#idDa').select2('data')
+                            return idDa[0].id
+                        },
                         ue: function() {
                             return $('#ue').val(); // valor actual del campo
                         },
-                        idUe: function (){
+                        idUnidadEjecutora: function (){
                             return idUe
                         }
                     }
@@ -180,7 +192,9 @@ $(document).ready(function () {
                 required: "Debe ingresar un valor a la Unidad",
                 minlength: "El codigo debe debe ser de 3 digitos",
                 maxlength: "El codigo debe debe ser de 3 digitos",
-                remote: "El codigo ingresado ya se encuentra en uso"
+                remote: "El codigo ingresado ya se encuentra en uso",
+                require_from_group: "Debe seleccionar una Da para validar el valor de UE",
+                pattern:"el valor debe tener 3 digitos de UE",
             },
             descripcion: {
                 required: "Debe ingresar la descripcion del programa",

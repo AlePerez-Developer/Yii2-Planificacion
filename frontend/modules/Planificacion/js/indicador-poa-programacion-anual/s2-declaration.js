@@ -24,7 +24,7 @@ $(document).ready(function () {
             });
             programacionPoaAnual_s2ObjEspecifico.trigger('change');
         },
-        error: manejarErrorDataTable
+        //error: manejarErrorDataTable
     });
 
     function formato(repo) {

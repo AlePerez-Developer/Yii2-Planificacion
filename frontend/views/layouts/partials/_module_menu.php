@@ -35,7 +35,7 @@ $menus = $modulo->menus;
                 <button class="dropbtn">Estructura Organizacional ▾</button>
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/da/index']) ?>">Direcciones Administrativas</a>
-                    <a href="<?= Url::to(['/Planificacion/ue/index']) ?>">Unidades Ejecutorias</a>
+                    <a href="<?= Url::to(['/Planificacion/unidad-ejecutora/index']) ?>">Unidades Ejecutorias</a>
                     <a href="<?= Url::to(['/Planificacion/programa/index']) ?>">Programas</a>
                     <a href="<?= Url::to(['/Planificacion/proyecto/index']) ?>">Proyectos</a>
                     <a href="<?= Url::to(['/Planificacion/actividad/index']) ?>">Actividades</a>

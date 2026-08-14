@@ -55,8 +55,8 @@ class UserContext
         return $this->contexto()?->estadoPoa;
     }
 
-    public function llaveActiva()
+    public function UnidadActiva()
     {
-        return $this->contexto()?->llavePresupuestaria;
+        return $this->contexto()?->unidadEjecutora;
     }
 }

@@ -197,7 +197,7 @@ class SiteController extends Controller
         if ($contexto) {
             $contexto->IdGestion = $id;
             $contexto->IdEstadoPoa = null;
-            $contexto->IdLlavePresupuestaria = null;
+            $contexto->IdUnidadEjecutora = null;
             $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
             //$contexto->save(false);
             if (!$contexto->save()) {
@@ -221,7 +221,7 @@ class SiteController extends Controller
 
         if ($contexto) {
             $contexto->IdEstadoPoa = $id;
-            $contexto->IdLlavePresupuestaria = null;
+            $contexto->IdUnidadEjecutora = null;
             $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
             $contexto->save(false);
         }
@@ -236,7 +236,7 @@ class SiteController extends Controller
         ]);
 
         if ($contexto) {
-            $contexto->IdLlavePresupuestaria = $id;
+            $contexto->IdUnidadEjecutora = $id;
             $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
             $contexto->save(false);
         }

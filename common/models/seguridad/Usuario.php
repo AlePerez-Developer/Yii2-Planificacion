@@ -1,6 +1,7 @@
 <?php
 
 namespace common\models\seguridad;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use common\models\seguridad\EstadosPoa;
 use app\modules\Planificacion\models\LlavePresupuestaria;
 use app\modules\Planificacion\models\PeiGestion;
@@ -8,6 +9,7 @@ use common\models\Estado;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use common\models\Persona;
+use yii\db\Expression;
 use yii\web\IdentityInterface;
 
 /**
@@ -139,11 +141,19 @@ class Usuario extends ActiveRecord implements IdentityInterface
 
     public function getLlavesPermitidas($idGestion, $idEstadoPoa)
     {
-        return LlavePresupuestaria::find()
+        return UnidadEjecutora::find()
+            ->select([
+                'l.IdUnidadEjecutora',
+                new Expression("CONCAT(d.Da, '-', Ue, ' : ', l.Descripcion) AS [[Compuesto]]")
+            ])
             ->alias('l')
             ->innerJoin(
                 'seguridad.UsuarioDaGestionEstado uge',
                 'uge.IdDa = l.IdDa'
+            )
+            ->innerJoin(
+                'Das d',
+                'd.IdDa = l.IdDa'
             )
             ->where([
                 'uge.IdUsuario' => $this->IdUsuario,
@@ -152,8 +162,10 @@ class Usuario extends ActiveRecord implements IdentityInterface
                 'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
                 'l.CodigoEstado' => Estado::ESTADO_VIGENTE,
             ])
-            ->orderBy(['l.Llave' => SORT_ASC])
+            ->orderBy(['l.Ue' => SORT_ASC])
+            ->asArray()
             ->all();
+
     }
 
     /**

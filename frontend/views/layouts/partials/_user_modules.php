@@ -66,7 +66,8 @@ $colorModulo = $moduloActivo?->Color ?? '#6c757d';
             <div class="context-row">
                 <span class="context-label">Llave</span>
                 <span class="context-value context-value-llave">
-                    <?= Html::encode($contexto->llavePresupuestaria?->Llave ?? '-') ?>
+                   
+                    <?= Html::encode($contexto->unidadEjecutora?->Descripcion?? '-') ?>
                 </span>
             </div>
 

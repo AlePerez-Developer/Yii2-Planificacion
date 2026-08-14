@@ -190,7 +190,7 @@ class UnidadEjecutoraController extends BaseController
      */
     private function obtenerId(): string
     {
-        $id = Yii::$app->request->post('idUe');
+        $id = Yii::$app->request->post('idUnidadEjecutora');
         if (!$id) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Código Ue no enviado.', 404);
         }

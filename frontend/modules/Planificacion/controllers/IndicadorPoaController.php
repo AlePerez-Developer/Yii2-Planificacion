@@ -134,7 +134,7 @@ class IndicadorPoaController extends BaseController
     private function obtenerContextoActivo(): array
     {
         $contexto = Yii::$app->userContext->contexto();
-        $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
+        $idLlave = (string)($contexto->IdUnidadEjecutora ?? '');
         $gestion = (int)($contexto->IdGestion ?? 0);
 
 

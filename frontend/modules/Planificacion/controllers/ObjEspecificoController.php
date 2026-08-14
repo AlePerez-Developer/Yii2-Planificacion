@@ -146,7 +146,7 @@ class ObjEspecificoController extends BaseController
     private function obtenerContextoActivo(): array
     {
         $contexto = Yii::$app->userContext->contexto();
-        $idLlave = (string)($contexto->IdLlavePresupuestaria ?? '');
+        $idLlave = (string)($contexto->IdUnidadEjecutora ?? '');
         $gestion = (string)($contexto->IdGestion ?? 0);
 
         if ($idLlave === '' || $gestion <= 0) {

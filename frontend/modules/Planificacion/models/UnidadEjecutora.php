@@ -6,6 +6,7 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use common\models\Estado;
 use common\models\Usuario;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "UnidadesEjecutoras".
@@ -20,7 +21,7 @@ use common\models\Usuario;
  *
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
- * @property Da $da
+ * @property Da $das
  */
 class UnidadEjecutora extends ActiveRecord
 {
@@ -49,7 +50,7 @@ class UnidadEjecutora extends ActiveRecord
             [['IdUnidadEjecutora'], 'unique'],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
-            [['idDa'], 'exist', 'skipOnError' => true, 'targetClass' => Da::class, 'targetAttribute' => ['idDa' => 'IdDa']],
+            [['IdDa'], 'exist', 'skipOnError' => true, 'targetClass' => Da::class, 'targetAttribute' => ['IdDa' => 'IdDa']],
         ];
     }
 
@@ -105,9 +106,9 @@ class UnidadEjecutora extends ActiveRecord
      * @param string $id
      * @return UnidadEjecutora|null
      */
-    public static function listOne(string $id): ?Ue
+    public static function listOne(string $id): ?UnidadEjecutora
     {
-        return self::findOne(['IdUe' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdUnidadEjecutora' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
     }
 
     /**
@@ -120,18 +121,23 @@ class UnidadEjecutora extends ActiveRecord
     {
         return self::find()->alias('u')
             ->select([
-                'u.IdUe',
+                'u.IdUnidadEjecutora',
                 'd.IdDa',
                 'u.Ue',
                 'u.Descripcion',
                 'u.CodigoEstado',
-                'u.CodigoUsuario'
+                'u.CodigoUsuario',
+                'd.Da',
+                new Expression("CONCAT(d.Da, '-', Ue) AS [[Compuesto]]")
             ])
-            ->joinWith('da d', true, 'INNER JOIN')
-            ->where(['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andwhere(['like', 'Descripcion', $search])
-            ->groupBy(['IdUe', 'IdDa', 'Ue', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'])
-            ->orderBy(['Ue' => SORT_ASC]);
+            ->joinWith('das d', true, 'INNER JOIN')
+            ->where(['!=', 'u.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andwhere(['like', 'u.Descripcion', $search])
+            ->groupBy(['u.IdUnidadEjecutora', 'd.IdDa', 'd.Da', 'u.Ue', 'u.Descripcion', 'u.CodigoEstado', 'u.CodigoUsuario'])
+            ->orderBy([
+                'd.Da' => SORT_ASC,
+                'Ue' => SORT_ASC,
+            ]);
     }
 
     /**
@@ -178,14 +184,14 @@ class UnidadEjecutora extends ActiveRecord
     }
 
     /**
-     * Gets query for [[IdDa0]].
+     * Gets query for [[Das]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getDa(): ActiveQuery
+    public function getDas(): ActiveQuery
     {
-        return $this->hasOne(Da::class, ['IdDa' => 'idDa']);
+        return $this->hasOne(Da::class, ['IdDa' => 'IdDa']);
     }
 
     /**
