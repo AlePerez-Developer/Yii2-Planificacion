@@ -141,7 +141,7 @@ class SiteController extends Controller
             ->andWhere(['m.CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->orderBy('m.Orden')
             ->all();
-
+        Yii::$app->contexto->setPei('7A63BC03-07AA-F011-A58A-CA927C59A087');
         return $this->render('index', [
             'modulos' => $modulos
         ]);

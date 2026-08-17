@@ -11,6 +11,7 @@ class OperacionDao
         string $id,
         string $idObjEspecifico,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa,
         string $codigo
     ): bool {
@@ -18,6 +19,7 @@ class OperacionDao
             ->where([
                 'IdObjEspecifico' => $idObjEspecifico,
                 'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdGestion' => $idGestion,
                 'IdEstadoPoa' => $idEstadoPoa,
                 'Codigo' => $codigo,
             ])

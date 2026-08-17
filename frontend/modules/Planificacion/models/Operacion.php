@@ -26,6 +26,7 @@ class Operacion extends ActiveRecord
                 'Codigo',
                 'IdObjEspecifico',
                 'IdUnidadEjecutora',
+                'IdGestion',
                 'IdIndicador',
                 'IdLlavePresupuestaria',
                 'PrimerTrimestre',
@@ -37,7 +38,7 @@ class Operacion extends ActiveRecord
                 'CodigoEstado',
                 'CodigoUsuario',
             ], 'required'],
-            [['IdOperacion', 'IdObjEspecifico', 'IdUnidadEjecutora', 'IdIndicador', 'IdLlavePresupuestaria'], 'string', 'max' => 36],
+            [['IdOperacion', 'IdObjEspecifico', 'IdUnidadEjecutora', 'IdGestion', 'IdIndicador', 'IdLlavePresupuestaria'], 'string', 'max' => 36],
             [['PrimerTrimestre', 'SegundoTrimestre', 'TercerTrimestre', 'CuartoTrimestre'], 'integer', 'min' => 0],
             [['PrimerTrimestre'], 'validateTotalTrimestral'],
             [['IdEstadoPoa'], 'integer'],
@@ -53,6 +54,7 @@ class Operacion extends ActiveRecord
             [['CodigoUsuario'], 'exist', 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['IdObjEspecifico'], 'exist', 'targetClass' => ObjetivoEspecifico::class, 'targetAttribute' => ['IdObjEspecifico' => 'IdObjEspecifico']],
             [['IdUnidadEjecutora'], 'exist', 'targetClass' => UnidadEjecutora::class, 'targetAttribute' => ['IdUnidadEjecutora' => 'IdUnidadEjecutora']],
+            [['IdGestion'], 'exist', 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdGestion' => 'IdGestion']],
             [['IdLlavePresupuestaria'], 'exist', 'targetClass' => LlavePresupuestaria::class, 'targetAttribute' => ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']],
             [['IdEstadoPoa'], 'exist', 'targetClass' => EstadoPoa::class, 'targetAttribute' => ['IdEstadoPoa' => 'CodigoEstadoPOA']],
         ];
@@ -72,6 +74,7 @@ class Operacion extends ActiveRecord
 
     public static function listAll(
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): ActiveQuery {
         return self::find()->alias('O')
@@ -94,6 +97,7 @@ class Operacion extends ActiveRecord
             ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = O.IdLlavePresupuestaria')
             ->where([
                 'O.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'O.IdGestion' => $idGestion,
                 'O.IdEstadoPoa' => $idEstadoPoa,
             ])
             ->andWhere(['<>', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO]);
@@ -119,6 +123,11 @@ class Operacion extends ActiveRecord
     public function getUnidadEjecutora(): ActiveQuery
     {
         return $this->hasOne(UnidadEjecutora::class, ['IdUnidadEjecutora' => 'IdUnidadEjecutora']);
+    }
+
+    public function getGestion(): ActiveQuery
+    {
+        return $this->hasOne(PeiGestion::class, ['IdGestion' => 'IdGestion']);
     }
 
     public function getIndicador(): ActiveQuery

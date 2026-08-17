@@ -26,8 +26,13 @@ $menus = $modulo->menus;
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/peis/index']) ?>">Manejo Pei</a>
                     <div class="dropdown-divider"></div>
+                    <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Objetivos Estrategicos</a>
+                    <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/area-estrategica/index']) ?>">Areas Estrategicas</a>
                     <a href="<?= Url::to(['/Planificacion/politica-estrategica/index']) ?>">Politicas Estrategicas</a>
+                    <a href="<?= Url::to(['/Planificacion/accion-estrategica/index']) ?>">Acciones Estrategicas</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
                 </div>
             </div>
 
@@ -51,20 +56,18 @@ $menus = $modulo->menus;
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-anual/index']) ?>">Programacion Anual</a>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
                 </div>
             </div>
 
             <div class="dropdown">
-                <button class="dropbtn">Indicadores Presupuestarios ▾</button>
+                <button class="dropbtn">Indicadores POA ▾</button>
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/indicador-poa/index']) ?>">Manejar Indicadores</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-poa-programacion-anual/index']) ?>">Programacion Anual</a>
                     <a href="<?= Url::to(['/Planificacion/indicador-poa-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
                     <div class="dropdown-divider"></div>
-                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
+
                 </div>
             </div>
 

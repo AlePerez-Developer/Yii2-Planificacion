@@ -28,9 +28,10 @@ class OperacionService
 
     public function listarTodo(
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): array {
-        $data = Operacion::listAll($idUnidadEjecutora, $idEstadoPoa)
+        $data = Operacion::listAll($idUnidadEjecutora, $idGestion, $idEstadoPoa)
             ->orderBy(['O.Codigo' => SORT_ASC])
             ->asArray()
             ->all();
@@ -135,6 +136,7 @@ class OperacionService
             'Codigo' => $form->codigo,
             'IdObjEspecifico' => $form->idObjEspecifico,
             'IdUnidadEjecutora' => $idUnidadEjecutora,
+            'IdGestion' => $idGestion,
             'IdIndicador' => $form->idIndicador,
             'IdLlavePresupuestaria' => $form->idLlavePresupuestaria,
             'Descripcion' => $this->normalizarDescripcion($form->descripcion),
@@ -158,13 +160,14 @@ class OperacionService
         string $idGestion,
         int $idEstadoPoa
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idEstadoPoa);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $this->validarRelaciones($form, $idUnidadEjecutora, $idGestion);
 
         $modelo->setAttributes([
             'Codigo' => $form->codigo,
             'IdObjEspecifico' => $form->idObjEspecifico,
             'IdIndicador' => $form->idIndicador,
+            'IdGestion' => $idGestion,
             'IdLlavePresupuestaria' => $form->idLlavePresupuestaria,
             'Descripcion' => $this->normalizarDescripcion($form->descripcion),
             'TipoOperacion' => $form->tipoOperacion,
@@ -179,6 +182,7 @@ class OperacionService
         int $trimestre,
         int $meta,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): array {
         if (!isset(self::CAMPOS_TRIMESTRE[$trimestre]) || $meta < 0) {
@@ -189,7 +193,7 @@ class OperacionService
             );
         }
 
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idEstadoPoa);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $campo = self::CAMPOS_TRIMESTRE[$trimestre];
         $metas = [
             1 => (int)$modelo->PrimerTrimestre,
@@ -226,9 +230,10 @@ class OperacionService
     public function obtenerModelo(
         string $id,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idEstadoPoa);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
 
         return ResponseHelper::success([
             'IdOperacion' => $modelo->IdOperacion,
@@ -244,9 +249,10 @@ class OperacionService
     public function cambiarEstado(
         string $id,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idEstadoPoa);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $modelo->cambiarEstado();
         return $this->procesar($modelo);
     }
@@ -254,9 +260,10 @@ class OperacionService
     public function eliminar(
         string $id,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idEstadoPoa);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $modelo->eliminar();
         return $this->procesar($modelo);
     }
@@ -266,12 +273,14 @@ class OperacionService
         string $idObjEspecifico,
         string $codigo,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): bool {
         return OperacionDao::verificarCodigo(
             $id,
             $idObjEspecifico,
             $idUnidadEjecutora,
+            $idGestion,
             $idEstadoPoa,
             $codigo
         );
@@ -359,12 +368,14 @@ class OperacionService
     private function obtenerModeloValidado(
         string $id,
         string $idUnidadEjecutora,
+        string $idGestion,
         int $idEstadoPoa
     ): Operacion {
         $modelo = Operacion::find()
             ->where([
                 'IdOperacion' => $id,
                 'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdGestion' => $idGestion,
                 'IdEstadoPoa' => $idEstadoPoa,
             ])
             ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])

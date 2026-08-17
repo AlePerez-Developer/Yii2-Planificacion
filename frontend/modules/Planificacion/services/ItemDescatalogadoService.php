@@ -25,7 +25,7 @@ class ItemDescatalogadoService
         int $codigoEstadoPoa,
         int $formulario
     ): array {
-        $operaciones = Operacion::listAll($idUnidad, $codigoEstadoPoa)
+        $operaciones = Operacion::listAll($idUnidad, $idGestion, $codigoEstadoPoa)
             ->andWhere(['O.CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['OE.IdGestion' => $idGestion])
             ->orderBy(['O.Codigo' => SORT_ASC])
@@ -194,6 +194,7 @@ class ItemDescatalogadoService
             ->where([
                 'O.IdOperacion' => $id,
                 'O.IdUnidadEjecutora' => $idUnidad,
+                'O.IdGestion' => $idGestion,
                 'O.IdEstadoPoa' => $idEstadoPoa,
                 'OE.IdGestion' => $idGestion,
             ])

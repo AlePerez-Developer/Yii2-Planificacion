@@ -63,9 +63,13 @@ class OperacionController extends BaseController
 
     public function actionListarTodo(): array
     {
-        [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
         return $this->withTryCatch(
-            fn() => $this->service->listarTodo($idUnidadEjecutora, $idEstadoPoa)
+            fn() => $this->service->listarTodo(
+                $idUnidadEjecutora,
+                $idGestion,
+                $idEstadoPoa
+            )
         );
     }
 
@@ -138,10 +142,11 @@ class OperacionController extends BaseController
 
     public function actionBuscar(): array
     {
-        [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
         return $this->withTryCatch(fn() => $this->service->obtenerModelo(
             $this->obtenerId(),
             $idUnidadEjecutora,
+            $idGestion,
             $idEstadoPoa
         ));
     }
@@ -149,7 +154,7 @@ class OperacionController extends BaseController
     public function actionGuardarMetaTrimestral(): array
     {
         return $this->withTryCatch(function () {
-            [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+            [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
             $trimestre = filter_var(
                 Yii::$app->request->post('trimestre'),
                 FILTER_VALIDATE_INT
@@ -178,6 +183,7 @@ class OperacionController extends BaseController
                 $trimestre,
                 $meta,
                 $idUnidadEjecutora,
+                $idGestion,
                 $idEstadoPoa
             );
         });
@@ -185,27 +191,29 @@ class OperacionController extends BaseController
 
     public function actionCambiarEstado(): array
     {
-        [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
         return $this->withTryCatch(fn() => $this->service->cambiarEstado(
             $this->obtenerId(),
             $idUnidadEjecutora,
+            $idGestion,
             $idEstadoPoa
         ));
     }
 
     public function actionEliminar(): array
     {
-        [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
         return $this->withTryCatch(fn() => $this->service->eliminar(
             $this->obtenerId(),
             $idUnidadEjecutora,
+            $idGestion,
             $idEstadoPoa
         ));
     }
 
     public function actionVerificarCodigo(): bool
     {
-        [$idUnidadEjecutora, , $idEstadoPoa] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
 
         return $this->service->verificarCodigo(
             (string)Yii::$app->request->post(
@@ -215,6 +223,7 @@ class OperacionController extends BaseController
             (string)Yii::$app->request->post('idObjEspecifico', ''),
             (string)Yii::$app->request->post('codigo', ''),
             $idUnidadEjecutora,
+            $idGestion,
             $idEstadoPoa
         );
     }
