@@ -6,6 +6,7 @@ use yii\base\Model;
 
 /**
   *
+ * @property  string $idPei
  * @property string $idObjEstrategico
  * @property int $codigo
  * @property int $meta
@@ -20,12 +21,12 @@ use yii\base\Model;
 
 class IndicadorEstrategicoForm extends Model
 {
+    public string $idPei;
     public string $idObjEstrategico;
     public int $codigo;
     public int $meta;
     public string $descripcion;
     public int $lineaBase;
-    public string $accionDescripcion;
     public string $idTipoResultado;
     public string $idCategoriaIndicador;
     public string $idUnidadIndicador;
@@ -35,10 +36,10 @@ class IndicadorEstrategicoForm extends Model
     public function rules(): array
     {
         return [
-            [['idObjEstrategico', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'string', 'max' => 36],
-            [['idObjEstrategico', 'codigo', 'meta', 'descripcion', 'lineaBase', 'accionDescripcion', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'required'],
+            [['idPei', 'idObjEstrategico', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'string', 'max' => 36],
+            [['idPei', 'idObjEstrategico', 'codigo', 'meta', 'descripcion', 'lineaBase', 'idTipoResultado', 'idCategoriaIndicador', 'idUnidadIndicador', 'idAccionEstrategica'], 'required'],
             [['codigo', 'meta', 'lineaBase'], 'integer'],
-            [['descripcion', 'accionDescripcion'], 'string', 'max' => 500],
+            [['descripcion'], 'string', 'max' => 500],
         ];
     }
 

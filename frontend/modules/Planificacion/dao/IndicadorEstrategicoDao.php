@@ -8,7 +8,7 @@ class IndicadorEstrategicoDao
 {
     static function enUso(IndicadorEstrategico $modelo): bool
     {
-        return $modelo->getIndicadorEstrategicoProgramacionGestions()->exists();
+        return $modelo->getProgramacionesIndicadoresGestiones()->exists();
     }
 
     static function verificarCodigo(string $id,  int $codigo): bool

@@ -163,7 +163,7 @@ class LlavePresupuestaria extends ActiveRecord
                 'lp.Descripcion',
                 'Estado' => new Expression("
                     CASE 
-                        WHEN pig.IdProgramacionIndicadorGestio IS NOT NULL 
+                        WHEN pig.IdProgramacionIndicadorGestion IS NOT NULL 
                         THEN 1 
                         ELSE 0 
                     END

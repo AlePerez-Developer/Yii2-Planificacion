@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\models\Indicador;
 use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
@@ -22,26 +23,30 @@ class IndicadorEstrategicoProgramacionTrimestralService
         $data = IndicadorEstrategico::find()
             ->alias('I')
             ->select([
-                'I.IdIndicadorEstrategico',
+                'I.IdIndicador as IdIndicadorEstrategico',
                 'I.Codigo',
-                'I.Descripcion',
-                'I.Meta',
+                'ii.Descripcion',
+                'ii.Meta',
 
                 'MetaProgramada' => new Expression('ISNULL(SUM(P.MetaProgramada), 0)'),
             ])
             ->innerJoin(
                 ['P' => ProgramacionIndicadorGestion::tableName()],
-                'P.IdIndicadorEstrategico = I.IdIndicadorEstrategico '
+                'P.IdIndicadorEstrategico = I.IdIndicador '
+            )
+            ->innerJoin(
+                ['ii' => Indicador::tableName()],
+                'ii.IdIndicador = I.IdIndicador '
             )
             ->where(['I.IdObjEstrategico' => $idObjEstrategico])
             ->groupBy([
-                'I.IdIndicadorEstrategico',
+                'I.IdIndicador',
                 'I.Codigo',
-                'I.Descripcion',
-                'I.Meta',
+                'ii.Descripcion',
+                'ii.Meta',
 
             ])
-            ->having('ISNULL(SUM(P.MetaProgramada), 0) >= I.Meta')
+            ->having('ISNULL(SUM(P.MetaProgramada), 0) >= ii.Meta')
             ->orderBy(['I.Codigo' => SORT_ASC])
             ->asArray()
             ->all();
@@ -72,7 +77,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
         $data = ProgramacionIndicadorGestion::find()
             ->alias('P')
             ->select([
-                'P.IdProgramacionIndicadorGestio',
+                'P.IdProgramacionIndicadorGestion',
                 'L.IdLlavePresupuestaria',
                 'CodigoCompuesto' => 'L.Llave',
                 'L.Descripcion',
@@ -86,7 +91,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
             ->innerJoin(['L' => 'LlavesPresupuestarias'], 'L.IdLlavePresupuestaria = P.IdLlavePresupuestaria')
             ->leftJoin(
                 ['T' => ProgramacionIndicadorTrimestre::tableName()],
-                'T.IdProgramacionIndicadorGestio = P.IdProgramacionIndicadorGestio'
+                'T.IdProgramacionIndicadorGestion = P.IdProgramacionIndicadorGestion'
             )
             ->where([
                 'P.IdIndicadorEstrategico' => $idIndicadorEstrategico,
@@ -135,12 +140,12 @@ class IndicadorEstrategicoProgramacionTrimestralService
         }
 
         $modelo = ProgramacionIndicadorTrimestre::findOne([
-            'IdProgramacionIndicadorGestio' => $idProgramacionIndicadorGestio,
+            'IdProgramacionIndicadorGestion' => $idProgramacionIndicadorGestio,
         ]);
 
         if ($modelo === null) {
             $modelo = new ProgramacionIndicadorTrimestre([
-                'IdProgramacionIndicadorGestio' => $idProgramacionIndicadorGestio,
+                'IdProgramacionIndicadorGestion' => $idProgramacionIndicadorGestio,
                 'MetaPrimerTrimestre' => 0,
                 'MetaSegundoTrimestre' => 0,
                 'MetaTercerTrimestre' => 0,

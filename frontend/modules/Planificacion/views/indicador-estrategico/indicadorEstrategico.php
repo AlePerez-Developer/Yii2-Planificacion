@@ -143,13 +143,6 @@ $this->params['breadcrumbs'][] = [
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="form-group">
-                                    <label for="accionDescripcion">Descripcion</label>
-                                    <input type="text" class="form-control input-sm txt dtic-input" id="accionDescripcion"
-                                           name="accionDescripcion" placeholder="Descripcion de la accion" >
-                                </div>
-                            </div>
                         </div>
 
                     </form>

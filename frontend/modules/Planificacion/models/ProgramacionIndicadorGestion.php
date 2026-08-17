@@ -10,7 +10,7 @@ use yii\db\ActiveQuery;
 /**
  * This is the model class for table "ProgramacioesnInidicadoresGestiones".
  *
- * @property string $IdProgramacionIndicadorGestio
+ * @property string $IdProgramacionIndicadorGestion
  * @property string $IdIndicadorEstrategico
  * @property string $IdLlavePresupuestaria
  * @property string $IdGestion
@@ -39,16 +39,16 @@ class ProgramacionIndicadorGestion extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdProgramacionIndicadorGestio', 'IdIndicadorEstrategico', 'IdLlavePresupuestaria', 'IdGestion'], 'string'],
+            [['IdProgramacionIndicadorGestion', 'IdIndicadorEstrategico', 'IdLlavePresupuestaria', 'IdGestion'], 'string'],
             [['IdIndicadorEstrategico', 'IdLlavePresupuestaria', 'IdGestion', 'CodigoUsuario'], 'required'],
             [['MetaProgramada'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoUsuario'], 'string', 'max' => 3],
-            [['IdProgramacionIndicadorGestio'], 'unique'],
+            [['IdProgramacionIndicadorGestion'], 'unique'],
             [['IdLlavePresupuestaria'], 'exist', 'skipOnError' => true, 'targetClass' => LlavePresupuestaria::class, 'targetAttribute' => ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']],
             [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['IdGestion'], 'exist', 'skipOnError' => true, 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdGestion' => 'IdGestion']],
-            [['IdIndicadorEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => IndicadorEstrategico::class, 'targetAttribute' => ['IdIndicadorEstrategico' => 'IdIndicadorEstrategico']],
+            [['IdIndicadorEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => IndicadorEstrategico::class, 'targetAttribute' => ['IdIndicadorEstrategico' => 'IdIndicador']],
         ];
     }
 
@@ -72,12 +72,12 @@ class ProgramacionIndicadorGestion extends ActiveRecord
     {
         return self::find()->alias('P')
             ->select([
-                'P.IdProgramacionIndicadorGestio',
+                'P.IdProgramacionIndicadorGestion',
                 'L.Llave',
                 'L.Descripcion',
                 'P.MetaProgramada as Meta',
                 'G.IdGestion',
-                'I.IdIndicadorEstrategico',
+                'I.IdIndicador',
                 'L.IdLlavePresupuestaria',
             ])
             ->joinWith('gestion G', true, 'INNER JOIN')
@@ -89,8 +89,8 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             ->joinWith('llavePresupuestaria.proyecto Lpy', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.actividad La', true, 'INNER JOIN')
             ->where(['!=', 'G.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->groupBy(['P.IdProgramacionIndicadorGestio', 'L.Llave', 'L.Descripcion', 'P.MetaProgramada',
-                    'G.IdGestion', 'I.IDIndicadorEstrategico', 'L.IdLlavePresupuestaria',]
+            ->groupBy(['P.IdProgramacionIndicadorGestion', 'L.Llave', 'L.Descripcion', 'P.MetaProgramada',
+                    'G.IdGestion', 'I.IdIndicador', 'L.IdLlavePresupuestaria',]
             );
     }
 
@@ -128,7 +128,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
      */
     public function getIndicadorEstrategico(): ActiveQuery
     {
-        return $this->hasOne(IndicadorEstrategico::class, ['IdIndicadorEstrategico' => 'IdIndicadorEstrategico']);
+        return $this->hasOne(IndicadorEstrategico::class, ['IdIndicador' => 'IdIndicadorEstrategico']);
     }
 
     /**

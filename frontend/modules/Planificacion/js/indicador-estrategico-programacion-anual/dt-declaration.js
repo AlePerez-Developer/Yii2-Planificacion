@@ -86,7 +86,7 @@ function inicializarTablaIndicadores() {
                         </div>
                         
                         <div class="dtic-item-sub mb-1">
-                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["AccionDescripcion"]} ${row["Meta"]}  
+                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["Meta"]}  
                         </div>
                         
                         <!-- DESC -->
@@ -110,9 +110,9 @@ function inicializarTablaIndicadores() {
                             </div>
     
                             <div class="result-box">
-                                <span class="badge-result">${row["catUnidadesIndicadores"]["Descripcion"]}</span>
-                                <span class="badge-result">${row["catTiposResultados"]["Descripcion"]}</span>
-                                <span class="badge-result">${row["catCategoriasIndicadores"]["Descripcion"]}</span>
+                                <span class="badge-result">${row['indicador']["catUnidadesIndicadores"]["Descripcion"]}</span>
+                                <span class="badge-result">${row['indicador']["catTiposResultados"]["Descripcion"]}</span>
+                                <span class="badge-result">${row['indicador']["catCategoriasIndicadores"]["Descripcion"]}</span>
                             </div>            
                         </div>                         
                     `;
@@ -159,7 +159,7 @@ $(document).ready(function () {
         openedRow = currentRow;
         const dtRow = currentRow.data();
 
-        cargarTabs(dtRow.IdIndicadorEstrategico, dtRow.Codigo);
+        cargarTabs(dtRow.IdIndicador, dtRow.Codigo);
     });
 
     function closeChildRow(row) {

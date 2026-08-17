@@ -49,7 +49,6 @@ class IndicadorEstrategicoAccionService
         $modelo = $this->obtenerModeloValidado($id);
 
         $modelo->IdAccionEstrategica = $form->idAccionEstrategica;
-        $modelo->AccionDescripcion = mb_strtoupper(trim($form->accionDescripcion), 'UTF-8');
 
         return $this->validarProcesarModelo($modelo);
     }

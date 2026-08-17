@@ -86,9 +86,9 @@ $(document).ready(function () {
 
                         
                         <div class="acc-footer mt-2" style="display: flex; gap: 10px">
-                            <span class="badge-result">${row["catUnidadesIndicadores"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["catTiposResultados"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["catCategoriasIndicadores"]["Descripcion"]}</span>
+                            <span class="badge-result">${row["indicador"]["catUnidadesIndicadores"]["Descripcion"]}</span>
+                            <span class="badge-result">${row["indicador"]["catTiposResultados"]["Descripcion"]}</span>
+                            <span class="badge-result">${row["indicador"]["catCategoriasIndicadores"]["Descripcion"]}</span>
                         </div>                        
                         `;
                 }
@@ -112,7 +112,7 @@ $(document).ready(function () {
                 },
             },
             {
-                data: "IdIndicadorEstrategico",
+                data: "IdIndicador",
                 className: "text-center",
                 width: "140px",
                 orderable: false,

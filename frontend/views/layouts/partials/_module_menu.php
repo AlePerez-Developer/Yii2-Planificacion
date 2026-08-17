@@ -60,6 +60,7 @@ $menus = $modulo->menus;
                 <button class="dropbtn">Indicadores Presupuestarios ▾</button>
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/indicador-poa/index']) ?>">Manejar Indicadores</a>
+                    <a href="<?= Url::to(['/Planificacion/operacion-dtic/index']) ?>">Operaciones</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-poa-programacion-anual/index']) ?>">Programacion Anual</a>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-trimestral/index']) ?>">Programacion Trimestral</a>

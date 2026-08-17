@@ -31,8 +31,8 @@ class ProgramacionIndicadorTrimestre extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdProgramacionTrimestral', 'IdProgramacionIndicadorGestio'], 'string', 'max' => 36],
-            [['IdProgramacionIndicadorGestio', 'CodigoUsuario'], 'required'],
+            [['IdProgramacionTrimestral', 'IdProgramacionIndicadorGestion'], 'string', 'max' => 36],
+            [['IdProgramacionIndicadorGestion', 'CodigoUsuario'], 'required'],
             [[
                 'MetaPrimerTrimestre',
                 'MetaSegundoTrimestre',
@@ -42,11 +42,11 @@ class ProgramacionIndicadorTrimestre extends ActiveRecord
             [['FechaHoraRegistro'], 'safe'],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdProgramacionTrimestral'], 'unique'],
-            [['IdProgramacionIndicadorGestio'], 'unique'],
-            [['IdProgramacionIndicadorGestio'], 'exist',
+            [['IdProgramacionIndicadorGestion'], 'unique'],
+            [['IdProgramacionIndicadorGestion'], 'exist',
                 'skipOnError' => true,
                 'targetClass' => ProgramacionIndicadorGestion::class,
-                'targetAttribute' => ['IdProgramacionIndicadorGestio' => 'IdProgramacionIndicadorGestio'],
+                'targetAttribute' => ['IdProgramacionIndicadorGestion' => 'IdProgramacionIndicadorGestion'],
             ],
             [['CodigoUsuario'], 'exist',
                 'skipOnError' => true,
@@ -60,7 +60,7 @@ class ProgramacionIndicadorTrimestre extends ActiveRecord
     {
         return [
             'IdProgramacionTrimestral' => 'Id Programación Trimestral',
-            'IdProgramacionIndicadorGestio' => 'Programación anual',
+            'IdProgramacionIndicadorGestion' => 'Programación anual',
             'MetaPrimerTrimestre' => 'Primer trimestre',
             'MetaSegundoTrimestre' => 'Segundo trimestre',
             'MetaTercerTrimestre' => 'Tercer trimestre',
@@ -74,7 +74,7 @@ class ProgramacionIndicadorTrimestre extends ActiveRecord
     {
         return $this->hasOne(
             ProgramacionIndicadorGestion::class,
-            ['IdProgramacionIndicadorGestio' => 'IdProgramacionIndicadorGestio']
+            ['IdProgramacionIndicadorGestion' => 'IdProgramacionIndicadorGestion']
         );
     }
 

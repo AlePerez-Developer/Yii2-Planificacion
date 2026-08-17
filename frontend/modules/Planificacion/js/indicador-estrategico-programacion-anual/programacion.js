@@ -75,8 +75,8 @@ $(document).ready(function () {
 
         const dt_table = tabla.DataTable();
         const dt_row = dt_table.row(objectBtn.closest('tr')).data();
-        let rowId = dt_row["IdProgramacionIndicadorGestio"];
-        let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+        let rowId = dt_row["IdProgramacionIndicadorGestion"];
+        let idIndicadorEstrategico = dt_row["IdIndicador"];
 
 
         const datos = new FormData();
@@ -128,8 +128,8 @@ $(document).ready(function () {
 
             const dt_table = tabla.DataTable();
             const dt_row = dt_table.row(objectInput.closest('tr')).data();
-            let rowId = dt_row["IdProgramacionIndicadorGestio"];
-            let idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+            let rowId = dt_row["IdProgramacionIndicadorGestion"];
+            let idIndicadorEstrategico = dt_row["IdIndicador"];
 
             const codigo = objectInput.data('codigoindicador');
             const gestion = objectInput.data('gestion')

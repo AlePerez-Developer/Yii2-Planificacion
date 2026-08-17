@@ -45,7 +45,6 @@ $(document).ready(function(){
         const meta = $("#meta").val();
         const lineaBase = $("#lineaBase").val();
         const descripcion = $("#descripcion").val();
-        const accionDescripcion = $('#accionDescripcion').val();
         const datos = new FormData();
         datos.append('idIndicadorEstrategico',idIndicadorEstrategico)
         datos.append("idObjEstrategico", idObjEstrategico);
@@ -57,7 +56,6 @@ $(document).ready(function(){
         datos.append("meta", meta);
         datos.append("lineaBase", lineaBase);
         datos.append("descripcion", descripcion);
-        datos.append("accionDescripcion", accionDescripcion);
 
         const hasCode =  idIndicadorEstrategico !== ID_EMPTY_GUID;
         let accion = hasCode ? 'actualizar' : 'guardar'
@@ -88,7 +86,7 @@ $(document).ready(function(){
 
         let objectBtn = $(this);
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
-        let rowId = dt_row["IdIndicadorEstrategico"];
+        let rowId = dt_row["IdIndicador"];
 
         const datos = new FormData();
         datos.append("idIndicadorEstrategico", rowId);
@@ -113,7 +111,7 @@ $(document).ready(function(){
     dtEvents.on('click', '.btn-delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
-        let rowId = dt_row["IdIndicadorEstrategico"];
+        let rowId = dt_row["IdIndicador"];
 
         const datos = new FormData();
         datos.append("idIndicadorEstrategico", rowId);
@@ -150,7 +148,7 @@ $(document).ready(function(){
     dtEvents.on('click', '.btn-edit', async function(){
         let objectBtn = $(this);
         const dt_row = dt_indEstrategico.row(objectBtn.closest('tr')).data()
-        idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+        idIndicadorEstrategico = dt_row["IdIndicador"];
 
         const datos = new FormData();
         datos.append("idIndicadorEstrategico", idIndicadorEstrategico);
@@ -167,7 +165,6 @@ $(document).ready(function(){
                 $("#meta").val(obj["Meta"]);
                 $("#lineaBase").val(obj["LineaBase"]);
                 $("#descripcion").val(obj["Descripcion"]);
-                $('#accionDescripcion').val(obj["AccionDescripcion"]);
                 indicadorEstrategico_s2TipoResultado.val(obj["IdTipoResultado"]).trigger('change')
                 indicadorEstrategico_s2CategoriaIndicador.val(obj["IdCategoriaIndicador"]).trigger('change')
                 indicadorEstrategico_s2UnidadIndicador.val(obj["IdUnidadIndicador"]).trigger('change')
@@ -221,11 +218,6 @@ $(document).ready(function(){
                 minlength: 2,
                 maxlength: 500,
             },
-            accionDescripcion: {
-                required: true,
-                minlength: 2,
-                maxlength: 500,
-            },
             idTipoResultado: {
                 required: true,
             },
@@ -264,11 +256,6 @@ $(document).ready(function(){
                 required: "Debe ingresar la descripcion del indicador estrategico",
                 minlength: "La descripcion del indicador debe tener por lo menos 2 caracteres",
                 maxlength: "La descripcion del indicador debe tener maximo 500 caracteres",
-            },
-            accionDescripcion: {
-                required: "Debe ingresar la descripcion de la accion estrategica",
-                minlength: "La descripcion debe tener por lo menos 2 caracteres",
-                maxlength: "La descripcion debe tener maximo 500 caracteres",
             },
             idTipoResultado: {
                 required: "Debe seleccionar una opcion para el tipo de resultado",

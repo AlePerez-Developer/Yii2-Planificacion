@@ -93,7 +93,7 @@ class IndicadorEstrategicoController extends BaseController
             $request = Yii::$app->request;
 
             $form = new IndicadorEstrategicoForm();
-
+            $form->idPei = yii::$app->contexto->getPei();
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
@@ -115,7 +115,7 @@ class IndicadorEstrategicoController extends BaseController
 
             $id = $this->obtenerId();
             $form = new IndicadorEstrategicoForm();
-
+            $form->idPei = yii::$app->contexto->getPei();
             if (!$form->load($request->post(), '') || !$form->validate()) {
                 throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
             }
@@ -162,7 +162,7 @@ class IndicadorEstrategicoController extends BaseController
     {
         return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->obtenerModelo($id);
+            return $this->service->obtenerModeloArray($id);
         });
     }
 

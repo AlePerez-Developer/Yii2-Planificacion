@@ -64,7 +64,7 @@ class IndicadorEstrategicoProgramacionAnualService
     {
         $data = IndicadorEstrategico::listAll()
             ->addSelect(['isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'])
-            ->joinWith('indicadorEstrategicoProgramacionGestions Ip')
+            ->joinWith('programacionesIndicadoresGestiones Ip')
             ->andWhere(['I.IdObjEstrategico' => $id])
             ->orderBy(['Codigo' => SORT_ASC])
             ->asArray()->all();
@@ -114,7 +114,7 @@ class IndicadorEstrategicoProgramacionAnualService
         $idGestion = $this->obtenerIdGestion($gestion, $pei);
 
         $data = ProgramacionIndicadorGestion::listAllbyGestion()
-            ->andWhere(['I.IdIndicadorEstrategico' => $idIndicador])
+            ->andWhere(['I.IdIndicador' => $idIndicador])
             ->andWhere(['P.IdGestion' => $idGestion])
             ->asArray()->all();
 
@@ -343,7 +343,7 @@ class IndicadorEstrategicoProgramacionAnualService
             ->addSelect(['O.IdObjEstrategico'])
             ->joinWith('objetivosEstrategicos O', true, 'INNER JOIN')
             ->andWhere(['!=', 'O.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andWhere(['I.Codigo' => $codigo])
+            ->andWhere(['E.Codigo' => $codigo])
             ->andWhere(['O.IdPei' => $pei])
             ->addGroupBy(['O.IdObjEstrategico'])
             ->one();
@@ -352,7 +352,7 @@ class IndicadorEstrategicoProgramacionAnualService
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'El codigo de Indicador estrategico no es valido en el contexto', 500);
         }
 
-        return $modelo->IdIndicadorEstrategico;
+        return $modelo->IdIndicador;
     }
 
     /**

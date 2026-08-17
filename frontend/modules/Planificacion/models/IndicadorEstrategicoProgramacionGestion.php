@@ -31,7 +31,7 @@ class IndicadorEstrategicoProgramacionGestion extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'IndicadorEstrategicoProgramacionGestion';
+        return 'IndicadorEstrategicoProgramacionGestiones';
     }
 
     /**

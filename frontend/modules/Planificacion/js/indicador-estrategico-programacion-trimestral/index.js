@@ -149,7 +149,7 @@ function crearColumnaTrimestre(numero, atributo) {
                        value="${data}"
                        data-original="${data}"
                        data-trimestre="${numero}"
-                       data-idprogramacion="${row.IdProgramacionIndicadorGestio}">`;
+                       data-idprogramacion="${row.IdProgramacionIndicadorGestion}">`;
         }
     };
 }

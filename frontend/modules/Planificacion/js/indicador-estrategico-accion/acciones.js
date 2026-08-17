@@ -51,10 +51,9 @@ $(document).ready(function () {
         let objectBtn = $(this);
 
         const dt_row = dt_indEstrategicoAccion.row(objectBtn.closest('tr')).data()
-        idIndicadorEstrategico = dt_row["IdIndicadorEstrategico"];
+        idIndicadorEstrategico = dt_row["IdIndicador"];
 
         indicadorEstrategicoAccion_s2AccionEstrategica.val(dt_row["IdAccionEstrategica"]).trigger('change')
-        $('#accionDescripcion').val(dt_row["AccionDescripcion"]);
 
         $('#modalAsignacion').modal('show');
     })
@@ -67,7 +66,6 @@ $(document).ready(function () {
         const datos = new FormData();
         datos.append("idIndicadorEstrategico", idIndicadorEstrategico);
         datos.append("idAccionEstrategica", indicadorEstrategicoAccion_s2AccionEstrategica.select2('data')[0].id);
-        datos.append("accionDescripcion", $('#accionDescripcion').val());
 
         try {
             await ajaxPromise({
@@ -96,21 +94,11 @@ $(document).ready(function () {
      */
     $("#formAsignacionAccion").validate({
         rules: {
-            accionDescripcion: {
-                required: true,
-                minlength: 2,
-                maxlength: 500,
-            },
             idAccionEstrategica: {
                 required: true
             }
         },
         messages: {
-            accionDescripcion: {
-                required: "Debe ingresar la descripcion de la accion estrategica",
-                minlength: "La descripcion debe tener por lo menos 2 caracteres",
-                maxlength: "La descripcion debe tener maximo 500 caracteres",
-            },
             idAccionEstrategica: {
                 required: "Debe seleccionar una opcion para la unidad del indicador",
             }
