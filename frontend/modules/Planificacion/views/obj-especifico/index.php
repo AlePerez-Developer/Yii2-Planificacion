@@ -55,34 +55,11 @@ $this->params['breadcrumbs'][] = ['label' => '/ Objetivos específicos'];
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="objetivo">Objetivo específico</label>
                                     <textarea id="objetivo" name="objetivo" class="form-control dtic-input" rows="4"
                                               maxlength="500"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="producto">Resultado / producto esperado</label>
-                                    <textarea id="producto" name="producto" class="form-control dtic-input" rows="4"
-                                              maxlength="500"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="contenedor">
-                            <div class="ltc">Datos del indicador del objetivo</div>
-                            <div class="square">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label for="descripcion" class="control-label">Descripcion</label>
-                                        <textarea class="form-control input-sm dtic-input txt" id="descripcion" name="descripcion" rows="3" placeholder="Descripcion del indicador"></textarea>
-                                    </div>
-                                    <div class="col-6">
-                                        <label for="formula" class="control-label">Formula</label>
-                                        <textarea class="form-control input-sm dtic-input txt" id="formula" name="formula" rows="3" placeholder="Formula del indicador"></textarea>
-                                    </div>
                                 </div>
                             </div>
                         </div>

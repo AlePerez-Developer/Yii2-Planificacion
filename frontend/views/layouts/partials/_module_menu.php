@@ -60,10 +60,9 @@ $menus = $modulo->menus;
                 <button class="dropbtn">Indicadores Presupuestarios ▾</button>
                 <div class="dropdown-content">
                     <a href="<?= Url::to(['/Planificacion/indicador-poa/index']) ?>">Manejar Indicadores</a>
-                    <a href="<?= Url::to(['/Planificacion/operacion-dtic/index']) ?>">Operaciones</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-poa-programacion-anual/index']) ?>">Programacion Anual</a>
-                    <a href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
+                    <a href="<?= Url::to(['/Planificacion/indicador-poa-programacion-trimestral/index']) ?>">Programacion Trimestral</a>
                     <div class="dropdown-divider"></div>
                     <a href="<?= Url::to(['/Planificacion/indicador-estrategico-accion/index']) ?>">Asignar Acciones Estrategicas</a>
                 </div>
@@ -87,17 +86,23 @@ $menus = $modulo->menus;
             <a href="">Form 2</a>
             <a href="<?= Url::to(['/Planificacion/obj-institucional/index']) ?>">Form 3</a>
             <a href="<?= Url::to(['/Planificacion/obj-especifico/index']) ?>">Form 4</a>
-            <a href="#">Form 5</a>
+            <a href="<?= Url::to(['/Planificacion/operacion/index']) ?>">Form 5</a>
             <a href="#">Form 6</a>
-            <a href="#">Form 7</a>
-            <a href="#">Form 8</a>
-            <a href="#">Form 9</a>
-            <a href="#">Form 10</a>
-            <a href="#">Form 11</a>
-            <a href="#">Form 12</a>
-            <a href="#">Form 13</a>
-            <a href="#">Form 14</a>
-            <a href="#">Form 15</a>
+            <a href="<?= Url::to(['/Planificacion/item-catalogado/index', 'formulario' => 7]) ?>">Form 7</a>
+            <a href="<?= Url::to(['/Planificacion/item-catalogado/index', 'formulario' => 8]) ?>">Form 8</a>
+            <a href="<?= Url::to(['/Planificacion/item-catalogado/index', 'formulario' => 9]) ?>">Form 9</a>
+            <a href="<?= Url::to(['/Planificacion/item-descatalogado/index', 'formulario' => 10]) ?>">Form 10</a>
+            <a href="<?= Url::to(['/Planificacion/item-descatalogado/index', 'formulario' => 11]) ?>">Form 11</a>
+            <a href="<?= Url::to(['/Planificacion/item-descatalogado/index', 'formulario' => 12]) ?>">Form 12</a>
+            <a href="<?= Url::to(['/Planificacion/item-descatalogado/index', 'formulario' => 13]) ?>">Form 13</a>
+            <a href="<?= Url::to(['/Planificacion/item-descatalogado/index', 'formulario' => 14]) ?>">Form 14</a>
+            <div class="dropdown form-dropdown">
+                <button type="button" class="form-dropbtn">Form 15 ▾</button>
+                <div class="dropdown-content">
+                    <a href="<?= Url::to(['/Planificacion/ingreso/index']) ?>">Registrar Ingreso</a>
+                    <a href="<?= Url::to(['/Planificacion/techo-unidad/index']) ?>">Asignar Techo</a>
+                </div>
+            </div>
 
         </div>
 
@@ -230,6 +235,41 @@ $menus = $modulo->menus;
         background:#0d6efd;
         color:white;
         border-color:#0d6efd;
+    }
+
+    .form-dropbtn {
+        background:#f4f6f9;
+        color:#444;
+        padding:8px 16px;
+        border-radius:20px;
+        border:1px solid #dcdcdc;
+        cursor:pointer;
+        font-size:13px;
+        transition:.25s;
+    }
+
+    .form-dropbtn:hover {
+        background:#0d6efd;
+        color:white;
+        border-color:#0d6efd;
+    }
+
+    .form-dropdown .dropdown-content {
+        width:180px;
+    }
+
+    .forms-row .form-dropdown .dropdown-content a {
+        display:block;
+        background:#fff;
+        color:#444;
+        padding:10px 12px;
+        border:0;
+        border-radius:0;
+    }
+
+    .forms-row .form-dropdown .dropdown-content a:hover {
+        background:#f2f2f2;
+        color:#0d6efd;
     }
 
     .dropdown-divider{

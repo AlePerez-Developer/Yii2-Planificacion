@@ -1,26 +1,173 @@
-table.dtic-gestion-table > tbody > tr.programacion-completa > td {
-    background: rgba(40, 167, 69, .12);
+.programacion-anual-header {
+    align-items: flex-start;
+    gap: 20px;
 }
-table.dtic-gestion-table > tbody > tr.programacion-pendiente > td {
-    background: rgba(220, 53, 69, .10);
+
+.programacion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 18px 8px;
 }
-.input-meta-poa-anual,
-.input-meta-poa-trimestre {
-    min-width: 90px;
+
+.programacion-empty-state {
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #64748b;
     text-align: center;
 }
-.input-meta-poa-anual[readonly],
-.input-meta-poa-trimestre[readonly] {
-    cursor: pointer;
-    background: transparent;
-    border-color: transparent;
+
+.programacion-empty-state i {
+    font-size: 38px;
+    color: #94a3b8;
 }
-.total-badge,
-.meta-badge {
-    display: inline-block;
-    border-radius: 12px;
-    padding: 3px 9px;
+
+span .select2-selection.select2-selection--single {
+    height: auto !important;
+    min-height: 48px;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+}
+
+.select2-selection__rendered {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    height: 70px !important;
+}
+
+.select2-selection__placeholder {
+    font-size: 17px !important;
+    color: #7086bd;
+}
+
+.mi-render-select2 {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    padding: 2px 0;
+    line-height: 1.2;
+    font-size: .88rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 0 !important;
+}
+
+.select2-results__option {
+    border-bottom: 1px dotted darkgrey;
+}
+
+.select2-results__options {
+    max-height: 390px !important;
+}
+
+.titulo-producto {
+    font-weight: bold;
+    color: #333;
+}
+
+.subtitulo-producto {
+    font-weight: normal;
+    color: #333;
+}
+
+.meta-summary {
+    background: #fff;
+    border: 1px solid #8dbe5a;
+    border-radius: 20px;
+    color: #61942e;
+    font-size: .84rem;
     font-weight: 700;
+    padding: 6px 14px;
 }
-.total-badge.completa { color: #155724; background: #d4edda; }
-.total-badge.pendiente { color: #721c24; background: #f8d7da; }
+
+.programacion-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.dtic-gestion-table {
+    width: 100% !important;
+    min-width: 1050px;
+    border-collapse: separate !important;
+    border-spacing: 0 12px !important;
+    padding: 0 12px;
+    font-size: .84rem;
+}
+
+.dtic-gestion-table > thead > tr > th {
+    font-size: .8rem;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.dtic-gestion-table > tbody > tr:not(.programacion-group-row) > td {
+    padding: 9px 10px !important;
+    vertical-align: middle;
+    background-color: #f8fbff !important;
+    border-top: 2px solid #9bbcf2 !important;
+    border-bottom: 2px solid #9bbcf2 !important;
+}
+
+.dtic-gestion-table > tbody > tr:not(.programacion-group-row) > td:first-child {
+    border-left: 2px solid #9bbcf2 !important;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.dtic-gestion-table > tbody > tr:not(.programacion-group-row) > td:last-child {
+    border-right: 2px solid #9bbcf2 !important;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.input-meta-poa-anual {
+    width: 100%;
+    min-width: 84px;
+    text-align: right;
+    cursor: pointer;
+    border-color: transparent;
+    background: transparent;
+    font-size: .84rem;
+    font-weight: 700;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.input-meta-poa-anual:not([readonly]) {
+    background: #fff !important;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .18) !important;
+}
+
+.programacion-group-row td {
+    background: #eef4fb !important;
+    border: 2px solid #8caed6 !important;
+    color: #294f78;
+    font-size: .86rem;
+    padding: 9px 12px !important;
+}
+
+#modalRelacionPoa {
+    font-size: .88rem;
+}
+
+#modalRelacionPoa .select2-container {
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .programacion-anual-header,
+    .programacion-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

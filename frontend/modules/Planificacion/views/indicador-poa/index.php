@@ -52,17 +52,6 @@ $this->params['breadcrumbs'][] = [
                     <form id="formIndicadorPoa" autocomplete="off">
 
                         <div class="row">
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="idObjEspecifico">Seleccione el objetivo estrategico</label>
-                                    <select class="form-control objEstrategico codigo_group dtic-input"
-                                            id="idObjEspecifico" name="idObjEspecifico">
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-4">
                                 <div class="form-group">
                                     <label for="codigo">Codigo indicador</label>
@@ -140,7 +129,7 @@ $this->params['breadcrumbs'][] = [
         <div class="card-dtic-style">
             <div class="card-dtic-style-header">
                 <div class="card-dtic-style-title">
-                    Indicadores Estratégicos Institucionales
+                    Indicadores POA
                 </div>
             </div>
 

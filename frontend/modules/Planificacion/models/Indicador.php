@@ -28,6 +28,7 @@ use yii\db\ActiveQuery;
  * @property CatTipoResultado $idTipoResultado
  * @property CatUnidadIndicador $idUnidadIndicador
  * @property IndicadorEstrategico $indicadoresEstrategico
+ * @property IndicadorPoa $indicadorPoa
  */
 
 class Indicador extends ActiveRecord
@@ -165,6 +166,11 @@ class Indicador extends ActiveRecord
     public function getIndicadoresEstrategico(): ActiveQuery
     {
         return $this->hasOne(IndicadorEstrategico::class, ['IdIndicador' => 'IdIndicador']);
+    }
+
+    public function getIndicadorPoa(): ActiveQuery
+    {
+        return $this->hasOne(IndicadorPoa::class, ['IdIndicador' => 'IdIndicador']);
     }
 
     /**

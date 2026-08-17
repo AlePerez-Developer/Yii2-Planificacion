@@ -1,0 +1,54 @@
+#idObjEspecifico + .select2 .select2-selection--single {
+    min-height: 70px;
+    height: auto;
+}
+
+#idObjEspecifico + .select2 .select2-selection__rendered {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+}
+
+.mi-render-select2 {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.2;
+    padding: 3px 0;
+}
+
+.titulo-producto {
+    font-weight: 600;
+}
+
+.subtitulo-producto {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.trimestres-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(80px, 1fr));
+    gap: 8px;
+}
+
+.trimestres-grid span {
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #f4f6f9;
+}
+
+.acc-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#tablaItemsOperacion .cantidad-asignada {
+    min-width: 110px;
+    text-align: right;
+}
+
+#modalAsignarItems .modal-dialog {
+    max-width: 1200px;
+}

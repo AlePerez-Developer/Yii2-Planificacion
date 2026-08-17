@@ -38,17 +38,14 @@ class ObjetivoEspecificoService
 
     public function guardar(
         ObjetivoEspecificoForm $form,
-        string $idLlavePresupuestaria,
+        string $idUnidadEjecutora,
         string $idGestion
     ): array {
         $modelo = new ObjetivoEspecifico([
             'IdObjInstitucional' => $form->idObjInstitucional,
-            'IdLlavePresupuestaria' => $idLlavePresupuestaria,
+            'IdUnidadEjecutora' => $idUnidadEjecutora,
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
-            'Producto' => mb_strtoupper($form->producto, 'UTF-8'),
-            'Indicador_Formula' => mb_strtoupper($form->formula, 'UTF-8'),
-            'Indicador_Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
             'IdGestion' => $idGestion,
             'CodigoEstado' => Estado::ESTADO_VIGENTE,
             'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario,
@@ -60,41 +57,38 @@ class ObjetivoEspecificoService
     public function actualizar(
         string $id,
         ObjetivoEspecificoForm $form,
-        string $idLlavePresupuestaria,
-        string $gestion
+        string $idUnidadEjecutora,
+        string $idGestion
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
         $modelo->setAttributes([
             'IdObjInstitucional' => $form->idObjInstitucional,
-            'IdLlavePresupuestaria' => $idLlavePresupuestaria,
-            'IdGestion' => $gestion,
+            'IdUnidadEjecutora' => $idUnidadEjecutora,
+            'IdGestion' => $idGestion,
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
-            'Producto' => mb_strtoupper($form->producto, 'UTF-8'),
-            'Indicador_Formula' => mb_strtoupper($form->formula, 'UTF-8'),
-            'Indicador_Descripcion' => mb_strtoupper($form->descripcion, 'UTF-8'),
         ]);
 
         return $this->procesar($modelo);
     }
 
-    public function cambiarEstado(string $id, string $idLlavePresupuestaria, string $gestion): array
+    public function cambiarEstado(string $id, string $idUnidadEjecutora, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
         $modelo->cambiarEstado();
         $this->guardarModelo($modelo);
 
         return ['message' => Yii::$app->params['PROCESO_CORRECTO'], 'data' => $modelo->CodigoEstado];
     }
 
-    public function eliminar(string $id, string $idLlavePresupuestaria, string  $gestion): array
+    public function eliminar(string $id, string $idUnidadEjecutora, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $gestion);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
 
         if (ObjEspecificoDao::enUso($modelo)) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'El objetivo específico tiene indicadores POA relacionados.',
+                'El objetivo específico se encuentra en uso.',
                 409
             );
         }
@@ -103,14 +97,14 @@ class ObjetivoEspecificoService
         return $this->procesar($modelo);
     }
 
-    public function obtenerModelo(string $id, string $idLlavePresupuestaria, string $idGestion): array
+    public function obtenerModelo(string $id, string $idUnidadEjecutora, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idLlavePresupuestaria, $idGestion);
+        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => $modelo->getAttributes([
-                'IdObjEspecifico', 'IdObjInstitucional', 'Codigo', 'Objetivo', 'Producto', 'Indicador_Formula', 'Indicador_Descripcion',
+                'IdObjEspecifico', 'IdObjInstitucional', 'Codigo', 'Objetivo',
             ]),
         ];
     }
@@ -118,22 +112,26 @@ class ObjetivoEspecificoService
     public function verificarCodigo(
         string $id,
         string $idObjInstitucional,
-        string $idLlavePresupuestaria,
-        int $gestion,
+        string $idUnidadEjecutora,
+        string $idGestion,
         string $codigo
     ): bool {
         return ObjEspecificoDao::verificarCodigo(
-            $id, $idObjInstitucional, $idLlavePresupuestaria, $gestion, $codigo
+            $id, $idObjInstitucional, $idUnidadEjecutora, $idGestion, $codigo
         );
     }
 
     private function obtenerModeloValidado(
         string $id,
-        string $idLlavePresupuestaria,
+        string $idUnidadEjecutora,
         string $idGestion
     ): ObjetivoEspecifico {
         $modelo = ObjetivoEspecifico::listAll()
-            ->andWhere(['OE.IdObjEspecifico' => $id])
+            ->andWhere([
+                'Oe.IdObjEspecifico' => $id,
+                'Oe.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'Oe.IdGestion' => $idGestion,
+            ])
             ->one();
 
         if ($modelo === null) {

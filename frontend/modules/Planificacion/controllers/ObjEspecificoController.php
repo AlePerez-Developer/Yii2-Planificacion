@@ -5,7 +5,6 @@ namespace app\modules\Planificacion\controllers;
 use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\ObjetivoEspecificoForm;
-use app\modules\Planificacion\models\ObjetivoInstitucional;
 use app\modules\Planificacion\services\ObjetivoEspecificoService;
 use Yii;
 use yii\filters\AccessControl;
@@ -76,47 +75,70 @@ class ObjEspecificoController extends BaseController
     public function actionGuardar(): array
     {
         return $this->withTryCatch(function () {
-            [$idLlave, $gestion] = $this->obtenerContextoActivo();
-            return $this->service->guardar($this->cargarFormulario(), $idLlave, $gestion);
+            [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+            return $this->service->guardar($this->cargarFormulario(), $idUnidadEjecutora, $idGestion);
         });
     }
 
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function () {
-            [$idLlave, $gestion] = $this->obtenerContextoActivo();
-            return $this->service->actualizar($this->obtenerId(), $this->cargarFormulario(), $idLlave, $gestion);
+            [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+            return $this->service->actualizar(
+                $this->obtenerId(),
+                $this->cargarFormulario(),
+                $idUnidadEjecutora,
+                $idGestion
+            );
         });
     }
 
     public function actionBuscar(): array
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
-        return $this->withTryCatch(fn() => $this->service->obtenerModelo($this->obtenerId(), $idLlave, $gestion));
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        return $this->withTryCatch(
+            fn() => $this->service->obtenerModelo(
+                $this->obtenerId(),
+                $idUnidadEjecutora,
+                $idGestion
+            )
+        );
     }
 
     public function actionCambiarEstado(): array
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
-        return $this->withTryCatch(fn() => $this->service->cambiarEstado($this->obtenerId(), $idLlave, $gestion));
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        return $this->withTryCatch(
+            fn() => $this->service->cambiarEstado(
+                $this->obtenerId(),
+                $idUnidadEjecutora,
+                $idGestion
+            )
+        );
     }
 
     public function actionEliminar(): array
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
-        return $this->withTryCatch(fn() => $this->service->eliminar($this->obtenerId(), $idLlave, $gestion));
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        return $this->withTryCatch(
+            fn() => $this->service->eliminar(
+                $this->obtenerId(),
+                $idUnidadEjecutora,
+                $idGestion
+            )
+        );
     }
 
     public function actionVerificarCodigo(): bool
     {
-        [$idLlave, $gestion] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
         $request = Yii::$app->request;
 
         return $this->service->verificarCodigo(
             (string)$request->post('idObjEspecifico', '00000000-0000-0000-0000-000000000000'),
             (string)$request->post('idObjInstitucional', ''),
-            $idLlave,
-            $gestion,
+            $idUnidadEjecutora,
+            $idGestion,
             (string)$request->post('codigo', '')
         );
     }
@@ -145,19 +167,20 @@ class ObjEspecificoController extends BaseController
 
     private function obtenerContextoActivo(): array
     {
-        $contexto = Yii::$app->userContext->contexto();
-        $idLlave = (string)($contexto->IdUnidadEjecutora ?? '');
-        $gestion = (string)($contexto->IdGestion ?? 0);
 
-        if ($idLlave === '' || $gestion <= 0) {
+        $contexto = Yii::$app->userContext->contexto();
+        $idUnidadEjecutora = (string)($contexto?->IdUnidadEjecutora ?? '');
+        $idGestion = (string)($contexto?->IdGestion ?? '');
+
+        if ($idUnidadEjecutora === '' || $idGestion === '') {
             throw new ValidationException(
                 Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'Debe seleccionar una gestión y una llave presupuestaria en el contexto activo.',
+                'Debe seleccionar una gestión y una unidad ejecutora en el contexto activo.',
                 400
             );
         }
 
-        return [$idLlave, $gestion];
+        return [$idUnidadEjecutora, $idGestion];
     }
 
     /**

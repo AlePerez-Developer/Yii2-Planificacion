@@ -55,11 +55,6 @@ $(document).ready(function () {
                     <div class="dtic-item-main">
                         ${row["Objetivo"]}
                     </div>
-                    
-                    <div class="dtic-item-sub">
-                        ${row["Producto"]}
-                    </div>
-                  
                     <div class="dtic-item-sub2 group-container"> 
                             <div class="sub-group-container">
                                 <div class="item-container"> 
@@ -74,16 +69,10 @@ $(document).ready(function () {
                                 <div>${row["objetivosInstitucionales"]["Producto"]}</div>
                             </div>
                         </div>
-                    
-
-                    <div class="dtic-item-sub">
-                        <small>(${row["Indicador_Descripcion"]} - ${row["Indicador_Formula"]})</small>
-                    </div>                    
                 `;
                 }
             },
             {data: 'Compuesto', visible: false},
-            {data: 'Producto', visible: false},
             {
                 data: "CodigoEstado",
                 className: "text-center",

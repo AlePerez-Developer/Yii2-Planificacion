@@ -1,0 +1,39 @@
+.resumen-techos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(170px, 1fr));
+    gap: 12px;
+}
+
+.resumen-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-left: 5px solid #2563eb;
+    border-radius: 12px;
+    padding: 13px 16px;
+}
+
+.resumen-card span { color: #64748b; font-size: .8rem; }
+.resumen-card b { color: #1f2937; font-size: 1.15rem; }
+.resumen-card.regla { border-left-color: #e0a800; }
+.resumen-card b.libre { color: #20652f; font-size: .9rem; }
+
+.input-techo {
+    min-width: 130px;
+    text-align: right;
+    font-weight: 700;
+}
+
+#tablaTechos tbody tr.techo-asignado td {
+    background: #edf9ef !important;
+}
+
+@media (max-width: 900px) {
+    .resumen-techos { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 520px) {
+    .resumen-techos { grid-template-columns: 1fr; }
+}

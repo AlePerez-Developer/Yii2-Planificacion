@@ -1,85 +1,134 @@
 $(document).ready(function () {
-    let openedRow = null;
-    inicializarTablaIndicadoresPoaProgramacion();
+    const baseUrl = 'index.php?r=Planificacion/indicador-poa-programacion-anual/';
 
     programacionPoaAnual_s2ObjEspecifico.on('change', function () {
-        if (openedRow && openedRow.child.isShown()) closeRow(openedRow);
-        openedRow = null;
-        PlanificacionDataTable.recargar(dt_programacionPoaAnual, false);
-    });
+        const seleccionado = Boolean($(this).val());
+        $('#btnAgregarRelacion').prop('disabled', !seleccionado);
 
-    $('#tablaListaIndicadoresPoaProgramacion tbody').on('click', 'td.expandible', function () {
-        const tr = $(this).closest('tr');
-        const row = dt_programacionPoaAnual.row(tr);
-
-        if (row.child.isShown()) {
-            closeRow(row);
-            openedRow = null;
+        if (!seleccionado) {
+            $('#mensajeInicial').show();
+            $('#dticTableContainer, #dticTableLoading').hide();
+            $('#resumenAnual').text('Total programado: 0');
             return;
         }
 
-        if (openedRow && openedRow.child.isShown()) closeRow(openedRow);
-
-        const data = row.data();
-        const tableId = `tabla_programacion_poa_${data.IdIndicadorPoa}`;
-        row.child(`
-            <div class="slider" style="display:none">
-                <ul class="nav nav-pills nav-fill">
-                    <li class="nav-item"><button class="nav-link active dtic-tab">Gestión activa</button></li>
-                </ul>
-                <div class="table-responsive mt-3">
-                    <table id="${tableId}" class="table table-sm table-bordered dtic-gestion-table w-100"></table>
-                </div>
-            </div>`, 'no-padding').show();
-
-        tr.addClass('shown');
-        $('div.slider', row.child()).hide().stop(true, true).slideDown(180);
-        openedRow = row;
-        crearTablaProgramacion(data.IdIndicadorPoa, tableId);
+        cargarProgramacionPoaAnual();
     });
 
-    function crearTablaProgramacion(idIndicadorPoa, tableId) {
-        PlanificacionDataTable.crear(`#${tableId}`, {
-            planificacion: {refresh: false, loader: false},
-            ajax: PlanificacionDataTable.ajax({
-                url: 'index.php?r=Planificacion/indicador-poa-programacion-anual/listar-programacion',
-                data: {idIndicadorPoa}
-            }),
-            columns: [
-                {title: 'Código compuesto', data: 'CodigoCompuesto'},
-                {title: 'Descripción', data: 'Descripcion'},
-                {
-                    title: 'Meta programada', data: 'MetaProgramada', className: 'text-center',
-                    render: function (data, type, row) {
-                        if (type !== 'display') return data;
-                        return `<input type="number" min="0" step="1" readonly
-                            class="form-control form-control-sm input-meta-poa-anual"
-                            value="${data}" data-original="${data}"
-                            data-idindicador="${idIndicadorPoa}">`;
-                    }
-                }
-            ],
-            paging: false, searching: false, info: false, ordering: false, responsive: false
+    $('#btnAgregarRelacion').on('click', function () {
+        if (!programacionPoaAnual_s2ObjEspecifico.val()) return;
+        limpiarModal();
+        $('#modalRelacionPoa').modal('show');
+    });
+
+    $('#metaProgramada').on('input', function () {
+        this.value = this.value.replace(/\D/g, '');
+    });
+
+    $('#btnGuardarRelacion').on('click', async function () {
+        const idObjetivo = programacionPoaAnual_s2ObjEspecifico.val();
+        const idLlave = programacionPoaAnual_s2Llave.val();
+        const idIndicador = programacionPoaAnual_s2Indicador.val();
+        const meta = Number($('#metaProgramada').val());
+
+        if (!idObjetivo || !idLlave || !idIndicador) {
+            MostrarMensaje('warning', 'Debe seleccionar objetivo, llave e indicador POA.');
+            return;
+        }
+        if (!Number.isInteger(meta) || meta < 0) {
+            MostrarMensaje('warning', 'La meta debe ser un entero mayor o igual a cero.');
+            return;
+        }
+
+        const datos = new FormData();
+        datos.append('idObjEspecifico', idObjetivo);
+        datos.append('idLlavePresupuestaria', idLlave);
+        datos.append('idIndicadorPoa', idIndicador);
+        datos.append('metaProgramada', meta);
+
+        try {
+            await ajaxPromise({
+                url: baseUrl + 'guardar',
+                data: datos,
+                spinnerBtn: $(this),
+                successMsg: 'Relación agregada correctamente.',
+                reloadTable: dt_programacionPoaAnual,
+                onSuccess: () => $('#modalRelacionPoa').modal('hide')
+            });
+        } catch (error) {
+            console.error('No se pudo guardar la relación.', error);
+        }
+    });
+
+    $('#tablaProgramacionPoaAnual')
+        .on('click', '.input-meta-poa-anual[readonly]', function () {
+            $(this)
+                .prop('readonly', false)
+                .data('original', $(this).val())
+                .focus()
+                .select();
+        })
+        .on('input', '.input-meta-poa-anual:not([readonly])', function () {
+            this.value = this.value.replace(/\D/g, '');
+        })
+        .on('keydown', '.input-meta-poa-anual:not([readonly])', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                guardarMetaProgramada($(this));
+            }
+            if (event.key === 'Escape') {
+                $(this)
+                    .val($(this).data('original'))
+                    .prop('readonly', true);
+            }
+        })
+        .on('blur', '.input-meta-poa-anual:not([readonly])', function () {
+            guardarMetaProgramada($(this));
         });
-    }
 
-    $(document).on('click', '.input-meta-poa-anual[readonly]', function () {
-        $(this).prop('readonly', false).data('original', $(this).val()).focus().select();
+    $('#tablaProgramacionPoaAnual').on('click', '.btn-delete-programacion', function () {
+        const row = dt_programacionPoaAnual.row($(this).closest('tr')).data();
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Eliminar programación',
+            text: '¿Está seguro de eliminar esta relación anual?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async result => {
+            if (!result.isConfirmed) return;
+
+            const datos = new FormData();
+            datos.append(
+                'idProgramacion',
+                row.IdProgramacionIndicadorPoaGestion
+            );
+            datos.append(
+                'idObjEspecifico',
+                programacionPoaAnual_s2ObjEspecifico.val()
+            );
+
+            try {
+                await ajaxPromise({
+                    url: baseUrl + 'eliminar',
+                    data: datos,
+                    successMsg: 'Programación eliminada correctamente.',
+                    reloadTable: dt_programacionPoaAnual
+                });
+            } catch (error) {
+                console.error('No se pudo eliminar la programación.', error);
+            }
+        });
     });
 
-    $(document).on('keydown', '.input-meta-poa-anual:not([readonly])', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); guardar($(this)); }
-        if (e.key === 'Escape') $(this).val($(this).data('original')).prop('readonly', true);
-    });
-
-    $(document).on('blur', '.input-meta-poa-anual:not([readonly])', function () {
-        guardar($(this));
-    });
-
-    function guardar(input) {
+    function guardarMetaProgramada(input) {
         if (input.data('guardando')) return;
-        const meta = parseInt(input.val(), 10);
-        const original = parseInt(input.data('original'), 10);
+
+        const meta = Number(input.val());
+        const original = Number(input.data('original'));
+        const row = dt_programacionPoaAnual.row(input.closest('tr'));
+        const rowData = row.data();
 
         if (!Number.isInteger(meta) || meta < 0) {
             input.val(original).prop('readonly', true);
@@ -90,25 +139,45 @@ $(document).ready(function () {
             input.prop('readonly', true);
             return;
         }
+        if (!rowData) {
+            input.val(original).prop('readonly', true);
+            MostrarMensaje('error', 'No se pudo identificar la programación.');
+            return;
+        }
 
         input.data('guardando', true).prop('disabled', true);
 
         $.ajax({
-            url: 'index.php?r=Planificacion/indicador-poa-programacion-anual/guardar-meta',
+            url: baseUrl + 'actualizar-meta',
             method: 'POST',
             dataType: 'json',
-            data: {idIndicadorPoa: input.data('idindicador'), meta},
-            success: response => input.val(response.data.MetaProgramada).data('original', response.data.MetaProgramada),
-            error: manejarErrorDataTable,
-            complete: () => input.data('guardando', false).prop('disabled', false).prop('readonly', true)
+            data: {
+                idProgramacion: input.data('idprogramacion'),
+                idObjEspecifico: programacionPoaAnual_s2ObjEspecifico.val(),
+                metaProgramada: meta
+            },
+            success: function (response) {
+                rowData.MetaProgramada = response.data.MetaProgramada;
+                row.data(rowData).invalidate();
+                dt_programacionPoaAnual.draw(false);
+            },
+            error: function (xhr) {
+                input.val(original);
+                mostrarErrorProgramacionPoa(xhr);
+            },
+            complete: function () {
+                input
+                    .data('guardando', false)
+                    .prop('disabled', false)
+                    .prop('readonly', true);
+            }
         });
     }
 
-    function closeRow(row) {
-        const slider = $('div.slider', row.child());
-        slider.stop(true, true).slideUp(160, function () {
-            row.child.hide();
-            $(row.node()).removeClass('shown');
-        });
+    function limpiarModal() {
+        $('#formRelacionPoa').trigger('reset');
+        $('#metaProgramada').val(0);
+        programacionPoaAnual_s2Llave.val(null).trigger('change');
+        programacionPoaAnual_s2Indicador.val(null).trigger('change');
     }
 });

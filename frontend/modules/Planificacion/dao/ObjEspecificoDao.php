@@ -9,21 +9,21 @@ class ObjEspecificoDao
 {
     public static function enUso(ObjetivoEspecifico $modelo): bool
     {
-        return $modelo->getIndicadoresPoa()->exists();
+        return false;
     }
 
     public static function verificarCodigo(
         string $id,
         string $idObjInstitucional,
-        string $idLlavePresupuestaria,
-        int $gestion,
+        string $idUnidadEjecutora,
+        string $idGestion,
         string $codigo
     ): bool {
         return !ObjetivoEspecifico::find()
             ->where([
                 'IdObjInstitucional' => $idObjInstitucional,
-                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
-                'Gestion' => $gestion,
+                'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdGestion' => $idGestion,
                 'Codigo' => $codigo,
             ])
             ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])

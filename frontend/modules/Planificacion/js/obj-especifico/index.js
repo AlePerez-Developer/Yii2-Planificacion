@@ -30,9 +30,6 @@ $(document).ready(function () {
         datos.append('idObjInstitucional', objEspecifico_s2ObjInstitucional.val());
         datos.append('codigo', $('#codigo').val());
         datos.append('objetivo', $('#objetivo').val());
-        datos.append('producto', $('#producto').val());
-        datos.append('formula', $('#formula').val());
-        datos.append('descripcion', $('#descripcion').val());
 
         await ajaxPromise({
             url: baseUrl + (id === EMPTY ? 'guardar' : 'actualizar'),
@@ -55,9 +52,6 @@ $(document).ready(function () {
         objEspecifico_s2ObjInstitucional.val(data.IdObjInstitucional).trigger('change');
         $('#codigo').val(data.Codigo);
         $('#objetivo').val(data.Objetivo);
-        $('#producto').val(data.Producto);
-        $('#formula').val(data.Indicador_Formula);
-        $('#descripcion').val(data.Indicador_Descripcion);
         $('#divTabla').hide(300);
         $('#divDatos').show(300);
     });

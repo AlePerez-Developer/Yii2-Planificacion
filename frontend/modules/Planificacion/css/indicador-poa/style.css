@@ -7,27 +7,6 @@ span .select2-selection.select2-selection--single {
     padding: 4px 8px !important;
 }
 
-#idObjEspecifico + span .select2-selection__rendered {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    height: 70px !important;
-}
-
-#idObjEspecifico +span  .select2-selection__placeholder{
-    font-size: 18px !important;
-    color: #7086bd;
-}
-
-.mi-render-select2 {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-    padding: 2px 0;
-    gap: 5px;
-    flex: 1;
-}
-
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     line-height: normal !important;
     padding-left: 0 !important;

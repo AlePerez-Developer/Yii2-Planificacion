@@ -16,37 +16,42 @@ $(document).ready(function () {
         method: 'POST',
         dataType: 'json',
         success: function (response) {
-            programacionPoaTrimestral_s2ObjEspecifico.empty().append(new Option('', '', false, false));
+            programacionPoaTrimestral_s2ObjEspecifico
+                .empty()
+                .append(new Option('', '', false, false));
+
             (response.data || []).forEach(item => {
                 const option = new Option(item.text, item.id, false, false);
-                $(option).data({compuesto: item.compuesto, producto: item.producto});
+                $(option).data('data', item);
                 programacionPoaTrimestral_s2ObjEspecifico.append(option);
             });
-            programacionPoaTrimestral_s2ObjEspecifico.trigger('change');
+            programacionPoaTrimestral_s2ObjEspecifico
+                .val(null)
+                .trigger('change.select2');
         },
-        error: manejarErrorDataTable
+        error: function (xhr) {
+            const data = xhr.responseJSON || {};
+            MostrarMensaje(
+                'error',
+                GenerarMensajeError(data.message || 'No se pudieron cargar los objetivos.'),
+                data.errors
+            );
+        }
     });
 
     function formato(repo) {
-        if (repo.loading || !repo.id) return repo.text;
-        const element = repo.element ? $(repo.element) : null;
-        const compuesto = repo.compuesto || element?.data('compuesto') || '';
-        const producto = repo.producto || element?.data('producto') || '';
-
+        if (!repo.id) return repo.text;
+        const data = repo.element ? ($(repo.element).data('data') || repo) : repo;
         return $(`<div class="mi-render-select2">
-            <div class="titulo-producto">Código: ${compuesto}</div>
-            <div class="titulo-producto">${repo.text || ''}</div>
-            <div class="subtitulo-producto">${producto}</div>
+            <div class="titulo-producto">Código: ${data.compuesto || ''}</div>
+            <div>${data.text || ''}</div>
         </div>`);
     }
 
     function buscar(params, data) {
         if ($.trim(params.term) === '') return data;
-        const term = params.term.toLowerCase();
-        const element = data.element ? $(data.element) : null;
-        const texto = (data.text || '').toLowerCase();
-        const compuesto = (data.compuesto || element?.data('compuesto') || '').toLowerCase();
-        const producto = (data.producto || element?.data('producto') || '').toLowerCase();
-        return texto.includes(term) || compuesto.includes(term) || producto.includes(term) ? data : null;
+        const item = data.element ? ($(data.element).data('data') || data) : data;
+        const contenido = `${item.compuesto || ''} ${item.text || ''}`.toLowerCase();
+        return contenido.includes(params.term.toLowerCase()) ? data : null;
     }
 });
