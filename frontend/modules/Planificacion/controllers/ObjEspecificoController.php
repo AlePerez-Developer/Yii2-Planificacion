@@ -75,19 +75,19 @@ class ObjEspecificoController extends BaseController
     public function actionGuardar(): array
     {
         return $this->withTryCatch(function () {
-            [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
-            return $this->service->guardar($this->cargarFormulario(), $idUnidadEjecutora, $idGestion);
+            [$idDa, $idGestion] = $this->obtenerContextoActivo();
+            return $this->service->guardar($this->cargarFormulario(), $idDa, $idGestion);
         });
     }
 
     public function actionActualizar(): array
     {
         return $this->withTryCatch(function () {
-            [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+            [$idDa, $idGestion] = $this->obtenerContextoActivo();
             return $this->service->actualizar(
                 $this->obtenerId(),
                 $this->cargarFormulario(),
-                $idUnidadEjecutora,
+                $idDa,
                 $idGestion
             );
         });
@@ -95,11 +95,11 @@ class ObjEspecificoController extends BaseController
 
     public function actionBuscar(): array
     {
-        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        [$idDa, $idGestion] = $this->obtenerContextoActivo();
         return $this->withTryCatch(
             fn() => $this->service->obtenerModelo(
                 $this->obtenerId(),
-                $idUnidadEjecutora,
+                $idDa,
                 $idGestion
             )
         );
@@ -107,11 +107,11 @@ class ObjEspecificoController extends BaseController
 
     public function actionCambiarEstado(): array
     {
-        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        [$idDa, $idGestion] = $this->obtenerContextoActivo();
         return $this->withTryCatch(
             fn() => $this->service->cambiarEstado(
                 $this->obtenerId(),
-                $idUnidadEjecutora,
+                $idDa,
                 $idGestion
             )
         );
@@ -119,11 +119,11 @@ class ObjEspecificoController extends BaseController
 
     public function actionEliminar(): array
     {
-        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        [$idDa, $idGestion] = $this->obtenerContextoActivo();
         return $this->withTryCatch(
             fn() => $this->service->eliminar(
                 $this->obtenerId(),
-                $idUnidadEjecutora,
+                $idDa,
                 $idGestion
             )
         );
@@ -131,13 +131,13 @@ class ObjEspecificoController extends BaseController
 
     public function actionVerificarCodigo(): bool
     {
-        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        [$idDa, $idGestion] = $this->obtenerContextoActivo();
         $request = Yii::$app->request;
 
         return $this->service->verificarCodigo(
             (string)$request->post('idObjEspecifico', '00000000-0000-0000-0000-000000000000'),
             (string)$request->post('idObjInstitucional', ''),
-            $idUnidadEjecutora,
+            $idDa,
             $idGestion,
             (string)$request->post('codigo', '')
         );
@@ -167,7 +167,6 @@ class ObjEspecificoController extends BaseController
 
     private function obtenerContextoActivo(): array
     {
-
         $contexto = Yii::$app->userContext->contexto();
         $idUnidadEjecutora = (string)($contexto?->IdUnidadEjecutora ?? '');
         $idGestion = (string)($contexto?->IdGestion ?? '');
@@ -180,7 +179,9 @@ class ObjEspecificoController extends BaseController
             );
         }
 
-        return [$idUnidadEjecutora, $idGestion];
+        $idDa = $this->service->obtenerIdDaDesdeUnidad($idUnidadEjecutora);
+
+        return [$idDa, $idGestion];
     }
 
     /**

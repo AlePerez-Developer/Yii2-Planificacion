@@ -8,6 +8,14 @@ if (!$modulo) {
     return;
 }
 
+$contexto = Yii::$app->userContext->contexto();
+$hayGestion = (string)($contexto?->IdGestion ?? '') !== '';
+$hayUnidad = (string)($contexto?->IdUnidadEjecutora ?? '') !== '';
+
+if (!$hayGestion && !$hayUnidad) {
+    return;
+}
+
 $menus = $modulo->menus;
 
 ?>
@@ -18,8 +26,9 @@ $menus = $modulo->menus;
 
     <div class="form-navigation">
 
+        <?php if ($hayGestion): ?>
         <!-- Primera fila -->
-        <div class="menu-row">
+        <div class="menu-row<?= $hayUnidad ? '' : ' menu-row-only' ?>">
 
             <div class="dropdown">
                 <button class="dropbtn">Pei ▾</button>
@@ -81,12 +90,20 @@ $menus = $modulo->menus;
             </div>
 
         </div>
+        <?php endif; ?>
 
+        <?php if ($hayUnidad): ?>
         <!-- Segunda fila -->
         <div class="forms-row">
 
             <a href="<?= Url::to(['/Planificacion/obj-estrategico/index']) ?>">Form 1</a>
-            <a href="">Form 2</a>
+            <div class="dropdown form-dropdown">
+                <button type="button" class="form-dropbtn">Form 2 ▾</button>
+                <div class="dropdown-content">
+                    <a href="<?= Url::to(['/Planificacion/foda-institucion/index']) ?>">FODA</a>
+                    <a href="<?= Url::to(['/Planificacion/foda-unidad/index']) ?>">Foda Unidad</a>
+                </div>
+            </div>
             <a href="<?= Url::to(['/Planificacion/obj-institucional/index']) ?>">Form 3</a>
             <a href="<?= Url::to(['/Planificacion/obj-especifico/index']) ?>">Form 4</a>
             <a href="<?= Url::to(['/Planificacion/operacion/index']) ?>">Form 5</a>
@@ -108,6 +125,7 @@ $menus = $modulo->menus;
             </div>
 
         </div>
+        <?php endif; ?>
 
     </div>
 
@@ -159,6 +177,10 @@ $menus = $modulo->menus;
         justify-content:flex-start;
         gap:10px;
         margin-bottom:15px;
+    }
+
+    .menu-row-only{
+        margin-bottom:0;
     }
 
     .dropdown{

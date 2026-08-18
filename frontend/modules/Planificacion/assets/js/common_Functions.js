@@ -81,6 +81,33 @@ function DataTable_actualizarFiltroColumna(dtTable,columnIndex,field) {
     select.val(valorSeleccionado);
 }
 
+function DataTable_filtroSelectHeader(dtTable, columnIndex, opciones, placeholder = 'Todos') {
+    const column = dtTable.column(columnIndex);
+    const header = $(column.header());
+    if (header.find('select.filtro-columna').length) {
+        return;
+    }
+
+    const select = $('<select class="form-control form-control-sm filtro-columna"></select>');
+    select.append($('<option>', {value: '', text: placeholder}));
+    opciones.forEach(opcion => {
+        select.append($('<option>', {value: opcion, text: opcion}));
+    });
+
+    header.append(select);
+    select.on('click', function (e) {
+        e.stopPropagation();
+    });
+    select.on('change', function () {
+        const val = $(this).val();
+        if (val === '') {
+            column.search('').draw();
+            return;
+        }
+        column.search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
+    });
+}
+
 function populateS2Areas(select2) {
     $.ajax({
         method: "POST",

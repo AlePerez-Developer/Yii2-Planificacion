@@ -38,12 +38,12 @@ class ObjetivoEspecificoService
 
     public function guardar(
         ObjetivoEspecificoForm $form,
-        string $idUnidadEjecutora,
+        string $idDa,
         string $idGestion
     ): array {
         $modelo = new ObjetivoEspecifico([
             'IdObjInstitucional' => $form->idObjInstitucional,
-            'IdUnidadEjecutora' => $idUnidadEjecutora,
+            'IdDa' => $idDa,
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
             'IdGestion' => $idGestion,
@@ -57,13 +57,13 @@ class ObjetivoEspecificoService
     public function actualizar(
         string $id,
         ObjetivoEspecificoForm $form,
-        string $idUnidadEjecutora,
+        string $idDa,
         string $idGestion
     ): array {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
+        $modelo = $this->obtenerModeloValidado($id, $idDa, $idGestion);
         $modelo->setAttributes([
             'IdObjInstitucional' => $form->idObjInstitucional,
-            'IdUnidadEjecutora' => $idUnidadEjecutora,
+            'IdDa' => $idDa,
             'IdGestion' => $idGestion,
             'Codigo' => $form->codigo,
             'Objetivo' => mb_strtoupper($form->objetivo, 'UTF-8'),
@@ -72,18 +72,18 @@ class ObjetivoEspecificoService
         return $this->procesar($modelo);
     }
 
-    public function cambiarEstado(string $id, string $idUnidadEjecutora, string $idGestion): array
+    public function cambiarEstado(string $id, string $idDa, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
+        $modelo = $this->obtenerModeloValidado($id, $idDa, $idGestion);
         $modelo->cambiarEstado();
         $this->guardarModelo($modelo);
 
         return ['message' => Yii::$app->params['PROCESO_CORRECTO'], 'data' => $modelo->CodigoEstado];
     }
 
-    public function eliminar(string $id, string $idUnidadEjecutora, string $idGestion): array
+    public function eliminar(string $id, string $idDa, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
+        $modelo = $this->obtenerModeloValidado($id, $idDa, $idGestion);
 
         if (ObjEspecificoDao::enUso($modelo)) {
             throw new ValidationException(
@@ -97,9 +97,9 @@ class ObjetivoEspecificoService
         return $this->procesar($modelo);
     }
 
-    public function obtenerModelo(string $id, string $idUnidadEjecutora, string $idGestion): array
+    public function obtenerModelo(string $id, string $idDa, string $idGestion): array
     {
-        $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion);
+        $modelo = $this->obtenerModeloValidado($id, $idDa, $idGestion);
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
@@ -112,24 +112,38 @@ class ObjetivoEspecificoService
     public function verificarCodigo(
         string $id,
         string $idObjInstitucional,
-        string $idUnidadEjecutora,
+        string $idDa,
         string $idGestion,
         string $codigo
     ): bool {
         return ObjEspecificoDao::verificarCodigo(
-            $id, $idObjInstitucional, $idUnidadEjecutora, $idGestion, $codigo
+            $id, $idObjInstitucional, $idDa, $idGestion, $codigo
         );
+    }
+
+    public function obtenerIdDaDesdeUnidad(string $idUnidadEjecutora): string
+    {
+        $idDa = ObjetivoEspecifico::obtenerIdDaDesdeUnidad($idUnidadEjecutora);
+        if ($idDa === '') {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'No se pudo obtener la Dirección Administrativa de la unidad ejecutora activa.',
+                400
+            );
+        }
+
+        return $idDa;
     }
 
     private function obtenerModeloValidado(
         string $id,
-        string $idUnidadEjecutora,
+        string $idDa,
         string $idGestion
     ): ObjetivoEspecifico {
         $modelo = ObjetivoEspecifico::listAll()
             ->andWhere([
                 'Oe.IdObjEspecifico' => $id,
-                'Oe.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'Oe.IdDa' => $idDa,
                 'Oe.IdGestion' => $idGestion,
             ])
             ->one();

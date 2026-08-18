@@ -223,10 +223,11 @@ class IndicadorPoaProgramacionAnualService
         string $idUnidadEjecutora,
         string $idGestion
     ): void {
+        $idDa = ObjetivoEspecifico::obtenerIdDaDesdeUnidad($idUnidadEjecutora);
         $valido = ObjetivoEspecifico::find()
             ->where([
                 'IdObjEspecifico' => $idObjEspecifico,
-                'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdDa' => $idDa,
                 'IdGestion' => $idGestion,
             ])
             ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])

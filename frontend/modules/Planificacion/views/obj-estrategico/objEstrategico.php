@@ -50,10 +50,10 @@ $this->params['actions'] =
             <span class="btn-text">Nuevo Registro</span>
         </button>
 
-         <button id="btnReportePdf" class="btn-reporte">
+         <a id="btnReportePdf" class="btn-reporte" href="' . Url::to(['reporte']) . '" target="_blank" rel="noopener">
             <i class="fas fa-file-pdf"></i>
              <span class="btn-text">Exportar</span>
-         </button>';
+         </a>';
 
 $this->params['breadcrumbs'][] = [
     'label' => '/ Obj. Estrategicos institucionales',

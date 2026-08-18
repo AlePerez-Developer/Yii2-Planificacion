@@ -15,14 +15,14 @@ class ObjEspecificoDao
     public static function verificarCodigo(
         string $id,
         string $idObjInstitucional,
-        string $idUnidadEjecutora,
+        string $idDa,
         string $idGestion,
         string $codigo
     ): bool {
         return !ObjetivoEspecifico::find()
             ->where([
                 'IdObjInstitucional' => $idObjInstitucional,
-                'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdDa' => $idDa,
                 'IdGestion' => $idGestion,
                 'Codigo' => $codigo,
             ])

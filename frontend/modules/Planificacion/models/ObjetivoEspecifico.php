@@ -11,7 +11,7 @@ use yii\db\ActiveRecord;
 /**
  * @property string $IdObjEspecifico
  * @property string $IdObjInstitucional
- * @property string $IdUnidadEjecutora
+ * @property string $IdDa
  * @property string $IdGestion
  * @property string $Codigo
  * @property string $Objetivo
@@ -20,7 +20,7 @@ use yii\db\ActiveRecord;
  * @property string $CodigoUsuario
  *
  * @property ObjetivoInstitucional $objetivosInstitucionales
- * @property UnidadEjecutora $unidadEjecutora
+ * @property Da $da
  * @property PeiGestion $peiGestion
  */
 class ObjetivoEspecifico extends ActiveRecord
@@ -33,8 +33,8 @@ class ObjetivoEspecifico extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdObjInstitucional', 'IdUnidadEjecutora', 'IdGestion', 'Codigo', 'Objetivo', 'CodigoEstado', 'CodigoUsuario'], 'required'],
-            [['IdObjEspecifico', 'IdObjInstitucional', 'IdUnidadEjecutora', 'IdGestion'], 'string', 'max' => 36],
+            [['IdObjInstitucional', 'IdDa', 'IdGestion', 'Codigo', 'Objetivo', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdObjEspecifico', 'IdObjInstitucional', 'IdDa', 'IdGestion'], 'string', 'max' => 36],
             [['Codigo'], 'match', 'pattern' => '/^\d{2}$/', 'message' => 'El código debe tener exactamente dos dígitos.'],
             [['Objetivo'], 'string', 'min' => 2, 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
@@ -45,7 +45,7 @@ class ObjetivoEspecifico extends ActiveRecord
             [['CodigoEstado'], 'exist', 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
             [['CodigoUsuario'], 'exist', 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
             [['IdObjInstitucional'], 'exist', 'targetClass' => ObjetivoInstitucional::class, 'targetAttribute' => ['IdObjInstitucional' => 'IdObjInstitucional']],
-            [['IdUnidadEjecutora'], 'exist', 'targetClass' => UnidadEjecutora::class, 'targetAttribute' => ['IdUnidadEjecutora' => 'IdUnidadEjecutora']],
+            [['IdDa'], 'exist', 'targetClass' => Da::class, 'targetAttribute' => ['IdDa' => 'IdDa']],
             [['IdGestion'], 'exist', 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdGestion' => 'IdGestion']],
         ];
     }
@@ -62,7 +62,7 @@ class ObjetivoEspecifico extends ActiveRecord
         $exists = self::find()
             ->where([
                 'IdObjInstitucional' => $this->IdObjInstitucional,
-                'IdUnidadEjecutora' => $this->IdUnidadEjecutora,
+                'IdDa' => $this->IdDa,
                 'IdGestion' => $this->IdGestion,
                 'Codigo' => $this->Codigo,
                 'CodigoEstado' => Estado::ESTADO_VIGENTE,
@@ -91,12 +91,13 @@ class ObjetivoEspecifico extends ActiveRecord
         $contexto = Yii::$app->userContext->contexto();
         $idUnidadEjecutora = (string)($contexto?->IdUnidadEjecutora ?? '');
         $idGestion = (string)($contexto?->IdGestion ?? '');
+        $idDa = self::obtenerIdDaDesdeUnidad($idUnidadEjecutora);
 
         return self::find()->alias('Oe')
             ->select([
                 'Oe.IdObjEspecifico',
                 'Oe.IdObjInstitucional',
-                'Oe.IdUnidadEjecutora',
+                'Oe.IdDa',
                 'Oes.IdObjEstrategico',
                 "CONCAT(a.Codigo, p.Codigo, Oes.Codigo, '-', Oi.Codigo, '-', Oe.Codigo) AS Compuesto",
                 'Oe.Codigo',
@@ -110,12 +111,26 @@ class ObjetivoEspecifico extends ActiveRecord
             ->joinWith('objetivosInstitucionales.objetivosEstrategicos.areaEstrategica a', true, 'INNER JOIN')
             ->joinWith('objetivosInstitucionales.objetivosEstrategicos.politicaEstrategica p', true, 'INNER JOIN')
             ->where([
-                'Oe.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'Oe.IdDa' => $idDa,
                 'Oe.IdGestion' => $idGestion,
             ])
             ->andWhere(['<>', 'Oe.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['<>', 'Oi.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andWhere(['<>', 'Oes.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+    }
+
+    public static function obtenerIdDaDesdeUnidad(string $idUnidadEjecutora): string
+    {
+        if ($idUnidadEjecutora === '') {
+            return '';
+        }
+
+        $unidad = UnidadEjecutora::find()
+            ->where(['IdUnidadEjecutora' => $idUnidadEjecutora])
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->one();
+
+        return (string)($unidad?->IdDa ?? '');
     }
 
     public function cambiarEstado(): void
@@ -148,12 +163,9 @@ class ObjetivoEspecifico extends ActiveRecord
         );
     }
 
-    public function getUnidadEjecutora(): ActiveQuery
+    public function getDa(): ActiveQuery
     {
-        return $this->hasOne(
-            UnidadEjecutora::class,
-            ['IdUnidadEjecutora' => 'IdUnidadEjecutora']
-        );
+        return $this->hasOne(Da::class, ['IdDa' => 'IdDa']);
     }
 
     public function getPeiGestion(): ActiveQuery

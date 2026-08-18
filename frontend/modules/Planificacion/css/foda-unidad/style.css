@@ -1,0 +1,32 @@
+.badge-tipo {
+    display: inline-block;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 9px;
+}
+
+.tipo-fortaleza { color: #155724; background: #d4edda; }
+.tipo-debilidad { color: #721c24; background: #f8d7da; }
+.tipo-oportunidad { color: #004085; background: #cce5ff; }
+.tipo-amenaza { color: #856404; background: #fff3cd; }
+
+.btn-toggle-estado {
+    border: 0;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 9px;
+}
+
+.btn-toggle-estado.activo { color: #155724; background: #d4edda; }
+.btn-toggle-estado.inactivo { color: #721c24; background: #f8d7da; }
+
+.filtro-columna {
+    display: block;
+    margin: 6px auto 0;
+    max-width: 140px;
+    font-size: 12px;
+}
+
+.error { color: #dc3545; font-size: 12px; }

@@ -291,10 +291,11 @@ class OperacionService
         string $idUnidadEjecutora,
         string $idGestion
     ): void {
+        $idDa = ObjetivoEspecifico::obtenerIdDaDesdeUnidad($idUnidadEjecutora);
         $objetivoValido = ObjetivoEspecifico::find()
             ->where([
                 'IdObjEspecifico' => $form->idObjEspecifico,
-                'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdDa' => $idDa,
                 'IdGestion' => $idGestion,
             ])
             ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
