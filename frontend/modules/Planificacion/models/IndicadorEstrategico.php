@@ -23,7 +23,7 @@ use yii\db\ActiveQuery;
  * @property ObjetivoEstrategico $idObjEstrategico
  * @property AccionEstrategica $idAccionEstrategica
  * @property IndicadorEstrategicoProgramacionGestion[] $indicadorEstrategicoProgramacionGestiones
- * @property PEI $idPei
+ * @property Pei $idPei
  */
 
 class IndicadorEstrategico extends ActiveRecord
@@ -52,7 +52,7 @@ class IndicadorEstrategico extends ActiveRecord
             [['IdIndicador'], 'exist', 'skipOnError' => true, 'targetClass' => Indicador::class, 'targetAttribute' => ['IdIndicador' => 'IdIndicador']],
             [['IdObjEstrategico'], 'exist', 'skipOnError' => true, 'targetClass' => ObjetivoEstrategico::class, 'targetAttribute' => ['IdObjEstrategico' => 'IdObjEstrategico']],
             [['IdAccionEstrategica'], 'exist', 'skipOnError' => true, 'targetClass' => AccionEstrategica::class, 'targetAttribute' => ['IdAccionEstrategica' => 'IdAccionEstrategica']],
-            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => PEI::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
+            [['IdPei'], 'exist', 'skipOnError' => true, 'targetClass' => Pei::class, 'targetAttribute' => ['IdPei' => 'IdPei']],
         ];
     }
 
@@ -277,7 +277,7 @@ class IndicadorEstrategico extends ActiveRecord
      */
     public function getIdPei(): ActiveQuery
     {
-        return $this->hasOne(PEI::class, ['IdPei' => 'IdPei']);
+        return $this->hasOne(Pei::class, ['IdPei' => 'IdPei']);
     }
 
 
