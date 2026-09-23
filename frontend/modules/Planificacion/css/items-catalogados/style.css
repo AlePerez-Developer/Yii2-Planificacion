@@ -1,0 +1,57 @@
+.sigma-preview {
+    background: #f4f7fb;
+    border: 1px solid #d6e0ef;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.sigma-preview dt {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6c7a96;
+    margin: 0;
+}
+
+.sigma-preview dd {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.total-formulario {
+    margin-left: auto;
+    font-size: 15px;
+}
+
+.card-dtic-style-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#accordionOperaciones .card {
+    margin-bottom: 8px;
+}
+
+#accordionOperaciones .operacion-cantidad {
+    max-width: 160px;
+}
+
+.item-child-table {
+    width: 100%;
+    margin: 0;
+}
+
+.item-child-table th,
+.item-child-table td {
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+#tablaListaItemsCatalogados tbody tr.item-row {
+    cursor: pointer;
+}
+
+#formItemCatalogado .select2-container,
+#formItemDescatalogado .select2-container {
+    width: 100% !important;
+}

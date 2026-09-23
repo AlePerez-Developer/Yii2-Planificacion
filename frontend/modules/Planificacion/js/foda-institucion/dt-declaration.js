@@ -1,5 +1,6 @@
 let dt_fodaInstitucion = null;
 const tiposFoda = ['Fortaleza', 'Debilidad', 'Oportunidad', 'Amenaza'];
+const incidenciasFoda = ['Alta', 'Media', 'Baja'];
 
 $(document).ready(function () {
     dt_fodaInstitucion = $('#tablaFodaInstitucion').DataTable({
@@ -10,7 +11,7 @@ $(document).ready(function () {
             dataSrc: 'data',
             error: mostrarErrorFodaInstitucion
         },
-        order: [[3, 'desc']],
+        order: [[4, 'desc']],
         columns: [
             {
                 title: 'Tipo',
@@ -23,12 +24,25 @@ $(document).ready(function () {
                     return `<span class="badge-tipo tipo-${String(data || '').toLowerCase()}">${data || ''}</span>`;
                 }
             },
+            {
+                title: 'Incidencia',
+                data: 'Incidencia',
+                className: 'text-center',
+                render: function (data, type) {
+                    if (type !== 'display') {
+                        return data || '';
+                    }
+                    return `<span class="badge-tipo incidencia-${String(data || '').toLowerCase()}">${data || ''}</span>`;
+                }
+            },
             {title: 'Descripción', data: 'Descripcion', defaultContent: ''},
             {
                 title: 'Estado',
                 data: 'CodigoEstado',
                 className: 'text-center',
-                render: data => `<button class="btn-toggle-estado ${data === 'V' ? 'activo' : 'inactivo'}">
+                render: data => window.poaPuedeEditar === false
+                    ? (data === 'V' ? 'Vigente' : 'Caduco')
+                    : `<button class="btn-toggle-estado ${data === 'V' ? 'activo' : 'inactivo'}">
                     ${data === 'V' ? 'Vigente' : 'Caduco'}
                 </button>`
             },
@@ -38,13 +52,12 @@ $(document).ready(function () {
                 data: 'IdFoda',
                 className: 'text-center',
                 orderable: false,
-                render: () => `
-                    <button class="btn-action btn-edit"><i class="fa fa-pen"></i></button>
-                    <button class="btn-action btn-delete"><i class="fa fa-trash"></i></button>`
+                render: () => htmlAccionesPoa()
             }
         ],
         initComplete: function () {
             DataTable_filtroSelectHeader(dt_fodaInstitucion, 0, tiposFoda, 'Todos');
+            DataTable_filtroSelectHeader(dt_fodaInstitucion, 1, incidenciasFoda, 'Todas');
             $('#dticTableLoading').hide();
             $('#dticTableContainer').fadeIn(180);
         }

@@ -62,6 +62,7 @@ $(document).ready(function () {
 
     $('#tablaProgramacionPoaAnual')
         .on('click', '.input-meta-poa-anual[readonly]', function () {
+            if (window.poaPuedeEditar === false) return;
             $(this)
                 .prop('readonly', false)
                 .data('original', $(this).val())

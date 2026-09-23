@@ -1,9 +1,12 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $cssPath = Yii::getAlias('@app/modules/Planificacion/css/ingreso/style.css');
 $version = is_file($cssPath) ? filemtime($cssPath) : time();
 $this->registerCssFile('@planificacionModule/css/ingreso/style.css?v=' . $version, [
@@ -16,11 +19,11 @@ $this->title = 'Planificación Institucional';
 $this->params['subtitle'] = 'Registro de ingresos';
 $this->params['icon'] = 'fas fa-coins';
 $this->params['iconColor'] = 'success';
-$this->params['actions'] = '
+$this->params['actions'] = $edicion['puedeCrear'] ? '
     <button id="btnMostrarCrear" class="btn-crear closed">
         <i class="fas fa-plus-circle"></i>
         <span class="btn-text">Registrar ingreso</span>
-    </button>';
+    </button>' : '';
 ?>
 
 <div class="resumen-financiero mb-3">

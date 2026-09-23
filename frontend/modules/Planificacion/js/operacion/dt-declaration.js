@@ -15,8 +15,13 @@ $(document).ready(function () {
         scrollX: true,
         responsive: false,
         autoWidth: false,
-        order: [[0, 'asc']],
+        order: [[0, 'asc'], [1, 'asc']],
         columns: [
+            {
+                title: 'Llave',
+                data: 'Llave',
+                visible: false
+            },
             {
                 title: 'Código',
                 data: 'Codigo',
@@ -27,7 +32,7 @@ $(document).ready(function () {
             {
                 title: 'Operación',
                 data: null,
-                width: '390px',
+                width: '420px',
                 render: function (data, type, row) {
                     if (type !== 'display') {
                         return `${row.Descripcion || ''} ${row.ObjetivoDescripcion || ''} ${row.IndicadorDescripcion || ''}`;
@@ -44,17 +49,6 @@ $(document).ready(function () {
                             ${row.IndicadorDescripcion || ''}
                         </div>
                     `;
-                }
-            },
-            {
-                title: 'Llave presupuestaria',
-                data: null,
-                width: '220px',
-                render: function (data, type, row) {
-                    const contenido = `${row.Llave || ''} ${row.LlaveDescripcion || ''}`;
-                    return type === 'display'
-                        ? `<div class="operacion-detail"><b>${row.Llave || ''}</b><br>${row.LlaveDescripcion || ''}</div>`
-                        : contenido;
                 }
             },
             {
@@ -98,6 +92,10 @@ $(document).ready(function () {
                 className: 'text-center',
                 width: '85px',
                 render: function (data) {
+                    if (window.poaPuedeEditar === false) {
+                        const activo = data === 'V';
+                        return activo ? 'Vigente' : 'Caduco';
+                    }
                     const activo = data === 'V';
                     return `<button class="btn-toggle-estado ${activo ? 'activo' : 'inactivo'}"
                                     title="Cambiar estado">
@@ -112,14 +110,7 @@ $(document).ready(function () {
                 width: '95px',
                 orderable: false,
                 searchable: false,
-                render: () => `
-                    <button class="btn-action btn-edit" title="Editar">
-                        <i class="fa fa-pen"></i>
-                    </button>
-                    <button class="btn-action btn-delete" title="Eliminar">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `
+                render: () => htmlAccionesPoa()
             }
         ],
         rowCallback: function (row, data) {
@@ -131,9 +122,39 @@ $(document).ready(function () {
                 .removeClass('programacion-completa programacion-pendiente')
                 .addClass(total === 100 ? 'programacion-completa' : 'programacion-pendiente');
         },
+        drawCallback: function () {
+            agruparPorLlave(this.api());
+        },
         initComplete: mostrarTablaOperacion
     });
 });
+
+function agruparPorLlave(api) {
+    $(api.table().body()).find('tr.programacion-group-row').remove();
+
+    const filas = api.rows({search: 'applied', order: 'applied'});
+    const datos = filas.data().toArray();
+    const nodos = filas.nodes().toArray();
+    let ultimaLlave = null;
+    const columnasVisibles = api.columns(':visible').count();
+
+    datos.forEach((item, indice) => {
+        if (item.IdLlavePresupuestaria === ultimaLlave) return;
+        ultimaLlave = item.IdLlavePresupuestaria;
+        $(nodos[indice]).before(`
+            <tr class="programacion-group-row">
+                <td colspan="${columnasVisibles}">
+                    <strong>${item.Llave || ''}</strong>
+                    <div class="operacion-group-detail">
+                        Programa: ${item.ProgramaCodigo || ''} - ${item.ProgramaDescripcion || ''}
+                        · Proyecto: ${item.ProyectoCodigo || ''} - ${item.ProyectoDescripcion || ''}
+                        · Actividad: ${item.ActividadCodigo || ''} - ${item.ActividadDescripcion || ''}
+                    </div>
+                </td>
+            </tr>
+        `);
+    });
+}
 
 function trimestre(numero, atributo, titulo) {
     return {
@@ -148,7 +169,8 @@ function trimestre(numero, atributo, titulo) {
                 value="${Number(data || 0)}"
                 data-original="${Number(data || 0)}"
                 data-trimestre="${numero}"
-                data-idoperacion="${row.IdOperacion}">`;
+                data-idoperacion="${row.IdOperacion}"
+                ${window.poaPuedeEditar === false ? 'disabled' : ''}>`;
         }
     };
 }

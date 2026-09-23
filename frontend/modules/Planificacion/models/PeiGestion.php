@@ -105,6 +105,11 @@ class PeiGestion extends ActiveRecord
         return $this->hasMany(ProgramacionIndicadorGestion::class, ['IdGestion' => 'IdGestion']);
     }
 
+    public function getItemsGestiones(): ActiveQuery
+    {
+        return $this->hasMany(ItemGestion::class, ['IdGestion' => 'IdGestion']);
+    }
+
     /**
      * Gets a query for [[CodigoEstado]].
      *

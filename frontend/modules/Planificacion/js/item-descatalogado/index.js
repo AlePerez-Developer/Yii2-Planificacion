@@ -150,7 +150,16 @@ $(document).ready(function () {
                 },
                 {
                     title: 'Acciones', data: null, orderable: false, searchable: false,
-                    render: () => '<button class="btn btn-sm btn-light btn-edit-item"><i class="fa fa-pen"></i></button> <button class="btn btn-sm btn-danger btn-delete-item"><i class="fa fa-trash"></i></button>'
+                    render: () => {
+                        let html = '';
+                        if (window.poaPuedeEditar !== false) {
+                            html += '<button class="btn btn-sm btn-light btn-edit-item"><i class="fa fa-pen"></i></button> ';
+                        }
+                        if (window.poaPuedeEliminar !== false) {
+                            html += '<button class="btn btn-sm btn-danger btn-delete-item"><i class="fa fa-trash"></i></button>';
+                        }
+                        return html;
+                    }
                 }
             ]
         });

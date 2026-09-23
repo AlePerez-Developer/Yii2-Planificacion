@@ -13,12 +13,54 @@ span .select2-selection.select2-selection--single {
     padding: 4px 8px !important;
 }
 
+#formOperacion .select2-container {
+    width: 100% !important;
+}
+
 #idObjEspecifico + .select2 .select2-selection__rendered,
-#idIndicador + .select2 .select2-selection__rendered {
-    min-height: 66px;
+#idLlavePresupuestaria + .select2 .select2-selection__rendered,
+#idIndicadorEstrategico + .select2 .select2-selection__rendered,
+#idIndicadorPoa + .select2 .select2-selection__rendered {
+    min-height: 72px;
     display: flex !important;
     align-items: center !important;
     line-height: normal !important;
+    white-space: normal !important;
+}
+
+.select2-dropdown.select2-dropdown-full {
+    width: 100% !important;
+}
+
+.select2-dropdown.select2-dropdown-full .select2-results__option {
+    white-space: normal;
+}
+
+.select2-sub {
+    color: #64748b;
+    font-size: .8rem;
+}
+
+.badge-uso {
+    display: inline-block;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+}
+
+.badge-uso.disponible {
+    color: #155724;
+    background: #d4edda;
+}
+
+.badge-uso.usado {
+    color: #856404;
+    background: #fff3cd;
+}
+
+.indicador-usado {
+    opacity: .82;
 }
 
 .select2-selection__placeholder {
@@ -229,6 +271,26 @@ span .select2-selection.select2-selection--single {
 
 .dtic-table tbody tr.programacion-pendiente td {
     border-color: #e8c56b !important;
+}
+
+.dtic-table tbody tr.programacion-group-row td {
+    background: #eef4fb !important;
+    border: 2px solid #8caed6 !important;
+    border-radius: 10px;
+    color: #294f78;
+    font-size: .86rem;
+    padding: 10px 14px !important;
+}
+
+.dtic-table tbody tr.programacion-group-row:hover td {
+    background: #eef4fb !important;
+}
+
+.operacion-group-detail {
+    color: #5f6b7a;
+    font-size: .8rem;
+    font-weight: 400;
+    margin-top: 4px;
 }
 
 .btn-toggle-estado {

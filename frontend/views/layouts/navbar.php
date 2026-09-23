@@ -1,44 +1,21 @@
 <?php
 
-use yii\helpers\ArrayHelper;
+use common\services\ContextoActivoService;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
 $contexto = Yii::$app->userContext->contexto();
 $colorModulo = Yii::$app->userContext->colorModulo();
 $moduloActivo = Yii::$app->userContext->moduloActivo();
-$usuario = Yii::$app->user->identity;
 
 $dashboardUrl = ['site/index'];
-
-$gestiones = [];
-$estadosPoa = [];
-$llaves = [];
+$opcionesContexto = Yii::$container->get(ContextoActivoService::class)->obtenerOpcionesNavbar();
+$gestiones = $opcionesContexto['gestiones'];
+$estadosPoa = $opcionesContexto['estadosPoa'];
+$unidades = $opcionesContexto['unidades'];
 
 if ($moduloActivo) {
     $dashboardUrl = [$moduloActivo->DashboardRoute];
-
-    $gestiones = ArrayHelper::map(
-            Yii::$app->user->identity->getGestionesPermitidas(),
-            'IdGestion',
-            'Gestion'
-    );
-
-    if ($contexto?->IdGestion) {
-        $estadosPoa = ArrayHelper::map(
-                $usuario->getEstadosPoaPermitidos($contexto->IdGestion),
-                'IdEstadoPoa',
-                'Codigo'
-        );
-    }
-
-    if ($contexto?->IdGestion && $contexto?->IdEstadoPoa) {
-        $llaves = ArrayHelper::map(
-                $usuario->getLlavesPermitidas($contexto->IdGestion, $contexto->IdEstadoPoa),
-                'IdUnidadEjecutora',
-                'Compuesto'
-        );
-    }
 }
 ?>
 <!-- Navbar -->
@@ -95,17 +72,17 @@ if ($moduloActivo) {
                     </div>
 
                     <div class="context-field context-field-lg">
-                        <label>Llave Presupuestaria</label>
+                        <label>Unidad ejecutora</label>
                         <?= Html::dropDownList(
-                                'IdLlavePresupuestaria',
+                                'IdUnidadEjecutora',
                                 $contexto?->IdUnidadEjecutora,
-                                $llaves,
+                                $unidades,
                                 [
                                         'class' => 'form-control form-control-sm context-select',
                                         'prompt' => 'Seleccione',
-                                        'id' => 'select-llave',
+                                        'id' => 'select-unidad-ejecutora',
                                         'disabled' => empty($contexto?->IdGestion) || empty($contexto?->IdEstadoPoa),
-                                        'onchange' => "if(this.value){ window.location.href='" . Url::to(['/site/cambiar-llave']) . "&id=' + this.value; }",
+                                        'onchange' => "if(this.value){ window.location.href='" . Url::to(['/site/cambiar-unidad-ejecutora']) . "&id=' + this.value; }",
                                 ]
                         ) ?>
                     </div>

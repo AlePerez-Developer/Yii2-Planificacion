@@ -38,56 +38,47 @@ $(document).ready(function () {
                 render: function (data, type, row) {
 
                     if (type !== "display") {
-                        return row["Descripcion"];
+                        return row["Llave"];
                     }
 
+                    const unidad = row["unidadEjecutora"] || {};
+                    const da = unidad["das"] || {};
+                    const programa = (row["proyecto"] && row["proyecto"]["programa"]) || {};
+                    const proyecto = row["proyecto"] || {};
+                    const actividad = row["actividad"] || {};
+
                     return `
+                    <div class="dtic-code-container">
+                        <span class="dtic-code-text">Unidad ejecutora</span>
+                        <div class="dtic-code-badge">
+                            ${da["Da"] || ''}-${unidad["Ue"] || ''}
+                        </div>
+                    </div>
+
                     <div class="dtic-item-main">
-                        Llave: ${row["Llave"]}
+                        ${unidad["Descripcion"] || ''}
                     </div>
                     
                     <div class="dtic-item-sub">
-                        ${row["Descripcion"]}
+                        <b>Programa:</b> ${programa["Codigo"] || ''} - ${programa["Descripcion"] || ''}
                     </div>
-                    
-                    <div class="dtic-item-sub2 ">
-                        <div class="row">
-                            <div class="col-md-auto">
-                                <b>Da: </b> ${row["da"]["Da"]} - ${row["da"]["Descripcion"]}
-                            </div>
-                            <div class="col-md-auto">
-                                <b>Ue: </b> ${row["ue"]["Ue"]} - ${row["ue"]["Descripcion"]}      
-                            </div>                        
-                        </div>
-                    </div>    
+                    <div class="dtic-item-sub">
+                        <b>Proyecto:</b> ${proyecto["Codigo"] || ''} - ${proyecto["Descripcion"] || ''}
+                    </div>
+                    <div class="dtic-item-sub">
+                        <b>Actividad:</b> ${actividad["Codigo"] || ''} - ${actividad["Descripcion"] || ''}
+                    </div>
+                    <div class="dtic-item-sub">
+                        <b>Llave:</b> ${row["Llave"]}
+                    </div>
                     <div class="dtic-item-sub2">
-                        <div class="row">
-                            <div class="col-md-auto">
-                                <b>Programa: </b> ${row["proyecto"]["programa"]["Codigo"]} - ${row["proyecto"]["programa"]["Descripcion"]}
-                            </div>
-                        </div>
-                    </div>      
-                    <div class="dtic-item-sub2">
-                        <div class="row">
-                            <div class="col-md-auto">
-                                <b>Proyecto: </b> ${row["proyecto"]["Codigo"]} - ${row["proyecto"]["Descripcion"]}
-                            </div>
-                            <div class="col-md-auto">
-                                <b>Actividad: </b> ${row["actividad"]["Codigo"]} - ${row["actividad"]["Descripcion"]}      
-                            </div>                        
-                        </div>
-                    </div>         
-                    <div class="dtic-item-sub2">
-                        Organizacional: ${(row["esOrganizacional"] === '1')?'Si':'No'}
-                    </div>   
+                        Organizacional: ${(row["esOrganizacional"] === '1' || row["esOrganizacional"] === 1) ? 'Si' : 'No'}
+                    </div>
                 `;
                 }
             },
             {
                 data: 'Llave', visible: false
-            },
-            {
-                data: 'Descripcion', visible: false
             },
             {
                 data: "CodigoEstado",

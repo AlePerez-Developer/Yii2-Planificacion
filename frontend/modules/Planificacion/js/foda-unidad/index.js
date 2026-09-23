@@ -19,6 +19,7 @@ $(document).ready(function () {
         const datos = new FormData();
         datos.append('idFoda', idFoda);
         datos.append('tipo', $('#tipo').val());
+        datos.append('incidencia', $('#incidencia').val());
         datos.append('descripcion', $('#descripcion').val());
 
         try {
@@ -45,6 +46,7 @@ $(document).ready(function () {
             success: function (response) {
                 idFoda = response.data.IdFoda;
                 $('#tipo').val(response.data.Tipo);
+                $('#incidencia').val(response.data.Incidencia);
                 $('#descripcion').val(response.data.Descripcion || '');
                 mostrarFormulario('Editar FODA');
             },
@@ -74,10 +76,12 @@ $(document).ready(function () {
     $('#formFodaUnidad').validate({
         rules: {
             tipo: {required: true},
+            incidencia: {required: true},
             descripcion: {required: true, minlength: 2, maxlength: 500}
         },
         messages: {
             tipo: 'Seleccione un tipo FODA.',
+            incidencia: 'Seleccione una incidencia.',
             descripcion: 'Ingrese una descripción de 2 a 500 caracteres.'
         }
     });

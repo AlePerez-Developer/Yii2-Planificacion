@@ -27,7 +27,7 @@ use common\models\Estado;
  * @property Usuario $idUsuario
  * @property Estado $codigoEstado
  * @property Menu[] $menus
- * @property UsuarioLlaveMenuPermiso[] $usuarioLlaveMenuPermisos
+ * @property UsuarioUnidadMenuPermiso[] $usuarioUnidadMenuPermisos
  *
  */
 
@@ -139,13 +139,13 @@ class Menu extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[UsuarioLlaveMenuPermisos]].
+     * Gets a query for [[UsuarioUnidadMenuPermisos]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getUsuarioLlaveMenuPermisos(): ActiveQuery
+    public function getUsuarioUnidadMenuPermisos(): ActiveQuery
     {
-        return $this->hasMany(UsuarioLlaveMenuPermiso::class, ['IdMenu' => 'IdMenu']);
+        return $this->hasMany(UsuarioUnidadMenuPermiso::class, ['IdMenu' => 'IdMenu']);
     }
 }

@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\controllers;
 
 use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use app\modules\Planificacion\formModels\IndicadorPoaForm;
 use app\modules\Planificacion\services\IndicadorPoaService;
 use Yii;
@@ -12,6 +13,8 @@ use yii\filters\VerbFilter;
 
 class IndicadorPoaController extends BaseController
 {
+    use ControlaEdicionPoa;
+
     public function __construct(
         $id,
         $module,

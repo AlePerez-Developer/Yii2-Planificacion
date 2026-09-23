@@ -12,31 +12,21 @@ class LlavePresupuestariaDao
         return false;
     }
 
-    static function verificarCodigo(string $id, string $idDa, string $idUe, string $idProyecto, string $idActividad): bool
-    {
+    static function verificarCodigo(
+        string $id,
+        string $idUnidadEjecutora,
+        string $idProyecto,
+        string $idActividad
+    ): bool {
         $model = LlavePresupuestaria::find()->where([
-            'IdDa' => $idDa,
-            'IdUe' => $idUe,
+            'IdUnidadEjecutora' => $idUnidadEjecutora,
             'IdProyecto' => $idProyecto,
             'IdActividad' => $idActividad,
             'CodigoEstado' => Estado::ESTADO_VIGENTE
         ])
-            ->andWhere(['!=','IdLlavePresupuestaria',$id])
+            ->andWhere(['!=', 'IdLlavePresupuestaria', $id])
             ->exists();
 
         return !$model;
-    }
-
-    static function validarId(string $id, string $idDa, string $idUe, string $idProyecto, string $idActividad): bool
-    {
-        return LlavePresupuestaria::find()
-            ->where([
-                'IdLlavePresupuestaria' => $id,
-                'IdDa' => $idDa,
-                'IdUe' => $idUe,
-                'IdProyecto' => $idProyecto,
-                'IdActividad' => $idActividad,
-                'CodigoEstado' => Estado::ESTADO_VIGENTE
-            ])->exists();
     }
 }

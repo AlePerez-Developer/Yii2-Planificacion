@@ -1,9 +1,12 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $this->registerCssFile('@planificacionModule/css/items-poa/style.css', ['depends' => [PlanificacionAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/item-catalogado/index.js', ['depends' => [JqueryAsset::class]]);
 
@@ -66,7 +69,9 @@ $this->params['breadcrumbs'][] = ['label' => "/ Formulario {$formulario}"];
                         </div>
                         <div class="text-right">
                             <button id="btnCancelarItem" type="button" class="btn-cancel btn btn-light">Limpiar</button>
+                            <?php if ($edicion['puedeCrear'] || $edicion['puedeEditar']): ?>
                             <button id="btnGuardarItem" type="submit" class="btn btn-primary">Guardar ítem</button>
+                            <?php endif; ?>
                         </div>
                     </form>
                     <hr>

@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\dao;
 
 use app\modules\Planificacion\models\Ingreso;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use common\models\Estado;
 use yii\db\Expression;
 
@@ -50,5 +51,22 @@ class IngresoDao
         return (float)$query->sum(
             new Expression('CAST(Cantidad AS decimal(18,2)) * CAST(Precio AS decimal(18,2))')
         );
+    }
+
+    public static function totalPorDa(
+        string $idDa,
+        string $idGestion,
+        string $idEstadoPoa
+    ): float {
+        return (float)Ingreso::find()->alias('I')
+            ->innerJoin(['UE' => UnidadEjecutora::tableName()], 'UE.IdUnidadEjecutora = I.IdUnidadEjecutora')
+            ->where([
+                'UE.IdDa' => $idDa,
+                'I.IdGestion' => $idGestion,
+                'I.IdEstadoPoa' => $idEstadoPoa,
+                'I.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'UE.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->sum(new Expression('CAST(I.Cantidad AS decimal(18,2)) * CAST(I.Precio AS decimal(18,2))'));
     }
 }

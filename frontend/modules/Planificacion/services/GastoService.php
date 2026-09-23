@@ -1,4 +1,5 @@
 <?php
+
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
@@ -6,226 +7,131 @@ use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\GastoDao;
 use app\modules\Planificacion\formModels\GastoForm;
 use app\modules\Planificacion\models\Gasto;
-use yii\db\StaleObjectException;
 use common\models\Estado;
-use yii\db\Exception;
-use Throwable;
 use Yii;
 
 class GastoService
 {
-    /**
-     * Lista un array de Gastos no eliminados
-     *
-     * @return array of gastos
-     */
-    public function listarGastos(): array
+    public function listarTodo(): array
     {
-        $data = Gasto::listAll()
+        $data = Gasto::listAll()->asArray()->all();
+        return ResponseHelper::success($data, 'Listado de gastos obtenido.');
+    }
+
+    public function listarS2(): array
+    {
+        $data = Gasto::find()
+            ->select([
+                'id' => 'IdGasto',
+                'text' => 'Descripcion',
+                'codigo' => 'CodigoGasto',
+                'entidadTransferencia' => 'EntidadTransferencia',
+            ])
+            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->orderBy(['CodigoGasto' => SORT_ASC])
             ->asArray()
             ->all();
-        return ResponseHelper::success($data, 'Listado de Gastos obtenido.');
+
+        return ResponseHelper::success($data);
     }
 
-    /**
-     * Obtiene un gasto en base a un código.
-     *
-     * @param int $codigoGasto
-     * @return Gasto|null
-     */
-    public function listarGasto(int $codigoGasto): ?Gasto
+    public function guardar(GastoForm $form): array
     {
-        return Gasto::listOne($codigoGasto);
-    }
-
-    /**
-     * Guarda un nuevo Gasto.
-     *
-     * @param GastoForm $form
-     * @return array ['message' => string, 'data' => string]
-     * @throws Exception|ValidationException
-     */
-    public function guardarGasto(GastoForm $form): array
-    {
-        $gasto = new Gasto([
-            //'CodigoGasto'         => GastoDao::generarCodigoGasto(),
-            'Descripcion'         => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
-            'EntidadTransferencia' => trim($form->entidadTransferencia),
-            'CodigoEstado'        => Estado::ESTADO_VIGENTE,
-            'CodigoUsuario'       => Yii::$app->user->identity->CodigoUsuario ?? null,
+        $modelo = new Gasto([
+            'CodigoGasto' => mb_strtoupper(trim($form->codigoGasto), 'UTF-8'),
+            'Descripcion' => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
+            'EntidadTransferencia' => mb_strtoupper(trim($form->entidadTransferencia), 'UTF-8'),
+            'CodigoEstado' => Estado::ESTADO_VIGENTE,
+            'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario,
         ]);
 
-        return $this->validarProcesarModelo($gasto);
+        return $this->procesar($modelo);
     }
 
-    /**
-     * Actualiza la información de un registro en el modelo
-     *
-     * @param int $codigo
-     * @param GastoForm $form
-     * @return array
-     * @throws Exception
-     * @throws Throwable
-     * @throws ValidationException
-     * @throws StaleObjectException
-     */
-    public function actualizarGasto(int $codigo, GastoForm $form): array
+    public function actualizar(string $id, GastoForm $form): array
     {
-        $gasto = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
+        $modelo->CodigoGasto = mb_strtoupper(trim($form->codigoGasto), 'UTF-8');
+        $modelo->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
+        $modelo->EntidadTransferencia = mb_strtoupper(trim($form->entidadTransferencia), 'UTF-8');
+        $modelo->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
-        // Asignar nuevos valores antes de verificar duplicados
-        $gasto->Descripcion = mb_strtoupper(trim($form->descripcion), 'UTF-8');
-        $gasto->EntidadTransferencia = trim($form->entidadTransferencia);
-
-        // Verificar si existe otro gasto con la misma descripción (excluyéndose a sí mismo)
-        if ($gasto->exist()) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_EXISTE'],
-                'Ya existe un gasto con esa descripción',
-                400
-            );
-        }
-
-        return $this->validarProcesarModelo($gasto);
+        return $this->procesar($modelo);
     }
 
-    /**
-     * Busca un Gasto por su código y alterna su estado.
-     *
-     * @param int $codigo
-     * @return array ['message' => string, 'data' => string]
-     * @throws Exception
-     * @throws ValidationException
-     */
-    public function cambiarEstado(int $codigo): array
+    public function cambiarEstado(string $id): array
     {
-        $gasto = $this->obtenerModeloValidado($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
+        $modelo->cambiarEstado();
+        $this->guardarModelo($modelo);
 
-        $gasto->cambiarEstado();
-
-        if (!$gasto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $gasto->getErrors(), 500);
-        }
-
-        if (!$gasto->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Gasto $gasto->CodigoGasto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $gasto->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $gasto->CodigoEstado,
-        ];
+        return ResponseHelper::success($modelo->CodigoEstado, 'Estado actualizado.');
     }
 
-    /**
-     * Busca un Gasto por su código y realiza un soft delete.
-     *
-     * @param int $codigo
-     * @return array ['message' => string, 'data' => string]
-     * @throws Exception
-     * @throws ValidationException
-     */
-    public function eliminarGasto(int $codigo): array
+    public function eliminar(string $id): array
     {
-        $gasto = $this->obtenerModeloValidado($codigo);
-
-        if ($gasto->enUso()) {
+        $modelo = $this->obtenerModeloValidado($id);
+        if (GastoDao::enUso($modelo)) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'El Gasto se encuentra en uso y no puede ser eliminado',
+                'El gasto se encuentra en uso y no puede ser eliminado.',
                 500
             );
         }
-
-        $gasto->eliminarGasto();
-
-        if (!$gasto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $gasto->getErrors(), 500);
-        }
-
-        if (!$gasto->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Gasto $gasto->CodigoGasto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $gasto->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
+        $modelo->eliminar();
+        return $this->procesar($modelo);
     }
 
-    /**
-     * Obtiene el modelo según el código enviado.
-     *
-     * @param int $codigo
-     * @return array
-     * @throws ValidationException
-     */
-    public function obtenerModelo(int $codigo): array
+    public function obtenerModelo(string $id): array
     {
-        $gasto = $this->listarGasto($codigo);
+        $modelo = $this->obtenerModeloValidado($id);
+        return ResponseHelper::success($modelo->getAttributes([
+            'IdGasto',
+            'CodigoGasto',
+            'Descripcion',
+            'EntidadTransferencia',
+        ]));
+    }
 
-        if (!$gasto) {
+    public function verificarCodigo(string $id, string $codigo): bool
+    {
+        return GastoDao::verificarCodigo($id, $codigo);
+    }
+
+    private function obtenerModeloValidado(string $id): Gasto
+    {
+        $modelo = Gasto::listOne($id);
+        if ($modelo === null) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'Registro no encontrado',
+                'No se encontró el gasto solicitado.',
                 404
             );
         }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $gasto->getAttributes([
-                'CodigoGasto',
-                'Descripcion',
-                'EntidadTransferencia'
-            ]),
-        ];
+        return $modelo;
     }
 
-    /**
-     * Obtiene el modelo según el código enviado y valida si existe.
-     *
-     * @param int $codigo
-     * @return Gasto|null
-     * @throws ValidationException
-     */
-    private function obtenerModeloValidado(int $codigo): ?Gasto
+    private function procesar(Gasto $modelo): array
     {
-        $model = $this->listarGasto($codigo);
-        if (!$model) {
+        $this->guardarModelo($modelo);
+        return ResponseHelper::success($modelo, 'Gasto procesado correctamente.');
+    }
+
+    private function guardarModelo(Gasto $modelo): void
+    {
+        if (!$modelo->validate()) {
             throw new ValidationException(
-                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
-                'No se encontró el registro buscado',
-                404
+                Yii::$app->params['ERROR_VALIDACION_MODELO'],
+                $modelo->getErrors(),
+                422
             );
         }
-        return $model;
-    }
-
-    /**
-     * Recibe un modelo lo valida y realiza el guardado del mismo.
-     *
-     * @param Gasto $gasto
-     * @return array ['message' => string, 'data' => string]
-     * @throws Exception
-     * @throws ValidationException
-     */
-    public function validarProcesarModelo(Gasto $gasto): array
-    {
-        if (!$gasto->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $gasto->getErrors(), 500);
+        if (!$modelo->save(false)) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_EJECUCION_SQL'],
+                $modelo->getErrors(),
+                500
+            );
         }
-
-        if (!$gasto->save(false)) {
-            Yii::error("Error al guardar el Gasto $gasto->CodigoGasto", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'], $gasto->getErrors(), 500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => '',
-        ];
     }
 }

@@ -7,6 +7,7 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\FodaUnidadForm;
 use app\modules\Planificacion\models\FODAUnidad;
 use app\modules\Planificacion\services\FodaUnidadService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
 use Yii;
@@ -15,6 +16,7 @@ use yii\filters\VerbFilter;
 
 class FodaUnidadController extends BaseController
 {
+    use ControlaEdicionPoa;
     protected array $accionesSinValidacion = ['index', 'reporte'];
 
     public function __construct(

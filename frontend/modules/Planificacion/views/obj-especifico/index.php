@@ -1,29 +1,36 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
+use yii\helpers\Url;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $this->registerJsFile('@planificacionModule/js/obj-especifico/s2-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/obj-especifico/dt-declaration.js', ['depends' => [JqueryAsset::class]]);
 $this->registerJsFile('@planificacionModule/js/obj-especifico/index.js', ['depends' => [JqueryAsset::class]]);
 $this->registerCssFile("@planificacionModule/css/obj-especifico/style.css", ['depends' => [PlanificacionAsset::class]
 ]);
+$this->registerJs("
+    urlProgramarPoa = '" . Url::to(['indicador-poa-programacion-trimestral/index']) . "';
+");
 
 
 $this->title = 'Planificación Institucional';
 $this->params['subtitle'] = 'Administracion de objetivos específicos';
 $this->params['icon'] = 'fas fa-clipboard-list';
 $this->params['iconColor'] = 'info';
-$this->params['actions'] =
-        '<button id="btnMostrarCrear"  class="btn-crear closed" >
+$this->params['actions'] = ($edicion['puedeCrear']
+        ? '<button id="btnMostrarCrear"  class="btn-crear closed" >
             <span class="circle">
                 <span class="horizontal"></span>
                 <span class="vertical"></span>
             </span>
             <span class="btn-text">Nuevo Registro</span>
-        </button>
-
+        </button>'
+        : '') . '
          <button id="btnReportePdf" class="btn-reporte">
             <i class="fas fa-file-pdf"></i>
              <span class="btn-text">Exportar</span>

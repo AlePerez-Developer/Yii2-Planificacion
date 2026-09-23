@@ -22,7 +22,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
                 MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_objEstrategico.processing(false);
+                dt_objEspecifico.processing(false);
             }
         },
         columns: [
@@ -79,9 +79,30 @@ $(document).ready(function () {
                 width: "65px",
                 orderable: false,
                 searchable: false,
+                render: function (data, type) {
+                    return ((type === 'display'))
+                        ? '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para programar indicadores">' +
+                        '    <span class="btn_ico"><i class="far fa-calendar-check"></i></span>' +
+                        '    <span class="btn_text">Programar</span>' +
+                        '  </button>'
+                        : data
+                },
+            },
+            {
+                data: "CodigoEstado",
+                className: "text-center",
+                width: "65px",
+                orderable: false,
+                searchable: false,
                 visible: true,
                 render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
+                    if (type !== 'display') {
+                        return data;
+                    }
+                    if (window.poaPuedeEditar === false) {
+                        return row["CodigoEstado"] === ESTADO_VIGENTE ? 'Vigente' : 'Caducado';
+                    }
+                    return (row["CodigoEstado"] === ESTADO_VIGENTE)
                         ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
                         '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
                         '    <span class="btn_text">Vigente</span>' +
@@ -99,15 +120,7 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function () {
-                    return `
-                    <button class="btn-action btn-edit ">
-                        <i class="fa fa-pen"></i>
-                    </button>
-
-                    <button class="btn-action btn-delete ">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `;
+                    return htmlAccionesPoa();
                 }
             },
         ]

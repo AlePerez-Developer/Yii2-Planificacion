@@ -32,6 +32,9 @@ $(document).ready(function () {
                 width: '180px',
                 render: function (data, type, row) {
                     if (type !== 'display') return data;
+                    if (window.poaPuedeEditar === false) {
+                        return Number(data || 0).toLocaleString();
+                    }
                     return `<input type="number" min="1" step="1"
                         class="form-control input-techo"
                         value="${Number(data || 0)}"
@@ -47,13 +50,18 @@ $(document).ready(function () {
                 width: '120px',
                 orderable: false,
                 render: function (data, type, row) {
-                    return `<button class="btn-action btn-save-techo" title="Guardar techo">
+                    let html = '';
+                    if (window.poaPuedeEditar !== false) {
+                        html += `<button class="btn-action btn-save-techo" title="Guardar techo">
                                 <i class="fa fa-check"></i>
-                            </button>
-                            ${row.IdAsignacion ? `
-                            <button class="btn-action btn-delete-techo" title="Quitar techo">
+                            </button>`;
+                    }
+                    if (row.IdAsignacion && window.poaPuedeEliminar !== false) {
+                        html += `<button class="btn-action btn-delete-techo" title="Quitar techo">
                                 <i class="fa fa-trash"></i>
-                            </button>` : ''}`;
+                            </button>`;
+                    }
+                    return html;
                 }
             }
         ],

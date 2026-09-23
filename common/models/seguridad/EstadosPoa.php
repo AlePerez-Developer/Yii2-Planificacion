@@ -23,8 +23,8 @@ use common\models\Usuario;
  * @property Usuario $codigoUsuario
  * @property Estado $codigoEstado
  * @property UsuarioContextoActivo[] $usuarioContextoActivos
- * @property UsuarioDaGestionEstado[] $usuarioDaGestionEstados
- * @property UsuarioLlaveMenuPermiso[] $usuarioLlaveMenuPermisos
+ * @property UsuarioUnidadGestionEstado[] $usuarioUnidadGestionEstados
+ * @property UsuarioUnidadMenuPermiso[] $usuarioUnidadMenuPermisos
  */
 class EstadosPoa extends ActiveRecord
 {
@@ -86,25 +86,19 @@ class EstadosPoa extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[UsuarioDaGestionEstados]].
+     * Gets a query for [[UsuarioUnidadGestionEstados]].
      *
      * @return ActiveQuery
      * @noinspection PhpUnused
      */
-    public function getUsuarioDaGestionEstados(): ActiveQuery
+    public function getUsuarioUnidadGestionEstados(): ActiveQuery
     {
-        return $this->hasMany(UsuarioDaGestionEstado::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
+        return $this->hasMany(UsuarioUnidadGestionEstado::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
     }
 
-    /**
-     * Gets a query for [[UsuarioLlaveMenuPermisos]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     */
-    public function getUsuarioLlaveMenuPermisos(): ActiveQuery
+    public function getUsuarioUnidadMenuPermisos(): ActiveQuery
     {
-        return $this->hasMany(UsuarioLlaveMenuPermiso::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
+        return $this->hasMany(UsuarioUnidadMenuPermiso::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
     }
 
     /**

@@ -388,6 +388,36 @@ function populateS2AccionesEstrategicas(select2) {
     });
 }
 
+function populateS2UnidadesEjecutoras(select2) {
+    $.ajax({
+        method: "POST",
+        dataType: 'json',
+        delay: 100,
+        cache: true,
+        url: 'index.php?r=Planificacion/unidad-ejecutora/listar-ues-s2',
+        success: function(data){
+            select2.empty();
+
+            $.each(data["data"], function(index, item) {
+                select2.append(
+                    $('<option>', {
+                        value: item["IdUnidadEjecutora"],
+                        text: '(' + item["Compuesto"] + ') - ' + item["Descripcion"],
+                        'data-key': item["Compuesto"],
+                        'data-descripcion': item["Descripcion"]
+                    })
+                );
+            });
+
+            select2.val(null).trigger('change');
+        },
+        error: function (xhr) {
+            const data = JSON.parse(xhr.responseText)
+            MostrarMensaje('error', GenerarMensajeError(data["message"]), data["errors"])
+        },
+    });
+}
+
 function populateS2Da(select2) {
     $.ajax({
         method: "POST",
@@ -538,6 +568,17 @@ function populateS2Actividades(idPrograma,select2, val = null) {
             }
         }
     });
+}
+
+function htmlAccionesPoa() {
+    var html = '';
+    if (window.poaPuedeEditar !== false) {
+        html += '<button class="btn-action btn-edit" title="Editar"><i class="fa fa-pen"></i></button>';
+    }
+    if (window.poaPuedeEliminar !== false) {
+        html += '<button class="btn-action btn-delete" title="Eliminar"><i class="fa fa-trash"></i></button>';
+    }
+    return html;
 }
 
 $(document).ready(function () {})

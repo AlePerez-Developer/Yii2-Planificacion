@@ -98,9 +98,15 @@ class Usuario extends ActiveRecord implements IdentityInterface
 
     public function getModulosPermitidos(): array
     {
-        return Modulo::find()
-            ->where(['CodigoEstado' => 'V'])
-            ->orderBy('Orden')
+        return Modulo::find()->alias('m')
+            ->innerJoin(['um' => UsuarioModulo::tableName()], 'um.IdModulo = m.IdModulo')
+            ->where([
+                'um.IdUsuario' => $this->IdUsuario,
+                'um.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'm.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'm.Visible' => true,
+            ])
+            ->orderBy(['m.Orden' => SORT_ASC])
             ->all();
     }
 
@@ -109,7 +115,7 @@ class Usuario extends ActiveRecord implements IdentityInterface
         return PeiGestion::find()
             ->alias('g')
             ->innerJoin(
-                'seguridad.UsuarioDaGestionEstado uge',
+                'seguridad.UsuarioUnidadGestionEstado uge',
                 'uge.IdGestion = g.IdGestion'
             )
             ->where([
@@ -117,6 +123,7 @@ class Usuario extends ActiveRecord implements IdentityInterface
                 'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
                 'g.CodigoEstado' => Estado::ESTADO_VIGENTE,
             ])
+            ->distinct()
             ->orderBy(['g.Gestion' => SORT_DESC])
             ->all();
     }
@@ -126,7 +133,7 @@ class Usuario extends ActiveRecord implements IdentityInterface
         return EstadosPoa::find()
             ->alias('e')
             ->innerJoin(
-                'seguridad.UsuarioDaGestionEstado uge',
+                'seguridad.UsuarioUnidadGestionEstado uge',
                 'uge.IdEstadoPoa = e.IdEstadoPoa'
             )
             ->where([
@@ -135,6 +142,7 @@ class Usuario extends ActiveRecord implements IdentityInterface
                 'uge.CodigoEstado' => Estado::ESTADO_VIGENTE,
                 'e.CodigoEstado' => Estado::ESTADO_VIGENTE,
             ])
+            ->distinct()
             ->orderBy(['e.Codigo' => SORT_ASC])
             ->all();
     }
@@ -148,8 +156,8 @@ class Usuario extends ActiveRecord implements IdentityInterface
             ])
             ->alias('l')
             ->innerJoin(
-                'seguridad.UsuarioDaGestionEstado uge',
-                'uge.IdDa = l.IdDa'
+                'seguridad.UsuarioUnidadGestionEstado uge',
+                'uge.IdUnidadEjecutora = l.IdUnidadEjecutora'
             )
             ->innerJoin(
                 'Das d',

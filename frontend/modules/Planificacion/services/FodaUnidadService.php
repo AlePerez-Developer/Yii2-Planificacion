@@ -53,6 +53,7 @@ class FodaUnidadService
             'IdGestion' => $idGestion,
             'Descripcion' => $this->normalizarDescripcion($form->descripcion),
             'Tipo' => $form->tipo,
+            'Incidencia' => $form->incidencia,
             'CodigoEstado' => Estado::ESTADO_VIGENTE,
             'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario,
         ]);
@@ -69,6 +70,7 @@ class FodaUnidadService
         $modelo = $this->obtenerModelo($id, $idDa, $idGestion);
         $modelo->Descripcion = $this->normalizarDescripcion($form->descripcion);
         $modelo->Tipo = $form->tipo;
+        $modelo->Incidencia = $form->incidencia;
         $modelo->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
 
         return $this->procesar($modelo);
@@ -82,6 +84,7 @@ class FodaUnidadService
             'IdFoda' => $modelo->IdFoda,
             'Descripcion' => $modelo->Descripcion,
             'Tipo' => $modelo->Tipo,
+            'Incidencia' => $modelo->Incidencia,
         ]);
     }
 

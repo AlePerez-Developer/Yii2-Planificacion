@@ -140,6 +140,29 @@ class UnidadEjecutora extends ActiveRecord
             ]);
     }
 
+    public function esUnidadPadre(): bool
+    {
+        return $this->Ue === '000';
+    }
+
+    public function usaIngresosGlobales(): bool
+    {
+        $codigoDa = (string)($this->das->Da ?? '');
+        return (int)$codigoDa >= 4;
+    }
+
+    public static function hijasVigentes(string $idDa): array
+    {
+        return self::find()
+            ->where([
+                'IdDa' => $idDa,
+                'CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->andWhere(['<>', 'Ue', '000'])
+            ->orderBy(['Ue' => SORT_ASC])
+            ->all();
+    }
+
     /**
      * Alterna el estado del modelo V/C.
      *

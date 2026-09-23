@@ -19,13 +19,14 @@ $(document).ready(function () {
     });
 
     $('#btnGuardar').on('click', async function () {
+        sincronizarIndicador();
         if (!$('#formOperacion').valid()) return;
 
         const datos = new FormData();
         datos.append('idOperacion', idOperacion);
         datos.append('codigo', $('#codigo').val());
         datos.append('idObjEspecifico', operacion_s2Objetivo.val() || '');
-        datos.append('idIndicador', operacion_s2Indicador.val() || '');
+        datos.append('idIndicador', $('#idIndicador').val() || '');
         datos.append('idLlavePresupuestaria', operacion_s2Llave.val() || '');
         datos.append('descripcion', $('#descripcion').val());
         datos.append('tipoOperacion', $('#tipoOperacion').val());
@@ -59,7 +60,10 @@ $(document).ready(function () {
                 $('#descripcion').val(data.Descripcion || '');
                 $('#tipoOperacion').val(data.TipoOperacion);
                 operacion_s2Objetivo.val(data.IdObjEspecifico).trigger('change');
-                operacion_s2Indicador.val(data.IdIndicador).trigger('change');
+                operacionRestaurarIndicador = {
+                    id: data.IdIndicador,
+                    tipo: data.tipoIndicador === 'poa' ? 'poa' : 'estrategico'
+                };
                 operacion_s2Llave.val(data.IdLlavePresupuestaria).trigger('change');
                 mostrarFormulario('Editar operación POA');
             },
@@ -99,6 +103,7 @@ $(document).ready(function () {
 
     $('#tablaOperaciones')
         .on('click', '.input-meta-operacion[readonly]', function () {
+            if (window.poaPuedeEditar === false) return;
             $(this)
                 .prop('readonly', false)
                 .data('original', $(this).val())
@@ -142,8 +147,13 @@ $(document).ready(function () {
                 }
             },
             idObjEspecifico: {required: true},
-            idIndicador: {required: true},
             idLlavePresupuestaria: {required: true},
+            idIndicadorEstrategico: {
+                required: () => !operacion_s2IndicadorPoa.val()
+            },
+            idIndicadorPoa: {
+                required: () => !operacion_s2IndicadorEstrategico.val()
+            },
             tipoOperacion: {required: true},
             descripcion: {maxlength: 300}
         },
@@ -156,8 +166,9 @@ $(document).ready(function () {
                 remote: 'El código ya existe para el objetivo seleccionado.'
             },
             idObjEspecifico: 'Seleccione un objetivo específico.',
-            idIndicador: 'Seleccione un indicador programado.',
             idLlavePresupuestaria: 'Seleccione una llave presupuestaria.',
+            idIndicadorEstrategico: 'Seleccione un indicador estratégico o uno POA.',
+            idIndicadorPoa: 'Seleccione un indicador POA o uno estratégico.',
             tipoOperacion: 'Seleccione el tipo de operación.',
             descripcion: 'La descripción no puede superar 300 caracteres.'
         },
@@ -262,11 +273,13 @@ $(document).ready(function () {
 
     function limpiarFormulario() {
         idOperacion = EMPTY;
+        operacionRestaurarIndicador = null;
         $('#formOperacion')[0].reset();
         $('#formOperacion').validate().resetForm();
         $('#tipoOperacion').val('Funcionamiento');
+        $('#idIndicador').val('');
         operacion_s2Objetivo.val(null).trigger('change');
-        operacion_s2Indicador.val(null).trigger('change');
         operacion_s2Llave.val(null).trigger('change');
+        vaciarSelectsIndicadorOperacion();
     }
 });

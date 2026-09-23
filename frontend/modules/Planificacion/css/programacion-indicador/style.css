@@ -1,0 +1,144 @@
+.objetivo-programacion-card {
+    border: 2px solid var(--border-color, #eef2f7);
+    border-radius: 20px;
+    padding: 16px 20px;
+    background: #fff;
+    margin-bottom: 12px;
+}
+
+.programacion-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 8px 0 16px;
+}
+
+.programacion-empty-state {
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #64748b;
+    text-align: center;
+}
+
+.programacion-empty-state i {
+    font-size: 38px;
+    color: #94a3b8;
+}
+
+#tablaListaIndicadoresTrimestrales > thead,
+#tablaListaIndicadoresPoaTrimestrales > thead {
+    display: none;
+}
+
+.acc-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meta-box-left {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.meta-badge-text {
+    font-weight: bold;
+    color: black;
+}
+
+.meta-badge {
+    background: #2563eb;
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dtic-control::before {
+    content: '\f067';
+    font-family: 'Font Awesome 5 Free', serif;
+    font-weight: 900;
+}
+
+tr.shown .dtic-control::before {
+    content: '\f068';
+}
+
+.dtic-gestion-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 12px !important;
+    padding: 0 12px;
+}
+
+.dtic-gestion-table > tbody > tr > td {
+    padding: 9px 10px !important;
+    vertical-align: middle;
+    border-top: 2px solid !important;
+    border-bottom: 2px solid !important;
+}
+
+.dtic-gestion-table > tbody > tr > td:first-child {
+    border-left: 2px solid !important;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.dtic-gestion-table > tbody > tr > td:last-child {
+    border-right: 2px solid !important;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.dtic-gestion-table > tbody > tr.programacion-completa > td {
+    background-color: #edf9ef !important;
+    border-color: #69b879 !important;
+}
+
+.dtic-gestion-table > tbody > tr.programacion-pendiente > td {
+    background-color: #fff1f1 !important;
+    border-color: #e58a8a !important;
+}
+
+.input-meta-trimestre,
+.input-meta-poa-trimestre {
+    width: 100%;
+    min-width: 74px;
+    text-align: right;
+    cursor: pointer;
+    border-color: transparent;
+    background: transparent;
+    font-weight: 700;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.input-meta-trimestre:not([readonly]),
+.input-meta-poa-trimestre:not([readonly]) {
+    background: #fff !important;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .18) !important;
+}
+
+.total-badge {
+    display: inline-block;
+    min-width: 54px;
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-weight: 800;
+}
+
+.total-badge.completa {
+    color: #20652f;
+    background: #d8f0dc;
+}
+
+.total-badge.pendiente {
+    color: #8f2727;
+    background: #f8d7da;
+}

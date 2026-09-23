@@ -75,6 +75,9 @@ $(document).ready(function () {
                 searchable: false,
                 render: function (data, type) {
                     if (type !== 'display') return data;
+                    if (window.poaPuedeEditar === false) {
+                        return data === ESTADO_VIGENTE ? 'Vigente' : 'Caducado';
+                    }
 
                     return data === ESTADO_VIGENTE
                         ? `<button type="button" class="estado-on btn-toggle-estado">
@@ -93,14 +96,7 @@ $(document).ready(function () {
                 width: '140px',
                 orderable: false,
                 searchable: false,
-                render: () => `
-                    <button class="btn-action btn-edit" title="Editar">
-                        <i class="fa fa-pen"></i>
-                    </button>
-                    <button class="btn-action btn-delete" title="Eliminar">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `
+                render: () => htmlAccionesPoa()
             }
         ]
     });

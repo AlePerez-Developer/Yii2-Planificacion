@@ -1,24 +1,29 @@
 <?php
+
 namespace app\modules\Planificacion\dao;
 
-use yii\base\BaseObject;
-use yii\db\Query;
+use app\modules\Planificacion\models\Gasto;
+use common\models\Estado;
 
 class GastoDao
 {
-    /*=====================================================
-                 Genera un nuevo codigo de gasto
-    =======================================================*/
-    static public function GenerarCodigoGasto()
+    public static function enUso(Gasto $modelo): bool
     {
-        $consulta = new Query();
-        $codigo = $consulta->select('max(CodigoGasto) as Codigo')
-            ->from('Gastos')
-            ->one();
-        if ($codigo['Codigo']){
-            return  $codigo['Codigo'] + 1;
-        } else {
-            return 1;
-        }
+        return $modelo->getItemsDescatalogados()
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->exists();
+    }
+
+    public static function verificarCodigo(string $id, string $codigo): bool
+    {
+        $existe = Gasto::find()
+            ->where([
+                'CodigoGasto' => $codigo,
+                'CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->andWhere(['<>', 'IdGasto', $id])
+            ->exists();
+
+        return !$existe;
     }
 }

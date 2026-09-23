@@ -1,9 +1,11 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
 $cssPath = Yii::getAlias('@app/modules/Planificacion/css/techo-unidad/style.css');
 $version = is_file($cssPath) ? filemtime($cssPath) : time();
 $this->registerCssFile('@planificacionModule/css/techo-unidad/style.css?v=' . $version, [

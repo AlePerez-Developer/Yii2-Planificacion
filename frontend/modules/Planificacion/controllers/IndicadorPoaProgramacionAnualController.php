@@ -8,12 +8,14 @@ use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\formModels\ProgramacionIndicadorPoaGestionForm;
 use app\modules\Planificacion\models\ObjetivoEspecifico;
 use app\modules\Planificacion\services\IndicadorPoaProgramacionAnualService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 class IndicadorPoaProgramacionAnualController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct(
         $id,
         $module,

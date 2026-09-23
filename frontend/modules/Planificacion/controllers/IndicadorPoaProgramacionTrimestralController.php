@@ -7,12 +7,14 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\models\ObjetivoEspecifico;
 use app\modules\Planificacion\services\IndicadorPoaProgramacionTrimestralService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 class IndicadorPoaProgramacionTrimestralController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct(
         $id,
         $module,
@@ -36,6 +38,7 @@ class IndicadorPoaProgramacionTrimestralController extends BaseController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'listar-objetivos-especificos-s2' => ['POST'],
+                    'listar-indicadores' => ['POST'],
                     'listar-programacion' => ['POST'],
                     'guardar-meta' => ['POST'],
                 ],
@@ -45,8 +48,34 @@ class IndicadorPoaProgramacionTrimestralController extends BaseController
 
     public function actionIndex(): string
     {
-        $this->obtenerContextoActivo();
-        return $this->render('index');
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+        $id = (string)Yii::$app->request->get('id', '');
+        $objetivo = null;
+
+        if ($id !== '') {
+            try {
+                $objetivo = $this->service->obtenerDetalleObjetivo(
+                    $id,
+                    $idUnidadEjecutora,
+                    $idGestion
+                );
+            } catch (ValidationException $exception) {
+                $objetivo = null;
+            }
+        }
+
+        return $this->render('index', ['objetivo' => $objetivo]);
+    }
+
+    public function actionListarIndicadores(): array
+    {
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
+
+        return $this->withTryCatch(fn() => $this->service->listarIndicadores(
+            $this->obtenerIdObjetivo(),
+            $idUnidadEjecutora,
+            $idGestion
+        ));
     }
 
     public function actionListarObjetivosEspecificosS2(): array
@@ -73,7 +102,8 @@ class IndicadorPoaProgramacionTrimestralController extends BaseController
         return $this->withTryCatch(fn() => $this->service->listarProgramacion(
             $this->obtenerIdObjetivo(),
             $idUnidadEjecutora,
-            $idGestion
+            $idGestion,
+            $this->obtenerIdIndicadorPoa()
         ));
     }
 
@@ -133,6 +163,11 @@ class IndicadorPoaProgramacionTrimestralController extends BaseController
         }
 
         return $id;
+    }
+
+    private function obtenerIdIndicadorPoa(): string
+    {
+        return (string)Yii::$app->request->post('idIndicadorPoa', '');
     }
 
     private function obtenerContextoActivo(): array

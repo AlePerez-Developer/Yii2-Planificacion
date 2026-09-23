@@ -6,12 +6,14 @@ use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\IngresoForm;
 use app\modules\Planificacion\services\IngresoService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 class IngresoController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct(
         $id,
         $module,

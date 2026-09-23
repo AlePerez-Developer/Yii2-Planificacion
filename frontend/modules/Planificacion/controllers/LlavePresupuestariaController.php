@@ -63,6 +63,7 @@ class LlavePresupuestariaController extends BaseController
                     'eliminar' => ['post'],
                     'buscar' => ['post'],
                     'finalizar' => ['post'],
+                    'verificar-llave' => ['post'],
                 ],
             ],
         ];
@@ -226,7 +227,7 @@ class LlavePresupuestariaController extends BaseController
     {
         $id = $this->obtenerId();
 
-        $parametros = ['idDa', 'idUe', 'idPrograma', 'idProyecto', 'idActividad'];
+        $parametros = ['idUnidadEjecutora', 'idPrograma', 'idProyecto', 'idActividad'];
 
         foreach ($parametros as $param) {
             $$param = Yii::$app->request->post($param);
@@ -235,6 +236,6 @@ class LlavePresupuestariaController extends BaseController
             }
         }
 
-        return $this->service->VerificarLlave($id, $idDa, $idUe, $idProyecto, $idActividad);
+        return $this->service->VerificarLlave($id, $idUnidadEjecutora, $idProyecto, $idActividad);
     }
 }

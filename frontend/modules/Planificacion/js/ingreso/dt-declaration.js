@@ -36,7 +36,9 @@ $(document).ready(function () {
                 title: 'Estado',
                 data: 'CodigoEstado',
                 className: 'text-center',
-                render: data => `<button class="btn-toggle-estado ${data === 'V' ? 'activo' : 'inactivo'}">
+                render: data => window.poaPuedeEditar === false
+                    ? (data === 'V' ? 'Vigente' : 'Caduco')
+                    : `<button class="btn-toggle-estado ${data === 'V' ? 'activo' : 'inactivo'}">
                     ${data === 'V' ? 'Vigente' : 'Caduco'}
                 </button>`
             },
@@ -46,9 +48,7 @@ $(document).ready(function () {
                 data: 'IdIngreso',
                 className: 'text-center',
                 orderable: false,
-                render: () => `
-                    <button class="btn-action btn-edit"><i class="fa fa-pen"></i></button>
-                    <button class="btn-action btn-delete"><i class="fa fa-trash"></i></button>`
+                render: () => htmlAccionesPoa()
             }
         ],
         initComplete: function () {

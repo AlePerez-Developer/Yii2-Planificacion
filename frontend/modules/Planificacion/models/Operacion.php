@@ -4,6 +4,7 @@ namespace app\modules\Planificacion\models;
 
 use common\models\Estado;
 use common\models\Usuario;
+use common\models\seguridad\EstadosPoa;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
@@ -38,10 +39,9 @@ class Operacion extends ActiveRecord
                 'CodigoEstado',
                 'CodigoUsuario',
             ], 'required'],
-            [['IdOperacion', 'IdObjEspecifico', 'IdUnidadEjecutora', 'IdGestion', 'IdIndicador', 'IdLlavePresupuestaria'], 'string', 'max' => 36],
+            [['IdOperacion', 'IdObjEspecifico', 'IdUnidadEjecutora', 'IdGestion', 'IdIndicador', 'IdLlavePresupuestaria', 'IdEstadoPoa'], 'string', 'max' => 36],
             [['PrimerTrimestre', 'SegundoTrimestre', 'TercerTrimestre', 'CuartoTrimestre'], 'integer', 'min' => 0],
             [['PrimerTrimestre'], 'validateTotalTrimestral'],
-            [['IdEstadoPoa'], 'integer'],
             [['FechaHoraRegistro'], 'safe'],
             [['Codigo'], 'match', 'pattern' => '/^\d{2}$/', 'message' => 'El código debe tener exactamente dos dígitos.'],
             [['Descripcion'], 'string', 'max' => 300],
@@ -56,7 +56,7 @@ class Operacion extends ActiveRecord
             [['IdUnidadEjecutora'], 'exist', 'targetClass' => UnidadEjecutora::class, 'targetAttribute' => ['IdUnidadEjecutora' => 'IdUnidadEjecutora']],
             [['IdGestion'], 'exist', 'targetClass' => PeiGestion::class, 'targetAttribute' => ['IdGestion' => 'IdGestion']],
             [['IdLlavePresupuestaria'], 'exist', 'targetClass' => LlavePresupuestaria::class, 'targetAttribute' => ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']],
-            [['IdEstadoPoa'], 'exist', 'targetClass' => EstadoPoa::class, 'targetAttribute' => ['IdEstadoPoa' => 'CodigoEstadoPOA']],
+            [['IdEstadoPoa'], 'exist', 'targetClass' => EstadosPoa::class, 'targetAttribute' => ['IdEstadoPoa' => 'IdEstadoPoa']],
         ];
     }
 
@@ -75,7 +75,7 @@ class Operacion extends ActiveRecord
     public static function listAll(
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): ActiveQuery {
         return self::find()->alias('O')
             ->select([
@@ -88,13 +88,23 @@ class Operacion extends ActiveRecord
                     "CASE WHEN IP.IdIndicador IS NOT NULL THEN 'POA' ELSE 'Estratégico' END"
                 ),
                 'Llave' => 'LP.Llave',
-                'LlaveDescripcion' => 'LP.Descripcion',
+                'UnidadDescripcion' => 'Un.Descripcion',
+                'ProgramaCodigo' => 'Pr.Codigo',
+                'ProgramaDescripcion' => 'Pr.Descripcion',
+                'ProyectoCodigo' => 'Py.Codigo',
+                'ProyectoDescripcion' => 'Py.Descripcion',
+                'ActividadCodigo' => 'Ac.Codigo',
+                'ActividadDescripcion' => 'Ac.Descripcion',
             ])
             ->innerJoin(['OE' => ObjetivoEspecifico::tableName()], 'OE.IdObjEspecifico = O.IdObjEspecifico')
             ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = O.IdIndicador')
             ->leftJoin(['IP' => IndicadorPoa::tableName()], 'IP.IdIndicador = O.IdIndicador')
             ->leftJoin(['IE' => IndicadorEstrategico::tableName()], 'IE.IdIndicador = O.IdIndicador')
             ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = O.IdLlavePresupuestaria')
+            ->innerJoin(['Un' => UnidadEjecutora::tableName()], 'Un.IdUnidadEjecutora = LP.IdUnidadEjecutora')
+            ->innerJoin(['Py' => Proyecto::tableName()], 'Py.IdProyecto = LP.IdProyecto')
+            ->innerJoin(['Pr' => Programa::tableName()], 'Pr.IdPrograma = Py.IdPrograma')
+            ->innerJoin(['Ac' => Actividad::tableName()], 'Ac.IdActividad = LP.IdActividad')
             ->where([
                 'O.IdUnidadEjecutora' => $idUnidadEjecutora,
                 'O.IdGestion' => $idGestion,
@@ -137,11 +147,16 @@ class Operacion extends ActiveRecord
 
     public function getEstadoPoa(): ActiveQuery
     {
-        return $this->hasOne(EstadoPoa::class, ['CodigoEstadoPOA' => 'IdEstadoPoa']);
+        return $this->hasOne(EstadosPoa::class, ['IdEstadoPoa' => 'IdEstadoPoa']);
     }
 
     public function getLlavePresupuestaria(): ActiveQuery
     {
         return $this->hasOne(LlavePresupuestaria::class, ['IdLlavePresupuestaria' => 'IdLlavePresupuestaria']);
+    }
+
+    public function getItemsGestionesOperaciones(): ActiveQuery
+    {
+        return $this->hasMany(ItemGestionOperacion::class, ['IdOperacion' => 'IdOperacion']);
     }
 }

@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\PresupuestoConsumoDao;
 use app\modules\Planificacion\formModels\ItemDescatalogadoForm;
@@ -11,6 +12,7 @@ use app\modules\Planificacion\models\Gasto;
 use app\modules\Planificacion\models\ItemDescatalogado;
 use app\modules\Planificacion\models\Operacion;
 use app\modules\Planificacion\models\Organismo;
+use app\modules\Planificacion\models\Partida;
 use app\modules\Planificacion\models\TechoUnidad;
 use common\models\Estado;
 use Yii;
@@ -25,7 +27,7 @@ class ItemDescatalogadoService
         int $codigoEstadoPoa,
         int $formulario
     ): array {
-        $operaciones = Operacion::listAll($idUnidad, $idGestion, $codigoEstadoPoa)
+        $operaciones = Operacion::listAll($idUnidad, $idGestion, $idEstadoPoa)
             ->andWhere(['O.CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['OE.IdGestion' => $idGestion])
             ->orderBy(['O.Codigo' => SORT_ASC])
@@ -62,16 +64,22 @@ class ItemDescatalogadoService
     {
         return ResponseHelper::success(Fuente::find()
             ->select(['id' => 'IdFuente', 'text' => 'Descripcion'])
-            ->orderBy(['IdFuente' => SORT_ASC])
+            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->orderBy(['Descripcion' => SORT_ASC])
             ->asArray()->all());
     }
 
     public function listarOrganismos(string $idFuente): array
     {
-        return ResponseHelper::success(Organismo::find()
-            ->select(['id' => 'IdOrganismo', 'text' => 'Descripcion'])
-            ->where(['IdFuente' => $idFuente])
-            ->orderBy(['IdOrganismo' => SORT_ASC])
+        return ResponseHelper::success(Partida::find()->alias('P')
+            ->select(['id' => 'O.IdOrganismo', 'text' => 'O.Descripcion'])
+            ->innerJoin(['O' => Organismo::tableName()], 'O.IdOrganismo = P.IdOrganismo')
+            ->where([
+                'P.IdFuente' => $idFuente,
+                'P.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'O.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->orderBy(['O.Descripcion' => SORT_ASC])
             ->asArray()->all());
     }
 
@@ -83,7 +91,7 @@ class ItemDescatalogadoService
         string $idEstadoPoa,
         int $codigoEstadoPoa
     ): array {
-        $this->obtenerOperacion($idOperacion, $idUnidad, $idGestion, $codigoEstadoPoa);
+        $this->obtenerOperacion($idOperacion, $idUnidad, $idGestion, $idEstadoPoa);
         $data = ItemDescatalogado::find()->alias('ID')
             ->select([
                 'ID.*',
@@ -92,9 +100,9 @@ class ItemDescatalogadoService
                 'FuenteDescripcion' => 'F.Descripcion',
                 'OrganismoDescripcion' => 'ORG.Descripcion',
             ])
-            ->innerJoin(['G' => Gasto::tableName()], 'G.CodigoGasto = ID.IdGasto')
+            ->innerJoin(['G' => Gasto::tableName()], 'G.IdGasto = ID.IdGasto')
             ->innerJoin(['F' => Fuente::tableName()], 'F.IdFuente = ID.IdFuente')
-            ->innerJoin(['ORG' => Organismo::tableName()], 'ORG.IdFuente = ID.IdFuente AND ORG.IdOrganismo = ID.IdOrganismo')
+            ->innerJoin(['ORG' => Organismo::tableName()], 'ORG.IdOrganismo = ID.IdOrganismo')
             ->where([
                 'ID.IdOperacion' => $idOperacion,
                 'ID.IdGestion' => $idGestion,
@@ -112,8 +120,9 @@ class ItemDescatalogadoService
     {
         return ResponseHelper::success(Gasto::find()
             ->select([
-                'id' => 'CodigoGasto',
+                'id' => 'IdGasto',
                 'text' => 'Descripcion',
+                'codigo' => 'CodigoGasto',
                 'EntidadTransferencia',
             ])
             ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
@@ -129,7 +138,8 @@ class ItemDescatalogadoService
         string $idEstadoPoa,
         int $codigoEstadoPoa
     ): array {
-        $operacion = $this->obtenerOperacion($form->idOperacion, $idUnidad, $idGestion, $codigoEstadoPoa);
+        PoaEdicionHelper::asegurarEdicion($idUnidad);
+        $operacion = $this->obtenerOperacion($form->idOperacion, $idUnidad, $idGestion, $idEstadoPoa);
         $modelo = $id
             ? $this->obtenerItem($id, $form->idOperacion, $form->formulario, $idGestion, $idEstadoPoa)
             : new ItemDescatalogado();
@@ -174,6 +184,7 @@ class ItemDescatalogadoService
         string $idGestion,
         string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion();
         $modelo = $this->obtenerItem($id, $idOperacion, $formulario, $idGestion, $idEstadoPoa);
         $modelo->CodigoEstado = Estado::ESTADO_ELIMINADO;
         $modelo->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
@@ -187,7 +198,7 @@ class ItemDescatalogadoService
         string $id,
         string $idUnidad,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): Operacion {
         $modelo = Operacion::find()->alias('O')
             ->innerJoin(['OE' => \app\modules\Planificacion\models\ObjetivoEspecifico::tableName()], 'OE.IdObjEspecifico = O.IdObjEspecifico')

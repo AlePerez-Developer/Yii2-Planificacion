@@ -1,57 +1,84 @@
-let programacionPoaTrimestral_s2ObjEspecifico = $('#idObjEspecifico');
+let programacionPoaTrimestral_s2Llave = $('#idLlavePresupuestaria');
+let programacionPoaTrimestral_s2Indicador = $('#idIndicadorPoa');
 
 $(document).ready(function () {
-    programacionPoaTrimestral_s2ObjEspecifico.select2({
-        theme: 'bootstrap4',
-        placeholder: 'Seleccione un objetivo específico',
-        allowClear: true,
-        width: '100%',
-        templateResult: formato,
-        templateSelection: formato,
-        matcher: buscar
-    });
+    inicializarSelect(
+        programacionPoaTrimestral_s2Llave,
+        'Seleccione una llave presupuestaria',
+        formatoLlave
+    );
+    inicializarSelect(
+        programacionPoaTrimestral_s2Indicador,
+        'Seleccione un indicador POA',
+        formatoIndicador
+    );
 
-    $.ajax({
-        url: 'index.php?r=Planificacion/indicador-poa-programacion-trimestral/listar-objetivos-especificos-s2',
-        method: 'POST',
-        dataType: 'json',
-        success: function (response) {
-            programacionPoaTrimestral_s2ObjEspecifico
-                .empty()
-                .append(new Option('', '', false, false));
+    cargarOpciones(
+        'index.php?r=Planificacion/indicador-poa-programacion-anual/listar-llaves-s2',
+        programacionPoaTrimestral_s2Llave
+    );
+    cargarOpciones(
+        'index.php?r=Planificacion/indicador-poa-programacion-anual/listar-indicadores-s2',
+        programacionPoaTrimestral_s2Indicador
+    );
 
-            (response.data || []).forEach(item => {
-                const option = new Option(item.text, item.id, false, false);
-                $(option).data('data', item);
-                programacionPoaTrimestral_s2ObjEspecifico.append(option);
-            });
-            programacionPoaTrimestral_s2ObjEspecifico
-                .val(null)
-                .trigger('change.select2');
-        },
-        error: function (xhr) {
-            const data = xhr.responseJSON || {};
-            MostrarMensaje(
-                'error',
-                GenerarMensajeError(data.message || 'No se pudieron cargar los objetivos.'),
-                data.errors
-            );
-        }
-    });
+    function inicializarSelect(select, placeholder, template) {
+        select.select2({
+            theme: 'bootstrap4',
+            placeholder,
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#modalRelacionPoa'),
+            templateResult: template,
+            templateSelection: template,
+            matcher: buscar
+        });
+    }
 
-    function formato(repo) {
+    function cargarOpciones(url, select) {
+        $.ajax({
+            url,
+            method: 'POST',
+            dataType: 'json',
+            success: function (response) {
+                select.empty().append(new Option('', '', false, false));
+                (response.data || []).forEach(item => {
+                    const option = new Option(item.text, item.id, false, false);
+                    $(option).data('data', item);
+                    select.append(option);
+                });
+                select.val(null).trigger('change.select2');
+            }
+        });
+    }
+
+    function formatoLlave(repo) {
         if (!repo.id) return repo.text;
-        const data = repo.element ? ($(repo.element).data('data') || repo) : repo;
+        const data = obtenerData(repo);
         return $(`<div class="mi-render-select2">
-            <div class="titulo-producto">Código: ${data.compuesto || ''}</div>
+            <div class="titulo-producto">${data.text || ''}</div>
+            <div class="subtitulo-producto">${data.descripcion || ''}</div>
+        </div>`);
+    }
+
+    function formatoIndicador(repo) {
+        if (!repo.id) return repo.text;
+        const data = obtenerData(repo);
+        return $(`<div class="mi-render-select2">
+            <div class="titulo-producto">Indicador ${data.codigo || ''}</div>
             <div>${data.text || ''}</div>
+            <div class="subtitulo-producto">Meta: ${data.meta ?? 0}</div>
         </div>`);
     }
 
     function buscar(params, data) {
         if ($.trim(params.term) === '') return data;
-        const item = data.element ? ($(data.element).data('data') || data) : data;
-        const contenido = `${item.compuesto || ''} ${item.text || ''}`.toLowerCase();
+        const item = obtenerData(data);
+        const contenido = Object.values(item).join(' ').toLowerCase();
         return contenido.includes(params.term.toLowerCase()) ? data : null;
+    }
+
+    function obtenerData(repo) {
+        return repo.element ? ($(repo.element).data('data') || repo) : repo;
     }
 });

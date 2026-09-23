@@ -70,7 +70,7 @@ $estilos = [
                 <?php else: ?>
                     <?php foreach ($registros[$tipo] as $i => $item): ?>
                         <p class="foda-item">
-                            <?= ($i + 1) . '. ' . Html::encode($item['Descripcion'] ?? '') ?>
+                            <?= ($i + 1) . '. [' . Html::encode($item['Incidencia'] ?? '') . '] ' . Html::encode($item['Descripcion'] ?? '') ?>
                         </p>
                     <?php endforeach; ?>
                 <?php endif; ?>

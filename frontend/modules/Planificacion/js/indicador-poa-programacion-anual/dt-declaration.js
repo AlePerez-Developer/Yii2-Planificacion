@@ -45,7 +45,8 @@ function cargarProgramacionPoaAnual() {
                         class="form-control form-control-sm input-meta-poa-anual"
                         value="${Number(data || 0)}"
                         data-original="${Number(data || 0)}"
-                        data-idprogramacion="${row.IdProgramacionIndicadorPoaGestion}">`;
+                        data-idprogramacion="${row.IdProgramacionIndicadorPoaGestion}"
+                        ${window.poaPuedeEditar === false ? 'disabled' : ''}>`;
                 }
             },
             {
@@ -55,7 +56,7 @@ function cargarProgramacionPoaAnual() {
                 width: '90px',
                 orderable: false,
                 searchable: false,
-                render: () => `
+                render: () => window.poaPuedeEliminar === false ? '' : `
                     <button class="btn-action btn-delete-programacion" title="Eliminar programación">
                         <i class="fa fa-trash"></i>
                     </button>

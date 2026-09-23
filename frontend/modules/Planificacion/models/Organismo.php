@@ -2,78 +2,90 @@
 
 namespace app\modules\Planificacion\models;
 
-use Yii;
+use common\models\Estado;
+use common\models\Usuario;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "Organismos".
- *
  * @property string $IdOrganismo
  * @property string $Descripcion
- * @property string $IdFuente
+ * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
- *
- * @property Fuente $idFuente
- * @property ProgramacionesItem[] $programacionesItems
+ * @property string $CodigoUsuario
  */
-class Organismo extends \yii\db\ActiveRecord
+class Organismo extends ActiveRecord
 {
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return 'Organismos';
+        return 'Poa.Organismos';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['FechaHoraRegistro'], 'default', 'value' => 'etdate('],
-            [['IdOrganismo', 'Descripcion', 'IdFuente'], 'required'],
+            [['Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdOrganismo'], 'string', 'max' => 36],
+            [['Descripcion'], 'string', 'max' => 500],
             [['FechaHoraRegistro'], 'safe'],
-            [['IdOrganismo', 'IdFuente'], 'string', 'max' => 10],
-            [['Descripcion'], 'string', 'max' => 250],
-            [['IdFuente', 'IdOrganismo'], 'unique', 'targetAttribute' => ['IdFuente', 'IdOrganismo']],
-            [['IdFuente'], 'exist', 'skipOnError' => true, 'targetClass' => Fuente::class, 'targetAttribute' => ['IdFuente' => 'IdFuente']],
+            [['CodigoEstado'], 'string', 'max' => 1],
+            [['CodigoUsuario'], 'string', 'max' => 3],
+            [['IdOrganismo'], 'unique'],
+            [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
+            [['CodigoUsuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['CodigoUsuario' => 'CodigoUsuario']],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public static function listOne(string $id): ?self
     {
-        return [
-            'IdOrganismo' => 'Id Organismo',
-            'Descripcion' => 'Descripcion',
-            'IdFuente' => 'Id Fuente',
-            'FechaHoraRegistro' => 'Fecha Hora Registro',
-        ];
+        return self::find()
+            ->where(['IdOrganismo' => $id])
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->one();
     }
 
-    /**
-     * Gets query for [[IdFuente]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getIdFuente()
+    public static function listAll(): ActiveQuery
     {
-        return $this->hasOne(Fuente::class, ['IdFuente' => 'IdFuente']);
+        return self::find()
+            ->select([
+                'IdOrganismo',
+                'Descripcion',
+                'CodigoEstado',
+                'CodigoUsuario',
+            ])
+            ->where(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->orderBy(['Descripcion' => SORT_ASC]);
     }
 
-    /**
-     * Gets query for [[ProgramacionesItems]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProgramacionesItems()
+    public function cambiarEstado(): void
     {
-        return $this->hasMany(ProgramacionesItem::class, ['Idfuente' => 'IdFuente', 'IdOrganismo' => 'IdOrganismo']);
+        $this->CodigoEstado = $this->CodigoEstado === Estado::ESTADO_VIGENTE
+            ? Estado::ESTADO_CADUCO
+            : Estado::ESTADO_VIGENTE;
     }
 
+    public function eliminar(): void
+    {
+        $this->CodigoEstado = Estado::ESTADO_ELIMINADO;
+    }
+
+    public function getPartidas(): ActiveQuery
+    {
+        return $this->hasMany(Partida::class, ['IdOrganismo' => 'IdOrganismo']);
+    }
+
+    public function getItems(): ActiveQuery
+    {
+        return $this->hasMany(Item::class, ['IdOrganismo' => 'IdOrganismo']);
+    }
+
+    public function getCodigoEstado(): ActiveQuery
+    {
+        return $this->hasOne(Estado::class, ['CodigoEstado' => 'CodigoEstado']);
+    }
+
+    public function getCodigoUsuario(): ActiveQuery
+    {
+        return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
+    }
 }

@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property string $IdGestion
  * @property string|null $Descripcion
  * @property string|null $Tipo
+ * @property string|null $Incidencia
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
@@ -31,6 +32,10 @@ class FODAUnidad extends ActiveRecord
     public const TIPO_OPORTUNIDAD = 'Oportunidad';
     public const TIPO_AMENAZA = 'Amenaza';
 
+    public const INCIDENCIA_ALTA = 'Alta';
+    public const INCIDENCIA_MEDIA = 'Media';
+    public const INCIDENCIA_BAJA = 'Baja';
+
     public static function tableName(): string
     {
         return 'FODAUnidad';
@@ -46,15 +51,25 @@ class FODAUnidad extends ActiveRecord
         ];
     }
 
+    public static function incidencias(): array
+    {
+        return [
+            self::INCIDENCIA_ALTA => self::INCIDENCIA_ALTA,
+            self::INCIDENCIA_MEDIA => self::INCIDENCIA_MEDIA,
+            self::INCIDENCIA_BAJA => self::INCIDENCIA_BAJA,
+        ];
+    }
+
     public function rules(): array
     {
         return [
             [['Descripcion'], 'default', 'value' => null],
-            [['IdDa', 'IdGestion', 'Descripcion', 'Tipo', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdDa', 'IdGestion', 'Descripcion', 'Tipo', 'Incidencia', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['IdFoda', 'IdDa', 'IdGestion'], 'string', 'max' => 36],
             [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 500],
             [['Tipo'], 'in', 'range' => array_values(self::tipos())],
+            [['Incidencia'], 'in', 'range' => array_values(self::incidencias())],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdFoda'], 'unique'],
@@ -73,6 +88,7 @@ class FODAUnidad extends ActiveRecord
             'IdGestion' => 'Id Gestion',
             'Descripcion' => 'Descripcion',
             'Tipo' => 'Tipo',
+            'Incidencia' => 'Incidencia',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
             'CodigoUsuario' => 'Codigo Usuario',

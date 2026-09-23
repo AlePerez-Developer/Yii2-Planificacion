@@ -15,6 +15,8 @@ use common\models\Estado;
 use Throwable;
 use Yii;
 
+use yii\db\Expression;
+
 class IndicadorPoaProgramacionTrimestralService
 {
     private const CAMPOS_TRIMESTRE = [
@@ -24,7 +26,20 @@ class IndicadorPoaProgramacionTrimestralService
         4 => 'MetaCuartoTrimestre',
     ];
 
-    public function listarProgramacion(
+    public function obtenerDetalleObjetivo(
+        string $idObjEspecifico,
+        string $idUnidadEjecutora,
+        string $idGestion
+    ): ?array {
+        $this->validarObjetivo($idObjEspecifico, $idUnidadEjecutora, $idGestion);
+
+        return ObjetivoEspecifico::listAll()
+            ->andWhere(['Oe.IdObjEspecifico' => $idObjEspecifico])
+            ->asArray()
+            ->one();
+    }
+
+    public function listarIndicadores(
         string $idObjEspecifico,
         string $idUnidadEjecutora,
         string $idGestion
@@ -33,8 +48,41 @@ class IndicadorPoaProgramacionTrimestralService
 
         $data = ProgramacionIndicadorPoaGestion::find()->alias('PG')
             ->select([
+                'IdIndicadorPoa' => 'P.IdIndicador',
+                'Codigo' => 'P.Codigo',
+                'Descripcion' => 'I.Descripcion',
+                'Meta' => 'I.Meta',
+                'MetaProgramada' => new Expression('ISNULL(SUM(PG.MetaProgramada), 0)'),
+            ])
+            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
+            ->innerJoin(['P' => IndicadorPoa::tableName()], 'P.IdIndicador = PG.IdIndicadorPoa')
+            ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = P.IdIndicador')
+            ->where([
+                'PG.IdObjEspecifico' => $idObjEspecifico,
+                'PG.IdGestion' => $idGestion,
+                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+            ])
+            ->groupBy(['P.IdIndicador', 'P.Codigo', 'I.Descripcion', 'I.Meta'])
+            ->orderBy(['P.Codigo' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        return ResponseHelper::success($data, 'Indicadores POA programados obtenidos.');
+    }
+
+    public function listarProgramacion(
+        string $idObjEspecifico,
+        string $idUnidadEjecutora,
+        string $idGestion,
+        string $idIndicadorPoa = ''
+    ): array {
+        $this->validarObjetivo($idObjEspecifico, $idUnidadEjecutora, $idGestion);
+
+        $query = ProgramacionIndicadorPoaGestion::find()->alias('PG')
+            ->select([
                 'PG.IdProgramacionIndicadorPoaGestion',
                 'PG.IdLlavePresupuestaria',
+                'PG.IdIndicadorPoa',
                 'PG.MetaProgramada',
                 'Gestion' => 'G.Gestion',
                 'Llave' => 'LP.Llave',
@@ -58,7 +106,13 @@ class IndicadorPoaProgramacionTrimestralService
                 'PG.IdObjEspecifico' => $idObjEspecifico,
                 'PG.IdGestion' => $idGestion,
                 'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
-            ])
+            ]);
+
+        if ($idIndicadorPoa !== '') {
+            $query->andWhere(['PG.IdIndicadorPoa' => $idIndicadorPoa]);
+        }
+
+        $data = $query
             ->orderBy(['LP.Llave' => SORT_ASC, 'P.Codigo' => SORT_ASC])
             ->asArray()
             ->all();

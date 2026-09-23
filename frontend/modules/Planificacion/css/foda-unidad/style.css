@@ -11,6 +11,10 @@
 .tipo-oportunidad { color: #004085; background: #cce5ff; }
 .tipo-amenaza { color: #856404; background: #fff3cd; }
 
+.incidencia-alta { color: #721c24; background: #f8d7da; }
+.incidencia-media { color: #856404; background: #fff3cd; }
+.incidencia-baja { color: #155724; background: #d4edda; }
+
 .btn-toggle-estado {
     border: 0;
     border-radius: 15px;

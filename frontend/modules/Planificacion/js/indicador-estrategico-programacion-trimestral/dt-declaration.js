@@ -13,7 +13,7 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
             method: 'POST',
             dataType: 'json',
             data: function () {
-                return {idObjEstrategico: programacionTrimestral_s2ObjEstrategico.val()};
+                return {idObjEstrategico: $('#idObjEstrategico').val()};
             },
             dataSrc: 'data',
             error: function (xhr) {
@@ -52,11 +52,9 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
                             </div>                                  
                         </div>
                         
-                        <div class="dtic-item-sub">
+                        <div class="dtic-item-main">
                             ${row["Descripcion"]}
                         </div>
-                        
-                          
                         
                         <div class="acc-footer">                                    
                             <div class="meta-box-left dtic-item-sub">
@@ -70,24 +68,11 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
                                 </span>
                                 <span id="metaTxt_${row["Codigo"]}" class="meta-badge ${colorClass}">${texto}</span>
                             </div>
-    
-          
                         </div>                         
                     `;
                 }
-            },
-            {
-                data: null,
-                className: 'dt-center',
-                width: 170,
-                render: function (data, type, row) {
-                    if (type !== 'display') return row.MetaProgramada;
-                    return `<span class="badge-programacion-anual completa">
-                                <i class="fas fa-check-circle"></i> Anual completa
-                            </span>`;
-                }
             }
-        ],
+        ]
     });
 
     $('#tablaListaIndicadoresTrimestrales tbody').on('click', 'td.expandible', function () {
@@ -120,6 +105,10 @@ function inicializarTablaIndicadoresTrimestrales(idObjEstrategico) {
 
 function cerrarFilaTrimestral(row) {
     const tr = $(row.node());
+    const nested = $('table.dtic-gestion-table', row.child());
+    if (nested.length && $.fn.DataTable.isDataTable(nested)) {
+        nested.DataTable().destroy();
+    }
     $('div.slider', row.child())
         .stop(true, true)
         .slideUp(180, function () {

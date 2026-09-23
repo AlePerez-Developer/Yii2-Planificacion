@@ -7,6 +7,7 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\ItemCatalogadoForm;
 use app\modules\Planificacion\models\EstadoPoa;
 use app\modules\Planificacion\services\ItemCatalogadoService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use common\models\Estado;
 use common\models\seguridad\EstadosPoa as EstadoPoaSeguridad;
 use Yii;
@@ -15,6 +16,7 @@ use yii\filters\VerbFilter;
 
 class ItemCatalogadoController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct($id, $module, private ItemCatalogadoService $service, $config = [])
     {
         parent::__construct($id, $module, $config);

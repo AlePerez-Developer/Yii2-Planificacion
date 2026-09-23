@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\OperacionDao;
 use app\modules\Planificacion\formModels\OperacionForm;
@@ -12,10 +13,18 @@ use app\modules\Planificacion\models\IndicadorPoa;
 use app\modules\Planificacion\models\LlavePresupuestaria;
 use app\modules\Planificacion\models\ObjetivoEspecifico;
 use app\modules\Planificacion\models\Operacion;
+use app\modules\Planificacion\models\Actividad;
+use app\modules\Planificacion\models\Da;
+use app\modules\Planificacion\models\Programa;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorPoaGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorPoaTrimestre;
+use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
+use app\modules\Planificacion\models\Proyecto;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use common\models\Estado;
 use Yii;
+use yii\db\Expression;
 
 class OperacionService
 {
@@ -29,10 +38,10 @@ class OperacionService
     public function listarTodo(
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
         $data = Operacion::listAll($idUnidadEjecutora, $idGestion, $idEstadoPoa)
-            ->orderBy(['O.Codigo' => SORT_ASC])
+            ->orderBy(['LP.Llave' => SORT_ASC, 'O.Codigo' => SORT_ASC])
             ->asArray()
             ->all();
 
@@ -41,80 +50,87 @@ class OperacionService
 
     public function listarIndicadoresProgramados(
         string $idUnidadEjecutora,
-        string $idGestion
+        string $idGestion,
+        string $idEstadoPoa,
+        string $idLlavePresupuestaria,
+        string $tipoIndicador
     ): array {
-        $poa = ProgramacionIndicadorPoaGestion::find()->alias('PG')
-            ->select([
-                'id' => 'P.IdIndicador',
-                'codigo' => 'P.Codigo',
-                'text' => 'I.Descripcion',
-            ])
-            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
-            ->innerJoin(['P' => IndicadorPoa::tableName()], 'P.IdIndicador = PG.IdIndicadorPoa')
-            ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = P.IdIndicador')
-            ->where([
-                'PG.IdGestion' => $idGestion,
-                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
-                'LP.CodigoEstado' => Estado::ESTADO_VIGENTE,
-                'P.CodigoEstado' => Estado::ESTADO_VIGENTE,
-                'I.CodigoEstado' => Estado::ESTADO_VIGENTE,
-            ])
-            ->groupBy(['P.IdIndicador', 'P.Codigo', 'I.Descripcion'])
-            ->asArray()
-            ->all();
-
-        $estrategicos = ProgramacionIndicadorGestion::find()->alias('PG')
-            ->select([
-                'id' => 'IE.IdIndicador',
-                'codigo' => 'IE.Codigo',
-                'text' => 'I.Descripcion',
-            ])
-            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
-            ->innerJoin(['IE' => IndicadorEstrategico::tableName()], 'IE.IdIndicador = PG.IdIndicadorEstrategico')
-            ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = IE.IdIndicador')
-            ->where([
-                'PG.IdGestion' => $idGestion,
-                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
-                'LP.CodigoEstado' => Estado::ESTADO_VIGENTE,
-                'IE.CodigoEstado' => Estado::ESTADO_VIGENTE,
-                'I.CodigoEstado' => Estado::ESTADO_VIGENTE,
-            ])
-            ->groupBy(['IE.IdIndicador', 'IE.Codigo', 'I.Descripcion'])
-            ->asArray()
-            ->all();
-
-        $data = [];
-        foreach ($poa as $indicador) {
-            $indicador['tipoIndicador'] = 'POA';
-            $data[$indicador['id']] = $indicador;
-        }
-        foreach ($estrategicos as $indicador) {
-            $indicador['tipoIndicador'] = 'Estratégico';
-            $data[$indicador['id']] = $indicador;
+        if ($idLlavePresupuestaria === '') {
+            return ResponseHelper::success([]);
         }
 
-        $data = array_values($data);
+        $this->asegurarLlaveDeUnidad($idLlavePresupuestaria, $idUnidadEjecutora);
+
+        $usados = $this->indicadoresUsados(
+            $idUnidadEjecutora,
+            $idGestion,
+            $idEstadoPoa
+        );
+
+        $data = $tipoIndicador === 'poa'
+            ? $this->indicadoresPoaProgramados($idLlavePresupuestaria, $idGestion)
+            : $this->indicadoresEstrategicosProgramados($idLlavePresupuestaria, $idGestion);
+
+        foreach ($data as &$indicador) {
+            $indicador['usado'] = in_array($indicador['id'], $usados, true) ? 1 : 0;
+            $indicador['tipoIndicador'] = $tipoIndicador === 'poa' ? 'POA' : 'Estratégico';
+        }
+        unset($indicador);
+
         usort($data, static fn(array $a, array $b): int => [
-            $a['tipoIndicador'],
+            (int)$a['usado'],
             (int)$a['codigo'],
         ] <=> [
-            $b['tipoIndicador'],
+            (int)$b['usado'],
             (int)$b['codigo'],
         ]);
 
         return ResponseHelper::success($data);
     }
 
-    public function listarLlaves(string $idUnidadEjecutora): array
+    public function listarLlaves(string $idUnidadEjecutora, string $idGestion): array
     {
+        $idsPoa = ProgramacionIndicadorPoaGestion::find()->alias('PG')
+            ->select('PG.IdLlavePresupuestaria')
+            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
+            ->where([
+                'PG.IdGestion' => $idGestion,
+                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'LP.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->column();
+
+        $idsEstrategicos = ProgramacionIndicadorGestion::find()->alias('PG')
+            ->select('PG.IdLlavePresupuestaria')
+            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
+            ->where([
+                'PG.IdGestion' => $idGestion,
+                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'LP.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->column();
+
+        $ids = array_values(array_unique(array_merge($idsPoa, $idsEstrategicos)));
+        if ($ids === []) {
+            return ResponseHelper::success([]);
+        }
+
         $data = LlavePresupuestaria::find()->alias('LP')
             ->select([
                 'id' => 'LP.IdLlavePresupuestaria',
                 'text' => 'LP.Llave',
-                'descripcion' => 'LP.Descripcion',
+                'unidad' => new Expression("CONCAT(Da.Da, '-', Un.Ue, ' ', Un.Descripcion)"),
+                'programa' => new Expression("CONCAT(Pr.Codigo, ' - ', Pr.Descripcion)"),
+                'proyecto' => new Expression("CONCAT(Py.Codigo, ' - ', Py.Descripcion)"),
+                'actividad' => new Expression("CONCAT(Ac.Codigo, ' - ', Ac.Descripcion)"),
             ])
+            ->innerJoin(['Un' => UnidadEjecutora::tableName()], 'Un.IdUnidadEjecutora = LP.IdUnidadEjecutora')
+            ->innerJoin(['Da' => Da::tableName()], 'Da.IdDa = Un.IdDa')
+            ->innerJoin(['Py' => Proyecto::tableName()], 'Py.IdProyecto = LP.IdProyecto')
+            ->innerJoin(['Pr' => Programa::tableName()], 'Pr.IdPrograma = Py.IdPrograma')
+            ->innerJoin(['Ac' => Actividad::tableName()], 'Ac.IdActividad = LP.IdActividad')
             ->where([
-                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'LP.IdLlavePresupuestaria' => $ids,
                 'LP.CodigoEstado' => Estado::ESTADO_VIGENTE,
             ])
             ->orderBy(['LP.Llave' => SORT_ASC])
@@ -128,8 +144,9 @@ class OperacionService
         OperacionForm $form,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion($idUnidadEjecutora);
         $this->validarRelaciones($form, $idUnidadEjecutora, $idGestion);
 
         $modelo = new Operacion([
@@ -158,8 +175,9 @@ class OperacionService
         OperacionForm $form,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion($idUnidadEjecutora);
         $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $this->validarRelaciones($form, $idUnidadEjecutora, $idGestion);
 
@@ -183,8 +201,9 @@ class OperacionService
         int $meta,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion($idUnidadEjecutora);
         if (!isset(self::CAMPOS_TRIMESTRE[$trimestre]) || $meta < 0) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_ENVIO_DATOS'],
@@ -231,15 +250,22 @@ class OperacionService
         string $id,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
         $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
+
+        $tipoIndicador = IndicadorPoa::find()
+            ->where(['IdIndicador' => $modelo->IdIndicador])
+            ->exists()
+            ? 'poa'
+            : 'estrategico';
 
         return ResponseHelper::success([
             'IdOperacion' => $modelo->IdOperacion,
             'Codigo' => $modelo->Codigo,
             'IdObjEspecifico' => $modelo->IdObjEspecifico,
             'IdIndicador' => $modelo->IdIndicador,
+            'tipoIndicador' => $tipoIndicador,
             'IdLlavePresupuestaria' => $modelo->IdLlavePresupuestaria,
             'Descripcion' => $modelo->Descripcion,
             'TipoOperacion' => $modelo->TipoOperacion,
@@ -250,8 +276,9 @@ class OperacionService
         string $id,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion($idUnidadEjecutora);
         $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $modelo->cambiarEstado();
         return $this->procesar($modelo);
@@ -261,8 +288,9 @@ class OperacionService
         string $id,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion($idUnidadEjecutora);
         $modelo = $this->obtenerModeloValidado($id, $idUnidadEjecutora, $idGestion, $idEstadoPoa);
         $modelo->eliminar();
         return $this->procesar($modelo);
@@ -274,7 +302,7 @@ class OperacionService
         string $codigo,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): bool {
         return OperacionDao::verificarCodigo(
             $id,
@@ -309,9 +337,106 @@ class OperacionService
             );
         }
 
+        $this->asegurarLlaveDeUnidad($form->idLlavePresupuestaria, $idUnidadEjecutora);
+
+        if (!$this->indicadorEstaProgramado(
+            $form->idIndicador,
+            $form->idLlavePresupuestaria,
+            $idGestion
+        )) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'El indicador no tiene programación anual para la llave presupuestaria seleccionada.',
+                400
+            );
+        }
+    }
+
+    private function indicadoresEstrategicosProgramados(
+        string $idLlavePresupuestaria,
+        string $idGestion
+    ): array {
+        return ProgramacionIndicadorGestion::find()->alias('PG')
+            ->select([
+                'id' => 'IE.IdIndicador',
+                'codigo' => 'IE.Codigo',
+                'text' => 'I.Descripcion',
+                'meta' => 'PG.MetaProgramada',
+                't1' => new Expression('ISNULL(PT.MetaPrimerTrimestre, 0)'),
+                't2' => new Expression('ISNULL(PT.MetaSegundoTrimestre, 0)'),
+                't3' => new Expression('ISNULL(PT.MetaTercerTrimestre, 0)'),
+                't4' => new Expression('ISNULL(PT.MetaCuartoTrimestre, 0)'),
+            ])
+            ->innerJoin(['IE' => IndicadorEstrategico::tableName()], 'IE.IdIndicador = PG.IdIndicadorEstrategico')
+            ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = IE.IdIndicador')
+            ->leftJoin(
+                ['PT' => ProgramacionIndicadorTrimestre::tableName()],
+                'PT.IdProgramacionIndicadorGestion = PG.IdProgramacionIndicadorGestion'
+            )
+            ->where([
+                'PG.IdLlavePresupuestaria' => $idLlavePresupuestaria,
+                'PG.IdGestion' => $idGestion,
+                'IE.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'I.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->asArray()
+            ->all();
+    }
+
+    private function indicadoresPoaProgramados(
+        string $idLlavePresupuestaria,
+        string $idGestion
+    ): array {
+        return ProgramacionIndicadorPoaGestion::find()->alias('PG')
+            ->select([
+                'id' => 'P.IdIndicador',
+                'codigo' => 'P.Codigo',
+                'text' => 'I.Descripcion',
+                'meta' => 'PG.MetaProgramada',
+                't1' => new Expression('ISNULL(PT.MetaPrimerTrimestre, 0)'),
+                't2' => new Expression('ISNULL(PT.MetaSegundoTrimestre, 0)'),
+                't3' => new Expression('ISNULL(PT.MetaTercerTrimestre, 0)'),
+                't4' => new Expression('ISNULL(PT.MetaCuartoTrimestre, 0)'),
+            ])
+            ->innerJoin(['P' => IndicadorPoa::tableName()], 'P.IdIndicador = PG.IdIndicadorPoa')
+            ->innerJoin(['I' => Indicador::tableName()], 'I.IdIndicador = P.IdIndicador')
+            ->leftJoin(
+                ['PT' => ProgramacionIndicadorPoaTrimestre::tableName()],
+                'PT.IdProgramacionIndicadorPoaGestion = PG.IdProgramacionIndicadorPoaGestion'
+            )
+            ->where([
+                'PG.IdLlavePresupuestaria' => $idLlavePresupuestaria,
+                'PG.IdGestion' => $idGestion,
+                'P.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'I.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->asArray()
+            ->all();
+    }
+
+    private function indicadoresUsados(
+        string $idUnidadEjecutora,
+        string $idGestion,
+        string $idEstadoPoa
+    ): array {
+        return Operacion::find()
+            ->select('IdIndicador')
+            ->where([
+                'IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdGestion' => $idGestion,
+                'IdEstadoPoa' => $idEstadoPoa,
+            ])
+            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->column();
+    }
+
+    private function asegurarLlaveDeUnidad(
+        string $idLlavePresupuestaria,
+        string $idUnidadEjecutora
+    ): void {
         $llaveValida = LlavePresupuestaria::find()
             ->where([
-                'IdLlavePresupuestaria' => $form->idLlavePresupuestaria,
+                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
                 'IdUnidadEjecutora' => $idUnidadEjecutora,
                 'CodigoEstado' => Estado::ESTADO_VIGENTE,
             ])
@@ -324,31 +449,18 @@ class OperacionService
                 400
             );
         }
-
-        if (!$this->indicadorEstaProgramado(
-            $form->idIndicador,
-            $idUnidadEjecutora,
-            $idGestion
-        )) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'El indicador no tiene programación anual para la unidad ejecutora activa.',
-                400
-            );
-        }
     }
 
     private function indicadorEstaProgramado(
         string $idIndicador,
-        string $idUnidadEjecutora,
+        string $idLlavePresupuestaria,
         string $idGestion
     ): bool {
-        $programadoPoa = ProgramacionIndicadorPoaGestion::find()->alias('PG')
-            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
+        $programadoPoa = ProgramacionIndicadorPoaGestion::find()
             ->where([
-                'PG.IdIndicadorPoa' => $idIndicador,
-                'PG.IdGestion' => $idGestion,
-                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdIndicadorPoa' => $idIndicador,
+                'IdGestion' => $idGestion,
+                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
             ])
             ->exists();
 
@@ -356,12 +468,11 @@ class OperacionService
             return true;
         }
 
-        return ProgramacionIndicadorGestion::find()->alias('PG')
-            ->innerJoin(['LP' => LlavePresupuestaria::tableName()], 'LP.IdLlavePresupuestaria = PG.IdLlavePresupuestaria')
+        return ProgramacionIndicadorGestion::find()
             ->where([
-                'PG.IdIndicadorEstrategico' => $idIndicador,
-                'PG.IdGestion' => $idGestion,
-                'LP.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IdIndicadorEstrategico' => $idIndicador,
+                'IdGestion' => $idGestion,
+                'IdLlavePresupuestaria' => $idLlavePresupuestaria,
             ])
             ->exists();
     }
@@ -370,7 +481,7 @@ class OperacionService
         string $id,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): Operacion {
         $modelo = Operacion::find()
             ->where([

@@ -60,15 +60,10 @@ $this->params['breadcrumbs'][] = [
                     <form id="formLlavePresupuestaria" action="" method="post">
 
                         <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="da">Direccion Administrativa</label>
-                                <select class="form-control codigo_group" id="da" name="da" data-default = '00'>
-                                </select>
-                            </div>
-
-                            <div class="form-group col-md-6">
-                                <label for="ue">Unidad Ejecutora</label>
-                                <select class="form-control codigo_group" id="ue" name="ue" data-default = '000'>
+                            <div class="form-group col-md-12">
+                                <label for="unidadEjecutora">Unidad ejecutora</label>
+                                <select class="form-control codigo_group" id="unidadEjecutora" name="unidadEjecutora"
+                                        data-default="00-000">
                                 </select>
                             </div>
                         </div>
@@ -93,12 +88,6 @@ $this->params['breadcrumbs'][] = [
                                 <select class="form-control codigo_group" id="actividad" name="actividad" data-default = '000'>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="descripcion">Descripción</label>
-                            <textarea class="form-control" rows="3" id="descripcion" name="descripcion"
-                                      placeholder="Descripción"></textarea>
                         </div>
 
                         <div class="form-group form-switch">

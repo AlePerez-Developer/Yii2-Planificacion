@@ -48,6 +48,7 @@ class UnidadEjecutoraController extends BaseController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'listar-todo' => ['get', 'post'],
+                    'listar-ues-s2' => ['post'],
                     'guardar' => ['post'],
                     'actualizar' => ['post'],
                     'cambiar-estado' => ['post'],
@@ -63,7 +64,7 @@ class UnidadEjecutoraController extends BaseController
      */
     public function beforeAction($action): bool
     {
-        if ($action->id == 'listar-todo' || $action->id == 'listar-das-s2') {
+        if ($action->id == 'listar-todo' || $action->id == 'listar-ues-s2') {
             $this->enableCsrfValidation = false;
         }
         return parent::beforeAction($action);

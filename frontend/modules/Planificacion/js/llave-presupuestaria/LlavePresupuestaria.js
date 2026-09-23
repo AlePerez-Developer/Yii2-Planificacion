@@ -8,8 +8,7 @@ $(document).ready(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formLlavePresupuestaria').trigger("reset");
-        llavePresupuestaria_s2Da.val(null).trigger('change')
-        llavePresupuestaria_s2Ue.val(null).trigger('change')
+        llavePresupuestaria_s2UnidadEjecutora.val(null).trigger('change')
         llavePresupuestaria_s2Programa.val(null).trigger('change')
         llavePresupuestaria_s2Proyecto.val(null).trigger('change')
         llavePresupuestaria_s2Actividad.val(null).trigger('change')
@@ -56,7 +55,7 @@ $(document).ready(function () {
 
     })
 
-    $('#da, #ue, #programa, #proyecto, #actividad').change(function() {
+    $('#unidadEjecutora, #programa, #proyecto, #actividad').change(function() {
         actualizarLlave();
 
         if (todosLosSelectsTienenValor()) {
@@ -75,8 +74,7 @@ $(document).ready(function () {
 
     function actualizarLlave() {
         let partes = [
-            obtenerValorLlave('#da'),
-            obtenerValorLlave('#ue'),
+            obtenerValorLlave('#unidadEjecutora'),
             obtenerValorLlave('#programa'),
             obtenerValorLlave('#proyecto'),
             obtenerValorLlave('#actividad')
@@ -112,25 +110,21 @@ $(document).ready(function () {
         const hasCode = idLlavePresupuestaria !== '00000000-0000-0000-0000-000000000000';
         let accion = hasCode ? 'actualizar' : 'guardar'
 
-        const idDa = llavePresupuestaria_s2Da.select2('data')[0].id
-        const idUe = llavePresupuestaria_s2Ue.select2('data')[0].id
+        const idUnidadEjecutora = llavePresupuestaria_s2UnidadEjecutora.select2('data')[0].id
         const idPrograma = llavePresupuestaria_s2Programa.select2('data')[0].id
         const idProyecto = llavePresupuestaria_s2Proyecto.select2('data')[0].id
         const idActividad = llavePresupuestaria_s2Actividad.select2('data')[0].id
 
-        const descripcion = $("#descripcion").val();
         const organizacional  =  $("#organizacional").is(":checked") ? '1' : '0'
         const llave = $('#llave').val()
         const fechaInicio = $("#fechaInicio").val();
 
         const datos = new FormData();
         datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
-        datos.append('idDa', idDa)
-        datos.append('idUe', idUe)
+        datos.append('idUnidadEjecutora', idUnidadEjecutora)
         datos.append("idPrograma", idPrograma);
         datos.append("idProyecto", idProyecto);
         datos.append("idActividad", idActividad);
-        datos.append("descripcion", descripcion);
         datos.append("llave", llave);
         datos.append("esOrganizacional", organizacional);
         datos.append("fechaInicio", fechaInicio);
@@ -262,8 +256,7 @@ $(document).ready(function () {
                 data: datos,
             }).then(async (data) => {
                 let obj = data.data
-                llavePresupuestaria_s2Da.val(obj["IdDa"]).trigger('change')
-                llavePresupuestaria_s2Ue.val(obj["IdUe"]).trigger('change')
+                llavePresupuestaria_s2UnidadEjecutora.val(obj["IdUnidadEjecutora"]).trigger('change')
 
                 llavePresupuestaria_s2Programa
                     .val(obj["IdPrograma"])
@@ -287,9 +280,6 @@ $(document).ready(function () {
                     obj["IdActividad"]
                 );
 
-
-                $("#descripcion").val(obj["Descripcion"]);
-
                 $("#organizacional").prop(
                     "checked",
                     obj["esOrganizacional"] === 1 || obj["esOrganizacional"] === "1"
@@ -311,10 +301,7 @@ $(document).ready(function () {
      */
     $("#formLlavePresupuestaria").validate({
         rules: {
-            da: {
-                required: true,
-            },
-            ue: {
+            unidadEjecutora: {
                 required: true,
             },
             programa: {
@@ -325,19 +312,15 @@ $(document).ready(function () {
             },
             actividad: {
                 required: true,
-                require_from_group: [5, ".codigo_group"],
+                require_from_group: [4, ".codigo_group"],
                 remote: {
                     url: baseUrl + "verificar-llave",
                     type: "post",
                     dataType: "json",
                     data: {
-                        idDa: function() {
-                            let da = $('#da').select2('data')
-                            return da[0].id
-                        },
-                        idUe: function (){
-                            let ue = $('#ue').select2('data')
-                            return ue[0].id
+                        idUnidadEjecutora: function() {
+                            let unidad = $('#unidadEjecutora').select2('data')
+                            return unidad[0].id
                         },
                         idPrograma: function (){
                             let programa = $('#programa').select2('data')
@@ -357,20 +340,12 @@ $(document).ready(function () {
                     }
                 }
             },
-            descripcion: {
-                required: true,
-                minlength: 2,
-                maxlength: 500,
-            },
             fechaInicio: {
                 required: true,
             }
         },
         messages: {
-            da: {
-                required: "Debe seleccionar una direccion administrativa",
-            },
-            ue: {
+            unidadEjecutora: {
                 required: "Debe seleccionar una unidad ejecutora",
             },
             programa: {
@@ -381,13 +356,8 @@ $(document).ready(function () {
             },
             actividad: {
                 required: "Debe seleccionar una actividad",
-                require_from_group: "Debe todos los campos que intervienen en la llave presupuestaria",
+                require_from_group: "Debe completar todos los campos que intervienen en la llave presupuestaria",
                 remote: "errorLlave"
-            },
-            descripcion: {
-                required: "Debe ingresar la descripcion del indicador estrategico",
-                minlength: "La descripcion debe tener por lo menos 2 caracteres",
-                maxlength: "La descripcion debe tener maximo 500 caracteres",
             },
             fechaInicio: {
                 required: "Debe seleccionar una fecha",

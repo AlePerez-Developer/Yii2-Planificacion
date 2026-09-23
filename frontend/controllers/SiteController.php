@@ -6,8 +6,8 @@ use common\models\Estado;
 use common\models\seguridad\Modulo;
 use common\models\seguridad\Usuario;
 use common\models\seguridad\UsuarioContextoActivo;
+use common\services\ContextoActivoService;
 use yii\captcha\CaptchaAction;
-use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\ErrorAction;
@@ -21,6 +21,14 @@ use Yii;
  */
 class SiteController extends Controller
 {
+    public function __construct(
+        $id,
+        $module,
+        private ContextoActivoService $contextoService,
+        $config = []
+    ) {
+        parent::__construct($id, $module, $config);
+    }
     /**
      * {@inheritdoc}
      */
@@ -41,7 +49,8 @@ class SiteController extends Controller
                             'seleccionar-modulo',
                             'cambiar-gestion',
                             'cambiar-estado-poa',
-                            'cambiar-llave'],
+                            'cambiar-llave',
+                            'cambiar-unidad-ejecutora'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -147,101 +156,36 @@ class SiteController extends Controller
         ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public function actionSeleccionarModulo($id): Response
     {
-        $contexto = UsuarioContextoActivo::find()
-            ->where([
-                'IdUsuario' => Yii::$app->user->id
-            ])
-            ->one();
-
-        if (!$contexto) {
-
-            $contexto = new UsuarioContextoActivo();
-
-            $contexto->IdUsuario = Yii::$app->user->id;
-        }
-
-        $contexto->IdModulo = $id;
-        $contexto->CodigoEstado = Estado::ESTADO_VIGENTE;
-        $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
-        $contexto->Usuario = Yii::$app->user->identity->IdUsuario;
-
-
-        if (!$contexto->save()) {
-
-            echo '<pre>';
-
-            print_r($contexto->errors);
-
-            die();
-        }
-
-        $modulo = Modulo::findOne($id);
+        $modulo = $this->contextoService->seleccionarModulo((string)$id);
 
         return $this->redirect([
-            $modulo->DashboardRoute
+            $modulo?->DashboardRoute ?: 'site/index'
         ]);
     }
 
     public function actionCambiarGestion($id): Response
     {
-
-        $contexto = UsuarioContextoActivo::findOne([
-            'IdUsuario' => Yii::$app->user->id
-        ]);
-
-        if ($contexto) {
-            $contexto->IdGestion = $id;
-            $contexto->IdEstadoPoa = null;
-            $contexto->IdUnidadEjecutora = null;
-            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
-            //$contexto->save(false);
-            if (!$contexto->save()) {
-
-                echo '<pre>';
-
-                print_r($contexto->errors);
-
-                die();
-            }
-        }
-
+        $this->contextoService->cambiarGestion((string)$id);
         return $this->redirectDashboardModulo();
     }
 
     public function actionCambiarEstadoPoa($id): Response
     {
-        $contexto = UsuarioContextoActivo::findOne([
-            'IdUsuario' => Yii::$app->user->id
-        ]);
+        $this->contextoService->cambiarEstadoPoa((string)$id);
+        return $this->redirectDashboardModulo();
+    }
 
-        if ($contexto) {
-            $contexto->IdEstadoPoa = $id;
-            $contexto->IdUnidadEjecutora = null;
-            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
-            $contexto->save(false);
-        }
-
+    public function actionCambiarUnidadEjecutora($id): Response
+    {
+        $this->contextoService->cambiarUnidadEjecutora((string)$id);
         return $this->redirectDashboardModulo();
     }
 
     public function actionCambiarLlave($id): Response
     {
-        $contexto = UsuarioContextoActivo::findOne([
-            'IdUsuario' => Yii::$app->user->id
-        ]);
-
-        if ($contexto) {
-            $contexto->IdUnidadEjecutora = $id;
-            $contexto->FechaHoraActualizacion = date('d/m/Y H:i:s');
-            $contexto->save(false);
-        }
-
-        return $this->redirectDashboardModulo();
+        return $this->actionCambiarUnidadEjecutora($id);
     }
 
     private function redirectDashboardModulo(): Response

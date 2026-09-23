@@ -6,17 +6,26 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\models\Indicador;
 use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\models\ObjetivoEstrategico;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
+use common\models\Estado;
 use Throwable;
 use Yii;
 use yii\db\Expression;
 
 class IndicadorEstrategicoProgramacionTrimestralService
 {
+    public function obtenerDetalleObjetivo(string $idObjEstrategico): ?array
+    {
+        return ObjetivoEstrategico::listAll()
+            ->andWhere(['O.IdObjEstrategico' => $idObjEstrategico])
+            ->asArray()
+            ->one();
+    }
+
     /**
-     * Lista indicadores del objetivo que ya tienen su programación anual completa
-     * en la gestión activa: SUM(MetaProgramada) >= Meta del indicador.
+     * Lista los indicadores estratégicos asignados al objetivo.
      */
     public function listarIndicadores(string $idObjEstrategico, string $idGestion): array
     {
@@ -27,31 +36,30 @@ class IndicadorEstrategicoProgramacionTrimestralService
                 'I.Codigo',
                 'ii.Descripcion',
                 'ii.Meta',
-
                 'MetaProgramada' => new Expression('ISNULL(SUM(P.MetaProgramada), 0)'),
             ])
-            ->innerJoin(
-                ['P' => ProgramacionIndicadorGestion::tableName()],
-                'P.IdIndicadorEstrategico = I.IdIndicador '
-            )
             ->innerJoin(
                 ['ii' => Indicador::tableName()],
                 'ii.IdIndicador = I.IdIndicador '
             )
+            ->leftJoin(
+                ['P' => ProgramacionIndicadorGestion::tableName()],
+                'P.IdIndicadorEstrategico = I.IdIndicador AND P.IdGestion = :idGestion',
+                [':idGestion' => $idGestion]
+            )
             ->where(['I.IdObjEstrategico' => $idObjEstrategico])
+            ->andWhere(['<>', 'I.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->groupBy([
                 'I.IdIndicador',
                 'I.Codigo',
                 'ii.Descripcion',
                 'ii.Meta',
-
             ])
-            ->having('ISNULL(SUM(P.MetaProgramada), 0) >= ii.Meta')
             ->orderBy(['I.Codigo' => SORT_ASC])
             ->asArray()
             ->all();
 
-        return ResponseHelper::success($data, 'Indicadores con programación anual completa obtenidos.');
+        return ResponseHelper::success($data, 'Indicadores estratégicos asignados obtenidos.');
     }
 
     /**

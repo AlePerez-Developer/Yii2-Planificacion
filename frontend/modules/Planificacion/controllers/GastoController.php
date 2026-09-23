@@ -2,22 +2,22 @@
 
 namespace app\modules\Planificacion\controllers;
 
+use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\GastoForm;
 use app\modules\Planificacion\services\GastoService;
-use yii\web\BadRequestHttpException;
-use app\controllers\BaseController;
+use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use Yii;
 
 class GastoController extends BaseController
 {
-    private GastoService $gastoService;
-
-    public function __construct($id, $module, GastoService $gastoService, $config = [])
-    {
-        $this->gastoService = $gastoService;
+    public function __construct(
+        $id,
+        $module,
+        private GastoService $service,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
     }
 
@@ -26,156 +26,100 @@ class GastoController extends BaseController
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => [],
-                'rules' => [
-                    [
-                        'actions' => [],
-                        'allow' => true,
-                        'roles' => ['?'],
-                    ],
-                    [
-                        'actions' => [],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
+                'rules' => [[
+                    'allow' => true,
+                    'roles' => ['@'],
+                ]],
             ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'listar-todo' => ['get', 'post'],
-                    'guardar' => ['post'],
-                    'actualizar' => ['post'],
-                    'cambiar-estado' => ['post'],
-                    'eliminar' => ['post'],
-                    'buscar' => ['post'],
+                    'listar-todo' => ['POST'],
+                    'listar-gastos-s2' => ['POST'],
+                    'guardar' => ['POST'],
+                    'actualizar' => ['POST'],
+                    'buscar' => ['POST'],
+                    'cambiar-estado' => ['POST'],
+                    'eliminar' => ['POST'],
+                    'verificar-codigo' => ['POST'],
                 ],
             ],
         ];
     }
 
-    /**
-     * @throws BadRequestHttpException
-     */
-    public function beforeAction($action): bool
-    {
-        if ($action->id == "listar-todo")
-            $this->enableCsrfValidation = false;
-        return parent::beforeAction($action);
-    }
-
-    /**
-     * accion index.
-     *
-     * @return string
-     */
     public function actionIndex(): string
     {
-        return $this->render('gasto');
+        return $this->render('index');
     }
 
-    /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
     public function actionListarTodo(): array
     {
-        return $this->withTryCatch(fn() => $this->gastoService->listarGastos());
+        return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
-    /**
-     * accion para agregar un nuevo registro.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
+    public function actionListarGastosS2(): array
+    {
+        return $this->withTryCatch(fn() => $this->service->listarS2());
+    }
+
     public function actionGuardar(): array
     {
-        return $this->withTryCatch(function() {
-            $request = Yii::$app->request;
-
-            $form = new GastoForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
-                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
-            }
-
-            return $this->gastoService->guardarGasto($form);
-        });
+        return $this->withTryCatch(fn() => $this->service->guardar($this->cargarFormulario()));
     }
 
-    /**
-     * accion para actualizar los valores de un registro existente.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
     public function actionActualizar(): array
     {
-        return $this->withTryCatch(function() {
-            $request = Yii::$app->request;
-
-            $codigoGasto = $this->obtenerCodigo();
-            $form = new GastoForm();
-
-            if (!$form->load($request->post(), '') || !$form->validate()) {
-                throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], $form->getErrors(), 400);
-            }
-
-            return $this->gastoService->actualizarGasto($codigoGasto, $form);
-        });
+        return $this->withTryCatch(
+            fn() => $this->service->actualizar($this->obtenerId(), $this->cargarFormulario())
+        );
     }
 
-    /**
-     * accion para alternar el estado de un registro V/C.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
-    public function actionCambiarEstado(): array
-    {
-        return $this->withTryCatch(function() {
-            $codigoGasto = $this->obtenerCodigo();
-            return $this->gastoService->cambiarEstado($codigoGasto);
-        });
-    }
-
-    /**
-     * accion para soft delete de un registro
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
-     */
-    public function actionEliminar(): array
-    {
-        return $this->withTryCatch(function() {
-            $codigoGasto = $this->obtenerCodigo();
-            return $this->gastoService->eliminarGasto($codigoGasto);
-        });
-    }
-
-    /**
-     * accion para buscar un registro en especifico
-     *
-     * @return array
-     */
     public function actionBuscar(): array
     {
-        return $this->withTryCatch(function() {
-            $codigoGasto = $this->obtenerCodigo();
-            return $this->gastoService->obtenerModelo($codigoGasto);
-        });
+        return $this->withTryCatch(fn() => $this->service->obtenerModelo($this->obtenerId()));
     }
 
-    /**
-     * obtiene y valida si se recibio el codigo por el request
-     *
-     * return int
-     * @throws ValidationException
-     */
-    private function obtenerCodigo(): int
+    public function actionCambiarEstado(): array
     {
-        $codigo = (int)Yii::$app->request->post('codigoGasto');
-        if (!$codigo) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Codigo Gasto no enviado.', 404);
+        return $this->withTryCatch(fn() => $this->service->cambiarEstado($this->obtenerId()));
+    }
+
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(fn() => $this->service->eliminar($this->obtenerId()));
+    }
+
+    public function actionVerificarCodigo(): bool
+    {
+        return $this->service->verificarCodigo(
+            (string)Yii::$app->request->post('idGasto', '00000000-0000-0000-0000-000000000000'),
+            (string)Yii::$app->request->post('codigoGasto', '')
+        );
+    }
+
+    private function cargarFormulario(): GastoForm
+    {
+        $form = new GastoForm();
+        if (!$form->load(Yii::$app->request->post(), '') || !$form->validate()) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                $form->getErrors(),
+                400
+            );
         }
-        return $codigo;
+        return $form;
+    }
+
+    private function obtenerId(): string
+    {
+        $id = (string)Yii::$app->request->post('idGasto', '');
+        if ($id === '') {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'No se recibió el gasto.',
+                400
+            );
+        }
+        return $id;
     }
 }

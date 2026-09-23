@@ -81,8 +81,7 @@ $(document).ready(function () {
                 data: datos,
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                cambiarEstadoBtnDtic(objectBtn, data.data);
+                reloadTable: dt_pei
             })
         } catch (err) {
             console.error("Error al procesar:", err);

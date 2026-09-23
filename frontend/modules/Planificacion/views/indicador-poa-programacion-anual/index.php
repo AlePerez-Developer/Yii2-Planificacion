@@ -1,9 +1,12 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $cssPath = Yii::getAlias(
     '@app/modules/Planificacion/css/indicador-poa-programacion-anual/style.css'
 );
@@ -20,11 +23,11 @@ $this->title = 'Planificación Institucional';
 $this->params['subtitle'] = 'Programación anual de indicadores POA';
 $this->params['icon'] = 'fas fa-calendar-alt';
 $this->params['iconColor'] = 'primary';
-$this->params['actions'] = '
+$this->params['actions'] = $edicion['puedeCrear'] ? '
     <button id="btnAgregarRelacion" class="btn-crear" disabled>
         <i class="fas fa-plus-circle"></i>
         <span class="btn-text">Agregar relación</span>
-    </button>';
+    </button>' : '';
 $this->params['breadcrumbs'][] = ['label' => '/ Programación anual de indicadores POA'];
 ?>
 

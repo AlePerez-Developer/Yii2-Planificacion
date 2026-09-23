@@ -54,7 +54,7 @@ class PeiService
             'FechaAprobacion' => date("d/m/Y", strtotime($form->fechaAprobacion)),
             'GestionInicio'   => $form->gestionInicio,
             'GestionFin'      => $form->gestionFin,
-            'CodigoEstado'    => Estado::ESTADO_VIGENTE,
+            'CodigoEstado'    => Estado::ESTADO_CADUCO,
             'CodigoUsuario'   => Yii::$app->user->identity->CodigoUsuario ?? null,
         ]);
 
@@ -91,20 +91,19 @@ class PeiService
     public function actualizar(string $id, PeiForm $form): array
     {
         $modelo = $this->obtenerModeloValidado($id);
+        $cambioRango = (int)$modelo->GestionInicio !== (int)$form->gestionInicio
+            || (int)$modelo->GestionFin !== (int)$form->gestionFin;
 
-        $accionInicio = ($modelo->GestionInicio !== $form->gestionInicio)?($modelo->GestionInicio < $form->gestionInicio )?'del':'add':'';
-        $accionFin = ($modelo->GestionFin !== $form->gestionFin)?($modelo->GestionFin > $form->gestionFin )?'del':'add':'';
-
-        if ($modelo->GestionInicio < $form->gestionInicio ){
-            if (!PeiDao::validarGestionInicio($modelo->IdPei, $form->gestionInicio)) {
-                throw new ValidationException(Yii::$app->params['ERROR_GESTION_INICIO'],'Existen indicadores programados con meta que serian afectados por el cambio de fecha de inicio',400);
-            }
-        }
-
-        if ($modelo->GestionFin > $form->gestionFin ){
-            if (!PeiDao::validarGestionFin($modelo->IdPei, $form->gestionFin)) {
-                throw new ValidationException(Yii::$app->params['ERROR_GESTION_FIN'],'Existen indicadores programados con meta que serian afectados por el cambio de fecha de fin',400);
-            }
+        if ($cambioRango && PeiDao::existenProgramacionesFueraDeRango(
+            $modelo->IdPei,
+            (int)$form->gestionInicio,
+            (int)$form->gestionFin
+        )) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_GESTION_INICIO'],
+                'No se puede cambiar el rango de gestiones: existen programaciones de indicadores estratégicos o POA en los años que se eliminarían.',
+                400
+            );
         }
 
         $modelo->Descripcion = $form->descripcion;
@@ -115,8 +114,13 @@ class PeiService
         $transaction = Pei::getDb()->beginTransaction();
 
         try {
-        PeiDao::regularizarProgramacionIndicadoresInicio($modelo, $form->gestionInicio, $accionInicio);
-        PeiDao::regularizarProgramacionIndicadoresFin($modelo, $form->gestionFin, $accionFin);
+        if ($cambioRango) {
+            PeiDao::sincronizarGestionesPei(
+                $modelo,
+                (int)$form->gestionInicio,
+                (int)$form->gestionFin
+            );
+        }
 
         $resultado = $this->validarProcesarModelo($modelo);
 
@@ -135,31 +139,43 @@ class PeiService
 
     /**
      * Busca un PEI por su código y alterna su estado.
+     * Solo puede existir un PEI vigente. Activar uno caduca el vigente anterior.
+     * No se permite dejar el catálogo sin ningún PEI vigente.
      *
      * @param string $id
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
+     * @throws Throwable
      */
     public function cambiarEstado(string $id): array
     {
         $modelo = $this->obtenerModeloValidado($id);
+        $transaction = Pei::getDb()->beginTransaction();
 
-        $modelo->cambiarEstado();
+        try {
+            if ($modelo->CodigoEstado === Estado::ESTADO_VIGENTE) {
+                if (!PeiDao::existeVigente($modelo->IdPei)) {
+                    throw new ValidationException(
+                        Yii::$app->params['ERROR_VALIDACION_MODELO'],
+                        'Debe existir al menos un PEI vigente.',
+                        400
+                    );
+                }
+                $modelo->CodigoEstado = Estado::ESTADO_CADUCO;
+            } else {
+                PeiDao::caducarVigentes($modelo->IdPei);
+                $modelo->CodigoEstado = Estado::ESTADO_VIGENTE;
+            }
 
-        if (!$modelo->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
+            $resultado = $this->validarProcesarModelo($modelo);
+            $transaction->commit();
+
+            return $resultado;
+        } catch (Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
         }
-
-        if (!$modelo->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del PEI $modelo->Descripcion", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
-        }
-
-        return [
-            'message' => Yii::$app->params['PROCESO_CORRECTO'],
-            'data' => $modelo->CodigoEstado,
-        ];
     }
 
     /**

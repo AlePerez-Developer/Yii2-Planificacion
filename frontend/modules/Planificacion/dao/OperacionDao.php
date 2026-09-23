@@ -12,7 +12,7 @@ class OperacionDao
         string $idObjEspecifico,
         string $idUnidadEjecutora,
         string $idGestion,
-        int $idEstadoPoa,
+        string $idEstadoPoa,
         string $codigo
     ): bool {
         return !Operacion::find()

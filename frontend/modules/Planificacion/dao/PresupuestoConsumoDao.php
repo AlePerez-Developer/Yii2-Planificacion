@@ -2,8 +2,8 @@
 
 namespace app\modules\Planificacion\dao;
 
-use app\modules\Planificacion\models\ItemCatalogado;
-use app\modules\Planificacion\models\ItemDescatalogado;
+use app\modules\Planificacion\models\ItemGestion;
+use app\modules\Planificacion\models\ItemGestionOperacion;
 use app\modules\Planificacion\models\Operacion;
 use common\models\Estado;
 use yii\db\Expression;
@@ -14,32 +14,28 @@ class PresupuestoConsumoDao
         string $idLlavePresupuestaria,
         string $idGestion,
         string $idEstadoPoa,
-        ?string $excluirCatalogado = null,
+        ?string $excluirItem = null,
         ?string $excluirDescatalogado = null
     ): float {
-        $catalogado = ItemCatalogado::find()->alias('IC')
-            ->innerJoin(['O' => Operacion::tableName()], 'O.IdOperacion = IC.IdOperacion')
+        $query = ItemGestionOperacion::find()->alias('IGO')
+            ->innerJoin(['IG' => ItemGestion::tableName()], 'IG.IdItem_Gestion = IGO.IdItem_Gestion')
+            ->innerJoin(['O' => Operacion::tableName()], 'O.IdOperacion = IGO.IdOperacion')
             ->where([
                 'O.IdLlavePresupuestaria' => $idLlavePresupuestaria,
-                'IC.IdGestion' => $idGestion,
-                'IC.IdEstadoPoa' => $idEstadoPoa,
-                'IC.CodigoEstado' => Estado::ESTADO_VIGENTE,
-            ])
-            ->andFilterWhere(['<>', 'IC.IdItemCatalogado', $excluirCatalogado])
-            ->sum(new Expression('CAST(IC.cantidad AS decimal(18,2)) * CAST(IC.Precio AS decimal(18,2))'));
+                'IG.IdGestion' => $idGestion,
+                'IGO.IdEstadoPoa' => $idEstadoPoa,
+                'IGO.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'IG.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'O.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ]);
 
-        $descatalogado = ItemDescatalogado::find()->alias('ID')
-            ->innerJoin(['O' => Operacion::tableName()], 'O.IdOperacion = ID.IdOperacion')
-            ->where([
-                'O.IdLlavePresupuestaria' => $idLlavePresupuestaria,
-                'ID.IdGestion' => $idGestion,
-                'ID.IdEstadoPoa' => $idEstadoPoa,
-                'ID.CodigoEstado' => Estado::ESTADO_VIGENTE,
-            ])
-            ->andFilterWhere(['<>', 'ID.IdItemDescatalogado', $excluirDescatalogado])
-            ->sum(new Expression('CAST(ID.cantidad AS decimal(18,2)) * CAST(ID.Precio AS decimal(18,2))'));
+        if ($excluirItem) {
+            $query->andWhere(['<>', 'IG.IdItem', $excluirItem]);
+        }
 
-        return (float)$catalogado + (float)$descatalogado;
+        return (float)$query->sum(new Expression(
+            'CAST(IGO.Cantidad AS decimal(18,2)) * CAST(IG.PrecioUnitario AS decimal(18,2))'
+        ));
     }
 
     public static function totalPorUnidad(
@@ -47,19 +43,45 @@ class PresupuestoConsumoDao
         string $idGestion,
         string $idEstadoPoa
     ): float {
-        $llaves = Operacion::find()
-            ->select('IdLlavePresupuestaria')
-            ->where(['IdUnidadEjecutora' => $idUnidadEjecutora])
-            ->distinct()
-            ->column();
+        return (float)ItemGestionOperacion::find()->alias('IGO')
+            ->innerJoin(['IG' => ItemGestion::tableName()], 'IG.IdItem_Gestion = IGO.IdItem_Gestion')
+            ->innerJoin(['O' => Operacion::tableName()], 'O.IdOperacion = IGO.IdOperacion')
+            ->where([
+                'O.IdUnidadEjecutora' => $idUnidadEjecutora,
+                'IG.IdGestion' => $idGestion,
+                'IGO.IdEstadoPoa' => $idEstadoPoa,
+                'IGO.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'IG.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'O.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->sum(new Expression(
+                'CAST(IGO.Cantidad AS decimal(18,2)) * CAST(IG.PrecioUnitario AS decimal(18,2))'
+            ));
+    }
 
-        return array_sum(array_map(
-            static fn(string $idLlave): float => self::totalPorLlave(
-                $idLlave,
-                $idGestion,
-                $idEstadoPoa
-            ),
-            $llaves
-        ));
+    public static function totalPorDa(
+        string $idDa,
+        string $idGestion,
+        string $idEstadoPoa
+    ): float {
+        return (float)ItemGestionOperacion::find()->alias('IGO')
+            ->innerJoin(['IG' => ItemGestion::tableName()], 'IG.IdItem_Gestion = IGO.IdItem_Gestion')
+            ->innerJoin(['O' => Operacion::tableName()], 'O.IdOperacion = IGO.IdOperacion')
+            ->innerJoin(
+                ['UE' => \app\modules\Planificacion\models\UnidadEjecutora::tableName()],
+                'UE.IdUnidadEjecutora = O.IdUnidadEjecutora'
+            )
+            ->where([
+                'UE.IdDa' => $idDa,
+                'IG.IdGestion' => $idGestion,
+                'IGO.IdEstadoPoa' => $idEstadoPoa,
+                'IGO.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'IG.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'O.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'UE.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->sum(new Expression(
+                'CAST(IGO.Cantidad AS decimal(18,2)) * CAST(IG.PrecioUnitario AS decimal(18,2))'
+            ));
     }
 }

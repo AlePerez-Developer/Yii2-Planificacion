@@ -9,13 +9,15 @@ class FodaInstitucionForm extends Model
 {
     public string $descripcion = '';
     public string $tipo = '';
+    public string $incidencia = '';
 
     public function rules(): array
     {
         return [
-            [['descripcion', 'tipo'], 'required'],
+            [['descripcion', 'tipo', 'incidencia'], 'required'],
             [['descripcion'], 'string', 'min' => 2, 'max' => 500],
             [['tipo'], 'in', 'range' => array_values(FODAInstitucion::tipos())],
+            [['incidencia'], 'in', 'range' => array_values(FODAInstitucion::incidencias())],
         ];
     }
 }

@@ -61,3 +61,26 @@ span .select2-selection.select2-selection--single {
 .sub-group-container{
     padding: 10px;
 }
+
+.btn-programar {
+    min-width:150px;
+    height:42px;
+    border-radius:20px;
+    border: 1px solid #425d65;
+    padding:0 16px;
+    font-size:12px;
+    font-weight:800;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
+    background-color: #abdbff;
+    color: #2a3437;
+}
+
+.btn-programar:hover{
+    background-color: #90c4d3;
+    box-shadow: 0 6px 16px #8cb2bf;
+    transform: translateY(-1px);
+}

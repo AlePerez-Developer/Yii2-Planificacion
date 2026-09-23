@@ -3,6 +3,7 @@
 namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\PresupuestoConsumoDao;
 use app\modules\Planificacion\formModels\ItemCatalogadoForm;
@@ -11,6 +12,7 @@ use app\modules\Planificacion\models\Fuente;
 use app\modules\Planificacion\models\ItemCatalogado;
 use app\modules\Planificacion\models\Operacion;
 use app\modules\Planificacion\models\Organismo;
+use app\modules\Planificacion\models\Partida;
 use app\modules\Planificacion\models\TechoUnidad;
 use common\models\Estado;
 use Yii;
@@ -25,7 +27,7 @@ class ItemCatalogadoService
         int $codigoEstadoPoa,
         int $formulario
     ): array {
-        $operaciones = Operacion::listAll($idUnidad, $idGestion, $codigoEstadoPoa)
+        $operaciones = Operacion::listAll($idUnidad, $idGestion, $idEstadoPoa)
             ->andWhere(['O.CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['OE.IdGestion' => $idGestion])
             ->orderBy(['O.Codigo' => SORT_ASC])
@@ -66,7 +68,7 @@ class ItemCatalogadoService
         string $idEstadoPoa,
         int $codigoEstadoPoa
     ): array {
-        $this->obtenerOperacion($idOperacion, $idUnidad, $idGestion, $codigoEstadoPoa);
+        $this->obtenerOperacion($idOperacion, $idUnidad, $idGestion, $idEstadoPoa);
         $data = ItemCatalogado::find()->alias('IC')
             ->select([
                 'IC.*',
@@ -80,7 +82,7 @@ class ItemCatalogadoService
             ])
             ->innerJoin(['CS' => CatalogoSigma::tableName()], 'CS.IdSigma = IC.IdSigma')
             ->innerJoin(['F' => Fuente::tableName()], 'F.IdFuente = IC.IdFuente')
-            ->innerJoin(['ORG' => Organismo::tableName()], 'ORG.IdFuente = IC.IdFuente AND ORG.IdOrganismo = IC.IdOrganismo')
+            ->innerJoin(['ORG' => Organismo::tableName()], 'ORG.IdOrganismo = IC.IdOrganismo')
             ->where([
                 'IC.IdOperacion' => $idOperacion,
                 'IC.IdGestion' => $idGestion,
@@ -118,16 +120,22 @@ class ItemCatalogadoService
     {
         return ResponseHelper::success(Fuente::find()
             ->select(['id' => 'IdFuente', 'text' => 'Descripcion'])
-            ->orderBy(['IdFuente' => SORT_ASC])
+            ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
+            ->orderBy(['Descripcion' => SORT_ASC])
             ->asArray()->all());
     }
 
     public function listarOrganismos(string $idFuente): array
     {
-        return ResponseHelper::success(Organismo::find()
-            ->select(['id' => 'IdOrganismo', 'text' => 'Descripcion'])
-            ->where(['IdFuente' => $idFuente])
-            ->orderBy(['IdOrganismo' => SORT_ASC])
+        return ResponseHelper::success(Partida::find()->alias('P')
+            ->select(['id' => 'O.IdOrganismo', 'text' => 'O.Descripcion'])
+            ->innerJoin(['O' => Organismo::tableName()], 'O.IdOrganismo = P.IdOrganismo')
+            ->where([
+                'P.IdFuente' => $idFuente,
+                'P.CodigoEstado' => Estado::ESTADO_VIGENTE,
+                'O.CodigoEstado' => Estado::ESTADO_VIGENTE,
+            ])
+            ->orderBy(['O.Descripcion' => SORT_ASC])
             ->asArray()->all());
     }
 
@@ -139,7 +147,8 @@ class ItemCatalogadoService
         string $idEstadoPoa,
         int $codigoEstadoPoa
     ): array {
-        $operacion = $this->obtenerOperacion($form->idOperacion, $idUnidad, $idGestion, $codigoEstadoPoa);
+        PoaEdicionHelper::asegurarEdicion($idUnidad);
+        $operacion = $this->obtenerOperacion($form->idOperacion, $idUnidad, $idGestion, $idEstadoPoa);
         $sigma = CatalogoSigma::findOne($form->idSigma);
         if ($sigma === null || $sigma->CodigoEstado !== Estado::ESTADO_VIGENTE) {
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'El ítem SIGMA no es válido.', 422);
@@ -184,6 +193,7 @@ class ItemCatalogadoService
         string $idGestion,
         string $idEstadoPoa
     ): array {
+        PoaEdicionHelper::asegurarEdicion();
         $modelo = $this->obtenerItem($id, $idOperacion, $formulario, $idGestion, $idEstadoPoa);
         $modelo->CodigoEstado = Estado::ESTADO_ELIMINADO;
         $modelo->CodigoUsuario = Yii::$app->user->identity->CodigoUsuario;
@@ -197,7 +207,7 @@ class ItemCatalogadoService
         string $id,
         string $idUnidad,
         string $idGestion,
-        int $idEstadoPoa
+        string $idEstadoPoa
     ): Operacion
     {
         $modelo = Operacion::find()->alias('O')

@@ -1,3 +1,5 @@
+let urlProgramarPoa;
+
 $(document).ready(function () {
     const EMPTY = '00000000-0000-0000-0000-000000000000';
     const baseUrl = 'index.php?r=Planificacion/obj-especifico/';
@@ -39,6 +41,11 @@ $(document).ready(function () {
             successMsg: 'Objetivo específico guardado correctamente.',
             reloadTable: dt_objEspecifico
         });
+    });
+
+    $('#tablaListaObjEspecificos').on('click', '.btn-programar', function () {
+        const row = dt_objEspecifico.row($(this).closest('tr')).data();
+        window.location.href = urlProgramarPoa + '&id=' + row.IdObjEspecifico;
     });
 
     $('#tablaListaObjEspecificos').on('click', '.btn-edit', async function () {

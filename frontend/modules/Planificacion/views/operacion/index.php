@@ -1,9 +1,12 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $cssPath = Yii::getAlias('@app/modules/Planificacion/css/operacion/style.css');
 $cssVersion = is_file($cssPath) ? filemtime($cssPath) : time();
 $this->registerCssFile(
@@ -23,101 +26,100 @@ $this->title = 'Planificación Institucional';
 $this->params['subtitle'] = 'Operaciones POA';
 $this->params['icon'] = 'fas fa-tasks';
 $this->params['iconColor'] = 'primary';
-$this->params['actions'] = '
+$this->params['actions'] = $edicion['puedeCrear'] ? '
     <button id="btnMostrarCrear" class="btn-crear closed">
-        <i class="fas fa-plus-circle"></i>
+        <span class="circle">
+            <span class="horizontal"></span>
+            <span class="vertical"></span>
+        </span>
         <span class="btn-text">Nueva operación</span>
-    </button>';
+    </button>' : '';
 $this->params['breadcrumbs'][] = ['label' => '/ Operaciones POA'];
 ?>
 
 <div class="card">
     <div id="divDatos" class="card-body" style="display:none">
-        <form id="formOperacion" autocomplete="off">
-            <div class="card-dtic-style">
-                <div class="card-dtic-style-header">
-                    <div id="tituloFormulario" class="card-dtic-style-title">Nueva operación POA</div>
+        <div class="col d-flex justify-content-center">
+            <div class="card-dtic-form" style="width: 120rem;">
+                <div class="card-header card-dtic-form-header" id="tituloFormulario">Nueva operación POA</div>
+                <div class="card-body card-dtic-form-body">
+                    <form id="formOperacion" autocomplete="off">
+                        <input type="hidden" id="idIndicador" name="idIndicador">
+
+                        <div class="form-group">
+                            <label for="idLlavePresupuestaria">Llave presupuestaria</label>
+                            <select id="idLlavePresupuestaria" name="idLlavePresupuestaria"
+                                    class="form-control dtic-input" style="width:100%"></select>
+                            <small class="form-text text-muted">
+                                Se listan las llaves con programación anual de indicadores para la unidad y gestión activas.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="idIndicadorEstrategico">Indicador estratégico</label>
+                            <select id="idIndicadorEstrategico" name="idIndicadorEstrategico"
+                                    class="form-control dtic-input" style="width:100%"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="idIndicadorPoa">Indicador POA</label>
+                            <select id="idIndicadorPoa" name="idIndicadorPoa"
+                                    class="form-control dtic-input" style="width:100%"></select>
+                            <small class="form-text text-muted">
+                                Un mismo indicador puede usarse en varias operaciones. Elija un indicador estratégico o uno POA.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="idObjEspecifico">Objetivo específico</label>
+                            <select id="idObjEspecifico" name="idObjEspecifico"
+                                    class="form-control dtic-input" style="width:100%"></select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="codigo">Código</label>
+                                    <input id="codigo" name="codigo" type="text" maxlength="2"
+                                           inputmode="numeric" class="form-control dtic-input" placeholder="01">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="tipoOperacion">Tipo de operación</label>
+                                    <select id="tipoOperacion" name="tipoOperacion" class="form-control dtic-input">
+                                        <option value="Funcionamiento">Funcionamiento</option>
+                                        <option value="Inversion">Inversión</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descripcion">Descripción de la operación</label>
+                            <textarea id="descripcion" name="descripcion" rows="4"
+                                      maxlength="300" class="form-control dtic-input"></textarea>
+                        </div>
+                    </form>
                 </div>
-                <div class="p-3">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="idObjEspecifico">Objetivo específico</label>
-                                <select id="idObjEspecifico" name="idObjEspecifico"
-                                        class="form-control dtic-input" style="width:100%"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="idLlavePresupuestaria">Llave presupuestaria</label>
-                                <select id="idLlavePresupuestaria" name="idLlavePresupuestaria"
-                                        class="form-control dtic-input" style="width:100%"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="idIndicador">Indicador programado anualmente</label>
-                                <select id="idIndicador" name="idIndicador"
-                                        class="form-control dtic-input" style="width:100%"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="codigo">Código</label>
-                                <input id="codigo" name="codigo" type="text" maxlength="2"
-                                       class="form-control dtic-input" placeholder="00">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-9">
-                            <div class="form-group">
-                                <label for="descripcion">Descripción</label>
-                                <textarea id="descripcion" name="descripcion" rows="3"
-                                          maxlength="300" class="form-control dtic-input"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="tipoOperacion">Tipo de operación</label>
-                                <select id="tipoOperacion" name="tipoOperacion"
-                                        class="form-control dtic-input">
-                                    <option value="Funcionamiento">Funcionamiento</option>
-                                    <option value="Inversion">Inversión</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <button id="btnCancelar" type="button" class="btn-cancel btn-cancelar mr-2">
-                            <i class="fa fa-times-circle"></i>
-                            <span class="btn_text">Cancelar</span>
-                        </button>
-                        <button id="btnGuardar" type="button" class="btn-guardar">
-                            <i class="fa fa-check-circle"></i>
-                            <span class="btn_text">Guardar</span>
-                        </button>
-                    </div>
+                <div class="card-footer card-dtic-form-footer">
+                    <button id="btnGuardar" type="button" class="btn-guardar">
+                        <i class="fa fa-check-circle"></i>
+                        <span class="btn_text">Guardar</span>
+                    </button>
+                    <button id="btnCancelar" type="button" class="btn-cancel btn-cancelar">
+                        <i class="fa fa-times-circle"></i>
+                        <span class="btn_text">Cancelar</span>
+                    </button>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     <div id="divTabla" class="card-body">
         <div class="card-dtic-style">
             <div class="card-dtic-style-header">
-                <div class="card-dtic-style-title">Operaciones POA registradas</div>
+                <div class="card-dtic-style-title">Operaciones POA de la unidad ejecutora</div>
             </div>
             <div id="dticTableLoading" class="p-4">
                 <div class="table-loading"></div>

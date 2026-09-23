@@ -6,6 +6,7 @@ use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\ObjetivoEspecificoForm;
 use app\modules\Planificacion\services\ObjetivoEspecificoService;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -13,6 +14,7 @@ use yii\web\Request;
 
 class ObjEspecificoController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct(
         $id,
         $module,

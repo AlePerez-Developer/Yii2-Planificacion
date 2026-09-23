@@ -1,10 +1,13 @@
 <?php
 
 use app\modules\Planificacion\assets\PlanificacionAsset;
+use app\modules\Planificacion\common\helpers\PoaEdicionHelper;
 use app\modules\Planificacion\models\FODAUnidad;
 use yii\web\JqueryAsset;
 
 PlanificacionAsset::register($this);
+PoaEdicionHelper::registrarFlagJs();
+$edicion = PoaEdicionHelper::accionesUi();
 $cssPath = Yii::getAlias('@app/modules/Planificacion/css/foda-unidad/style.css');
 $version = is_file($cssPath) ? filemtime($cssPath) : time();
 $this->registerCssFile('@planificacionModule/css/foda-unidad/style.css?v=' . $version, [
@@ -17,12 +20,12 @@ $this->title = 'Planificación Institucional';
 $this->params['subtitle'] = 'FODA Unidad';
 $this->params['icon'] = 'fas fa-th-large';
 $this->params['iconColor'] = 'info';
-$this->params['actions'] = '
-    <button id="btnMostrarCrear" class="btn-crear closed">
+$this->params['actions'] = ($edicion['puedeCrear']
+    ? '<button id="btnMostrarCrear" class="btn-crear closed">
         <i class="fas fa-plus-circle"></i>
         <span class="btn-text">Nuevo registro</span>
-    </button>
-
+    </button>'
+    : '') . '
      <button id="btnReportePdf" class="btn-reporte">
         <i class="fas fa-file-pdf"></i>
          <span class="btn-text">Exportar</span>
@@ -49,7 +52,18 @@ $this->params['actions'] = '
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="incidencia">Incidencia</label>
+                                <select id="incidencia" name="incidencia" class="form-control dtic-input">
+                                    <option value="">Seleccione una incidencia</option>
+                                    <?php foreach (FODAUnidad::incidencias() as $incidencia): ?>
+                                        <option value="<?= $incidencia ?>"><?= $incidencia ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label for="descripcion">Descripción</label>
                                 <textarea id="descripcion" name="descripcion" rows="4"

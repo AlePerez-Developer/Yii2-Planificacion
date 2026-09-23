@@ -53,11 +53,12 @@ class LlavePresupuestaria extends ActiveRecord
     {
         return [
             [['IdLlavePresupuestaria', 'IdUnidadEjecutora', 'IdDa', 'IdUe', 'IdProyecto', 'IdActividad'], 'string', 'max' => 36],
-            [['IdUnidadEjecutora', 'IdDa', 'IdUe', 'IdProyecto', 'IdActividad', 'Llave', 'Descripcion', 'esOrganizacional', 'FechaInicio', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['IdUnidadEjecutora', 'IdProyecto', 'IdActividad', 'Llave', 'esOrganizacional', 'FechaInicio', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['esOrganizacional'], 'integer'],
             [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
             [['Llave'], 'string', 'max' => 200],
             [['Descripcion'], 'string', 'max' => 500],
+            [['Descripcion'], 'default', 'value' => ''],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdLlavePresupuestaria'], 'unique'],
@@ -101,12 +102,9 @@ class LlavePresupuestaria extends ActiveRecord
             ->select([
                 'LP.IdLlavePresupuestaria',
                 'LP.Llave',
-                'LP.Descripcion',
                 'LP.esOrganizacional',
                 'LP.FechaInicio',
                 'LP.FechaFin',
-                'Da.IdDa',
-                'Ue.IdUe',
                 'Un.IdUnidadEjecutora',
                 'Pr.IdPrograma',
                 'Py.IdProyecto',
@@ -114,9 +112,8 @@ class LlavePresupuestaria extends ActiveRecord
                 'LP.CodigoEstado',
                 'LP.CodigoUsuario'
             ])
-            ->joinWith('da Da', true, 'INNER JOIN')
-            ->joinWith('ue Ue', true, 'INNER JOIN')
             ->joinWith('unidadEjecutora Un', true, 'INNER JOIN')
+            ->joinWith('unidadEjecutora.das Da', true, 'INNER JOIN')
             ->joinWith('proyecto.programa Pr', true, 'INNER JOIN')
             ->joinWith('proyecto Py', true, 'INNER JOIN')
             ->joinWith('actividad Ac', true, 'INNER JOIN')
@@ -142,12 +139,9 @@ class LlavePresupuestaria extends ActiveRecord
 
         return [
             'IdUnidadEjecutora' => $modelo['IdUnidadEjecutora'],
-            'IdDa' => $modelo['IdDa'],
-            'IdUe' => $modelo['IdUe'],
             'IdPrograma' => $modelo->proyecto->programa->IdPrograma ?? null,
             'IdProyecto' => $modelo['IdProyecto'],
             'IdActividad' => $modelo['IdActividad'],
-            'Descripcion' => $modelo['Descripcion'],
             'esOrganizacional' => $modelo['esOrganizacional'],
             'FechaInicio' => $modelo['FechaInicio'],
         ];

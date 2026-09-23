@@ -5,18 +5,17 @@ namespace app\modules\Planificacion\controllers;
 use app\controllers\BaseController;
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
 use app\modules\Planificacion\formModels\OperacionForm;
-use app\modules\Planificacion\models\EstadoPoa;
 use app\modules\Planificacion\models\ObjetivoEspecifico;
 use app\modules\Planificacion\services\OperacionService;
-use common\models\Estado;
-use common\models\seguridad\EstadosPoa as EstadoPoaSeguridad;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 class OperacionController extends BaseController
 {
+    use ControlaEdicionPoa;
     public function __construct(
         $id,
         $module,
@@ -92,20 +91,34 @@ class OperacionController extends BaseController
 
     public function actionListarIndicadoresProgramadosS2(): array
     {
-        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
-        return $this->withTryCatch(
-            fn() => $this->service->listarIndicadoresProgramados(
+        return $this->withTryCatch(function () {
+            [$idUnidadEjecutora, $idGestion, $idEstadoPoa] = $this->obtenerContextoActivo();
+            $idLlave = (string)Yii::$app->request->post('idLlavePresupuestaria', '');
+            $tipoIndicador = strtolower((string)Yii::$app->request->post('tipoIndicador', ''));
+
+            if (!in_array($tipoIndicador, ['estrategico', 'poa'], true)) {
+                throw new ValidationException(
+                    Yii::$app->params['ERROR_ENVIO_DATOS'],
+                    'El tipo de indicador no es válido.',
+                    400
+                );
+            }
+
+            return $this->service->listarIndicadoresProgramados(
                 $idUnidadEjecutora,
-                $idGestion
-            )
-        );
+                $idGestion,
+                $idEstadoPoa,
+                $idLlave,
+                $tipoIndicador
+            );
+        });
     }
 
     public function actionListarLlavesS2(): array
     {
-        [$idUnidadEjecutora] = $this->obtenerContextoActivo();
+        [$idUnidadEjecutora, $idGestion] = $this->obtenerContextoActivo();
         return $this->withTryCatch(
-            fn() => $this->service->listarLlaves($idUnidadEjecutora)
+            fn() => $this->service->listarLlaves($idUnidadEjecutora, $idGestion)
         );
     }
 
@@ -263,12 +276,12 @@ class OperacionController extends BaseController
         $contexto = Yii::$app->userContext->contexto();
         $idUnidadEjecutora = (string)($contexto?->IdUnidadEjecutora ?? '');
         $idGestion = (string)($contexto?->IdGestion ?? '');
-        $idEstadoPoaSeguridad = (string)($contexto?->IdEstadoPoa ?? '');
+        $idEstadoPoa = (string)($contexto?->IdEstadoPoa ?? '');
 
         if (
             $idUnidadEjecutora === ''
             || $idGestion === ''
-            || $idEstadoPoaSeguridad === ''
+            || $idEstadoPoa === ''
         ) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_ENVIO_DATOS'],
@@ -280,44 +293,7 @@ class OperacionController extends BaseController
         return [
             $idUnidadEjecutora,
             $idGestion,
-            $this->resolverCodigoEstadoPoa($idEstadoPoaSeguridad),
+            $idEstadoPoa,
         ];
-    }
-
-    private function resolverCodigoEstadoPoa(string $idEstadoPoa): int
-    {
-        $estadoSeguridad = EstadoPoaSeguridad::findOne([
-            'IdEstadoPoa' => $idEstadoPoa,
-        ]);
-
-        if ($estadoSeguridad === null) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'El estado POA del contexto activo no es válido.',
-                400
-            );
-        }
-
-        $codigo = trim((string)$estadoSeguridad->Codigo);
-        $estado = ctype_digit($codigo)
-            ? EstadoPoa::findOne(['CodigoEstadoPOA' => (int)$codigo])
-            : EstadoPoa::find()
-                ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
-                ->andWhere([
-                    'or',
-                    ['Descripcion' => $estadoSeguridad->Descripcion],
-                    ['Abreviacion' => $codigo],
-                ])
-                ->one();
-
-        if ($estado === null) {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'No existe equivalencia del estado POA activo en EstadosPOA.',
-                400
-            );
-        }
-
-        return (int)$estado->CodigoEstadoPOA;
     }
 }

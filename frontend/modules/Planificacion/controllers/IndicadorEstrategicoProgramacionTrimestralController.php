@@ -68,7 +68,13 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
 
     public function actionIndex(): string
     {
-        return $this->render('index');
+        $id = (string)Yii::$app->request->get('id', '');
+        $objetivo = null;
+        if ($id !== '') {
+            $objetivo = $this->service->obtenerDetalleObjetivo($id);
+        }
+
+        return $this->render('index', ['objetivo' => $objetivo]);
     }
 
     public function actionListarIndicadores(): array
