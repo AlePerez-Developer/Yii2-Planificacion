@@ -1,15 +1,15 @@
 <?php
 namespace app\modules\Planificacion\dao;
 
+use app\modules\Planificacion\models\ProgramacionIndicadorPoaGestion;
 use app\modules\Planificacion\common\exceptions\ValidationException;
-use app\modules\Planificacion\models\IndicadorEstrategicoProgramacionGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\models\IndicadorPoa;
 use app\modules\Planificacion\models\PeiGestion;
 use app\modules\Planificacion\models\Pei;
-use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
-use app\modules\Planificacion\models\ProgramacionIndicadorPoaGestion;
-use common\models\Estado;
 use yii\db\StaleObjectException;
+use common\models\Estado;
+use yii\db\Exception;
 use Throwable;
 use Yii;
 
@@ -43,7 +43,8 @@ class PeiDao
     }
 
     /**
-     * @throws Exception|ValidationException
+     * @throws ValidationException
+     * @throws Exception
      */
     static function generarGestionesPei(Pei $pei): array
     {
@@ -108,13 +109,13 @@ class PeiDao
         }
 
         return ProgramacionIndicadorGestion::find()->where(['IdGestion' => $idsGestion])->exists()
-            || IndicadorEstrategicoProgramacionGestion::find()->where(['IdGestion' => $idsGestion])->exists()
             || ProgramacionIndicadorPoaGestion::find()->where(['IdGestion' => $idsGestion])->exists()
             || IndicadorPoa::find()->where(['IdGestion' => $idsGestion])->exists();
     }
 
     /**
      * @throws ValidationException
+     * @throws Exception
      */
     private static function crearGestion(Pei $pei, int $gestion): void
     {

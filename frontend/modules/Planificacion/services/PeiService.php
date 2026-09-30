@@ -91,13 +91,13 @@ class PeiService
     public function actualizar(string $id, PeiForm $form): array
     {
         $modelo = $this->obtenerModeloValidado($id);
-        $cambioRango = (int)$modelo->GestionInicio !== (int)$form->gestionInicio
-            || (int)$modelo->GestionFin !== (int)$form->gestionFin;
+        $cambioRango = $modelo->GestionInicio !== $form->gestionInicio
+            || $modelo->GestionFin !== $form->gestionFin;
 
         if ($cambioRango && PeiDao::existenProgramacionesFueraDeRango(
             $modelo->IdPei,
-            (int)$form->gestionInicio,
-            (int)$form->gestionFin
+            $form->gestionInicio,
+            $form->gestionFin
         )) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_GESTION_INICIO'],
@@ -117,8 +117,8 @@ class PeiService
         if ($cambioRango) {
             PeiDao::sincronizarGestionesPei(
                 $modelo,
-                (int)$form->gestionInicio,
-                (int)$form->gestionFin
+                $form->gestionInicio,
+                $form->gestionFin
             );
         }
 
