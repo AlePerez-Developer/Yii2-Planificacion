@@ -12,8 +12,7 @@ class MenuPermisoHelper
     public static function normalizar(string $ruta): string
     {
         $ruta = strtolower(trim($ruta));
-        $ruta = ltrim($ruta, '/');
-        return $ruta;
+        return ltrim($ruta, '/');
     }
 
     /**
@@ -86,6 +85,9 @@ class MenuPermisoHelper
         ];
     }
 
+    /**
+     * @throws ValidationException
+     */
     public static function asegurar(string $accion): void
     {
         $permisos = self::permisosPagina();

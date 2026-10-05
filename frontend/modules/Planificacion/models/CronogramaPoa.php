@@ -63,7 +63,7 @@ class CronogramaPoa extends ActiveRecord
 
     public static function vigenteHoy(): ?self
     {
-        $ahora = date('Y-m-d H:i:s');
+        $ahora = date('d/m/Y H:i:s');
         return self::find()
             ->where(['CodigoEstado' => Estado::ESTADO_VIGENTE])
             ->andWhere(['<=', 'FechaInicio', $ahora])
