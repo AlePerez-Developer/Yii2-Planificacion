@@ -86,15 +86,10 @@ function inicializarTablaIndicadores() {
                         </div>
                         
                         <div class="dtic-item-sub mb-1">
-                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["Meta"]}  
+                            AEI: unindetify  
                         </div>
                         
-                        <!-- DESC -->
-                        <div class="dtic-item-sub2 mb-2">
-                            <span>OBJETIVO:</span> 
-                            <b>${row["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + row["objetivosEstrategicos"]["Codigo"]}</b> 
-                            <span>${row["objetivosEstrategicos"]["Objetivo"]}</span>
-                        </div>          
+                              
                         
                         <div class="acc-footer">                                    
                             <div class="meta-box-left dtic-item-sub">

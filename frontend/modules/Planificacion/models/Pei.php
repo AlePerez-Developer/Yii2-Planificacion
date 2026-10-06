@@ -32,7 +32,7 @@ class Pei extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'pei.PEIs';
+        return 'PEIs';
     }
 
     /**

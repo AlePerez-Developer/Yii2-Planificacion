@@ -50,6 +50,12 @@ $this->params['breadcrumbs'][] = [
                 <div class="card-body card-dtic-form-body">
                     <form id="formAccionEstrategica" action="" method="post">
                         <div class="form-group">
+                            <label for="codigo" class="control-label">Codigo</label>
+                            <input class="form-control input-sm dtic-input txt" id="codigo"
+                                      name="codigo"  placeholder="Codigo de accion estrategica"></input>
+                        </div>
+
+                        <div class="form-group">
                             <label for="descripcion" class="control-label">Descripcion de la accion estrategica</label>
                             <textarea class="form-control input-sm dtic-input txt" id="descripcion"
                                       name="descripcion" rows="3" placeholder="descripcion de la accion estrategica"></textarea>

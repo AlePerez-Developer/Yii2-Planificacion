@@ -50,7 +50,7 @@ class PeiService
     public function guardar(PeiForm $form): array
     {
         $modelo = new Pei([
-            'Descripcion'  => mb_strtoupper(trim($form->descripcion), 'UTF-8'),
+            'Descripcion'  => trim($form->descripcion),
             'FechaAprobacion' => date("d/m/Y", strtotime($form->fechaAprobacion)),
             'GestionInicio'   => $form->gestionInicio,
             'GestionFin'      => $form->gestionFin,

@@ -97,6 +97,7 @@ $(document).ready(function () {
                 width: "65px",
                 orderable: false,
                 searchable: false,
+                visible: false,
                 render: function (data, type) {
                     return ((type === 'display'))
                         ? '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para programar indicadores">' +

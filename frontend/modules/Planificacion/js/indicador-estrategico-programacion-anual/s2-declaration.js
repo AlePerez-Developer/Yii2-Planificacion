@@ -22,7 +22,7 @@ $(document).ready(function () {
             `<div class="mi-render-select2">
                 <div class="titulo-producto">Código: ${data.compuesto || ''}</div>
                 <div class="titulo-producto">${data.text || ''}</div>
-                <div class="subtitulo-producto">${data.producto || ''}</div>
+                
             </div>`
         );
     }
