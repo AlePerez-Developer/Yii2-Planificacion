@@ -43,7 +43,7 @@ class LlavePresupuestaria extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'LlavesPresupuestarias';
+        return 'planificacion.LlavesPresupuestarias';
     }
 
     /**

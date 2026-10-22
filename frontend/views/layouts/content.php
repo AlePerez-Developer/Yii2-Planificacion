@@ -29,13 +29,13 @@ $actions = $this->params['actions']
 <div class="content-wrapper content-wrapper-pro">
     <?= $this->render('partials/_module_menu') ?>
     <!-- HEADER -->
-    <section class="content-header pt-3 pb-2">
+    <section class="content-header pt-1 pb-2">
 
         <div class="container-fluid">
 
             <div class="card header-card border-0 shadow-sm mb-3">
 
-                <div class="card-body px-4 py-3">
+                <div class="card-body px-3 py-1">
 
                     <div class="row align-items-center">
 
@@ -44,9 +44,12 @@ $actions = $this->params['actions']
 
                             <div class="d-flex align-items-center flex-wrap">
 
-                                <div class="page-icon bg-<?= $iconColor ?> mr-3">
-                                    <i class="<?= $icon ?>"></i>
-                                </div>
+                                <?php if ($icon): ?>
+                                    <div class="page-icon bg-<?= $iconColor ?> mr-3">
+                                        <i class="<?= $icon ?>"></i>
+                                    </div>
+                                <?php endif; ?>
+
 
                                 <div>
 

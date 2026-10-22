@@ -292,3 +292,40 @@ a.desc:after {
 .sidebar-collapse .main-sidebar:hover .sidebar-module-item {
     justify-content: flex-start;
 }
+
+/****************************** gestion ******************************/
+.gestion-badge {
+    /* Diseño e inline-flex para que se ajuste al contenido */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    /* Espaciado y bordes redondeados en forma de píldora */
+    padding: 6px 16px;
+    border-radius: 50px;
+
+    /* Colores basados en la imagen (tonos verdes/teales) */
+    background-color: #f2faf7;
+    border: 1px solid #e1f2ec;
+
+    /* Fuente limpia y sin serifas */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.gestion-badge .dot {
+    width: 8px;
+    height: 8px;
+    background-color: #52b79a;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.gestion-badge .text {
+    color: #1e5245;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.gestion-badge .text strong {
+    font-weight: 600;
+}

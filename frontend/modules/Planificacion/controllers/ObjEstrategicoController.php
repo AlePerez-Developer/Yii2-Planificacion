@@ -83,6 +83,7 @@ class ObjEstrategicoController extends BaseController
      */
     public function actionIndex(): string
     {
+        return $this->render('bla');
         return $this->render('objEstrategico');
     }
 

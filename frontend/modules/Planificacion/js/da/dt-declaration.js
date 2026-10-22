@@ -1,13 +1,13 @@
 let dt_da
 $(document).ready(function () {
     dt_da = $("#tablaListaDas").DataTable({
+        layout: {
+            topStart: null ,
+            topEnd:null ,
+            bottomStart: 'info',
+            bottomEnd: 'paging'
+        },
         initComplete: function () {
-            $("div.dt-search").append(`
-            <button id="refreshTable" class="btn-refresh">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </button>`
-            );
-
             $("#dticTableLoading").hide();
             $("#dticTableContainer").fadeIn(250);
         },
@@ -22,16 +22,6 @@ $(document).ready(function () {
         columns: [
 
             {
-                data: "CodigoUsuario",
-                className: "text-center",
-                width: "60px",
-                orderable: false,
-                searchable: false,
-                render: function (data) {
-                    return `<div class="badge-codigo">${data}</div>`;
-                }
-            },
-            {
                 data: null,
                 render: function (data, type, row) {
 
@@ -40,54 +30,27 @@ $(document).ready(function () {
                     }
 
                     return `
-                    <div class="dtic-item-main">
-                        DA: ${row["Da"]}
-                    </div>
-
-                    <div class="dtic-item-sub">
-                        ${row["Descripcion"]}
-                    </div>
+                        <div class="card-row">
+                            <span class="row-num">1</span>
+                            <div class="patient">
+                                <div class="avatar" style="background:#0ea5e9">MF</div>
+                                <div>
+                                    <p class="patient-name">María Fernández López <span class="code-badge">C-001</span></p>
+                                    <p class="patient-meta">34 años • 🌐 Boliviana</p>
+                                    <p class="patient-motivo">📄 Control general</p>
+                                </div>
+                            </div>
+                            <div class="datetime">jue, 17 oct 2026<small>🕐 09:00</small></div>
+                            <div><span class="estado confirmada"><span class="dot"></span>Confirmada ▾</span></div>
+                            <div class="actions">
+                                <button class="btn-action edit">✏ Editar</button>
+                                <button class="btn-action delete">🗑 Eliminar</button>
+                            </div>
+                        </div>
                 `;
                 }
             },
-            {data: "Da", visible: false},
-            {
-                data: "CodigoEstado",
-                className: "text-center",
-                width: "90px",
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>';
-                },
-            },
-            {
-                data: "IdDa",
-                className: "text-center",
-                width: "140px",
-                orderable: false,
-                searchable: false,
-                render: function () {
 
-                    return `
-                    <button class="btn-action btn-edit ">
-                        <i class="fa fa-pen"></i>
-                    </button>
-
-                    <button class="btn-action btn-delete ">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `;
-                }
-            }
         ]
     });
 
