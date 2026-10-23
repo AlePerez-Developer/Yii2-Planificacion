@@ -1,3 +1,99 @@
+let daFiltroTexto = ''
+let daFiltroCodigoEstado = ''
+
+function codigoEstadoDesdeEtiqueta(etiqueta) {
+    const texto = (etiqueta || '').trim().toLowerCase()
+    if (!texto || texto.indexOf('todos') === 0) {
+        return ''
+    }
+    if (texto.indexOf('vigent') !== -1) {
+        return ESTADO_VIGENTE
+    }
+    if (texto.indexOf('cancel') !== -1 || texto.indexOf('caduc') !== -1) {
+        return ESTADO_CADUCO
+    }
+    return ''
+}
+
+function aplicarFiltrosTablaDa() {
+    if (typeof dt_da === 'undefined' || !dt_da) {
+        return
+    }
+    dt_da.draw()
+}
+
+function sincronizarFiltroEstadoDa(codigoEstado) {
+    daFiltroCodigoEstado = codigoEstado || ''
+    $('#filtroEstadoDa').val(daFiltroCodigoEstado)
+    $('.stats .stat').removeClass('active')
+    if (daFiltroCodigoEstado) {
+        $('.stats .stat').each(function () {
+            const statEtiqueta = $(this).find('.stat-label').text().trim()
+            if (codigoEstadoDesdeEtiqueta(statEtiqueta) === daFiltroCodigoEstado) {
+                $(this).addClass('active')
+            }
+        })
+    }
+    aplicarFiltrosTablaDa()
+}
+
+function initDaListadoFiltros() {
+    if ($.fn.dataTable.ext.search.some(function (fn) {
+        return fn && fn.__daListadoFiltro === true
+    })) {
+        aplicarFiltrosTablaDa()
+        return
+    }
+
+    const filtroFn = function (settings, data, dataIndex) {
+        if (settings.nTable.id !== 'tablaListaDas') {
+            return true
+        }
+
+        const row = dt_da.row(dataIndex).data()
+        if (!row) {
+            return true
+        }
+
+        if (daFiltroCodigoEstado && row.CodigoEstado !== daFiltroCodigoEstado) {
+            return false
+        }
+
+        if (!daFiltroTexto) {
+            return true
+        }
+
+        const termino = daFiltroTexto.toLowerCase()
+        const da = (row.Da || '').toLowerCase()
+        const descripcion = (row.Descripcion || '').toLowerCase()
+
+        return da.indexOf(termino) !== -1 || descripcion.indexOf(termino) !== -1
+    }
+    filtroFn.__daListadoFiltro = true
+    $.fn.dataTable.ext.search.push(filtroFn)
+
+    $('.stats').on('click', '.stat', function () {
+        const etiqueta = $(this).find('.stat-label').text().trim()
+        const codigo = codigoEstadoDesdeEtiqueta(etiqueta)
+
+        if ($(this).hasClass('active')) {
+            sincronizarFiltroEstadoDa('')
+            return
+        }
+
+        sincronizarFiltroEstadoDa(codigo)
+    })
+
+    $('#buscarDa').on('input', function () {
+        daFiltroTexto = $(this).val().trim()
+        aplicarFiltrosTablaDa()
+    })
+
+    $('#filtroEstadoDa').on('change', function () {
+        sincronizarFiltroEstadoDa($(this).val())
+    })
+}
+
 $(document).ready(function () {
     let idDa = '00000000-0000-0000-0000-000000000000';
     let baseUrl = "index.php?r=Planificacion/da/"
@@ -73,7 +169,11 @@ $(document).ready(function () {
                 spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
             }).then((data) => {
-                cambiarEstadoBtnDtic(objectBtn, data.data);
+                const vigente = data.data === ESTADO_VIGENTE
+                objectBtn
+                    .toggleClass('confirmada', vigente)
+                    .toggleClass('cancelada', !vigente)
+                objectBtn.find('.btn_text').text(vigente ? 'Vigente' : 'Caducado')
             })
         } catch (err) {
             console.error("Error al procesar:", err);

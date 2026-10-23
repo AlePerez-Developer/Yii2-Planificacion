@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = [
                 <div class="logo">📅</div>
                 <div>
                     <h1>Listado de direcciones administrativas</h1>
-                    <p class="subtitle">32 citas registradas</p>
+                    <p id="daSubtitleTotal" class="subtitle">0 direcciones administrativas registradas</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -57,27 +57,30 @@ $this->params['breadcrumbs'][] = [
 
         <!-- Stats -->
         <div class="stats">
-            <div class="stat active">
+            <div class="stat">
                 <div class="stat-icon sky">✅</div>
-                <div><p class="stat-count">12</p><p class="stat-label">Vigentes</p></div>
+                <div><p class="stat-count">0</p><p class="stat-label">Vigentes</p></div>
             </div>
 
             <div class="stat">
                 <div class="stat-icon rose">✖</div>
-                <div><p class="stat-count">3</p><p class="stat-label">Canceladas</p></div>
+                <div><p class="stat-count">0</p><p class="stat-label">Canceladas</p></div>
             </div>
         </div>
 
         <!-- Toolbar -->
         <div class="toolbar">
             <div class="search">
-                <input type="text" placeholder="Buscar por codigo de DA  o descripcion...">
+                <input id="buscarDa" type="text" placeholder="Buscar por codigo de DA  o descripcion...">
             </div>
-            <select>
-                <option>Todos los estados</option>
-                <option>Vigente</option>
-                <option>Caduca</option>
+            <select id="filtroEstadoDa">
+                <option value="">Todos los estados</option>
+                <option value="V">Vigente</option>
+                <option value="C">Caduca</option>
             </select>
+            <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
 
         <!-- Encabezado de columnas -->
@@ -147,6 +150,10 @@ td { padding-bottom: 10px !important; }
     .search::before { content: "🔍"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: .5; }
     .toolbar select { height: 44px; padding: 0 14px; border: 1px solid #e2e8f0; border-radius: 12px;
         background: #fff; font-size: 14px; color: #334155; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .toolbar .btn-refresh { flex-shrink: 0; width: 44px; height: 44px; margin: 0; padding: 0;
+        border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #0284c7;
+        box-shadow: 0 1px 2px rgba(0,0,0,.05); cursor: pointer; transition: all .2s; }
+    .toolbar .btn-refresh:hover { border-color: #7dd3fc; background: #f0f9ff; }
 
     /* Column headers */
     .col-headers { display: grid; grid-template-columns: 1fr 4fr 2fr 2fr 3fr; gap: 16px;
