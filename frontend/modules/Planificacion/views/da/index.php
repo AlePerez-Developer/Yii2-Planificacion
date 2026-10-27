@@ -79,13 +79,13 @@ $this->params['breadcrumbs'][] = [
                 <option value="C">Caduca</option>
             </select>
             <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
-                <i class="fas fa-sync-alt"></i>
+                <i class="fa fa-sync-alt fa-spin"></i>
             </button>
         </div>
 
         <!-- Encabezado de columnas -->
         <div class="col-headers">
-            <span>#</span><span>Paciente</span><span>Fecha y hora</span><span>Estado</span><span>Acciones</span>
+            <span>#</span><span>Paciente</span><span>Estado</span><span>Acciones</span>
         </div>
 
         <div id="dticTableLoading" class="p-4">
@@ -156,14 +156,14 @@ td { padding-bottom: 10px !important; }
     .toolbar .btn-refresh:hover { border-color: #7dd3fc; background: #f0f9ff; }
 
     /* Column headers */
-    .col-headers { display: grid; grid-template-columns: 1fr 4fr 2fr 2fr 3fr; gap: 16px;
+    .col-headers { display: grid; grid-template-columns: 1fr 8fr 2fr 3fr; gap: 16px;
         padding: 0 30px; font-size: 11px; font-weight: 600; text-transform: uppercase;
         letter-spacing: .05em; color: #94a3b8; }
     .col-headers span:last-child { text-align: right; }
 
     /* Row cards */
     .list { display: flex; flex-direction: column; gap: 12px; }
-    .card-row { display: grid; grid-template-columns: 1fr 4fr 2fr 2fr 3fr; gap: 16px; align-items: center;
+    .card-row { display: grid; grid-template-columns: 1fr 8fr  2fr 3fr; gap: 16px; align-items: center;
         background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 20px;
         box-shadow: 0 1px 2px rgba(0,0,0,.05); transition: all .2s; }
     .card-row:hover { border-color: #bae6fd; box-shadow: 0 6px 16px rgba(0,0,0,.08); }
@@ -190,17 +190,17 @@ td { padding-bottom: 10px !important; }
     .estado.pendiente .dot { background: #fbbf24; }
     .estado.confirmada { background: #f0f9ff; color: #0369a1; border-color: #bae6fd; }
     .estado.confirmada .dot { background: #0ea5e9; }
-    .estado.completada { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-    .estado.completada .dot { background: #10b981; }
+    .estado.vigente { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .estado.vigente .dot { background: #10b981; }
     .estado.cancelada { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
     .estado.cancelada .dot { background: #fb7185; }
 
     /* Acciones */
     .actions { display: flex; justify-content: flex-end; gap: 4px; }
-    .btn-action { padding: 8px 12px; border-radius: 8px; background: transparent; border: none;
+    .btn-action-new { padding: 8px 12px; border-radius: 8px; background: transparent; border: none;
         font-size: 13px; font-weight: 500; color: #94a3b8; cursor: pointer; transition: all .2s; }
-    .btn-action.edit:hover { background: #f0f9ff; color: #0284c7; transform: scale(1.05); }
-    .btn-action.delete:hover { background: #fff1f2; color: #e11d48; transform: scale(1.05); }
+    .btn-action-new.edit:hover { background: #f0f9ff; color: #0284c7; transform: scale(1.05); }
+    .btn-action-new.delete:hover { background: #fff1f2; color: #e11d48; transform: scale(1.05); }
 
     /* Paginación */
     .pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;

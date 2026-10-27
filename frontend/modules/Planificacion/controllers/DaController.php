@@ -87,7 +87,7 @@ class DaController extends BaseController
      */
     public function actionListarTodo(): array
     {
-        sleep(5);
+       // sleep(5);
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 

@@ -89,7 +89,7 @@ $(document).ready(function () {
 
                     const numero = meta.settings._iDisplayStart + meta.row + 1
                     const vigente = row['CodigoEstado'] === ESTADO_VIGENTE
-                    const estadoClase = vigente ? 'confirmada' : 'cancelada'
+                    const estadoClase = vigente ? 'vigente' : 'cancelada'
                     const estadoTexto = vigente ? 'Vigente' : 'Caducado'
                     const colorAvatar = vigente ? '#0ea5e9' : '#f43f5e'
 
@@ -102,16 +102,11 @@ $(document).ready(function () {
                                     <p class="patient-name">${row['Descripcion']} <span class="code-badge">${row['Da']}</span></p>
                                     <p class="patient-meta">Código DA: ${row['Da']}</p>
                                 </div>
-                            </div>
-                            <div class="datetime">—<small>Registro administrativo</small></div>
-                            <div>
-                                <button type="button" class="estado ${estadoClase} btn-toggle-estado">
-                                    <span class="dot"></span><span class="btn_text">${estadoTexto}</span> ▾
-                                </button>
-                            </div>
+                            </div>                            
+                            <div><span class="estado ${estadoClase}"><span class="dot"></span>${estadoTexto} ▾</span></div>
                             <div class="actions">
-                                <button type="button" class="btn-action edit btn-edit">✏ Editar</button>
-                                <button type="button" class="btn-action delete btn-delete">🗑 Eliminar</button>
+                                <button type="button" class="btn-action-new edit">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
                             </div>
                         </div>
                 `
@@ -119,16 +114,6 @@ $(document).ready(function () {
             },
             {data: 'Da', visible: false},
             {data: 'Descripcion', visible: false},
-            {
-                data: 'CodigoEstado',
-                visible: false,
-                render: function (data, type) {
-                    if (type === 'display') {
-                        return data
-                    }
-                    return daEstadoEtiqueta(data)
-                }
-            },
             {data: 'IdDa', visible: false, searchable: false}
         ]
     })
