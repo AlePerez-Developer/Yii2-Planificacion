@@ -97,6 +97,17 @@ $this->params['breadcrumbs'][] = [
         <div class="p-0" id="dticTableContainer" style="display:none;">
             <table id="tablaListaDas" class="w-100" > </table>
         </div>
+
+        <div class="pagination">
+            <p class="pagination-info">Mostrando <strong>1–15</strong> de <strong>32</strong> citas</p>
+            <div class="pagination-nav">
+                <button class="page-btn" disabled>‹ Anterior</button>
+                <button class="page-btn current">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">Siguiente ›</button>
+            </div>
+        </div>
     </div>
 </div>
 
