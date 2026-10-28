@@ -150,35 +150,54 @@ $(document).ready(function () {
         dt_da.ajax.reload();
     })
 
-    /* =============================================
-     * CAMBIA EL ESTADO DEL REGISTRO
-     * =============================================
-     */
-    dtEvents.on('click', '.btn-toggle-estado', async function(){
-        let objectBtn = $(this);
-        const dt_row = dt_da.row(objectBtn.closest('tr')).data()
-        let idDa = dt_row["IdDa"];
+    dtEvents.on('click', '.estado-trigger', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        const wrap = $(this).closest('.estado-wrap')
+        const abierto = wrap.hasClass('open')
+        cerrarMenusEstadoDa()
+        wrap.toggleClass('open', !abierto)
+    })
 
-        const datos = new FormData();
-        datos.append("idDa", idDa);
+    dtEvents.on('click', '.estado-menu', function (e) {
+        e.stopPropagation()
+    })
+
+    dtEvents.on('click', '.estado-option', async function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const option = $(this)
+        const wrap = option.closest('.estado-wrap')
+        const tr = option.closest('tr')
+        const rowApi = dt_da.row(tr)
+        const dt_row = rowApi.data()
+        const codigoNuevo = option.data('estado')
+
+        if (!dt_row || codigoNuevo === dt_row.CodigoEstado) {
+            wrap.removeClass('open')
+            return
+        }
+
+        const datos = new FormData()
+        datos.append('idDa', dt_row.IdDa)
+        datos.append('codigoEstado', codigoNuevo)
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "cambiar-estado",
+            const data = await ajaxPromise({
+                url: baseUrl + 'cambiar-estado',
                 data: datos,
-                spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                const vigente = data.data === ESTADO_VIGENTE
-                objectBtn
-                    .toggleClass('confirmada', vigente)
-                    .toggleClass('cancelada', !vigente)
-                objectBtn.find('.btn_text').text(vigente ? 'Vigente' : 'Caducado')
             })
+            dt_row.CodigoEstado = data.data
+            rowApi.data(dt_row).draw(false)
+            actualizarContadoresDa()
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+        } finally {
+            wrap.removeClass('open')
         }
-    });
+    })
 
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
@@ -208,8 +227,10 @@ $(document).ready(function () {
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_da
                     });
+                    dt_da.ajax.reload(function () {
+                        actualizarContadoresDa()
+                    }, false);
                 } catch (err) {
                     console.error("Error al procesar:", err);
                 }

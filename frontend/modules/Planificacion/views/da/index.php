@@ -58,13 +58,13 @@ $this->params['breadcrumbs'][] = [
         <!-- Stats -->
         <div class="stats">
             <div class="stat">
-                <div class="stat-icon sky">✅</div>
-                <div><p class="stat-count">0</p><p class="stat-label">Vigentes</p></div>
+                <div class="stat-icon emerald">✅</div>
+                <div><p id="daCountVigentes" class="stat-count">0</p><p class="stat-label">Vigentes</p></div>
             </div>
 
             <div class="stat">
                 <div class="stat-icon rose">✖</div>
-                <div><p class="stat-count">0</p><p class="stat-label">Canceladas</p></div>
+                <div><p id="daCountCaducos" class="stat-count">0</p><p class="stat-label">Caducos</p></div>
             </div>
         </div>
 
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = [
             <select id="filtroEstadoDa">
                 <option value="">Todos los estados</option>
                 <option value="V">Vigente</option>
-                <option value="C">Caduca</option>
+                <option value="C">Caduco</option>
             </select>
             <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
                 <i class="fa fa-sync-alt fa-spin"></i>
@@ -97,24 +97,13 @@ $this->params['breadcrumbs'][] = [
         <div class="p-0" id="dticTableContainer" style="display:none;">
             <table id="tablaListaDas" class="w-100" > </table>
         </div>
-
-        <div class="pagination">
-            <p class="pagination-info">Mostrando <strong>1–15</strong> de <strong>32</strong> citas</p>
-            <div class="pagination-nav">
-                <button class="page-btn" disabled>‹ Anterior</button>
-                <button class="page-btn current">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">Siguiente ›</button>
-            </div>
-        </div>
     </div>
 </div>
 
 
 
 <style>
-td { padding-bottom: 10px !important; }
+td { padding-bottom: 10px !important; overflow: visible; }
     thead { display: none}
     /** { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }*/
     .body { background: #f8fafc; padding: 8px 16px; color: #1e293b; }
@@ -138,7 +127,7 @@ td { padding-bottom: 10px !important; }
     .btn-primary:hover { background: #0369a1; }
 
     /* Stats */
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .stat { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #e2e8f0;
         border-radius: 16px; padding: 16px; cursor: pointer; transition: box-shadow .2s; }
     .stat:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
@@ -196,15 +185,28 @@ td { padding-bottom: 10px !important; }
     .estado { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
         border-radius: 999px; padding: 6px 12px; border: 1px solid; cursor: pointer; transition: box-shadow .2s; }
     .estado:hover { box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-    .estado .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .estado .dot, .estado-option .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .estado.pendiente { background: #fffbeb; color: #b45309; border-color: #fde68a; }
     .estado.pendiente .dot { background: #fbbf24; }
     .estado.confirmada { background: #f0f9ff; color: #0369a1; border-color: #bae6fd; }
     .estado.confirmada .dot { background: #0ea5e9; }
     .estado.vigente { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-    .estado.vigente .dot { background: #10b981; }
+    .estado.vigente .dot, .estado-option.vigente .dot { background: #10b981; }
     .estado.cancelada { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
-    .estado.cancelada .dot { background: #fb7185; }
+    .estado.cancelada .dot, .estado-option.cancelada .dot { background: #fb7185; }
+    .estado .chevron { font-size: 10px; margin-left: 2px; opacity: .8; }
+
+    .estado-wrap { position: relative; display: inline-block; }
+    .estado-menu { display: none; position: absolute; top: calc(100% + 6px); left: 0; min-width: 160px;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 8px;
+        box-shadow: 0 10px 24px rgba(15,23,42,.12); z-index: 30; }
+    .estado-wrap.open .estado-menu { display: flex; flex-direction: column; gap: 2px; }
+    .estado-option { display: flex; align-items: center; gap: 8px; width: 100%; border: none;
+        background: transparent; padding: 8px 10px; border-radius: 10px; font-size: 13px;
+        font-weight: 600; color: #334155; cursor: pointer; text-align: left; }
+    .estado-option:hover { background: #f8fafc; }
+    .estado-option.selected { background: #f1f5f9; }
+    .estado-option .check { margin-left: auto; color: #0369a1; font-size: 13px; }
 
     /* Acciones */
     .actions { display: flex; justify-content: flex-end; gap: 4px; }
@@ -213,19 +215,40 @@ td { padding-bottom: 10px !important; }
     .btn-action-new.edit:hover { background: #f0f9ff; color: #0284c7; transform: scale(1.05); }
     .btn-action-new.delete:hover { background: #fff1f2; color: #e11d48; transform: scale(1.05); }
 
-    /* Paginación */
-    .pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    /* Paginación (bloque de ejemplo + DataTables) */
+    .body .container .pagination,
+    .body .container #dticTableContainer .dt-container > .dt-layout-row:has(.dt-paging),
+    .body .container #dticTableContainer .dt-container > .dt-layout-row:has(.dt-info) {
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
         gap: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
-        padding: 12px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
-    .pagination-info { font-size: 14px; color: #64748b; }
-    .pagination-info strong { color: #334155; }
-    .pagination-nav { display: flex; align-items: center; gap: 4px; }
-    .page-btn { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; border: none;
+        padding: 12px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin-top: 8px;
+    }
+    .body .container .pagination-info,
+    .body .container #dticTableContainer .dt-info { font-size: 14px; color: #64748b; }
+    .body .container .pagination-info strong,
+    .body .container #dticTableContainer .dt-info strong { color: #334155; font-weight: 700; }
+    .body .container .pagination-nav,
+    .body .container #dticTableContainer .dt-paging,
+    .body .container #dticTableContainer .dt-paging nav { display: flex; align-items: center; gap: 4px; }
+    .body .container .page-btn,
+    .body .container #dticTableContainer .dt-paging-button {
+        min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; border: none;
         background: transparent; font-size: 14px; font-weight: 600; color: #64748b;
-        cursor: pointer; transition: all .2s; }
-    .page-btn:hover { background: #f0f9ff; color: #0284c7; }
-    .page-btn.current { background: #0284c7; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
-    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+        cursor: pointer; transition: all .2s;
+    }
+    .body .container .page-btn:hover,
+    .body .container #dticTableContainer .dt-paging-button:hover:not(.disabled):not(.current) {
+        background: #f0f9ff; color: #0284c7;
+    }
+    .body .container .page-btn.current,
+    .body .container #dticTableContainer .dt-paging-button.current {
+        background: #0284c7; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+    .body .container .page-btn:disabled,
+    .body .container .page-btn.disabled,
+    .body .container #dticTableContainer .dt-paging-button.disabled {
+        opacity: .4; cursor: not-allowed; background: transparent; color: #64748b;
+    }
 
     @media (max-width: 768px) {
         .stats { grid-template-columns: repeat(2, 1fr); }

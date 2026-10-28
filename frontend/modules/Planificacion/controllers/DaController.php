@@ -154,7 +154,8 @@ class DaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->cambiarEstado($id);
+            $codigoEstado = Yii::$app->request->post('codigoEstado');
+            return $this->service->cambiarEstado($id, $codigoEstado ?: null);
         });
     }
 

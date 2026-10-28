@@ -105,18 +105,19 @@ class DaService
     }
 
     /**
-     * Busca un Da por su código y alterna su estado.
+     * Busca un Da por su código y cambia su estado a V o C.
      *
      * @param string $id
+     * @param string|null $codigoEstado
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(string $id): array
+    public function cambiarEstado(string $id, ?string $codigoEstado = null): array
     {
         $modelo = $this->obtenerModeloValidado($id);
 
-        $modelo->cambiarEstado();
+        $modelo->cambiarEstado($codigoEstado);
 
         if (!$modelo->validate()) {
             throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
