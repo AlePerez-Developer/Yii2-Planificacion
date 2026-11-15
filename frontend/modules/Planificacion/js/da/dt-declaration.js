@@ -176,8 +176,8 @@ $(document).ready(function () {
                             </div>
                             <div>${renderEstadoDropdownDa(row['CodigoEstado'])}</div>
                             <div class="actions">
-                                <button type="button" class="btn-action-new edit btn-edit">✏ Editar</button>
-                                <button type="button" class="btn-action-new delete btn-delete">🗑 Eliminar</button>
+                                <button type="button" class="btn-action-new edit ">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete ">🗑 Eliminar</button>
                             </div>
                         </div>
                 `
