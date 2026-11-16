@@ -16,6 +16,7 @@ class FodaInstitucionForm extends Model
         return [
             [['descripcion', 'tipo', 'incidencia'], 'required'],
             [['descripcion'], 'string', 'min' => 2, 'max' => 500],
+            [['incidencia'], 'string', 'max' => 10],
             [['tipo'], 'in', 'range' => array_values(FODAInstitucion::tipos())],
             [['incidencia'], 'in', 'range' => array_values(FODAInstitucion::incidencias())],
         ];

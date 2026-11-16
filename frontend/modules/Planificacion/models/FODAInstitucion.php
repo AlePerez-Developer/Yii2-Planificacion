@@ -14,7 +14,7 @@ use yii\db\ActiveRecord;
  * @property string $IdGestion
  * @property string|null $Descripcion
  * @property string|null $Tipo
- * @property string|null $Incidencia
+ * @property string $Incidencia
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
@@ -43,8 +43,8 @@ class FODAInstitucion extends ActiveRecord
     {
         return [
             self::TIPO_FORTALEZA => self::TIPO_FORTALEZA,
-            self::TIPO_DEBILIDAD => self::TIPO_DEBILIDAD,
             self::TIPO_OPORTUNIDAD => self::TIPO_OPORTUNIDAD,
+            self::TIPO_DEBILIDAD => self::TIPO_DEBILIDAD,
             self::TIPO_AMENAZA => self::TIPO_AMENAZA,
         ];
     }
@@ -53,8 +53,8 @@ class FODAInstitucion extends ActiveRecord
     {
         return [
             self::INCIDENCIA_ALTA => self::INCIDENCIA_ALTA,
-            self::INCIDENCIA_MEDIA => self::INCIDENCIA_MEDIA,
             self::INCIDENCIA_BAJA => self::INCIDENCIA_BAJA,
+            self::INCIDENCIA_MEDIA => self::INCIDENCIA_MEDIA,
         ];
     }
 
@@ -66,6 +66,7 @@ class FODAInstitucion extends ActiveRecord
             [['IdFoda', 'IdGestion'], 'string', 'max' => 36],
             [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 500],
+            [['Incidencia'], 'string', 'max' => 10],
             [['Tipo'], 'in', 'range' => array_values(self::tipos())],
             [['Incidencia'], 'in', 'range' => array_values(self::incidencias())],
             [['CodigoEstado'], 'string', 'max' => 1],
