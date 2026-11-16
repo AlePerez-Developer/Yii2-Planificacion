@@ -7,7 +7,11 @@ use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\formModels\ProgramacionIndicadorDaForm;
 use app\modules\Planificacion\models\Da;
 use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\models\LlavePresupuestaria;
 use app\modules\Planificacion\models\ProgramacionIndicadorDa;
+use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use common\models\Estado;
 use Throwable;
 use Yii;
@@ -127,6 +131,7 @@ class ProgramacionIndicadorDaService
 
         $modelo = ProgramacionIndicadorDa::listOne($form->idIndicador, $form->idDa);
         if ($modelo) {
+            $this->validarSinProgramacion($form->idIndicador, $form->idDa);
             $modelo->delete();
         }
 
@@ -134,6 +139,69 @@ class ProgramacionIndicadorDaService
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
             'data' => 0,
         ];
+    }
+
+    /**
+     * Impide quitar la DA si aún tiene programación anual o trimestral
+     * en llaves de esa dirección administrativa.
+     *
+     * @throws ValidationException
+     */
+    private function validarSinProgramacion(string $idIndicador, string $idDa): void
+    {
+        $tieneAnual = ProgramacionIndicadorGestion::find()
+            ->alias('p')
+            ->innerJoin(
+                ['lp' => LlavePresupuestaria::tableName()],
+                'lp.IdLlavePresupuestaria = p.IdLlavePresupuestaria'
+            )
+            ->innerJoin(
+                ['ue' => UnidadEjecutora::tableName()],
+                'ue.IdUnidadEjecutora = lp.IdUnidadEjecutora'
+            )
+            ->where([
+                'p.IdIndicadorEstrategico' => $idIndicador,
+                'ue.IdDa' => $idDa,
+            ])
+            ->exists();
+
+        $tieneTrimestral = ProgramacionIndicadorTrimestre::find()
+            ->alias('t')
+            ->innerJoin(
+                ['p' => ProgramacionIndicadorGestion::tableName()],
+                'p.IdProgramacionIndicadorGestion = t.IdProgramacionIndicadorGestion'
+            )
+            ->innerJoin(
+                ['lp' => LlavePresupuestaria::tableName()],
+                'lp.IdLlavePresupuestaria = p.IdLlavePresupuestaria'
+            )
+            ->innerJoin(
+                ['ue' => UnidadEjecutora::tableName()],
+                'ue.IdUnidadEjecutora = lp.IdUnidadEjecutora'
+            )
+            ->where([
+                'p.IdIndicadorEstrategico' => $idIndicador,
+                'ue.IdDa' => $idDa,
+            ])
+            ->exists();
+
+        if ($tieneAnual || $tieneTrimestral) {
+            $detalle = [];
+            if ($tieneAnual) {
+                $detalle[] = 'programación anual';
+            }
+            if ($tieneTrimestral) {
+                $detalle[] = 'programación trimestral';
+            }
+
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
+                'No se puede quitar la asignación de la DA porque existe '
+                . implode(' y ', $detalle)
+                . ' en sus llaves. Primero elimine o reinicie esas programaciones.',
+                400
+            );
+        }
     }
 
     /**

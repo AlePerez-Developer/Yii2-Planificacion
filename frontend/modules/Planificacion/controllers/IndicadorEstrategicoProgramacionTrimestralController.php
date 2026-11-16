@@ -12,6 +12,8 @@ use yii\filters\VerbFilter;
 /** @noinspection PhpUnused */
 class IndicadorEstrategicoProgramacionTrimestralController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index'];
+
     private IndicadorEstrategicoProgramacionTrimestralService $service;
 
     public function __construct(
@@ -22,6 +24,18 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
     ) {
         $this->service = $service;
         parent::__construct($id, $module, $config);
+    }
+
+    public function beforeAction($action): bool
+    {
+        if (in_array($action->id, [
+            'listar-indicadores',
+            'obtener-gestion-activa',
+            'listar-programacion',
+        ], true)) {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
     }
 
     public function behaviors(): array
@@ -43,6 +57,7 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
                             'obtener-gestion-activa',
                             'listar-programacion',
                             'guardar-meta',
+                            'eliminar',
                         ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -61,6 +76,7 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
                     'obtener-gestion-activa' => ['post'],
                     'listar-programacion' => ['post'],
                     'guardar-meta' => ['post'],
+                    'eliminar' => ['post'],
                 ],
             ],
         ];
@@ -112,6 +128,16 @@ class IndicadorEstrategicoProgramacionTrimestralController extends BaseControlle
                 $this->obtenerTrimestre(),
                 $this->obtenerMeta()
             );
+        });
+    }
+
+    /**
+     * @noinspection PhpUnused
+     */
+    public function actionEliminar(): array
+    {
+        return $this->withTryCatch(function () {
+            return $this->service->eliminar($this->obtenerIdProgramacion());
         });
     }
 

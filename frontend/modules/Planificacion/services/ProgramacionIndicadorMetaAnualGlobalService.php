@@ -7,7 +7,9 @@ use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\formModels\ProgramacionIndicadorMetaAnualGlobalForm;
 use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\models\PeiGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorMetaAnualGlobal;
+use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
 use common\models\Estado;
 use Yii;
 use yii\db\Exception;
@@ -145,6 +147,12 @@ class ProgramacionIndicadorMetaAnualGlobalService
         }
 
         $modelo = ProgramacionIndicadorMetaAnualGlobal::listOne($form->idIndicador, $form->idGestion);
+        $metaActual = $modelo ? (float)$modelo->Meta : 0.0;
+
+        if ($metaNueva < $metaActual - 0.00001) {
+            $this->validarReduccionMeta($form->idIndicador, $form->idGestion);
+        }
+
         if (!$modelo) {
             $modelo = new ProgramacionIndicadorMetaAnualGlobal([
                 'IdIndicador' => $form->idIndicador,
@@ -189,6 +197,41 @@ class ProgramacionIndicadorMetaAnualGlobalService
                 'completo' => $metaProgramada >= $metaIndicador && $metaIndicador > 0,
             ],
         ];
+    }
+
+    /**
+     * No permite reducir la meta global si ya hay programación anual o trimestral.
+     *
+     * @throws ValidationException
+     */
+    private function validarReduccionMeta(string $idIndicador, string $idGestion): void
+    {
+        $tieneAnual = ProgramacionIndicadorGestion::find()
+            ->where([
+                'IdIndicadorEstrategico' => $idIndicador,
+                'IdGestion' => $idGestion,
+            ])
+            ->exists();
+
+        $tieneTrimestral = ProgramacionIndicadorTrimestre::find()
+            ->alias('t')
+            ->innerJoin(
+                ['p' => ProgramacionIndicadorGestion::tableName()],
+                'p.IdProgramacionIndicadorGestion = t.IdProgramacionIndicadorGestion'
+            )
+            ->where([
+                'p.IdIndicadorEstrategico' => $idIndicador,
+                'p.IdGestion' => $idGestion,
+            ])
+            ->exists();
+
+        if ($tieneAnual || $tieneTrimestral) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
+                'No se puede reducir la programación global porque ya existe programación anual y/o trimestral. Primero elimine o reinicie esas programaciones.',
+                400
+            );
+        }
     }
 
     /**

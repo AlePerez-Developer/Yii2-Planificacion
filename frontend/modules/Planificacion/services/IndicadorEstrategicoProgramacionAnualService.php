@@ -171,6 +171,13 @@ class IndicadorEstrategicoProgramacionAnualService
         );
 
         if ($modelo !== null) {
+            if (ProgramacionAnualDao::enUso($modelo)) {
+                throw new ValidationException(
+                    Yii::$app->params['ERROR_REGISTRO_EN_USO'],
+                    'No se puede eliminar la programación anual porque existe programación trimestral. Primero reinicie la programación trimestral.',
+                    400
+                );
+            }
             $modelo->delete();
         } else {
             $this->validarLlaveAsignable($idIndicadorEstrategico, $idLlavePresupuestaria);
@@ -218,8 +225,8 @@ class IndicadorEstrategicoProgramacionAnualService
         if (ProgramacionAnualDao::enUso($modelo)) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_REGISTRO_EN_USO'],
-                'La programacion ya se encuentra desglosada en trimestres',
-                500
+                'No se puede eliminar la programación anual porque existe programación trimestral. Primero reinicie la programación trimestral.',
+                400
             );
         }
 

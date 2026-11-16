@@ -158,6 +158,9 @@ class ProgramacionIndicadorGestion extends ActiveRecord
      */
     public function getProgramacionesIndicadoresTrimestres(): ActiveQuery
     {
-        return $this->hasMany(ProgramacionIndicadorTrimestre::class, ['IdProgramacionIndicadorGestio' => 'IdProgramacionIndicadorGestio']);
+        return $this->hasMany(
+            ProgramacionIndicadorTrimestre::class,
+            ['IdProgramacionIndicadorGestion' => 'IdProgramacionIndicadorGestion']
+        );
     }
 }

@@ -4,13 +4,17 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
+use app\modules\Planificacion\models\AccionEstrategica;
+use app\modules\Planificacion\models\Da;
 use app\modules\Planificacion\models\Indicador;
 use app\modules\Planificacion\models\IndicadorEstrategico;
 use app\modules\Planificacion\models\ObjetivoEstrategico;
+use app\modules\Planificacion\models\PeiGestion;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorMetaAnualGlobal;
 use app\modules\Planificacion\models\ProgramacionIndicadorTrimestre;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use common\models\Estado;
-use Throwable;
 use Yii;
 use yii\db\Expression;
 
@@ -35,12 +39,24 @@ class IndicadorEstrategicoProgramacionTrimestralService
                 'I.IdIndicador as IdIndicadorEstrategico',
                 'I.Codigo',
                 'ii.Descripcion',
-                'ii.Meta',
+                'Meta' => new Expression('ISNULL(Mg.Meta, ii.Meta)'),
+                'MetaGlobal' => new Expression('ISNULL(Mg.Meta, ii.Meta)'),
                 'MetaProgramada' => new Expression('ISNULL(SUM(P.MetaProgramada), 0)'),
+                'Ac.Codigo as AccionCodigo',
+                'Ac.Descripcion as AccionDescripcion',
             ])
             ->innerJoin(
                 ['ii' => Indicador::tableName()],
-                'ii.IdIndicador = I.IdIndicador '
+                'ii.IdIndicador = I.IdIndicador'
+            )
+            ->leftJoin(
+                ['Ac' => AccionEstrategica::tableName()],
+                'Ac.IdAccionEstrategica = I.IdAccionEstrategica'
+            )
+            ->leftJoin(
+                ['Mg' => ProgramacionIndicadorMetaAnualGlobal::tableName()],
+                'Mg.IdIndicador = I.IdIndicador AND Mg.IdGestion = :idGestionMeta',
+                [':idGestionMeta' => $idGestion]
             )
             ->leftJoin(
                 ['P' => ProgramacionIndicadorGestion::tableName()],
@@ -54,6 +70,9 @@ class IndicadorEstrategicoProgramacionTrimestralService
                 'I.Codigo',
                 'ii.Descripcion',
                 'ii.Meta',
+                'Mg.Meta',
+                'Ac.Codigo',
+                'Ac.Descripcion',
             ])
             ->orderBy(['I.Codigo' => SORT_ASC])
             ->asArray()
@@ -77,8 +96,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
 
     /**
      * Lista las llaves programadas anualmente para un indicador y la gestión activa,
-     * incorporando las metas trimestrales. Si aún no existe el registro trimestral,
-     * devuelve ceros sin crearlo hasta el primer guardado.
+     * incorporando las metas trimestrales.
      */
     public function listarProgramacion(string $idIndicadorEstrategico, string $idGestion): array
     {
@@ -86,17 +104,29 @@ class IndicadorEstrategicoProgramacionTrimestralService
             ->alias('P')
             ->select([
                 'P.IdProgramacionIndicadorGestion',
+                'T.IdProgramacionTrimestral',
                 'L.IdLlavePresupuestaria',
                 'CodigoCompuesto' => 'L.Llave',
-                'L.Descripcion',
+                'Descripcion' => new Expression("CONCAT(Da.Da, '-', Un.Ue, ' ', Un.Descripcion)"),
                 'P.MetaProgramada',
                 'MetaPrimerTrimestre' => new Expression('ISNULL(T.MetaPrimerTrimestre, 0)'),
                 'MetaSegundoTrimestre' => new Expression('ISNULL(T.MetaSegundoTrimestre, 0)'),
                 'MetaTercerTrimestre' => new Expression('ISNULL(T.MetaTercerTrimestre, 0)'),
                 'MetaCuartoTrimestre' => new Expression('ISNULL(T.MetaCuartoTrimestre, 0)'),
-                'TotalTrimestral' => new Expression('ISNULL(T.MetaPrimerTrimestre, 0) + ISNULL(T.MetaSegundoTrimestre, 0) + ISNULL(T.MetaTercerTrimestre, 0) + ISNULL(T.MetaCuartoTrimestre, 0)'),
+                'TotalTrimestral' => new Expression(
+                    'ISNULL(T.MetaPrimerTrimestre, 0) + ISNULL(T.MetaSegundoTrimestre, 0)'
+                    . ' + ISNULL(T.MetaTercerTrimestre, 0) + ISNULL(T.MetaCuartoTrimestre, 0)'
+                ),
             ])
             ->innerJoin(['L' => 'LlavesPresupuestarias'], 'L.IdLlavePresupuestaria = P.IdLlavePresupuestaria')
+            ->innerJoin(
+                ['Un' => UnidadEjecutora::tableName()],
+                'Un.IdUnidadEjecutora = L.IdUnidadEjecutora'
+            )
+            ->innerJoin(
+                ['Da' => Da::tableName()],
+                'Da.IdDa = Un.IdDa'
+            )
             ->leftJoin(
                 ['T' => ProgramacionIndicadorTrimestre::tableName()],
                 'T.IdProgramacionIndicadorGestion = P.IdProgramacionIndicadorGestion'
@@ -110,6 +140,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
             ->all();
 
         foreach ($data as &$fila) {
+            $fila['TieneProgramacionTrimestral'] = !empty($fila['IdProgramacionTrimestral']) ? 1 : 0;
             $fila['ProgramacionCompleta'] = (int)$fila['TotalTrimestral'] >= (int)$fila['MetaProgramada'] ? 1 : 0;
         }
         unset($fila);
@@ -118,7 +149,58 @@ class IndicadorEstrategicoProgramacionTrimestralService
     }
 
     /**
-     * Crea o actualiza una meta trimestral mediante upsert lógico.
+     * Elimina la programación trimestral asociada a una programación anual.
+     *
+     * @throws ValidationException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function eliminar(string $idProgramacionIndicadorGestion): array
+    {
+        $programacionAnual = ProgramacionIndicadorGestion::findOne($idProgramacionIndicadorGestion);
+        if ($programacionAnual === null) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
+                'No se encontró la programación anual.',
+                404
+            );
+        }
+
+        $modelo = ProgramacionIndicadorTrimestre::findOne([
+            'IdProgramacionIndicadorGestion' => $idProgramacionIndicadorGestion,
+        ]);
+
+        if ($modelo === null) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
+                'No existe programación trimestral para reiniciar.',
+                404
+            );
+        }
+
+        if (!$modelo->delete()) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_EJECUCION_SQL'],
+                'No fue posible reiniciar la programación trimestral.',
+                500
+            );
+        }
+
+        return ResponseHelper::success([
+            'MetaPrimerTrimestre' => 0,
+            'MetaSegundoTrimestre' => 0,
+            'MetaTercerTrimestre' => 0,
+            'MetaCuartoTrimestre' => 0,
+            'TotalTrimestral' => 0,
+            'MetaProgramada' => (int)$programacionAnual->MetaProgramada,
+            'ProgramacionCompleta' => 0,
+            'TieneProgramacionTrimestral' => 0,
+            'IdProgramacionTrimestral' => null,
+        ], 'Programación trimestral reiniciada.');
+    }
+
+    /**
+     * Crea o actualiza una meta trimestral.
      */
     public function guardarMeta(string $idProgramacionIndicadorGestio, int $trimestre, int $meta): array
     {
@@ -171,6 +253,19 @@ class IndicadorEstrategicoProgramacionTrimestralService
 
         $modelo->{$atributo} = $meta;
 
+        $totalPropuesto = (int)$modelo->MetaPrimerTrimestre
+            + (int)$modelo->MetaSegundoTrimestre
+            + (int)$modelo->MetaTercerTrimestre
+            + (int)$modelo->MetaCuartoTrimestre;
+
+        if ($totalPropuesto > (int)$programacionAnual->MetaProgramada) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                "La suma trimestral ($totalPropuesto) excede la meta anual programada ({$programacionAnual->MetaProgramada}).",
+                400
+            );
+        }
+
         if (!$modelo->validate()) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_VALIDACION_MODELO'],
@@ -181,7 +276,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
 
         if (!$modelo->save(false)) {
             throw new ValidationException(
-                Yii::$app->params['ERROR_GUARDAR_REGISTRO'],
+                Yii::$app->params['ERROR_EJECUCION_SQL'],
                 'No fue posible guardar la programación trimestral.',
                 500
             );
@@ -193,6 +288,7 @@ class IndicadorEstrategicoProgramacionTrimestralService
             + (int)$modelo->MetaCuartoTrimestre;
 
         return ResponseHelper::success([
+            'IdProgramacionTrimestral' => $modelo->IdProgramacionTrimestral,
             'MetaPrimerTrimestre' => (int)$modelo->MetaPrimerTrimestre,
             'MetaSegundoTrimestre' => (int)$modelo->MetaSegundoTrimestre,
             'MetaTercerTrimestre' => (int)$modelo->MetaTercerTrimestre,
@@ -200,12 +296,13 @@ class IndicadorEstrategicoProgramacionTrimestralService
             'TotalTrimestral' => $total,
             'MetaProgramada' => (int)$programacionAnual->MetaProgramada,
             'ProgramacionCompleta' => $total >= (int)$programacionAnual->MetaProgramada ? 1 : 0,
+            'TieneProgramacionTrimestral' => 1,
         ], 'Meta trimestral actualizada.');
     }
 
-    private function obtenerGestionValidada(string $idGestion): \app\modules\Planificacion\models\PeiGestion
+    private function obtenerGestionValidada(string $idGestion): PeiGestion
     {
-        $gestion = \app\modules\Planificacion\models\PeiGestion::findOne($idGestion);
+        $gestion = PeiGestion::findOne($idGestion);
         if ($gestion === null) {
             throw new ValidationException(
                 Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
