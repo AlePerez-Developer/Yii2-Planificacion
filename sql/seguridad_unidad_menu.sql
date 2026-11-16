@@ -146,6 +146,7 @@ BEGIN
             ('ACT', 'Actividades', 'Planificacion/actividad/index', 'fas fa-clipboard-list', 24),
             ('LLAVE', 'Llaves Presupuestarias', 'Planificacion/llave-presupuestaria/index', 'fas fa-key', 25),
             ('IND_EST', 'Indicadores Estratégicos', 'Planificacion/indicador-estrategico/index', 'fas fa-chart-line', 30),
+            ('IND_EST_DA', 'Asignar Indicador Estratégico a DA', 'Planificacion/indicador-estrategico-da/index', 'fas fa-building', 29),
             ('IND_EST_ANUAL', 'Programación Anual Estratégica', 'Planificacion/indicador-estrategico-programacion-anual/index', 'fas fa-calendar', 31),
             ('IND_EST_TRIM', 'Programación Trimestral Estratégica', 'Planificacion/indicador-estrategico-programacion-trimestral/index', 'fas fa-calendar-alt', 32),
             ('IND_POA', 'Indicadores POA', 'Planificacion/indicador-poa/index', 'fas fa-chart-bar', 40),

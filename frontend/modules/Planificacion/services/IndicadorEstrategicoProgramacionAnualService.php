@@ -4,86 +4,97 @@ namespace app\modules\Planificacion\services;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\models\ProgramacionIndicadorGestion;
+use app\modules\Planificacion\models\ProgramacionIndicadorMetaAnualGlobal;
+use app\modules\Planificacion\models\ProgramacionIndicadorDa;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\models\IndicadorEstrategico;
+use app\modules\Planificacion\models\LlavePresupuestaria;
+use app\modules\Planificacion\models\UnidadEjecutora;
 use app\modules\Planificacion\dao\ProgramacionAnualDao;
 use app\modules\Planificacion\models\PeiGestion;
+use yii\db\Expression;
 use yii\db\StaleObjectException;
 use common\models\Estado;
 use yii\db\Exception;
 use Throwable;
 use Yii;
 
-
-/**
- *
- */
 class IndicadorEstrategicoProgramacionAnualService
 {
     private LlavePresupuestariaService $serviceLlavePresupuestaria;
 
-    public function __construct(
-        LlavePresupuestariaService $serviceLlavePresupuestaria
-    )
+    public function __construct(LlavePresupuestariaService $serviceLlavePresupuestaria)
     {
         $this->serviceLlavePresupuestaria = $serviceLlavePresupuestaria;
     }
 
-    /**
-     * Lista un array de Programaciones no eliminados
-     *
-     * @return array of peis
-     */
-    public  function listarTodo(string $idGestion): array
+    public function listarTodo(string $idGestion): array
     {
         $data = ProgramacionIndicadorGestion::listAllbyGestion()
             ->andWhere(['IdGestion' => $idGestion])
             ->asArray()
             ->all();
-        return ResponseHelper::success($data,'Listado de PEIs obtenido.');
+        return ResponseHelper::success($data, 'Listado de PEIs obtenido.');
     }
 
-    /**
-     * Obtiene un registro de programacion con base en un codigo.
-     *
-     * @param string $id
-     * @return ProgramacionIndicadorGestion|null
-     */
-    public  function listarUno(string $id): ?ProgramacionIndicadorGestion
+    public function listarUno(string $id): ?ProgramacionIndicadorGestion
     {
         return ProgramacionIndicadorGestion::listOne($id);
     }
 
-
     /**
-     * Lista un array de Indicadores Estrategicos no eliminados según un, Id Objetivo Estrategico
-     *
-     * @return array of Indicadores Estategicos segun
+     * Indicadores del objetivo con meta global (MetaAnualGlobal) y meta programada en llaves.
      */
     public function listarIndicadoresbyObjConProgramacion(string $id): array
     {
+        $idPei = Yii::$app->contexto->getPei();
+
         $data = IndicadorEstrategico::listAll()
-            ->addSelect(['isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'])
+            ->addSelect([
+                'MetaProgramada' => new Expression('ISNULL(SUM(Ip.MetaProgramada), 0)'),
+            ])
             ->joinWith('programacionesIndicadoresGestiones Ip')
             ->andWhere(['I.IdObjEstrategico' => $id])
             ->orderBy(['Codigo' => SORT_ASC])
-            ->asArray()->all();
+            ->asArray()
+            ->all();
+
+        $metasGlobales = ProgramacionIndicadorMetaAnualGlobal::find()
+            ->alias('mg')
+            ->select([
+                'mg.IdIndicador',
+                'MetaGlobal' => new Expression('ISNULL(SUM(mg.Meta), 0)'),
+            ])
+            ->innerJoin(['g' => PeiGestion::tableName()], 'g.IdGestion = mg.IdGestion')
+            ->where(['g.IdPei' => $idPei])
+            ->andWhere(['<>', 'g.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->groupBy(['mg.IdIndicador'])
+            ->asArray()
+            ->all();
+
+        $mapGlobal = [];
+        foreach ($metasGlobales as $item) {
+            $mapGlobal[$item['IdIndicador']] = (float)$item['MetaGlobal'];
+        }
+
+        foreach ($data as &$row) {
+            $row['MetaGlobal'] = $mapGlobal[$row['IdIndicador']] ?? 0.0;
+            // Compatibilidad con UI previa que leía Meta
+            $row['Meta'] = $row['MetaGlobal'];
+            $row['MetaProgramada'] = (float)($row['MetaProgramada'] ?? 0);
+        }
+        unset($row);
 
         return ResponseHelper::success($data, 'Listado de Indicadores Estrategicos por Objetivo obtenido.');
     }
 
-
-    /**
-     * Lista de gestiones de un pei en específico
-     *
-     * @param string $id
-     * @param string $idIndicadorEstrategico
-     * @return array of peiGestion
-     */
     public function listarGestionesbyPei(string $id, string $idIndicadorEstrategico): array
     {
         $data = PeiGestion::listAll()
-            ->addSelect(['isnull(sum(Ip.MetaProgramada),0) as MetaProgramada'])
+            ->addSelect([
+                'MetaProgramada' => new Expression('ISNULL(SUM(Ip.MetaProgramada), 0)'),
+                'MetaGlobal' => new Expression('ISNULL(MAX(Mg.Meta), 0)'),
+            ])
             ->joinWith([
                 'gestionProgramacion Ip' => function ($query) use ($idIndicadorEstrategico) {
                     $query->andOnCondition([
@@ -91,21 +102,20 @@ class IndicadorEstrategicoProgramacionAnualService
                     ]);
                 },
             ])
+            ->leftJoin(
+                ['Mg' => ProgramacionIndicadorMetaAnualGlobal::tableName()],
+                'Mg.IdGestion = G.IdGestion AND Mg.IdIndicador = :idIndicadorMeta',
+                [':idIndicadorMeta' => $idIndicadorEstrategico]
+            )
             ->andWhere(['G.IdPei' => $id])
             ->orderBy(['G.Gestion' => SORT_ASC])
-            ->asArray()->all();
+            ->asArray()
+            ->all();
 
         return ResponseHelper::success($data, 'Listado de gestiones obtenido.');
     }
 
-
     /**
-     * Lista de programaciones de una gestion y un indicador
-     *
-     * @param int $codigoIndicador
-     * @param int $gestion
-     * @param string $pei
-     * @return array
      * @throws ValidationException
      */
     public function listarProgramacionbyGestion(int $codigoIndicador, int $gestion, string $pei): array
@@ -116,18 +126,13 @@ class IndicadorEstrategicoProgramacionAnualService
         $data = ProgramacionIndicadorGestion::listAllbyGestion()
             ->andWhere(['I.IdIndicador' => $idIndicador])
             ->andWhere(['P.IdGestion' => $idGestion])
-            ->asArray()->all();
+            ->asArray()
+            ->all();
 
         return ResponseHelper::success($data, 'Listado de programaciones obtenido.');
     }
 
     /**
-     * Lista de llaves presupuestarias
-     *
-     * @param int $codigoIndicador
-     * @param int $gestion
-     * @param string $pei
-     * @return array
      * @throws ValidationException
      */
     public function listarLlavesPresupuestarias(int $codigoIndicador, int $gestion, string $pei): array
@@ -135,19 +140,19 @@ class IndicadorEstrategicoProgramacionAnualService
         $idIndicador = $this->obtenerIdIndicador($codigoIndicador, $pei);
         $idGestion = $this->obtenerIdGestion($gestion, $pei);
 
+        $tieneDas = ProgramacionIndicadorDa::find()
+            ->where(['IdIndicador' => $idIndicador])
+            ->exists();
+
+        if (!$tieneDas) {
+            return ResponseHelper::success([], 'El indicador no tiene DAs asignadas.');
+        }
+
         $data = $this->serviceLlavePresupuestaria->listAllbyProgramacion($idIndicador, $idGestion);
         return ResponseHelper::success($data, 'Listado de llaves presupuestarias obtenido.');
     }
 
-
     /**
-     * agrega o elimina la relacion de llavepresupuestaria
-     *
-     * @param $idLlavePresupuestaria
-     * @param $codigoIndicador
-     * @param $gestion
-     * @param $pei
-     * @return array
      * @throws Exception
      * @throws StaleObjectException
      * @throws ValidationException
@@ -168,6 +173,8 @@ class IndicadorEstrategicoProgramacionAnualService
         if ($modelo !== null) {
             $modelo->delete();
         } else {
+            $this->validarLlaveAsignable($idIndicadorEstrategico, $idLlavePresupuestaria);
+
             $modelo = new ProgramacionIndicadorGestion([
                 'IdIndicadorEstrategico' => $idIndicadorEstrategico,
                 'IdGestion' => $idGestion,
@@ -176,7 +183,13 @@ class IndicadorEstrategicoProgramacionAnualService
                 'CodigoUsuario' => Yii::$app->user->identity->CodigoUsuario ?? null,
             ]);
             $data = 1;
-            $modelo->save();
+            if (!$modelo->save()) {
+                throw new ValidationException(
+                    Yii::$app->params['ERROR_EJECUCION_SQL'],
+                    $modelo->getErrors(),
+                    500
+                );
+            }
         }
 
         return [
@@ -186,21 +199,31 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * Quita una programacion del modelo
-     * @param string $idProgramacion
-     * @return array
      * @throws StaleObjectException
      * @throws Throwable
+     * @throws ValidationException
      */
     public function quitarProgramacion(string $idProgramacion): array
     {
         $modelo = ProgramacionIndicadorGestion::findOne($idProgramacion);
 
-        if (ProgramacionAnualDao::enUso($modelo)){
-            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_EN_USO'],'La programacion ya se encuentra desglosada en trimestres',500);
+        if (!$modelo) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
+                'Programación no encontrada.',
+                404
+            );
         }
 
-        $modelo?->delete();
+        if (ProgramacionAnualDao::enUso($modelo)) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_EN_USO'],
+                'La programacion ya se encuentra desglosada en trimestres',
+                500
+            );
+        }
+
+        $modelo->delete();
 
         return [
             'message' => Yii::$app->params['PROCESO_CORRECTO'],
@@ -209,11 +232,6 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * registra un nuevo valor de meta
-     *
-     * @param string $idProgramacion
-     * @param int $meta
-     * @return array
      * @throws Exception
      * @throws ValidationException
      */
@@ -226,23 +244,22 @@ class IndicadorEstrategicoProgramacionAnualService
             throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Meta programada invalida.', 400);
         }
 
+        $this->validarMetaContraGlobal($modelo, $metaProgramada);
+
         $modelo->MetaProgramada = $metaProgramada;
 
         return $this->validarProcesarModelo($modelo);
     }
 
     /**
-     * @param string $codigo
-     * @param string $pei
-     * @return array
      * @throws ValidationException
      */
     public function calcularMeta(string $codigo, string $pei): array
     {
-        $idIndicadorEstrategico = $this->obtenerIdIndicador($codigo, $pei);
+        $idIndicadorEstrategico = $this->obtenerIdIndicador((int)$codigo, $pei);
         $total = ProgramacionIndicadorGestion::find()
             ->where([
-                'IdIndicadorEstrategico' => $idIndicadorEstrategico
+                'IdIndicadorEstrategico' => $idIndicadorEstrategico,
             ])
             ->sum('MetaProgramada') ?? 0;
 
@@ -253,10 +270,6 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * @param string $idIndicadorEstrategico
-     * @param int $gestion
-     * @param string $pei
-     * @return array
      * @throws ValidationException
      */
     public function calcularMetaGestion(string $idIndicadorEstrategico, int $gestion, string $pei): array
@@ -265,7 +278,7 @@ class IndicadorEstrategicoProgramacionAnualService
         $total = ProgramacionIndicadorGestion::find()
             ->where([
                 'IdIndicadorEstrategico' => $idIndicadorEstrategico,
-                'IdGestion' => $idGestion
+                'IdGestion' => $idGestion,
             ])
             ->sum('MetaProgramada') ?? 0;
 
@@ -279,8 +292,7 @@ class IndicadorEstrategicoProgramacionAnualService
         string $idIndicadorEstrategico,
         string $idGestion,
         string $idLlavePresupuestaria
-    ): ?ProgramacionIndicadorGestion
-    {
+    ): ?ProgramacionIndicadorGestion {
         return ProgramacionIndicadorGestion::findOne([
             'IdIndicadorEstrategico' => $idIndicadorEstrategico,
             'IdGestion' => $idGestion,
@@ -289,38 +301,45 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * Obtiene el modelo según el codigo enviado y válida si existe.
-     *
-     * @param string $id
-     * @return ProgramacionIndicadorGestion|null
      * @throws ValidationException
      */
-    private function obtenerModeloValidado(string $id): ?ProgramacionIndicadorGestion
+    private function obtenerModeloValidado(string $id): ProgramacionIndicadorGestion
     {
         $model = $this->listarUno($id);
         if (!$model) {
-            throw new ValidationException(Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],'No se encontro el registro buscado',404);
+            throw new ValidationException(
+                Yii::$app->params['ERROR_REGISTRO_NO_ENCONTRADO'],
+                'No se encontro el registro buscado',
+                404
+            );
         }
         return $model;
     }
 
     /**
-     *  Recibe un modelo lo valida y realiza el guardado del mismo.
-     *
-     * @param ProgramacionIndicadorGestion $model
-     * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
     public function validarProcesarModelo(ProgramacionIndicadorGestion $model): array
     {
         if (!$model->validate()) {
-            throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$model->getErrors(),500);
+            throw new ValidationException(
+                Yii::$app->params['ERROR_VALIDACION_MODELO'],
+                $model->getErrors(),
+                500
+            );
         }
 
         if (!$model->save(false)) {
-            Yii::error("Error al guardar el cambio de estado de la programacion  $model->IdProgramacionIndicadorGestio", __METHOD__);
-            throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$model->getErrors(),500);
+            Yii::error(
+                "Error al guardar el cambio de estado de la programacion  $model->IdProgramacionIndicadorGestion",
+                __METHOD__
+            );
+            throw new ValidationException(
+                Yii::$app->params['ERROR_EJECUCION_SQL'],
+                $model->getErrors(),
+                500
+            );
         }
 
         return [
@@ -330,10 +349,94 @@ class IndicadorEstrategicoProgramacionAnualService
     }
 
     /**
-     * Válida que el indicador exista y pertenezca al PEI actual.
-     * @param int $codigo
-     * @param string $pei
-     * @return string
+     * @throws ValidationException
+     */
+    private function validarLlaveAsignable(string $idIndicador, string $idLlavePresupuestaria): void
+    {
+        $llave = LlavePresupuestaria::find()
+            ->alias('lp')
+            ->innerJoin(
+                ['Un' => UnidadEjecutora::tableName()],
+                'Un.IdUnidadEjecutora = lp.IdUnidadEjecutora'
+            )
+            ->innerJoin(
+                ['pida' => ProgramacionIndicadorDa::tableName()],
+                'pida.IdDa = Un.IdDa AND pida.IdIndicador = :idIndicador',
+                [':idIndicador' => $idIndicador]
+            )
+            ->where(['lp.IdLlavePresupuestaria' => $idLlavePresupuestaria])
+            ->andWhere(['!=', 'lp.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->one();
+
+        if (!$llave) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'La llave no pertenece a una DA asignada al indicador estratégico.',
+                400
+            );
+        }
+    }
+
+    /**
+     * Valida que la meta de la llave no exceda MetaAnualGlobal de la gestión
+     * ni la meta global total del indicador.
+     *
+     * @throws ValidationException
+     */
+    private function validarMetaContraGlobal(ProgramacionIndicadorGestion $modelo, int $nuevaMeta): void
+    {
+        $metaGlobalGestion = ProgramacionIndicadorMetaAnualGlobal::find()
+            ->where([
+                'IdIndicador' => $modelo->IdIndicadorEstrategico,
+                'IdGestion' => $modelo->IdGestion,
+            ])
+            ->one();
+
+        $topeGestion = $metaGlobalGestion ? (float)$metaGlobalGestion->Meta : 0.0;
+
+        $sumaGestion = (float)(ProgramacionIndicadorGestion::find()
+            ->where([
+                'IdIndicadorEstrategico' => $modelo->IdIndicadorEstrategico,
+                'IdGestion' => $modelo->IdGestion,
+            ])
+            ->andWhere(['<>', 'IdProgramacionIndicadorGestion', $modelo->IdProgramacionIndicadorGestion])
+            ->sum('MetaProgramada') ?? 0);
+
+        $totalGestion = $sumaGestion + $nuevaMeta;
+
+        if ($totalGestion > $topeGestion) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                "La meta programada ($totalGestion) excede la meta global de la gestión ($topeGestion).",
+                400
+            );
+        }
+
+        $idPei = Yii::$app->contexto->getPei();
+        $topeGlobal = (float)(ProgramacionIndicadorMetaAnualGlobal::find()
+            ->alias('mg')
+            ->innerJoin(['g' => PeiGestion::tableName()], 'g.IdGestion = mg.IdGestion')
+            ->where(['mg.IdIndicador' => $modelo->IdIndicadorEstrategico])
+            ->andWhere(['g.IdPei' => $idPei])
+            ->andWhere(['<>', 'g.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->sum('mg.Meta') ?? 0);
+
+        $sumaTotal = (float)(ProgramacionIndicadorGestion::find()
+            ->where(['IdIndicadorEstrategico' => $modelo->IdIndicadorEstrategico])
+            ->andWhere(['<>', 'IdProgramacionIndicadorGestion', $modelo->IdProgramacionIndicadorGestion])
+            ->sum('MetaProgramada') ?? 0);
+
+        $totalIndicador = $sumaTotal + $nuevaMeta;
+        if ($totalIndicador > $topeGlobal) {
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                "La meta programada ($totalIndicador) excede la meta global del indicador ($topeGlobal).",
+                400
+            );
+        }
+    }
+
+    /**
      * @throws ValidationException
      */
     private function obtenerIdIndicador(int $codigo, string $pei): string
@@ -349,17 +452,17 @@ class IndicadorEstrategicoProgramacionAnualService
             ->one();
 
         if (!$modelo) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'El codigo de Indicador estrategico no es valido en el contexto', 500);
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'El codigo de Indicador estrategico no es valido en el contexto',
+                500
+            );
         }
 
         return $modelo->IdIndicador;
     }
 
     /**
-     * Válida que la gestion exista y pertenezca al PEI actual.
-     * @param int $gestion
-     * @param string $pei
-     * @return string
      * @throws ValidationException
      */
     private function obtenerIdGestion(int $gestion, string $pei): string
@@ -371,10 +474,13 @@ class IndicadorEstrategicoProgramacionAnualService
             ->one();
 
         if (!$modelo) {
-            throw new ValidationException(Yii::$app->params['ERROR_ENVIO_DATOS'], 'Gestion invalida para el PEI actual.', 400);
+            throw new ValidationException(
+                Yii::$app->params['ERROR_ENVIO_DATOS'],
+                'Gestion invalida para el PEI actual.',
+                400
+            );
         }
 
         return $modelo->IdGestion;
     }
-
 }

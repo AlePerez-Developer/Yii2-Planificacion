@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  * This is the model class for table "AccionesEstrategicas".
  *
  * @property string $IdAccionEstrategica
+ * @property int $Codigo
  * @property string $Descripcion
  * @property string $CodigoEstado
  * @property string $FechaHoraRegistro
@@ -38,7 +39,8 @@ class AccionEstrategica extends ActiveRecord
     {
         return [
             [['IdAccionEstrategica'], 'string'],
-            [['Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Codigo', 'Descripcion', 'CodigoEstado', 'CodigoUsuario'], 'required'],
+            [['Codigo'], 'integer', 'message' => 'El código debe ser un valor numérico.'],
             [['FechaHoraRegistro'], 'safe'],
             [['Descripcion'], 'string', 'max' => 500],
             [['CodigoEstado'], 'string', 'max' => 1],
@@ -56,6 +58,7 @@ class AccionEstrategica extends ActiveRecord
     {
         return [
             'IdAccionEstrategica' => 'Id Accion Estrategica',
+            'Codigo' => 'Codigo',
             'Descripcion' => 'Descripcion',
             'CodigoEstado' => 'Codigo Estado',
             'FechaHoraRegistro' => 'Fecha Hora Registro',
@@ -64,18 +67,18 @@ class AccionEstrategica extends ActiveRecord
     }
 
     /**
-     * Busca una Accion específica por código, excluyendo eliminados
+     * Busca una Accion específica por id, excluyendo eliminados
      *
      * @param string $id
-     * @return Programa|null
+     * @return AccionEstrategica|null
      */
     public static function listOne(string $id): ?AccionEstrategica
     {
-        return self::findOne(['IdAccionEstrategica' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdAccionEstrategica' => $id, ['!=', 'CodigoEstado', Estado::ESTADO_ELIMINADO]]);
     }
 
     /**
-     * Obtiene todas las actividades activas (no eliminados)
+     * Obtiene todas las acciones activas (no eliminadas)
      *
      * @param string $search
      * @return ActiveQuery
@@ -85,21 +88,29 @@ class AccionEstrategica extends ActiveRecord
         return self::find()->alias('A')
             ->select([
                 'A.IdAccionEstrategica',
+                'A.Codigo',
                 'A.Descripcion',
                 'A.CodigoEstado',
                 'A.CodigoUsuario',
             ])
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->andwhere(['like', 'A.Descripcion', $search, false]);
+            ->andwhere(['like', 'A.Descripcion', $search, false])
+            ->orderBy(['A.Codigo' => SORT_ASC]);
     }
 
     /**
-     * Alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C, o fuerza un estado si se envía.
      *
+     * @param string|null $codigoEstado
      * @return void
      */
-    public function cambiarEstado(): void
+    public function cambiarEstado(?string $codigoEstado = null): void
     {
+        if ($codigoEstado === Estado::ESTADO_VIGENTE || $codigoEstado === Estado::ESTADO_CADUCO) {
+            $this->CodigoEstado = $codigoEstado;
+            return;
+        }
+
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
@@ -116,7 +127,7 @@ class AccionEstrategica extends ActiveRecord
     }
 
     /**
-     * Gets a query for [[LlavesPresupuestarias]].
+     * Gets a query for [[IndicadoresEstrategicos]].
      *
      * @return ActiveQuery
      */

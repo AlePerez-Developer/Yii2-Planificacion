@@ -69,7 +69,7 @@ class LlavePresupuestaria extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'IdLlavePresupuestaria' => 'Id Llave Presupuestaria',
+            'IdLlavePresupuestaria' => 'Id Llave',
             'IdUnidadEjecutora' => 'Id Unidad',
             'IdProyecto' => 'Id Proyecto',
             'IdActividad' => 'Id Actividad',
@@ -141,21 +141,42 @@ class LlavePresupuestaria extends ActiveRecord
         ];
     }
 
+    /**
+     * Lista llaves para programación anual, restringidas a DAs asignadas al indicador.
+     */
     public static function listAllbyProgramacion(string $idIndicadorEstrategico, string $idGestion): array
     {
-        return LlavePresupuestaria::find()
+        return self::find()
             ->alias('lp')
             ->select([
                 'lp.IdLlavePresupuestaria',
                 'lp.Llave',
+                'Descripcion' => new Expression("CONCAT(Da.Da, '-', Un.Ue, ' ', Un.Descripcion)"),
+                'Da.Da',
+                'Da.IdDa',
                 'Estado' => new Expression("
-                    CASE 
-                        WHEN pig.IdProgramacionIndicadorGestion IS NOT NULL 
-                        THEN 1 
-                        ELSE 0 
+                    CASE
+                        WHEN pig.IdProgramacionIndicadorGestion IS NOT NULL
+                        THEN 1
+                        ELSE 0
                     END
-                ")
+                "),
             ])
+            ->innerJoin(
+                ['Un' => UnidadEjecutora::tableName()],
+                'Un.IdUnidadEjecutora = lp.IdUnidadEjecutora AND Un.CodigoEstado <> :estadoEliminado',
+                [':estadoEliminado' => Estado::ESTADO_ELIMINADO]
+            )
+            ->innerJoin(
+                ['Da' => Da::tableName()],
+                'Da.IdDa = Un.IdDa AND Da.CodigoEstado <> :estadoEliminadoDa',
+                [':estadoEliminadoDa' => Estado::ESTADO_ELIMINADO]
+            )
+            ->innerJoin(
+                ['pida' => ProgramacionIndicadorDa::tableName()],
+                'pida.IdDa = Un.IdDa AND pida.IdIndicador = :idIndicadorDa',
+                [':idIndicadorDa' => $idIndicadorEstrategico]
+            )
             ->leftJoin(
                 ['pig' => ProgramacionIndicadorGestion::tableName()],
                 'pig.IdLlavePresupuestaria = lp.IdLlavePresupuestaria
@@ -163,10 +184,11 @@ class LlavePresupuestaria extends ActiveRecord
                     AND pig.IdGestion = :idGestion',
                 [
                     ':idIndicador' => $idIndicadorEstrategico,
-                    ':idGestion' => $idGestion
+                    ':idGestion' => $idGestion,
                 ]
             )
-            ->orderBy(['lp.Llave' => SORT_ASC])
+            ->where(['!=', 'lp.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->orderBy(['Da.Da' => SORT_ASC, 'lp.Llave' => SORT_ASC])
             ->asArray()
             ->all();
     }

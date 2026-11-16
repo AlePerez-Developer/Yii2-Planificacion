@@ -5,10 +5,11 @@ let indicadorEstrategico_s2CategoriaIndicador = $('#idCategoriaIndicador')
 let indicadorEstrategico_s2UnidadIndicador = $('#idUnidadIndicador')
 
 let indicadorEstrategico_s2AccionEstrategica = $('#idAccionEstrategica')
-$(document).ready(function() {
+
+$(document).ready(function () {
+    const $modal = $('#modalIndicadorEstrategico')
 
     populateS2ObjEstrategico(indicadorEstrategico_s2ObjEstrategico)
-
     populateS2TiposResultados(indicadorEstrategico_s2TipoResultado)
     populateS2CategoriasIndicadores(indicadorEstrategico_s2CategoriaIndicador)
     populateS2UnidadesIndicadores(indicadorEstrategico_s2UnidadIndicador)
@@ -16,8 +17,9 @@ $(document).ready(function() {
 
     indicadorEstrategico_s2ObjEstrategico.select2({
         theme: 'bootstrap4',
-        placeholder: "Selecciones un objetivo estrategico",
+        placeholder: 'Seleccione un objetivo estratégico',
         allowClear: true,
+        dropdownParent: $modal,
         templateResult: select2HtmlFormat,
         templateSelection: select2HtmlFormat,
         matcher: select2MatchSearch
@@ -25,70 +27,68 @@ $(document).ready(function() {
 
     indicadorEstrategico_s2TipoResultado.select2({
         theme: 'bootstrap4',
-        placeholder: "Elija un tipo de resultado",
+        placeholder: 'Elija un tipo de resultado',
         allowClear: true,
+        dropdownParent: $modal,
     })
 
     indicadorEstrategico_s2CategoriaIndicador.select2({
         theme: 'bootstrap4',
-        placeholder: "Elija una categoria de indicador",
+        placeholder: 'Elija una categoría de indicador',
         allowClear: true,
+        dropdownParent: $modal,
     })
 
     indicadorEstrategico_s2UnidadIndicador.select2({
         theme: 'bootstrap4',
-        placeholder: "Elija una unidad de indicador",
+        placeholder: 'Elija una unidad de indicador',
         allowClear: true,
+        dropdownParent: $modal,
     })
 
     indicadorEstrategico_s2AccionEstrategica.select2({
         theme: 'bootstrap4',
-        placeholder: "Elija una accion estrategica",
+        placeholder: 'Elija una acción estratégica',
         allowClear: true,
+        dropdownParent: $modal,
     })
 
     function select2HtmlFormat(repo) {
         if (repo.loading) {
-            return repo.text;
+            return repo.text
         }
-        if (repo.id === "")
-        {
+        if (repo.id === '') {
             return repo.text
         }
         return $(`
         <div class='mi-render-select2'>
-            <div class='titulo-producto'>Codigo: ${repo.compuesto} </div>
-            <div class='titulo-producto'> ${repo.text} </div>
-            <div class='subtitulo-producto'>  ${repo.producto} </div>
+            <div class='titulo-producto'>Código: ${repo.compuesto}</div>
+            <div class='titulo-producto'>${repo.text}</div>
+            <div class='subtitulo-producto'>${repo.producto || ''}</div>
         </div>
     `)
     }
 
     function select2MatchSearch(params, data) {
-
         if ($.trim(params.term) === '') {
-            return data;
+            return data
         }
 
         if (typeof data.text === 'undefined') {
-            return null;
+            return null
         }
 
-        let contenidoBusqueda = params.term.toLowerCase();
+        const contenidoBusqueda = params.term.toLowerCase()
+        const texto = (data.text || '').toLowerCase()
+        const compuesto = (data.compuesto || '').toLowerCase()
+        const producto = (data.producto || '').toLowerCase()
 
-        let texto = (data.text || '').toLowerCase();
-        let compuesto = (data.compuesto || '').toLowerCase();
-        let producto = (data.producto || '').toLowerCase();
-
-        if (texto.indexOf(contenidoBusqueda) > -1 ||
-            compuesto.indexOf(contenidoBusqueda) > -1 ||
-            producto.indexOf(contenidoBusqueda) > -1) {
-
-            return data;
+        if (texto.indexOf(contenidoBusqueda) > -1
+            || compuesto.indexOf(contenidoBusqueda) > -1
+            || producto.indexOf(contenidoBusqueda) > -1) {
+            return data
         }
 
-        return null;
+        return null
     }
-
-});
-
+})

@@ -3,7 +3,6 @@ namespace app\modules\Planificacion\controllers;
 
 use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\services\ObjetivoEstrategicoService;
-use app\modules\Planificacion\services\ReporteForm1Service;
 use app\modules\Planificacion\formModels\ObjetivoEstrategicoForm;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
@@ -21,15 +20,12 @@ class ObjEstrategicoController extends BaseController
     protected array $accionesSinValidacion = ['index', 'reporte'];
 
     private ObjetivoEstrategicoService $service;
-    private ReporteForm1Service $reporteService;
 
     public function __construct($id, $module,
                                 ObjetivoEstrategicoService $service,
-                                ReporteForm1Service $reporteService,
                                 $config = [])
     {
         $this->service = $service;
-        $this->reporteService = $reporteService;
         parent::__construct($id, $module, $config);
     }
 
@@ -64,6 +60,7 @@ class ObjEstrategicoController extends BaseController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
+                    'reporte' => ['get'],
                 ],
             ],
         ];
@@ -83,7 +80,6 @@ class ObjEstrategicoController extends BaseController
      */
     public function actionIndex(): string
     {
-        return $this->render('bla');
         return $this->render('objEstrategico');
     }
 
@@ -171,7 +167,8 @@ class ObjEstrategicoController extends BaseController
     {
         return $this->withTryCatch(function() {
             $id = $this->obtenerId();
-            return $this->service->cambiarEstado($id);
+            $codigoEstado = Yii::$app->request->post('codigoEstado');
+            return $this->service->cambiarEstado($id, $codigoEstado ?: null);
         });
     }
 
@@ -250,23 +247,28 @@ class ObjEstrategicoController extends BaseController
     }
 
     /**
+     * Genera el PDF del listado de objetivos estratégicos institucionales.
+     *
      * @throws MpdfException
      * @noinspection PhpUnused
      */
     public function actionReporte(): void
     {
-        [$idGestion, $idUnidad, $idEstadoPoa] = $this->obtenerContextoReporte();
-        $reporte = $this->reporteService->listarParaReporte($idGestion, $idUnidad, $idEstadoPoa);
+        $registros = [];
+        if (Yii::$app->contexto->getPei() !== '') {
+            $listado = $this->service->listarTodo();
+            $registros = $listado['data'] ?? [];
+        }
 
         $usuario = Yii::$app->user->identity;
-        $persona = $usuario->persona ?? null;
+        $persona = $usuario?->persona ?? null;
         $nombreUsuario = trim(implode(' ', array_filter([
             $persona->Nombres ?? '',
             $persona->Paterno ?? '',
             $persona->Materno ?? '',
         ])));
         if ($nombreUsuario === '') {
-            $nombreUsuario = (string)($usuario->CodigoUsuario ?? '');
+            $nombreUsuario = (string)($usuario?->CodigoUsuario ?? '');
         }
 
         $mpdf = new Mpdf([
@@ -282,36 +284,16 @@ class ObjEstrategicoController extends BaseController
             '<table class="reporte-footer" width="100%">'
             . '<tr>'
             . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
-            . ' (' . htmlspecialchars((string)($usuario->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . ' (' . htmlspecialchars((string)($usuario?->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
             . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
             . '<td width="40%" align="right">Fecha y hora de impresión: '
             . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
             . '</tr></table>'
         );
-        $mpdf->WriteHTML($this->renderPartial('reporte', $reporte));
-        $mpdf->Output('Formulario-1-OGI.pdf', 'I');
-    }
-
-    /**
-     * @return array{0: string, 1: string, 2: string}
-     * @throws ValidationException
-     */
-    private function obtenerContextoReporte(): array
-    {
-        $contexto = Yii::$app->userContext->contexto();
-        $idGestion = (string)($contexto?->IdGestion ?? '');
-        $idUnidad = (string)($contexto?->IdUnidadEjecutora ?? '');
-        $idEstadoPoa = (string)($contexto?->IdEstadoPoa ?? '');
-
-        if ($idGestion === '' || $idUnidad === '' || $idEstadoPoa === '') {
-            throw new ValidationException(
-                Yii::$app->params['ERROR_ENVIO_DATOS'],
-                'Debe seleccionar gestión, unidad ejecutora y estado POA.',
-                400
-            );
-        }
-
-        return [$idGestion, $idUnidad, $idEstadoPoa];
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('Objetivos-Estrategicos.pdf', 'I');
     }
 
     /**

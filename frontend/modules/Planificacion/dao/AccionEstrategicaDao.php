@@ -16,5 +16,4 @@ class AccionEstrategicaDao
     {
         return AccionEstrategica::find()->where(['IdAccionEstrategica' => $id, 'CodigoEstado' => Estado::ESTADO_VIGENTE])->exists();
     }
-
 }

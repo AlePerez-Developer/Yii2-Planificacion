@@ -34,7 +34,7 @@ $usaIngresos = (bool)$unidad?->usaIngresosGlobales();
             <!-- Primera fila -->
             <div class="menu-row<?= $hayUnidad ? '' : ' menu-row-only' ?>">
 
-                <?php if ($ver('Planificacion/peis/index') || $ver('Planificacion/obj-estrategico/index') || $ver('Planificacion/area-estrategica/index') || $ver('Planificacion/politica-estrategica/index') || $ver('Planificacion/accion-estrategica/index') || $ver('Planificacion/indicador-estrategico-accion/index')): ?>
+                <?php if ($ver('Planificacion/peis/index') || $ver('Planificacion/obj-estrategico/index') || $ver('Planificacion/area-estrategica/index') || $ver('Planificacion/politica-estrategica/index') || $ver('Planificacion/accion-estrategica/index') || $ver('Planificacion/indicador-estrategico-accion/index') || $ver('Planificacion/indicador-estrategico-da/index')): ?>
                     <div class="dropdown">
                         <button class="dropbtn">PEI ▾</button>
                         <div class="dropdown-content">
@@ -76,7 +76,7 @@ $usaIngresos = (bool)$unidad?->usaIngresosGlobales();
 
                             <div class="dropdown-divider"></div>
 
-                            <?php if ($ver('Planificacion/indicador-estrategico-accion/index')): ?>
+                            <?php if ($ver('Planificacion/indicador-estrategico/index') || $ver('Planificacion/indicador-estrategico-da/index') || $ver('Planificacion/indicador-estrategico-programacion-global/index') || $ver('Planificacion/indicador-estrategico-programacion-anual/index')): ?>
                                 <div class="submenu">
                                     <a href="#" class="submenu-btn">
                                         <span>Indicadores Estrategicos</span>
@@ -90,13 +90,12 @@ $usaIngresos = (bool)$unidad?->usaIngresosGlobales();
                                             href="<?= Url::to(['/Planificacion/indicador-estrategico/index']) ?>">
                                                 Manejar Indicadores</a><?php endif; ?>
 
-                                        <?php if ($ver('Planificacion/indicador-estrategico-programacion-anual/index')): ?>
-                                        <a
-                                                href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-anual/index']) ?>">
+                                        <?php if ($ver('Planificacion/indicador-estrategico-da/index')): ?>
+                                        <a href="<?= Url::to(['/Planificacion/indicador-estrategico-da/index']) ?>">
                                                 Asignar Indicador Estrategico</a><?php endif; ?>
-                                        <?php if ($ver('Planificacion/indicador-estrategico-programacion-anual/index')): ?>
+                                        <?php if ($ver('Planificacion/indicador-estrategico-programacion-global/index') || $ver('Planificacion/indicador-estrategico-programacion-anual/index')): ?>
                                         <a
-                                                href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-anual/index']) ?>">
+                                                href="<?= Url::to(['/Planificacion/indicador-estrategico-programacion-global/index']) ?>">
                                                 Programacion Global</a><?php endif; ?>
 
                                         <?php if ($ver('Planificacion/indicador-estrategico-programacion-anual/index')): ?>

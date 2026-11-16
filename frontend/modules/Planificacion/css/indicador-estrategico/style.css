@@ -1,18 +1,150 @@
-/*******************Select2 css***********************/
-span .select2-selection.select2-selection--single{
+.ie-col-headers {
+    grid-template-columns: 1fr 8fr 2fr 3fr;
+}
+
+.ie-card-row {
+    grid-template-columns: 1fr 8fr 2fr 3fr !important;
+}
+
+.ie-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.ie-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#modalIndicadorEstrategico.modal .modal-dialog {
+    width: 100%;
+    max-width: 760px;
+    margin: 1.75rem auto;
+    height: auto !important;
+    max-height: none !important;
+}
+
+#modalIndicadorEstrategico .modal-content,
+#modalIndicadorEstrategico .da-modal-content {
+    display: block;
+    height: auto !important;
+    max-height: none !important;
+    flex: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: visible;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .12);
+}
+
+#modalIndicadorEstrategico .modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    background: #f8fafc;
+}
+
+#modalIndicadorEstrategico .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+#modalIndicadorEstrategico .modal-body {
+    padding: 14px 16px !important;
+    height: auto !important;
+    max-height: 70vh;
+    overflow-y: auto !important;
+}
+
+#modalIndicadorEstrategico .da-form-group {
+    margin-bottom: 12px;
+}
+
+#modalIndicadorEstrategico .control-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+#modalIndicadorEstrategico .form-control,
+#modalIndicadorEstrategico .dtic-input {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    min-height: 38px;
+}
+
+#modalIndicadorEstrategico textarea.form-control {
+    min-height: 70px;
+}
+
+#modalIndicadorEstrategico .select2-container {
+    width: 100% !important;
+}
+
+#modalIndicadorEstrategico .select2-container--bootstrap4 .select2-selection {
+    min-height: 38px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+#modalIndicadorEstrategico .modal-footer,
+#modalIndicadorEstrategico .da-modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    gap: 8px;
+    height: auto !important;
+}
+
+#modalIndicadorEstrategico .btn-modal {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+#modalIndicadorEstrategico .btn-modal-cancel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+#modalIndicadorEstrategico .btn-modal-continue {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+#modalIndicadorEstrategico .btn-modal-save {
+    background: #0284c7;
+    color: #fff;
+}
+
+span.select2-selection.select2-selection--single {
     height: auto !important;
     border-radius: 8px !important;
     padding: 4px 8px !important;
 }
 
-.select2-selection__rendered{
+.select2-selection__rendered {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
     height: auto !important;
 }
 
-.mi-render-select2{
+.mi-render-select2 {
     display: flex;
     flex-direction: column;
     line-height: 1.2;
@@ -26,40 +158,26 @@ span .select2-selection.select2-selection--single{
     padding-left: 0 !important;
 }
 
-.select2-results__option{
+.select2-results__option {
     border-bottom: 1px dotted darkgrey;
 }
 
-/****************select2 datos css************************/
-
-.titulo-producto{
+.titulo-producto {
     font-weight: bold;
     color: #333;
 }
 
-.subtitulo-producto{
+.subtitulo-producto {
     font-weight: normal;
-    color: #333;
+    color: #64748b;
 }
 
-/***************Tabla css********************/
-.group-container{
-    gap: 5px !important;
-}
+@media (max-width: 768px) {
+    .ie-col-headers {
+        display: none;
+    }
 
-.sub-group-container{
-    gap: 5px !important;
-    padding: 5px !important;
-}
-
-.badge-result {
-    background: #ffffff; /* <-- CAMBIADO: Fondo limpio */
-    color: #61942e; /* <-- CAMBIADO: El texto toma el color verde para resaltar */
-    border: 2px solid #8DBE5A; /* <-- CAMBIADO: El verde original pasa a ser el borde */
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 11px;
-    font-weight: 600;
-    width: 120px;
-    text-align: center;
+    .ie-card-row {
+        grid-template-columns: 1fr !important;
+    }
 }

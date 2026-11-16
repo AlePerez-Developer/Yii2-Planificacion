@@ -4,8 +4,9 @@ namespace app\modules\Planificacion\models;
 
 use common\models\Estado;
 use common\models\Usuario;
-use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "ProgramacioesnInidicadoresGestiones".
@@ -74,7 +75,7 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             ->select([
                 'P.IdProgramacionIndicadorGestion',
                 'L.Llave',
-                'L.Descripcion',
+                'Descripcion' => new Expression("CONCAT(Ld.Da, '-', Lu.Ue, ' ', Lu.Descripcion)"),
                 'P.MetaProgramada as Meta',
                 'G.IdGestion',
                 'I.IdIndicador',
@@ -83,20 +84,28 @@ class ProgramacionIndicadorGestion extends ActiveRecord
             ->joinWith('gestion G', true, 'INNER JOIN')
             ->joinWith('indicadorEstrategico I', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria L', true, 'INNER JOIN')
-            ->joinWith('llavePresupuestaria.da Ld', true, 'INNER JOIN')
-            ->joinWith('llavePresupuestaria.ue Lu', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.unidadEjecutora Lu', true, 'INNER JOIN')
+            ->joinWith('llavePresupuestaria.unidadEjecutora.das Ld', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.proyecto.programa Lpr', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.proyecto Lpy', true, 'INNER JOIN')
             ->joinWith('llavePresupuestaria.actividad La', true, 'INNER JOIN')
             ->where(['!=', 'G.CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->groupBy(['P.IdProgramacionIndicadorGestion', 'L.Llave', 'L.Descripcion', 'P.MetaProgramada',
-                    'G.IdGestion', 'I.IdIndicador', 'L.IdLlavePresupuestaria',]
-            );
+            ->groupBy([
+                'P.IdProgramacionIndicadorGestion',
+                'L.Llave',
+                'Ld.Da',
+                'Lu.Ue',
+                'Lu.Descripcion',
+                'P.MetaProgramada',
+                'G.IdGestion',
+                'I.IdIndicador',
+                'L.IdLlavePresupuestaria',
+            ]);
     }
 
     public static function listOne(string $id): ?ProgramacionIndicadorGestion
     {
-        return self::findOne(['IdProgramacionIndicadorGestio' => $id,['!=','CodigoEstado',Estado::ESTADO_ELIMINADO]]);
+        return self::findOne(['IdProgramacionIndicadorGestion' => $id]);
     }
 
     /**

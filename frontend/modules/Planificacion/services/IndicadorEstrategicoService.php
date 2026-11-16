@@ -288,20 +288,21 @@ class IndicadorEstrategicoService
     }
 
     /**
-     * Busca un Indicador estrategico por su código y alterna su estado.
+     * Busca un Indicador estrategico por su código y cambia su estado.
      *
      * @param string $id
+     * @param string|null $codigoEstado
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(string $id): array
+    public function cambiarEstado(string $id, ?string $codigoEstado = null): array
     {
         $modelo = $this->obtenerModeloValidado($id);
         $indicador = $this->obtenerIndicadorValidado($id);
 
-        $modelo->cambiarEstado();
-        $indicador->cambiarEstado();
+        $modelo->cambiarEstado($codigoEstado);
+        $indicador->cambiarEstado($codigoEstado);
 
         if (!$modelo->validate()) {
             throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $modelo->getErrors(), 500);

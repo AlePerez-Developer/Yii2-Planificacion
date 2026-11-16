@@ -1,114 +1,232 @@
-/*global idObjEstrategico*/
-let dt_indEstrategicoAccion;
-function inicializarTablaIndAcciones()
-{
+let dt_indEstrategicoAccion
 
+function indAccionIniciales(texto) {
+    if (!texto) {
+        return 'IN'
+    }
+    const palabras = String(texto).trim().split(/\s+/).slice(0, 2)
+    return palabras.map(function (p) {
+        return p.charAt(0)
+    }).join('').toUpperCase()
+}
+
+function numerarFilasIndAccion(api) {
+    if (!api) {
+        return
+    }
+    const start = parseInt(api.page.info().start, 10) || 0
+    api.column(0, {page: 'current', search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
+        $(cell).find('.row-num').text(start + i + 1)
+    })
+}
+
+function actualizarContadoresIndAccion() {
+    if (typeof dt_indEstrategicoAccion === 'undefined' || !dt_indEstrategicoAccion) {
+        return
+    }
+    const total = dt_indEstrategicoAccion.rows({search: 'none'}).data().length
+    $('#indAccionSubtitleTotal').text(total + ' indicadores en el objetivo')
+}
+
+function rangoPaginasVisibleIndAccion(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionIndAccion(api) {
+    const $paginacion = $('#indAccionPagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisibleIndAccion(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> indicadores'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> indicadores'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
+function textoAccionEstrategica(row) {
+    const accion = row.accionesEstrategicas || {}
+    const codigo = (accion.Codigo != null && accion.Codigo !== '')
+        ? accion.Codigo
+        : (row.AccionCodigo != null && row.AccionCodigo !== '' ? row.AccionCodigo : '—')
+    const descripcion = accion.Descripcion
+        || row.AccionDescripcion
+        || 'Sin acción asignada'
+    return 'AET: ' + codigo + ' - ' + descripcion
+}
+
+function inicializarTablaIndAcciones() {
+    // compat: la tabla ya se crea en document.ready
 }
 
 $(document).ready(function () {
-    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
-    dt_indEstrategicoAccion = $("#tablaListaIndicadoresEstrategicosAccion").DataTable({
-        initComplete: function () {
-            $("div.dt-search").append(`
-            <button id="refreshTable" class="btn-refresh">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </button>`
-            );
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 
-            $("#dticTableLoading").hide();
-            $("#dticTableContainer").fadeIn(250);
-        },
+    dt_indEstrategicoAccion = $('#tablaListaIndicadoresEstrategicosAccion').DataTable({
         layout: {
-            topEnd: null
+            topStart: null,
+            topEnd: null,
+            bottomStart: null,
+            bottomEnd: null,
+            bottom: null,
+        },
+        pageLength: 10,
+        paging: true,
+        info: false,
+        language: {
+            emptyTable: 'No hay indicadores para el objetivo seleccionado',
+            zeroRecords: 'No se encontraron coincidencias'
+        },
+        order: [[1, 'asc']],
+        initComplete: function () {
+            numerarFilasIndAccion(this.api())
+            actualizarContadoresIndAccion()
+            actualizarPaginacionIndAccion(this.api())
+        },
+        drawCallback: function () {
+            numerarFilasIndAccion(this.api())
+            actualizarContadoresIndAccion()
+            actualizarPaginacionIndAccion(this.api())
         },
         ajax: {
-            method: "POST",
+            method: 'POST',
             dataType: 'json',
             data: function () {
                 return {
-                    idObjEstrategico: indicadorEstrategicoAccion_s2ObjEstrategico.val() || ID_EMPTY_GUID
-                };
+                    idObjEstrategico: (typeof indicadorEstrategicoAccion_s2ObjEstrategico !== 'undefined'
+                        ? indicadorEstrategicoAccion_s2ObjEstrategico.val()
+                        : null) || ID_EMPTY_GUID
+                }
             },
-            cache: false,
-
-
             url: 'index.php?r=Planificacion/indicador-estrategico-accion/listar-indicadores',
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_indEstrategicoAccion.processing(false);
+                MostrarMensaje('error', GenerarMensajeError(data['mensaje']), data['errors'])
+                dt_indEstrategicoAccion.processing(false)
             }
         },
         columns: [
             {
-                data: "CodigoUsuario",
-                className: "dt-dtic-text-center",
-                width: "60px",
+                data: null,
                 orderable: false,
                 searchable: false,
-                render: function (data) {
-                    return `<div class="badge-codigo">${data}</div>`;
-                }
-            },
-            {data: "Codigo", visible:false},
-            {
-                data: null,
                 render: function (data, type, row) {
-                    if (type !== "display") {
-                        return row["Descripcion"];
+                    const indicador = row.indicador || {}
+                    const descripcion = indicador.Descripcion || row.Descripcion || ''
+                    if (type !== 'display') {
+                        return descripcion
                     }
 
+                    const unidad = (indicador.catUnidadesIndicadores && indicador.catUnidadesIndicadores.Descripcion)
+                        ? indicador.catUnidadesIndicadores.Descripcion
+                        : ''
+                    const tipo = (indicador.catTiposResultados && indicador.catTiposResultados.Descripcion)
+                        ? indicador.catTiposResultados.Descripcion
+                        : ''
+                    const categoria = (indicador.catCategoriasIndicadores && indicador.catCategoriasIndicadores.Descripcion)
+                        ? indicador.catCategoriasIndicadores.Descripcion
+                        : ''
+                    const lineaBase = indicador.LineaBase != null ? indicador.LineaBase : ''
+                    const meta = indicador.Meta != null ? indicador.Meta : ''
+
                     return `
-                        <div class="dtic-code-container">
-                            <span class="dtic-code-text">Indicador N°</span>
-                            <div class="dtic-code-badge">
-                                ${row["Codigo"]}
-                            </div>                                  
+                        <div class="card-row iea-card-row">
+                            <span class="row-num"></span>
+                            <div class="patient">
+                                <div class="avatar" style="background:#0284c7">${indAccionIniciales(descripcion)}</div>
+                                <div>
+                                    <p class="patient-name">${descripcion} <span class="code-badge">${row.Codigo || ''}</span></p>
+                                    <p class="patient-meta">${textoAccionEstrategica(row)}</p>
+                                    <p class="patient-meta">Línea base: ${lineaBase} · Meta: ${meta}</p>
+                                    <div class="iea-badges">
+                                        ${unidad ? `<span class="iea-badge">${unidad}</span>` : ''}
+                                        ${tipo ? `<span class="iea-badge">${tipo}</span>` : ''}
+                                        ${categoria ? `<span class="iea-badge">${categoria}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button type="button" class="btn-action-new assign btn-programar" title="Asignar acción estratégica">
+                                    ✏ Asignar acción
+                                </button>
+                            </div>
                         </div>
-                        
-                        <div class="dtic-item-main">
-                            ${row['indicador']["Descripcion"]}
-                        </div>
-                        
-                        <div class="dtic-item-sub">
-                            ${row["accionesEstrategicas"]["Descripcion"]} ${row['indicador']["LineaBase"]} ${row['indicador']["Meta"]}  
-                        </div>
-                        
-                        <div class="acc-footer mt-2" style="display: flex; gap: 10px">
-                            <span class="badge-result">${row['indicador']["catUnidadesIndicadores"]["Descripcion"]}</span>
-                            <span class="badge-result">${row['indicador']["catTiposResultados"]["Descripcion"]}</span>
-                            <span class="badge-result">${row['indicador']["catCategoriasIndicadores"]["Descripcion"]}</span>
-                        </div>                        
-                        `;
+                    `
                 }
             },
-            {
-                data: null,
-                className: "text-center",
-                width: "90px",
-                orderable: false,
-                searchable: false,
-                render: function (data, type) {
-                    return (type === 'display')?
-                        '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Asignar Accion</span>' +
-                        '  </button>'
-                        :data
-                },
-            },
-        ],
-    });
+            {data: 'Codigo', visible: false},
+            {data: 'IdIndicador', visible: false, searchable: false},
+            {data: 'IdAccionEstrategica', visible: false, searchable: false}
+        ]
+    })
 
-    $(document).on("click", "#refreshTable", function () {
-        dt_indEstrategicoAccion.ajax.reload();
-    });
-
-    dt_indEstrategicoAccion.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_indEstrategicoAccion.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
-            this.data(i++);
-        });
-    }).draw();
+    $(document).on('click', '#refreshTable', function () {
+        if (!$.fn.DataTable.isDataTable('#tablaListaIndicadoresEstrategicosAccion')) {
+            return
+        }
+        const btn = $(this)
+        btn.prop('disabled', true)
+        dt_indEstrategicoAccion.ajax.reload(function () {
+            btn.prop('disabled', false)
+        }, false)
+    })
 })

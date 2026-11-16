@@ -1,94 +1,131 @@
 <?php
+
 use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/accion-estrategica/accionEstrategica.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/accion-estrategica/dt-declaration.js", [
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/accion-estrategica/dt-declaration.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/accion-estrategica/accionEstrategica.js", [
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
 $this->title = 'Planificación Institucional';
 
-$this->params['subtitle'] = 'Administración de acciones estratégicas institucionales';
+$this->params['subtitle'] = 'Administración de acciones estratégicas';
 
-$this->params['icon'] = 'fas fa-clipboard-list';
+$this->params['icon'] = '';
 
 $this->params['iconColor'] = 'info';
 
 $this->params['actions'] =
-    '<button id="btnMostrarCrear"  class="btn-crear closed" >
-      <span class="circle">
-        <span class="horizontal"></span>
-        <span class="vertical"></span>
-      </span>
-      <span class="btn-text">Nuevo Registro</span>
-    </button>
-
-     <button id="btnReportePdf" class="btn-reporte">
-        <i class="fas fa-file-pdf"></i>
-         <span class="btn-text">Exportar</span>
-     </button>';
+        '
+            <div class="gestion-badge">
+              <span class="dot"></span>
+              <span class="text">Gestión Activa: <strong>2026 - 2030</strong></span>
+            </div>
+        ';
 
 $this->params['breadcrumbs'][] = [
-    'label' => '/ Peis'
+        'label' => '/ Acciones estratégicas',
 ];
 ?>
 
-<div class="card ">
-    <div id="divDatos" class="card-body" style="display: none">
-        <div class="col d-flex justify-content-center">
-            <div class="card card-dtic-form" style="width: 40rem;">
-                <div class="card-header card-dtic-form-header">Ingreso Datos</div>
-                <div class="card-body card-dtic-form-body">
-                    <form id="formAccionEstrategica" action="" method="post">
-                        <div class="form-group">
-                            <label for="codigo" class="control-label">Codigo</label>
-                            <input class="form-control input-sm dtic-input txt" id="codigo"
-                                      name="codigo"  placeholder="Codigo de accion estrategica"></input>
-                        </div>
+<div class="body">
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">⚡</div>
+                <div>
+                    <h1>Listado de acciones estratégicas</h1>
+                    <p id="accionSubtitleTotal" class="subtitle">0 acciones registradas</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btnReportePdf" class="btn-reporte">⬇ Exportar PDF</button>
+                <button type="button" id="btnNuevoAccion" class="btn-crear">＋ Nuevo registro</button>
+            </div>
+        </div>
 
-                        <div class="form-group">
-                            <label for="descripcion" class="control-label">Descripcion de la accion estrategica</label>
-                            <textarea class="form-control input-sm dtic-input txt" id="descripcion"
-                                      name="descripcion" rows="3" placeholder="descripcion de la accion estrategica"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer card-dtic-form-footer">
-                    <button id="btnGuardar" name="btnGuardar" class='btn-guardar'><i class='fa fa-check-circle'></i> <span class='btn_text'> Guardar </span> </button>
-                    <button id="btnCancelar" name="btnCancelar" class='btn-cancel'><span class='fa fa-times-circle'></span> Cancelar </button>
-                </div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-icon emerald">✅</div>
+                <div><p id="accionCountVigentes" class="stat-count">0</p><p class="stat-label">Vigentes</p></div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon rose">✖</div>
+                <div><p id="accionCountCaducos" class="stat-count">0</p><p class="stat-label">Caducos</p></div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search">
+                <input id="buscarAccion" type="text" placeholder="Buscar por código o descripción...">
+            </div>
+            <select id="filtroEstadoAccion">
+                <option value="">Todos los estados</option>
+                <option value="V">Vigente</option>
+                <option value="C">Caduco</option>
+            </select>
+            <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
+                <i class="fa fa-sync-alt fa-spin"></i>
+            </button>
+        </div>
+
+        <div class="col-headers">
+            <span>#</span><span>Acción estratégica</span><span>Estado</span><span>Acciones</span>
+        </div>
+
+        <div id="dticTableLoading" class="p-4">
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+        </div>
+
+        <div class="p-0" id="dticTableContainer" style="display:none;">
+            <table id="tablaListaAccionesEstrategicas" class="w-100"></table>
+            <div class="pagination" id="accionPagination">
+                <p class="pagination-info">Mostrando <strong>0</strong> de <strong>0</strong> acciones</p>
+                <div class="pagination-nav"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="divTabla" class="card-body">
-        <div class="card-dtic-style">
-
-            <div class="card-dtic-style-header">
-                <div class="card-dtic-style-title">
-                    Acciones Estratégicas Institucionales
-                </div>
+<div class="modal fade" id="modalAccionEstrategica" tabindex="-1" role="dialog" aria-labelledby="accionModalTitulo" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content da-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accionModalTitulo">Ingreso de datos</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-
-            <div id="dticTableLoading" class="p-4">
-                <div class="table-loading"></div>
-                <div class="table-loading"></div>
-                <div class="table-loading"></div>
+            <div class="modal-body">
+                <form id="formAccionEstrategica" action="" method="post" autocomplete="off">
+                    <div class="form-group da-form-group">
+                        <label for="codigo" class="control-label">Código de acción</label>
+                        <input type="text" class="form-control input-sm dtic-input num" id="codigo" name="codigo"
+                               inputmode="numeric" placeholder="Código numérico">
+                    </div>
+                    <div class="form-group da-form-group">
+                        <label for="descripcion" class="control-label">Descripción</label>
+                        <textarea class="form-control input-sm dtic-input txt" id="descripcion" name="descripcion" rows="2"
+                                  placeholder="Descripción de la acción estratégica"></textarea>
+                    </div>
+                </form>
             </div>
-
-            <div class="p-2" id="dticTableContainer" style="display:none;">
-                <table id="tablaListaAccionesEstrategicas" class="table w-100 dtic-table"></table>
+            <div class="modal-footer da-modal-footer">
+                <button type="button" id="btnCancelar" class="btn btn-modal btn-modal-cancel">Cancelar</button>
+                <button type="button" id="btnGuardarContinuar" class="btn btn-modal btn-modal-continue">Guardar y continuar</button>
+                <button type="button" id="btnGuardar" class="btn btn-modal btn-modal-save">Guardar</button>
             </div>
-
         </div>
     </div>
 </div>

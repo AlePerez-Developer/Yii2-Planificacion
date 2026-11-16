@@ -9,7 +9,9 @@ $(document).ready(function () {
             $(this).removeClass('is-invalid is-valid');
         });
         $('#formAsignacionAccion').trigger("reset");
-        indicadorEstrategico_s2AccionEstrategica.val(null).trigger('change')
+        if (typeof indicadorEstrategicoAccion_s2AccionEstrategica !== 'undefined') {
+            indicadorEstrategicoAccion_s2AccionEstrategica.val(null).trigger('change')
+        }
         idIndicadorEstrategico = ID_EMPTY_GUID
     }
 
@@ -18,26 +20,18 @@ $(document).ready(function () {
         const holder = $('#mensajeInicial')
         const load = $('#dticTableLoading')
         const contain = $('#dticTableContainer')
-        const dt_table = $('#tablaListaIndicadores')
 
         if (!idObjEstrategico){
             contain.hide();
             load.hide();
             holder.show();
+            $('#indAccionSubtitleTotal').text('Seleccione un objetivo estratégico')
             return;
         }
 
-        openedRow = null;
         holder.hide();
-
         load.show();
         contain.hide();
-
-        if ($.fn.DataTable.isDataTable(dt_table)) {
-            dt_indEstrategicoAccion.ajax.reload();
-        } else {
-            inicializarTablaIndAcciones();
-        }
 
         dt_indEstrategicoAccion.one('draw', function () {
             load.hide();
@@ -107,7 +101,11 @@ $(document).ready(function () {
 
         errorPlacement: function (error, element) {
             error.addClass("invalid-feedback");
-            error.insertAfter(element);
+            if (element.hasClass('select2-hidden-accessible')) {
+                error.insertAfter(element.next('.select2'));
+            } else {
+                error.insertAfter(element);
+            }
         },
         highlight: function (element) {
             $(element).addClass("is-invalid").removeClass("is-valid");

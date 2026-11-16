@@ -29,106 +29,91 @@ $this->registerCssFile("@planificacionModule/css/indicador-estrategico-accion/st
         ]
 ]);
 
-
 $this->title = 'Planificación Institucional';
 
-$this->params['subtitle'] = 'Asignacion de acciones estrategicas';
+$this->params['subtitle'] = 'Asignación de acciones estratégicas';
 
-$this->params['icon'] = 'fas fa-clipboard-list';
+$this->params['icon'] = '';
 
 $this->params['iconColor'] = 'info';
 
-$this->params['actions'] = '';
+$this->params['actions'] =
+        '
+            <div class="gestion-badge">
+              <span class="dot"></span>
+              <span class="text">Gestión Activa: <strong>2026 - 2030</strong></span>
+            </div>
+        ';
 
 $this->params['breadcrumbs'][] = [
-        'label' => '/ Ind. Estrategicos'
+        'label' => '/ Ind. Estratégicos — Acciones',
 ];
 ?>
-<div class="card ">
-    <div class="card-body">
-        <div class="card-dtic-style">
 
-            <div class="card-dtic-style-header">
-                <div class="card-dtic-style-title">Objetivos Estrategicos</div>
-                <select id="idObjEstrategico" class="form-control dtic-input"></select>
+<div class="body">
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">🔗</div>
+                <div>
+                    <h1>Asignación de acciones estratégicas</h1>
+                    <p id="indAccionSubtitleTotal" class="subtitle">Seleccione un objetivo estratégico</p>
+                </div>
             </div>
+        </div>
 
-            <div id="dticTableLoading" class="p-4">
-                <div class="table-loading"></div>
-                <div class="table-loading"></div>
-                <div class="table-loading"></div>
-            </div>
+        <div class="toolbar iea-toolbar">
+            <select id="idObjEstrategico" class="form-control dtic-input iea-obj-select"></select>
+            <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
+                <i class="fa fa-sync-alt fa-spin"></i>
+            </button>
+        </div>
 
-            <div id="mensajeInicial" class="programacion-empty-state">
-                <i class="fas fa-bullseye"></i>
-                <span>Seleccione un objetivo estratégico para mostrar sus indicadores programados.</span>
-            </div>
+        <div class="col-headers iea-col-headers">
+            <span>#</span><span>Indicador estratégico</span><span>Acciones</span>
+        </div>
 
-            <div class="p-2" id="dticTableContainer" style="display:none;">
-                <table id="tablaListaIndicadoresEstrategicosAccion" class="table w-100 dtic-table"></table>
+        <div id="mensajeInicial" class="programacion-empty-state">
+            <i class="fas fa-bullseye"></i>
+            <span>Seleccione un objetivo estratégico para mostrar sus indicadores.</span>
+        </div>
+
+        <div id="dticTableLoading" class="p-4" style="display:none;">
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+        </div>
+
+        <div class="p-0" id="dticTableContainer" style="display:none;">
+            <table id="tablaListaIndicadoresEstrategicosAccion" class="w-100"></table>
+            <div class="pagination" id="indAccionPagination">
+                <p class="pagination-info">Mostrando <strong>0</strong> de <strong>0</strong> indicadores</p>
+                <div class="pagination-nav"></div>
             </div>
-            <label for="idObjEstrategico"></label>
         </div>
     </div>
 </div>
 
-
-<!-- Modal Fijo en la Vista -->
-<div class="modal fade" id="modalAsignacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="overflow: hidden">
-            <div class="modal-header bg-primary text-white">
-                <div class="modal-header-title">
-                    <div class="page-icon bg-info specific">
-                        <i class="fa fa-list-alt"></i>
-                    </div>
-                    <h5 class="modal-title" id="modalLabel">
-                        Asignacion de accion estrategica
-                    </h5>
-                </div>
-
-                <button type="button" class="btn-remove" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
+<div class="modal fade" id="modalAsignacion" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content da-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Asignación de acción estratégica</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
                 </button>
-
             </div>
             <div class="modal-body">
-
-                <div class="card ">
-
-                    <div id="divTabla" class="card-body">
-                        <div class="card-dtic-style specific">
-
-                            <div class="card-dtic-style-header">
-                                <div class="card-dtic-style-title">
-                                    Listado de acciones estrategicas
-                                </div>
-                            </div>
-
-                            <div class="p-2" id="dticTableContainer">
-                                <form id="formAsignacionAccion" action="" method="post">
-                                    <div class="row" style="display: flex; align-items: center">
-                                        <div class="col-8">
-                                            <div class="form-group">
-                                                <label for="idAccionEstrategica">Seleccione la Accion estrategica</label>
-                                                <select class="form-control dtic-input" id="idAccionEstrategica"
-                                                        name="idAccionEstrategica">
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-
-                        </div>
+                <form id="formAsignacionAccion" action="" method="post" autocomplete="off">
+                    <div class="form-group da-form-group">
+                        <label for="idAccionEstrategica" class="control-label">Acción estratégica</label>
+                        <select class="form-control input-sm dtic-input" id="idAccionEstrategica" name="idAccionEstrategica"></select>
                     </div>
-                </div>
+                </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-guardar  guardar" >Cerrar y
-                    Actualizar
-                </button>
+            <div class="modal-footer da-modal-footer">
+                <button type="button" class="btn btn-modal btn-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-modal btn-modal-save guardar">Guardar</button>
             </div>
         </div>
     </div>

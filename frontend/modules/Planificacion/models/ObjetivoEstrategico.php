@@ -166,8 +166,13 @@ class ObjetivoEstrategico extends ActiveRecord
      *
      * @return void
      */
-    public function cambiarEstado(): void
+    public function cambiarEstado(?string $codigoEstado = null): void
     {
+        if ($codigoEstado === Estado::ESTADO_VIGENTE || $codigoEstado === Estado::ESTADO_CADUCO) {
+            $this->CodigoEstado = $codigoEstado;
+            return;
+        }
+
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;

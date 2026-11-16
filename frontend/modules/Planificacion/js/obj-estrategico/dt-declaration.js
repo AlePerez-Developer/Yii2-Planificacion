@@ -1,160 +1,333 @@
-let dt_objEstrategico;
+let dt_objEstrategico
+
+function oeEsVigente(codigo) {
+    return codigo === ESTADO_VIGENTE
+}
+
+function oeEstadoMeta(codigo) {
+    const vigente = oeEsVigente(codigo)
+    return {
+        codigo: vigente ? ESTADO_VIGENTE : ESTADO_CADUCO,
+        clase: vigente ? 'vigente' : 'cancelada',
+        texto: vigente ? 'Vigente' : 'Caduco',
+        colorAvatar: vigente ? '#10b981' : '#f43f5e'
+    }
+}
+
+function oeTexto(valor) {
+    return $('<div>').text(valor == null ? '' : String(valor)).html()
+}
+
+function numerarFilasOe(api) {
+    if (!api) {
+        return
+    }
+    const start = parseInt(api.page.info().start, 10) || 0
+    api.column(0, {page: 'current', search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
+        $(cell).find('.row-num').text(start + i + 1)
+    })
+}
+
+function actualizarContadoresOe() {
+    if (typeof dt_objEstrategico === 'undefined' || !dt_objEstrategico) {
+        return
+    }
+
+    let total = 0
+    let vigentes = 0
+    let caducos = 0
+
+    dt_objEstrategico.rows({search: 'none'}).data().each(function (row) {
+        total++
+        if (oeEsVigente(row.CodigoEstado)) {
+            vigentes++
+        } else if (row.CodigoEstado === ESTADO_CADUCO) {
+            caducos++
+        }
+    })
+
+    $('#oeSubtitleTotal').text(total + ' objetivos estratégicos registrados')
+    $('#oeCountVigentes').text(vigentes)
+    $('#oeCountCaducos').text(caducos)
+}
+
+function mostrarCargaTablaOe() {
+    $('#dticTableContainer').hide()
+    $('#dticTableLoading').show()
+}
+
+function ocultarCargaTablaOe() {
+    $('#dticTableLoading').hide()
+    $('#dticTableContainer').fadeIn(250)
+}
+
+function cerrarMenusEstadoOe(excepto) {
+    $('.estado-wrap').not(excepto).removeClass('open')
+}
+
+function rangoPaginasVisibleOe(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionOe(api) {
+    const $paginacion = $('#oePagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisibleOe(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> objetivos estratégicos'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> objetivos estratégicos'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
+function renderEstadoDropdownOe(codigoActual) {
+    const actual = oeEstadoMeta(codigoActual)
+    const vigente = oeEstadoMeta(ESTADO_VIGENTE)
+    const caduco = oeEstadoMeta(ESTADO_CADUCO)
+
+    function opcion(meta) {
+        const activo = meta.codigo === actual.codigo
+        return `
+            <button type="button" class="estado-option ${meta.clase}${activo ? ' selected' : ''}" data-estado="${meta.codigo}">
+                <span class="dot"></span>
+                <span>${meta.texto}</span>
+                ${activo ? '<span class="check">✓</span>' : ''}
+            </button>
+        `
+    }
+
+    return `
+        <div class="estado-wrap">
+            <button type="button" class="estado ${actual.clase} estado-trigger" data-estado="${actual.codigo}">
+                <span class="dot"></span>${actual.texto}<span class="chevron">▾</span>
+            </button>
+            <div class="estado-menu">
+                ${opcion(vigente)}
+                ${opcion(caduco)}
+            </div>
+        </div>
+    `
+}
+
+function renderTarjetaOe(row) {
+    const area = row.areaEstrategica || {}
+    const politica = row.politicaEstrategica || {}
+    const pei = row.pei || {}
+    const gestion = (pei.GestionInicio && pei.GestionFin)
+        ? oeTexto(pei.GestionInicio) + ' - ' + oeTexto(pei.GestionFin)
+        : ''
+
+    return `
+        <article class="oe-card">
+            <div class="oe-card-body">
+                <div class="oe-head">
+                    <span class="row-num oe-num"></span>
+                    <div class="oe-head-text">
+                        <div class="oe-badges">
+                            <span class="oe-badge-code">Objetivo: ${oeTexto(row.Compuesto)}</span>
+                        </div>
+                        <h2 class="oe-title">${oeTexto(row.Objetivo)}</h2>
+                    </div>
+                </div>
+                <div class="oe-meta">
+                    <div class="oe-meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span class="oe-meta-label">PRODUCTO:</span>
+                        <span class="oe-meta-value">${oeTexto(row.Producto)}</span>
+                    </div>
+                    <div class="oe-meta-item">
+                        <i class="far fa-calendar-alt"></i>
+                        <span class="oe-meta-label">Gestión:</span>
+                        <span class="oe-meta-value">${gestion}</span>
+                    </div>
+                    <div class="oe-meta-hint">
+                        <i class="fas fa-info-circle"></i>
+                        <em>(${oeTexto(row.Indicador_Descripcion)} - ${oeTexto(row.Indicador_Formula)})</em>
+                    </div>
+                </div>
+                <div class="oe-blocks">
+                    <div class="oe-block">
+                        <div class="oe-block-label">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>ÁREA</span>
+                            <span class="oe-chip oe-chip-area">&lt;${oeTexto(area.Codigo)}&gt;</span>
+                        </div>
+                        <p>${oeTexto(area.Descripcion)}</p>
+                    </div>
+                    <div class="oe-block">
+                        <div class="oe-block-label">
+                            <i class="fas fa-landmark"></i>
+                            <span>POLÍTICA</span>
+                            <span class="oe-chip oe-chip-politica">&lt;${oeTexto(politica.Codigo)}&gt;</span>
+                        </div>
+                        <p>${oeTexto(politica.Descripcion)}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="oe-actions">
+                <div>${renderEstadoDropdownOe(row.CodigoEstado)}</div>
+                <div class="actions">
+                    <button type="button" class="btn-action-new programar btn-programar">📅 Programar</button>
+                    <button type="button" class="btn-action-new edit">✏ Editar</button>
+                    <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
+                </div>
+            </div>
+        </article>
+    `
+}
+
 $(document).ready(function () {
-
-    dt_objEstrategico = $("#tablaListaObjEstrategicos").DataTable({
+    dt_objEstrategico = $('#tablaListaObjEstrategicos').DataTable({
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: null,
+            bottomEnd: null,
+            bottom: null,
+        },
+        responsive: false,
+        pageLength: 10,
+        paging: true,
+        info: false,
+        language: {
+            emptyTable: 'No hay objetivos estratégicos registrados',
+            zeroRecords: 'No se encontraron coincidencias'
+        },
+        order: [[1, 'asc']],
         initComplete: function () {
-            $("div.dt-search").append(`
-            <button id="refreshTable" class="btn-refresh">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </button>`
-            );
-
-            $("#dticTableLoading").hide();
-            $("#dticTableContainer").fadeIn(250);
+            ocultarCargaTablaOe()
+            actualizarContadoresOe()
+            numerarFilasOe(this.api())
+            actualizarPaginacionOe(this.api())
+            if (typeof initOeListadoFiltros === 'function') {
+                initOeListadoFiltros()
+            }
+        },
+        drawCallback: function () {
+            numerarFilasOe(this.api())
+            actualizarContadoresOe()
+            actualizarPaginacionOe(this.api())
         },
         ajax: {
-            method: "POST",
+            method: 'POST',
             dataType: 'json',
             cache: false,
-            contentType: false,
-            processData: false,
             url: 'index.php?r=Planificacion/obj-estrategico/listar-todo',
             dataSrc: 'data',
             error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_objEstrategico.processing(false);
+                let mensaje = 'No se pudo cargar el listado'
+                try {
+                    const data = JSON.parse(xhr.responseText)
+                    mensaje = data.message || data.mensaje || mensaje
+                    if (typeof MostrarMensaje === 'function') {
+                        MostrarMensaje('error', GenerarMensajeError(mensaje), data.errors)
+                    }
+                } catch (e) {
+                    if (typeof MostrarMensaje === 'function') {
+                        MostrarMensaje('error', mensaje)
+                    }
+                }
+                ocultarCargaTablaOe()
             }
         },
-
         columns: [
             {
-                data: "CodigoUsuario",
-                className: "text-center",
-                width: "60px",
+                data: null,
                 orderable: false,
                 searchable: false,
-                render: function (data) {
-                    return `<div class="badge-codigo">${data}</div>`;
-                }
-            },
-            {
-                data: "Objetivo",
                 render: function (data, type, row) {
-                    if (type !== "display") {
-                        return row["Objetivo"];
+                    if (type !== 'display') {
+                        return row.Objetivo
                     }
-
-                    return `
-
-                    <div class="dtic-code-container">
-                        <span class="dtic-code-text">Objetivo:  </span>
-                            <div class="dtic-code-badge">
-                                ${row["Compuesto"]}
-                            </div>                                  
-                    </div>
-
-                    
-                    <div class="dtic-item-main">
-                        ${row["Objetivo"]}
-                    </div>
-                    
-                    <div class="dtic-item-sub">
-                        <b>PRODUCTO:</b> ${row["Producto"]}
-                    </div>
-                  
-                    <div class="dtic-item-sub2 group-container">
-                        <div class="sub-group-container">
-                            <div class="item-container"> 
-                                <div>AREA</div>
-                                <div>< ${row["areaEstrategica"]["Codigo"]} ></div>
-                            </div>
-                            <div>${row["areaEstrategica"]["Descripcion"]}</div>
-                        </div>
-                        <div class="sub-group-container">
-                            <div class="item-container"> 
-                                <div>POLITICA</div>
-                                <div>< ${row["politicaEstrategica"]["Codigo"]} ></div>
-                            </div>
-                            <div>${row["politicaEstrategica"]["Descripcion"]}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="dtic-item-sub">
-                        <b>Gestión:</b> ${row["pei"]["GestionInicio"]} - ${row["pei"]["GestionFin"]}
-                    </div>
-                    <div class="dtic-item-sub">
-                        <small>(${row["Indicador_Descripcion"]} - ${row["Indicador_Formula"]})</small>
-                    </div>                    
-                `;
+                    return renderTarjetaOe(row)
                 }
             },
-            {data: "Compuesto",visible: false},
-            {data: "Producto",visible: false},
-            {
-                data: "CodigoEstado",
-                className: "text-center",
-                width: "65px",
-                orderable: false,
-                searchable: false,
-                visible: false,
-                render: function (data, type) {
-                    return ((type === 'display'))
-                        ? '<button type="button" class="btn-programar" data-toggle="tooltip" title="Click! para programar indicadores">' +
-                        '    <span class="btn_ico"><i class="far fa-calendar-check"></i></span>' +
-                        '    <span class="btn_text">Programar</span>' +
-                        '  </button>'
-                        : data
-                },
-            },
-            {
-                data: "CodigoEstado",
-                className: "text-center",
-                width: "65px",
-                orderable: false,
-                searchable: false,
-                visible: false,
-                render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>';
-                },
-            },
-            {
-                data: "IdObjEstrategico",
-                className: "text-center",
-                width: "140px",
-                orderable: false,
-                searchable: false,
-                render: function () {
-                    return `
-                    <button class="btn-action btn-edit ">
-                        <i class="fa fa-pen"></i>
-                    </button>
+            {data: 'Compuesto', visible: false},
+            {data: 'Objetivo', visible: false},
+            {data: 'Producto', visible: false},
+            {data: 'CodigoEstado', visible: false},
+            {data: 'IdObjEstrategico', visible: false, searchable: false}
+        ]
+    })
 
-                    <button class="btn-action btn-delete ">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `;
-                }
-            },
-        ],
-    });
+    $(document).on('click', '#refreshTable', function () {
+        const btn = $(this)
+        btn.prop('disabled', true)
+        mostrarCargaTablaOe()
+        dt_objEstrategico.ajax.reload(function () {
+            actualizarContadoresOe()
+            ocultarCargaTablaOe()
+            btn.prop('disabled', false)
+        }, false)
+    })
 
-    $(document).on("click", "#refreshTable", function () {
-        dt_objEstrategico.ajax.reload();
-    });
+    $('#oePageLength').on('change', function () {
+        const len = parseInt($(this).val(), 10) || 10
+        if (typeof dt_objEstrategico !== 'undefined' && dt_objEstrategico) {
+            dt_objEstrategico.page.len(len).draw()
+        }
+    })
 
-    dt_objEstrategico.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_objEstrategico.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
-            this.data(i++);
-        });
-    }).draw();
+    $(document).on('click', function () {
+        cerrarMenusEstadoOe()
+    })
 })

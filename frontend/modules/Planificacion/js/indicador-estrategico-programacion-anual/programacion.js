@@ -1,231 +1,243 @@
 $(document).ready(function () {
-    let baseUrl = "index.php?r=Planificacion/indicador-estrategico-programacion-anual/"
+    const baseUrl = 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/'
 
-    programacionAnual_s2ObjEstrategico.on('change', function(){
+    programacionAnual_s2ObjEstrategico.on('change', function () {
         const idObjEstrategico = programacionAnual_s2ObjEstrategico.select2('data')[0]?.id
         const placeHolder = $('#mensajeInicial')
         const loader = $('#dticTableLoading')
         const container = $('#dticTableContainer')
-        const dt_table = $('#tablaListaIndicadores')
 
-        if (!idObjEstrategico){
-            container.hide();
-            loader.hide();
-            placeHolder.show();
-            return;
+        if (openedRow) {
+            closeChildRow(openedRow)
+            openedRow = null
         }
 
-        openedRow = null;
-        placeHolder.hide();
+        if (!idObjEstrategico) {
+            container.hide()
+            loader.hide()
+            placeHolder.show()
+            $('#progAnualSubtitle').text('Seleccione un objetivo estratégico')
+            return
+        }
 
-        loader.show();
-        container.hide();
+        placeHolder.hide()
+        loader.show()
+        container.hide()
+        $('#progAnualSubtitle').text('Indicadores del objetivo seleccionado')
 
-        if ($.fn.DataTable.isDataTable(dt_table)) {
-            dt_listaIndicadores.ajax.reload();
+        if ($.fn.DataTable.isDataTable('#tablaListaIndicadores')) {
+            dt_listaIndicadores.ajax.reload(function () {
+                loader.hide()
+                container.fadeIn(180)
+            }, false)
         } else {
-            inicializarTablaIndicadores();
+            inicializarTablaIndicadores()
+            dt_listaIndicadores.one('draw', function () {
+                loader.hide()
+                container.fadeIn(180)
+            })
         }
+    })
 
-        dt_listaIndicadores.one('draw', function () {
-            loader.hide();
-            container.fadeIn(180);
-        });
+    $(document).on('click', '#refreshTable', function () {
+        if (!$.fn.DataTable.isDataTable('#tablaListaIndicadores')) {
+            return
+        }
+        if (openedRow) {
+            closeChildRow(openedRow)
+            openedRow = null
+        }
+        dt_listaIndicadores.ajax.reload(null, false)
     })
 
     function mensajeAccion(accion) {
-        return `Los datos de la programacion se ${accion}ron correctamente.`;
+        return `Los datos de la programación se ${accion}ron correctamente.`
     }
 
-    /* =============================================
-           CAMBIA EL ESTADO DEL REGISTRO
-   ===============================================*/
-    $(document).on('click', 'tbody #btnEstado', async function () {
-        const btn = $(this);
-
-        const idLlavePresupuestaria = btn.data('idllave');
-        const codigoIndicador = btn.data('indicador');
-        const gestion = btn.data('gestion');
-
-        const datos = new FormData();
-        datos.append("idLlavePresupuestaria", idLlavePresupuestaria);
-        datos.append("codigoIndicador", codigoIndicador);
-        datos.append("gestion", gestion);
+    $(document).on('click', 'tbody .btnEstado', async function () {
+        const btn = $(this)
+        const datos = new FormData()
+        datos.append('idLlavePresupuestaria', btn.data('idllave'))
+        datos.append('codigoIndicador', btn.data('indicador'))
+        datos.append('gestion', btn.data('gestion'))
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "cambiar-estado",
+            const data = await ajaxPromise({
+                url: baseUrl + 'cambiar-estado',
                 data: datos,
                 spinnerBtn: btn,
-                successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                cambiarEstado(btn, data.data);
+                successMsg: 'Asignación de llave actualizada.',
             })
+            cambiarEstado(btn, data.data)
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
         }
-    });
+    })
 
     $(document).on('click', 'tbody .btnQuitar', function () {
-        let objectBtn = $(this)
+        const objectBtn = $(this)
+        const tabla = objectBtn.closest('table')
+        const codigo = objectBtn.data('codigoindicador')
+        const gestion = objectBtn.data('gestion')
+        const dt_table = tabla.DataTable()
+        const dt_row = dt_table.row(objectBtn.closest('tr')).data()
+        const rowId = dt_row.IdProgramacionIndicadorGestion
+        const idIndicadorEstrategico = dt_row.IdIndicador
 
-        const tabla = objectBtn.closest('table');
-        const codigo = objectBtn.data('codigoindicador');
-        const gestion = objectBtn.data('gestion');
-
-        const dt_table = tabla.DataTable();
-        const dt_row = dt_table.row(objectBtn.closest('tr')).data();
-        let rowId = dt_row["IdProgramacionIndicadorGestion"];
-        let idIndicadorEstrategico = dt_row["IdIndicador"];
-
-
-        const datos = new FormData();
-        datos.append("idProgramacion", rowId);
+        const datos = new FormData()
+        datos.append('idProgramacion', rowId)
 
         Swal.fire({
-            icon: "warning",
-            title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar la programacion?",
+            icon: 'warning',
+            title: 'Confirmación eliminación',
+            text: '¿Está seguro de eliminar la programación?',
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: '#3085d6',
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
-            cancelButtonText: 'Cancelar'
+            cancelButtonText: 'Cancelar',
         }).then(async function (resultado) {
             if (resultado.value) {
                 try {
                     await ajaxPromise({
-                        url: baseUrl + "eliminar",
+                        url: baseUrl + 'eliminar',
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_table
-                    });
+                        reloadTable: dt_table,
+                    })
                     actualizarSumaGlobal(codigo)
                     actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion)
                 } catch (err) {
-                    console.error("Error al procesar:", err);
+                    console.error('Error al procesar:', err)
                 }
             }
-        });
-    });
-
+        })
+    })
 
     $(document).on('click', '.input-meta', function () {
-        const input = $(this);
-
+        const input = $(this)
         if (input.prop('readonly')) {
-            input.prop('readonly', false)
-                .select();
+            input.prop('readonly', false).select()
         }
-    });
+    })
 
-    $(document).on('keypress', '.input-meta', function (e) {
-        if (e.which === 13) {
-            const objectInput = $(this);
-            const meta = objectInput.val();
-            const tabla = objectInput.closest('table');
+    $(document).on('keydown', '.input-meta', async function (e) {
+        if (e.key !== 'Enter' && e.which !== 13) {
+            return
+        }
 
-            const dt_table = tabla.DataTable();
-            const dt_row = dt_table.row(objectInput.closest('tr')).data();
-            let rowId = dt_row["IdProgramacionIndicadorGestion"];
-            let idIndicadorEstrategico = dt_row["IdIndicador"];
+        e.preventDefault()
+        const objectInput = $(this)
+        if (objectInput.data('saving')) {
+            return
+        }
 
-            const codigo = objectInput.data('codigoindicador');
-            const gestion = objectInput.data('gestion')
-            e.preventDefault();
+        const meta = objectInput.val()
+        const tabla = objectInput.closest('table')
+        const dt_table = tabla.DataTable()
+        const dt_row = dt_table.row(objectInput.closest('tr')).data()
+        if (!dt_row) {
+            return
+        }
 
-            $.ajax({
+        const rowId = dt_row.IdProgramacionIndicadorGestion
+        const idIndicadorEstrategico = dt_row.IdIndicador
+        const codigo = objectInput.data('codigoindicador')
+        const gestion = objectInput.data('gestion')
+
+        objectInput.data('saving', true)
+        objectInput.prop('disabled', true)
+            .removeClass('is-valid is-invalid meta-saved')
+
+        const datos = new FormData()
+        datos.append('idProgramacion', rowId)
+        datos.append('meta', meta)
+
+        try {
+            await ajaxPromise({
                 url: baseUrl + 'guardar-meta',
-                method: 'POST',
-                data: {
-                    idProgramacion: rowId,
-                    meta: meta,
-                },
-                success: function (resp) {
-                    if (resp.message === 'ok') {
-                        objectInput.prop('readonly', true)
-                            .prop('disabled', false)
-                            .addClass('is-valid');
+                data: datos,
+                successMsg: 'Meta guardada correctamente.',
+            })
 
-                        setTimeout(() => objectInput.removeClass('is-valid'), 1000);
+            objectInput
+                .prop('readonly', true)
+                .prop('disabled', false)
+                .addClass('is-valid meta-saved')
 
-                        // Recalcular sumas
-                        actualizarSumaGlobal(codigo);
-                        actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion);
-                    } else {
-                        alert("Error: " + resp.mensaje);
-                        objectInput.prop('disabled', false).focus();
-                    }
-                },
-                error: function () {
-                    objectInput.prop('disabled', false).focus();
-                }
-            });
+            dt_row.Meta = meta
+            actualizarSumaGlobal(codigo)
+            actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion)
+
+            setTimeout(function () {
+                objectInput.removeClass('is-valid meta-saved')
+            }, 1400)
+        } catch (err) {
+            objectInput
+                .prop('disabled', false)
+                .prop('readonly', false)
+                .addClass('is-invalid')
+                .focus()
+            console.error('Error al guardar meta:', err)
+        } finally {
+            objectInput.data('saving', false)
         }
-    });
+    })
 
     function actualizarSumaGlobal(codigo) {
-        const badge = $(`#metaProg_${codigo}`);
-        const badgeTxt = $(`#metaTxt_${codigo}`);
+        const metaGlobal = paNumero($('#paMetaTot_' + codigo).text())
         $.ajax({
-            url: 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/calcular-meta',
+            url: baseUrl + 'calcular-meta',
             method: 'POST',
+            dataType: 'json',
             data: {codigoIndicador: codigo},
             success: function (resp) {
-                const nuevoTotal = parseFloat(resp.data);
-                const metaGlobal = parseFloat(badge.data('meta-global'))
+                const nuevoTotal = paNumero(resp.data)
+                actualizarMetaFracDom(codigo, nuevoTotal, metaGlobal)
 
-                badge.html(nuevoTotal);
-
-                badge.removeClass('bg-warning bg-danger bg-info');
-                badgeTxt.removeClass('bg-warning bg-danger bg-info');
-
-                let texto = 'Excedente'
-                if (metaGlobal > nuevoTotal) {
-                    badge.addClass('bg-danger'); badgeTxt.addClass('bg-danger'); texto = 'Pendiente';
-                } else if (metaGlobal === nuevoTotal) {
-                    badge.addClass('bg-info'); badgeTxt.addClass('bg-info'); texto = 'Completa';
-                } else {
-                    badge.addClass('bg-warning'); badgeTxt.addClass('bg-warning');
+                if (typeof dt_listaIndicadores !== 'undefined' && dt_listaIndicadores) {
+                    dt_listaIndicadores.rows().every(function () {
+                        const row = this.data()
+                        if (row && String(row.Codigo) === String(codigo)) {
+                            row.MetaProgramada = nuevoTotal
+                        }
+                    })
                 }
-
-                badgeTxt.html(texto);
-
-                badge.fadeOut(100).fadeIn(100);
-                badgeTxt.fadeOut(100).fadeIn(100);
             },
-            error: function () {
-                badge.prop('disabled', false).focus();
-            }
-        });
+        })
     }
 
     function actualizarSumaGestion(idIndicadorEstrategico, codigo, gestion) {
-        const badge = $(`#sum_tbl_${codigo}_${gestion}`);
+        const tableId = 'tbl_' + codigo + '_' + gestion
+        const metaGlobal = paNumero($('#sum_' + tableId).attr('data-meta-global'))
         $.ajax({
-            url: 'index.php?r=Planificacion/indicador-estrategico-programacion-anual/calcular-meta-gestion',
+            url: baseUrl + 'calcular-meta-gestion',
             method: 'POST',
-            data: {idIndicadorEstrategico: idIndicadorEstrategico, gestion: gestion},
-            success: function (resp) {
-                const nuevoTotal = parseFloat(resp.data);
-
-                badge.html(nuevoTotal);
-                badge.fadeOut(100).fadeIn(100);
+            dataType: 'json',
+            data: {
+                idIndicadorEstrategico: idIndicadorEstrategico,
+                gestion: gestion,
             },
-            error: function () {
-                input.prop('disabled', false).focus();
-            }
-        });
+            success: function (resp) {
+                const nuevoTotal = paNumero(resp.data)
+                actualizarTabMetaDom(tableId, nuevoTotal, metaGlobal)
+                $('#nav-pane_' + codigo + '_' + gestion + ' .iepa-tab-meta strong')
+                    .text(paFormatoMeta(nuevoTotal) + '/' + paFormatoMeta(metaGlobal))
+            },
+        })
     }
 
     $(document).on('blur', '.input-meta', function () {
-        $(this).prop('readonly', true).prop('disabled', false)
-    });
+        const input = $(this)
+        if (!input.data('saving')) {
+            input.prop('readonly', true).prop('disabled', false)
+        }
+    })
 
     function cambiarEstado(objectBtn, data) {
         if (data === 0) {
-            objectBtn.addClass('estado-on').removeClass('estado-off');
+            objectBtn.addClass('estado-on').removeClass('estado-off')
             objectBtn.find('.btn_text').html('Agregar')
         } else {
             objectBtn.removeClass('estado-on').addClass('estado-off')

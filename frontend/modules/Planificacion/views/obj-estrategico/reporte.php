@@ -1,153 +1,196 @@
 <?php
 
+use common\models\Estado;
 use yii\helpers\Html;
 
-/** @var int $gestion */
-/** @var string $unidad */
-/** @var array $grupos */
-/** @var float $totalGeneral */
+/** @var array $registros */
 
-$fmt = static fn(float $valor): string => number_format($valor, 2, ',', '.');
+$total = count($registros);
+$vigentes = 0;
+$caducos = 0;
+foreach ($registros as $row) {
+    if (($row['CodigoEstado'] ?? '') === Estado::ESTADO_VIGENTE) {
+        $vigentes++;
+    } elseif (($row['CodigoEstado'] ?? '') === Estado::ESTADO_CADUCO) {
+        $caducos++;
+    }
+}
+
+$texto = static function ($valor): string {
+    return Html::encode(trim((string)$valor));
+};
 ?>
 <style>
     .reporte-header {
         height: 70px;
-        border-bottom: 1px solid #ffffff;
     }
     .reporte-footer {
-        font-size: 8px;
+        font-size: 9px;
         color: #444;
-        border-top: 1px solid #ccc;
+        border-top: 1px solid #cbd5e1;
         padding-top: 4px;
     }
-    .reporte-titulo {
-        text-align: center;
-        font-size: 12px;
-        font-weight: bold;
-        margin: 0 0 4px 0;
+    .oe-title {
+        margin: 0 0 2px 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
         text-transform: uppercase;
+        letter-spacing: .04em;
     }
-    .reporte-subtitulo {
-        text-align: center;
+    .oe-subtitle {
+        margin: 0 0 12px 0;
+        font-size: 10px;
+        color: #64748b;
+    }
+    .oe-summary {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 12px;
+    }
+    .oe-summary td {
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 6px 10px;
         font-size: 9px;
-        margin: 0 0 8px 0;
-        color: #333;
+        color: #475569;
+        width: 33.33%;
     }
-    .ogi-table {
+    .oe-summary strong {
+        display: block;
+        font-size: 13px;
+        color: #0f172a;
+        margin-top: 2px;
+    }
+    .oe-table {
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
     }
-    .ogi-table th,
-    .ogi-table td {
-        border: 1px solid #4a4a4a;
-        font-size: 7.5px;
-        padding: 3px 4px;
-        vertical-align: middle;
-    }
-    .ogi-table thead th {
-        background: #d9d9d9;
-        text-align: center;
-        font-weight: bold;
-        line-height: 1.25;
-    }
-    .ogi-group {
-        background: #bfbfbf;
-        font-weight: bold;
+    .oe-table thead th {
+        background: #0f172a;
+        color: #fff;
         font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 6px 5px;
+        border: 1px solid #0f172a;
         text-align: left;
     }
-    .ogi-num {
+    .oe-table tbody td {
+        font-size: 8px;
+        color: #1e293b;
+        padding: 5px;
+        border: 1px solid #e2e8f0;
+        vertical-align: top;
+    }
+    .oe-table tbody tr:nth-child(even) td {
+        background: #f8fafc;
+    }
+    .oe-num { width: 4%; text-align: center; color: #64748b; font-weight: 700; }
+    .oe-code { width: 8%; text-align: center; font-family: monospace; font-weight: 700; color: #0369a1; }
+    .oe-obj { width: 24%; }
+    .oe-prod { width: 16%; }
+    .oe-area, .oe-pol { width: 16%; }
+    .oe-gestion { width: 8%; text-align: center; }
+    .oe-estado { width: 8%; text-align: center; }
+    .oe-chip {
+        font-family: monospace;
+        font-weight: 700;
+        color: #1d4ed8;
+    }
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 7px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+    .badge-vigente {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+    .badge-caduco {
+        background: #fff1f2;
+        color: #e11d48;
+        border: 1px solid #fecdd3;
+    }
+    .oe-empty {
         text-align: center;
-    }
-    .ogi-text {
-        text-align: justify;
-        line-height: 1.3;
-    }
-    .ogi-money {
-        text-align: right;
-        white-space: nowrap;
-    }
-    .ogi-total td {
-        background: #e6e6e6;
-        font-weight: bold;
-    }
-    .ogi-vacio {
-        text-align: center;
+        color: #94a3b8;
         font-style: italic;
-        color: #666;
-        padding: 12px;
-        font-size: 9px;
+        padding: 18px 8px;
+        font-size: 10px;
     }
 </style>
 
-<p class="reporte-titulo">Formulario 1 — Objetivo de gestión institucional</p>
-<p class="reporte-subtitulo">
-    Gestión <?= Html::encode((string)$gestion) ?>
-    <?php if ($unidad !== ''): ?>
-        | Unidad: <?= Html::encode($unidad) ?>
-    <?php endif; ?>
-</p>
+<p class="oe-title">Objetivos estratégicos institucionales</p>
+<p class="oe-subtitle">Listado ejecutivo de registros · <?= Html::encode(date('d/m/Y')) ?></p>
 
-<table class="ogi-table">
+<table class="oe-summary">
+    <tr>
+        <td>Total registrados<strong><?= $total ?></strong></td>
+        <td>Vigentes<strong><?= $vigentes ?></strong></td>
+        <td>Caducos<strong><?= $caducos ?></strong></td>
+    </tr>
+</table>
+
+<table class="oe-table">
     <thead>
     <tr>
-        <th colspan="4">Indicador (Resultado Esperado - Producto) de la Gestión</th>
-        <th rowspan="2" width="9%">(Bien, Norma o Servicio)</th>
-        <th colspan="5">Programación trimestral del producto (cantidad o porcentaje)</th>
-        <th rowspan="2" width="10%">Presupuesto programado por OGI</th>
-    </tr>
-    <tr>
-        <th width="5%">Cod</th>
-        <th width="32%">Denominación</th>
-        <th width="7%">Tipo</th>
-        <th width="8%">Categoría</th>
-        <th width="5%">I</th>
-        <th width="5%">II</th>
-        <th width="5%">III</th>
-        <th width="5%">IV</th>
-        <th width="9%">Meta anual</th>
+        <th class="oe-num">#</th>
+        <th class="oe-code">Código</th>
+        <th class="oe-obj">Objetivo</th>
+        <th class="oe-prod">Producto</th>
+        <th class="oe-area">Área</th>
+        <th class="oe-pol">Política</th>
+        <th class="oe-gestion">Gestión</th>
+        <th class="oe-estado">Estado</th>
     </tr>
     </thead>
     <tbody>
-    <?php if (empty($grupos)): ?>
+    <?php if (empty($registros)): ?>
         <tr>
-            <td colspan="11" class="ogi-vacio">No hay indicadores programados para el contexto activo.</td>
+            <td colspan="8" class="oe-empty">No hay objetivos estratégicos registrados</td>
         </tr>
     <?php else: ?>
-        <?php foreach ($grupos as $grupo): ?>
+        <?php foreach ($registros as $i => $row): ?>
+            <?php
+            $area = $row['areaEstrategica'] ?? [];
+            $politica = $row['politicaEstrategica'] ?? [];
+            $pei = $row['pei'] ?? [];
+            $gestion = trim((string)($pei['GestionInicio'] ?? ''));
+            $gestionFin = trim((string)($pei['GestionFin'] ?? ''));
+            if ($gestion !== '' && $gestionFin !== '') {
+                $gestion .= ' - ' . $gestionFin;
+            }
+            $vigente = ($row['CodigoEstado'] ?? '') === Estado::ESTADO_VIGENTE;
+            $estadoTexto = $vigente ? 'Vigente' : 'Caduco';
+            $estadoClase = $vigente ? 'badge-vigente' : 'badge-caduco';
+            ?>
             <tr>
-                <td colspan="11" class="ogi-group">
-                    Cod. Articulación: <?= Html::encode($grupo['codArticulacion']) ?>
-                    &nbsp;|&nbsp;
-                    Objetivo Gestión Institucional (Acción de Corto Plazo Institucional) Gestión <?= Html::encode((string)$gestion) ?>:
-                    <?= Html::encode($grupo['objetivo']) ?>
+                <td class="oe-num"><?= $i + 1 ?></td>
+                <td class="oe-code"><?= $texto($row['Compuesto'] ?? '') ?></td>
+                <td class="oe-obj"><?= $texto($row['Objetivo'] ?? '') ?></td>
+                <td class="oe-prod"><?= $texto($row['Producto'] ?? '') ?></td>
+                <td class="oe-area">
+                    <span class="oe-chip">&lt;<?= $texto($area['Codigo'] ?? '') ?>&gt;</span>
+                    <?= $texto($area['Descripcion'] ?? '') ?>
+                </td>
+                <td class="oe-pol">
+                    <span class="oe-chip">&lt;<?= $texto($politica['Codigo'] ?? '') ?>&gt;</span>
+                    <?= $texto($politica['Descripcion'] ?? '') ?>
+                </td>
+                <td class="oe-gestion"><?= $texto($gestion) ?></td>
+                <td class="oe-estado">
+                    <span class="badge <?= $estadoClase ?>"><?= $estadoTexto ?></span>
                 </td>
             </tr>
-            <?php foreach ($grupo['indicadores'] as $indicador): ?>
-                <tr>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['codigo']) ?></td>
-                    <td class="ogi-text"><?= Html::encode($indicador['denominacion']) ?></td>
-                    <td class="ogi-num"><?= Html::encode($indicador['tipo']) ?></td>
-                    <td class="ogi-num"><?= Html::encode($indicador['categoria']) ?></td>
-                    <td class="ogi-num"><?= Html::encode($indicador['naturaleza']) ?></td>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['t1']) ?></td>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['t2']) ?></td>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['t3']) ?></td>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['t4']) ?></td>
-                    <td class="ogi-num"><?= Html::encode((string)$indicador['metaAnual']) ?></td>
-                    <td class="ogi-money"><?= Html::encode($fmt((float)$indicador['presupuesto'])) ?></td>
-                </tr>
-            <?php endforeach; ?>
-            <tr class="ogi-total">
-                <td colspan="10" class="ogi-money">TOTAL</td>
-                <td class="ogi-money"><?= Html::encode($fmt((float)$grupo['totalPresupuesto'])) ?></td>
-            </tr>
         <?php endforeach; ?>
-        <tr class="ogi-total">
-            <td colspan="10" class="ogi-money">TOTAL GENERAL</td>
-            <td class="ogi-money"><?= Html::encode($fmt((float)$totalGeneral)) ?></td>
-        </tr>
     <?php endif; ?>
     </tbody>
 </table>

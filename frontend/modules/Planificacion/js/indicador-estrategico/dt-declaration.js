@@ -1,146 +1,302 @@
-let dt_indEstrategico;
+let dt_indEstrategico
+
+function indEsVigente(codigo) {
+    return codigo === ESTADO_VIGENTE
+}
+
+function indEstadoMeta(codigo) {
+    const vigente = indEsVigente(codigo)
+    return {
+        codigo: vigente ? ESTADO_VIGENTE : ESTADO_CADUCO,
+        clase: vigente ? 'vigente' : 'cancelada',
+        texto: vigente ? 'Vigente' : 'Caduco',
+        colorAvatar: vigente ? '#10b981' : '#f43f5e'
+    }
+}
+
+function indIniciales(texto) {
+    if (!texto) {
+        return 'IN'
+    }
+    const palabras = String(texto).trim().split(/\s+/).slice(0, 2)
+    return palabras.map(function (p) {
+        return p.charAt(0)
+    }).join('').toUpperCase()
+}
+
+function textoAccionEstrategicaInd(row) {
+    const accion = row.accionesEstrategicas || {}
+    const codigo = (accion.Codigo != null && accion.Codigo !== '')
+        ? accion.Codigo
+        : (row.AccionCodigo != null && row.AccionCodigo !== '' ? row.AccionCodigo : '—')
+    const descripcion = accion.Descripcion
+        || row.AccionDescripcion
+        || 'Sin acción asignada'
+    return 'AEI: ' + codigo + ' - ' + descripcion
+}
+
+function numerarFilasInd(api) {
+    if (!api) {
+        return
+    }
+    const start = parseInt(api.page.info().start, 10) || 0
+    api.column(0, {page: 'current', search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
+        $(cell).find('.row-num').text(start + i + 1)
+    })
+}
+
+function actualizarContadoresInd() {
+    if (typeof dt_indEstrategico === 'undefined' || !dt_indEstrategico) {
+        return
+    }
+
+    let total = 0
+    let vigentes = 0
+    let caducos = 0
+
+    dt_indEstrategico.rows({search: 'none'}).data().each(function (row) {
+        total++
+        if (indEsVigente(row.CodigoEstado)) {
+            vigentes++
+        } else if (row.CodigoEstado === ESTADO_CADUCO) {
+            caducos++
+        }
+    })
+
+    $('#indEstrategicoSubtitleTotal').text(total + ' indicadores registrados')
+    $('#indEstrategicoCountVigentes').text(vigentes)
+    $('#indEstrategicoCountCaducos').text(caducos)
+}
+
+function mostrarCargaTablaInd() {
+    $('#dticTableContainer').hide()
+    $('#dticTableLoading').show()
+}
+
+function ocultarCargaTablaInd() {
+    $('#dticTableLoading').hide()
+    $('#dticTableContainer').fadeIn(250)
+}
+
+function cerrarMenusEstadoInd(excepto) {
+    $('.estado-wrap').not(excepto).removeClass('open')
+}
+
+function rangoPaginasVisibleInd(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionInd(api) {
+    const $paginacion = $('#indEstrategicoPagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisibleInd(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> indicadores'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> indicadores'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
+function renderEstadoDropdownInd(codigoActual) {
+    const actual = indEstadoMeta(codigoActual)
+    const vigente = indEstadoMeta(ESTADO_VIGENTE)
+    const caduco = indEstadoMeta(ESTADO_CADUCO)
+
+    function opcion(meta) {
+        const activo = meta.codigo === actual.codigo
+        return `
+            <button type="button" class="estado-option ${meta.clase}${activo ? ' selected' : ''}" data-estado="${meta.codigo}">
+                <span class="dot"></span>
+                <span>${meta.texto}</span>
+                ${activo ? '<span class="check">✓</span>' : ''}
+            </button>
+        `
+    }
+
+    return `
+        <div class="estado-wrap">
+            <button type="button" class="estado ${actual.clase} estado-trigger" data-estado="${actual.codigo}">
+                <span class="dot"></span>${actual.texto}<span class="chevron">▾</span>
+            </button>
+            <div class="estado-menu">
+                ${opcion(vigente)}
+                ${opcion(caduco)}
+            </div>
+        </div>
+    `
+}
+
 $(document).ready(function () {
-
-    dt_indEstrategico = $("#tablaListaIndicadoresEstrategicos").DataTable({
+    dt_indEstrategico = $('#tablaListaIndicadoresEstrategicos').DataTable({
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: null,
+            bottomEnd: null,
+            bottom: null,
+        },
+        pageLength: 10,
+        paging: true,
+        info: false,
+        language: {
+            emptyTable: 'No hay indicadores estratégicos registrados',
+            zeroRecords: 'No se encontraron coincidencias'
+        },
+        order: [[1, 'asc']],
         initComplete: function () {
-            $("div.dt-search").append(`
-            <button id="refreshTable" class="btn-refresh">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </button>`
-            );
-
-            $("#dticTableLoading").hide();
-            $("#dticTableContainer").fadeIn(250);
+            ocultarCargaTablaInd()
+            actualizarContadoresInd()
+            numerarFilasInd(this.api())
+            actualizarPaginacionInd(this.api())
+            if (typeof initIndEstrategicoListadoFiltros === 'function') {
+                initIndEstrategicoListadoFiltros()
+            }
+        },
+        drawCallback: function () {
+            numerarFilasInd(this.api())
+            actualizarContadoresInd()
+            actualizarPaginacionInd(this.api())
         },
         ajax: {
-            method: "POST",
+            method: 'POST',
             dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
             url: 'index.php?r=Planificacion/indicador-estrategico/listar-todo',
             dataSrc: 'data',
             error: function (xhr) {
                 const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_indEstrategico.processing(false);
+                MostrarMensaje('error', GenerarMensajeError(data['mensaje']), data['errors'])
+                dt_indEstrategico.processing(false)
             }
         },
-
         columns: [
             {
-                data: "CodigoUsuario",
-                className: "dt-dtic-text-center",
-                width: "60px",
+                data: null,
                 orderable: false,
                 searchable: false,
-                render: function (data) {
-                    return `<div class="badge-codigo">${data}</div>`;
-                }
-            },
-            {data: "Codigo", visible:false},
-            {
-                data: null,
                 render: function (data, type, row) {
-                    if (type !== "display") {
-                        return row["Descripcion"];
+                    const indicador = row.indicador || {}
+                    const descripcion = indicador.Descripcion || row.Descripcion || ''
+                    if (type !== 'display') {
+                        return descripcion
                     }
 
-                    return `
-                        <div class="dtic-code-container">
-                            <span class="dtic-code-text">Indicador N°</span>
-                            <div class="dtic-code-badge">
-                                ${row["Codigo"]}
-                            </div>                                  
-                        </div>
-                        
-                        <div class="dtic-item-main">
-                            ${row["Descripcion"]}
-                        </div>
-                        
-                        <div class="dtic-item-sub">
-                            ${row["accionesEstrategicas"]["Descripcion"]} ${row["LineaBase"]} ${row["AccionDescripcion"]} ${row["Meta"]}  
-                        </div>
-                        
-                        <div class="dtic-item-sub2 group-container">
-                            <div class="sub-group-container">
-                                <div class="item-container"> 
-                                    <div>Objetivo</div>
-                                </div>
-                                <div>${row["objetivosEstrategicos"]["Objetivo"]}</div>
-                            </div>
-                            <div class="sub-group-container">
-                                <div class="item-container"> 
-                                    <div>Producto</div>
-                                </div>
-                                <div>${row["objetivosEstrategicos"]["Producto"]}</div>
-                            </div>
-                        </div>
-                                               
-                        <div class="dtic-item-sub2">
-                            <small><b>Ind-Descripcion:</b> ${row["objetivosEstrategicos"]["Indicador_Descripcion"]}</small>
-                        </div>
-                        <div class="dtic-item-sub2">
-                            <small><b>Formula:</b> ${row["objetivosEstrategicos"]["Indicador_Formula"]}</small>
-                        </div>
-
-                        
-                        <div class="acc-footer mt-2" style="display: flex; gap: 10px">
-                            <span class="badge-result">${row["indicador"]["catUnidadesIndicadores"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["indicador"]["catTiposResultados"]["Descripcion"]}</span>
-                            <span class="badge-result">${row["indicador"]["catCategoriasIndicadores"]["Descripcion"]}</span>
-                        </div>                        
-                        `;
-                }
-            },
-            {
-                data: "CodigoEstado",
-                className: "text-center",
-                width: "90px",
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>';
-                },
-            },
-            {
-                data: "IdIndicador",
-                className: "text-center",
-                width: "140px",
-                orderable: false,
-                searchable: false,
-                render: function () {
+                    const estado = indEstadoMeta(row.CodigoEstado)
+                    const unidad = (indicador.catUnidadesIndicadores && indicador.catUnidadesIndicadores.Descripcion)
+                        ? indicador.catUnidadesIndicadores.Descripcion
+                        : ''
+                    const tipo = (indicador.catTiposResultados && indicador.catTiposResultados.Descripcion)
+                        ? indicador.catTiposResultados.Descripcion
+                        : ''
+                    const categoria = (indicador.catCategoriasIndicadores && indicador.catCategoriasIndicadores.Descripcion)
+                        ? indicador.catCategoriasIndicadores.Descripcion
+                        : ''
+                    const lineaBase = indicador.LineaBase != null ? indicador.LineaBase
+                        : (row.LineaBase != null ? row.LineaBase : '')
+                    const meta = indicador.Meta != null ? indicador.Meta
+                        : (row.Meta != null ? row.Meta : '')
 
                     return `
-                    <button class="btn-action btn-edit ">
-                        <i class="fa fa-pen"></i>
-                    </button>
-
-                    <button class="btn-action btn-delete ">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `;
+                        <div class="card-row ie-card-row">
+                            <span class="row-num"></span>
+                            <div class="patient">
+                                <div class="avatar" style="background:${estado.colorAvatar}">${indIniciales(descripcion)}</div>
+                                <div>
+                                    <p class="patient-name">${descripcion} <span class="code-badge">${row.Codigo || ''}</span></p>
+                                    <p class="patient-meta">${textoAccionEstrategicaInd(row)}</p>
+                                    <p class="patient-meta">Línea base: ${lineaBase} · Meta: ${meta}</p>
+                                    <div class="ie-badges">
+                                        ${unidad ? `<span class="ie-badge">${unidad}</span>` : ''}
+                                        ${tipo ? `<span class="ie-badge">${tipo}</span>` : ''}
+                                        ${categoria ? `<span class="ie-badge">${categoria}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>${renderEstadoDropdownInd(row.CodigoEstado)}</div>
+                            <div class="actions">
+                                <button type="button" class="btn-action-new edit">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
+                            </div>
+                        </div>
+                    `
                 }
-            }
-        ],
-    });
+            },
+            {data: 'Codigo', visible: false},
+            {data: 'CodigoEstado', visible: false},
+            {data: 'IdIndicador', visible: false, searchable: false}
+        ]
+    })
 
-    $(document).on("click", "#refreshTable", function () {
-        dt_indEstrategico.ajax.reload();
-    });
+    $(document).on('click', '#refreshTable', function () {
+        const btn = $(this)
+        btn.prop('disabled', true)
+        mostrarCargaTablaInd()
+        dt_indEstrategico.ajax.reload(function () {
+            actualizarContadoresInd()
+            ocultarCargaTablaInd()
+            btn.prop('disabled', false)
+        }, false)
+    })
 
-    dt_indEstrategico.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_indEstrategico.cells(null, 0, {search: 'applied', order: 'applied'}).every(function () {
-            this.data(i++);
-        });
-    }).draw();
+    $(document).on('click', function () {
+        cerrarMenusEstadoInd()
+    })
 })

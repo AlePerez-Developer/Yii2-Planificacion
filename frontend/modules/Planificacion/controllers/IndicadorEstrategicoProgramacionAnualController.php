@@ -14,7 +14,10 @@ use Yii;
  */
 class IndicadorEstrategicoProgramacionAnualController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index'];
+
     private IndicadorEstrategicoProgramacionAnualService $service;
+
     public function __construct($id, $module,
                                 IndicadorEstrategicoProgramacionAnualService $service,
         $config = [])
@@ -53,8 +56,16 @@ class IndicadorEstrategicoProgramacionAnualController extends BaseController
 
     public function beforeAction($action): bool
     {
-        if ($action->id == "listar-todo")
+        if (in_array($action->id, [
+            'listar-indicadores',
+            'listar-gestiones',
+            'listar-programacion',
+            'listar-llaves',
+            'calcular-meta',
+            'calcular-meta-gestion',
+        ], true)) {
             $this->enableCsrfValidation = false;
+        }
         return parent::beforeAction($action);
     }
 
@@ -173,7 +184,7 @@ class IndicadorEstrategicoProgramacionAnualController extends BaseController
         return $this->withTryCatch(function () {
 
             $idProgramacion = $this->obtenerIdProgramacion();
-            $meta = $this->obtenerMeta();
+            $meta = (int)$this->obtenerMeta();
 
             return $this->service->guardarMeta($idProgramacion, $meta);
         });

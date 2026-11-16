@@ -374,7 +374,7 @@ function populateS2AccionesEstrategicas(select2) {
                 select2.append(
                     $('<option>', {
                         value: item["IdAccionEstrategica"],
-                        text: item["Descripcion"]
+                        text: '(' + item["Codigo"] + ') - ' + item["Descripcion"]
                     })
                 );
             });

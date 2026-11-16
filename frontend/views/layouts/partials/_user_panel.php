@@ -2,8 +2,9 @@
 use yii\helpers\Html;
 
 $usuario = Yii::$app->user->identity;
+//dd($usuario);
 $persona = $usuario->persona;
-
+//dd($persona);
 $nombreCompleto =
     $persona->Nombres . ' ' .
     $persona->Paterno . ' ' .

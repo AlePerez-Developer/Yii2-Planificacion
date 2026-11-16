@@ -1,0 +1,113 @@
+.ieda-col-headers {
+    grid-template-columns: 1fr 10fr 2fr;
+}
+
+.ieda-card-row {
+    grid-template-columns: 1fr 10fr 2fr !important;
+    cursor: pointer;
+}
+
+.ieda-hint {
+    color: #94a3b8 !important;
+    font-style: italic;
+}
+
+.ieda-count-wrap {
+    text-align: right;
+}
+
+.ieda-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#tablaListaIndicadoresDa tr.shown .card-row {
+    border-color: #7dd3fc;
+    box-shadow: 0 0 0 2px #e0f2fe;
+}
+
+#tablaListaIndicadoresDa td.no-padding {
+    padding: 0 !important;
+}
+
+.ieda-slider .ieda-child {
+    margin: 0 12px 12px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.ieda-da-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+}
+
+.ieda-da-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.ieda-da-item:hover {
+    border-color: #bae6fd;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, .08);
+}
+
+.ieda-da-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: #0284c7;
+    cursor: pointer;
+}
+
+.ieda-da-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.35;
+}
+
+.ieda-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    padding: 18px 8px;
+}
+
+@media (max-width: 768px) {
+    .ieda-col-headers {
+        display: none;
+    }
+
+    .ieda-card-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ieda-da-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ieda-count-wrap {
+        text-align: left;
+    }
+}
