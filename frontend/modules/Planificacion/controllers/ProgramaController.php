@@ -10,6 +10,8 @@ use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use Mpdf\MpdfException;
+use Mpdf\Mpdf;
 use Yii;
 
 /**
@@ -17,6 +19,8 @@ use Yii;
  */
 class ProgramaController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index', 'reporte'];
+
     private ProgramaService $service;
 
     public function __construct($id, $module, ProgramaService $service, $config = [])
@@ -47,13 +51,13 @@ class ProgramaController extends BaseController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    // Soporte nuevo y legacy
                     'listar-todo' => ['get', 'post'],
                     'guardar' => ['post'],
                     'actualizar' => ['post'],
                     'cambiar-estado' => ['post'],
                     'eliminar' => ['post'],
                     'buscar' => ['post'],
+                    'reporte' => ['get'],
                 ],
             ],
         ];
@@ -64,7 +68,10 @@ class ProgramaController extends BaseController
      */
     public function beforeAction($action): bool
     {
-        if ($action->id == 'listar-todo' || $action->id == 'listar-programas') {
+        if ($action->id === 'listar-todo'
+            || $action->id === 'listar-programas'
+            || $action->id === 'listar-programas-s2'
+        ) {
             $this->enableCsrfValidation = false;
         }
         return parent::beforeAction($action);
@@ -78,6 +85,53 @@ class ProgramaController extends BaseController
     public function actionIndex(): string
     {
         return $this->render('programa');
+    }
+
+    /**
+     * Genera el PDF del listado de programas.
+     *
+     * @throws MpdfException
+     * @noinspection PhpUnused
+     */
+    public function actionReporte(): void
+    {
+        $listado = $this->service->listarTodo();
+        $registros = $listado['data'] ?? [];
+
+        $usuario = Yii::$app->user->identity;
+        $persona = $usuario->persona ?? null;
+        $nombreUsuario = trim(implode(' ', array_filter([
+            $persona->Nombres ?? '',
+            $persona->Paterno ?? '',
+            $persona->Materno ?? '',
+        ])));
+        if ($nombreUsuario === '') {
+            $nombreUsuario = (string)($usuario->CodigoUsuario ?? '');
+        }
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter',
+            'margin_top' => 32,
+            'margin_bottom' => 18,
+            'margin_left' => 12,
+            'margin_right' => 12,
+        ]);
+        $mpdf->SetMargins(12, 12, 32);
+        $mpdf->SetHTMLHeader('<div class="reporte-header"></div>');
+        $mpdf->SetHTMLFooter(
+            '<table class="reporte-footer" width="100%">'
+            . '<tr>'
+            . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
+            . ' (' . htmlspecialchars((string)($usuario->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
+            . '<td width="40%" align="right">Fecha y hora de impresión: '
+            . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
+            . '</tr></table>'
+        );
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('Programas.pdf', 'I');
     }
 
     /**
@@ -153,7 +207,8 @@ class ProgramaController extends BaseController
     {
         return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->cambiarEstado($id);
+            $codigoEstado = Yii::$app->request->post('codigoEstado');
+            return $this->service->cambiarEstado($id, $codigoEstado ?: null);
         });
     }
 

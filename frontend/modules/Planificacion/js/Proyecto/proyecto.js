@@ -1,108 +1,296 @@
-$(document).ready(function () {
-    let idProyecto = '00000000-0000-0000-0000-000000000000'
-    let baseUrl = "index.php?r=Planificacion/proyecto/"
+let proyectoFiltroTexto = ''
+let proyectoFiltroCodigoEstado = ''
+let proyectoFiltroIdPrograma = ''
 
-    function ReiniciarCampos() {
+function codigoEstadoDesdeEtiquetaProyecto(etiqueta) {
+    const texto = (etiqueta || '').trim().toLowerCase()
+    if (!texto || texto.indexOf('todos') === 0) {
+        return ''
+    }
+    if (texto.indexOf('vigent') !== -1) {
+        return ESTADO_VIGENTE
+    }
+    if (texto.indexOf('cancel') !== -1 || texto.indexOf('caduc') !== -1) {
+        return ESTADO_CADUCO
+    }
+    return ''
+}
+
+function aplicarFiltrosTablaProyecto() {
+    if (typeof dt_proyecto === 'undefined' || !dt_proyecto) {
+        return
+    }
+    dt_proyecto.draw()
+}
+
+function sincronizarFiltroEstadoProyecto(codigoEstado) {
+    proyectoFiltroCodigoEstado = codigoEstado || ''
+    $('#filtroEstadoProyecto').val(proyectoFiltroCodigoEstado)
+    $('.stats .stat').removeClass('active')
+    if (proyectoFiltroCodigoEstado) {
+        $('.stats .stat').each(function () {
+            const statEtiqueta = $(this).find('.stat-label').text().trim()
+            if (codigoEstadoDesdeEtiquetaProyecto(statEtiqueta) === proyectoFiltroCodigoEstado) {
+                $(this).addClass('active')
+            }
+        })
+    }
+    aplicarFiltrosTablaProyecto()
+}
+
+function initProyectoListadoFiltros() {
+    if ($.fn.dataTable.ext.search.some(function (fn) {
+        return fn && fn.__proyectoListadoFiltro === true
+    })) {
+        aplicarFiltrosTablaProyecto()
+        return
+    }
+
+    const filtroFn = function (settings, data, dataIndex) {
+        if (settings.nTable.id !== 'tablaListaProyectos') {
+            return true
+        }
+
+        const row = dt_proyecto.row(dataIndex).data()
+        if (!row) {
+            return true
+        }
+
+        if (proyectoFiltroIdPrograma && row.IdPrograma !== proyectoFiltroIdPrograma) {
+            return false
+        }
+
+        if (proyectoFiltroCodigoEstado && row.CodigoEstado !== proyectoFiltroCodigoEstado) {
+            return false
+        }
+
+        if (!proyectoFiltroTexto) {
+            return true
+        }
+
+        const termino = proyectoFiltroTexto.toLowerCase()
+        const codigo = (row.Codigo || '').toLowerCase()
+        const descripcion = (row.Descripcion || '').toLowerCase()
+        const progCodigo = ((row.programa && row.programa.Codigo) ? row.programa.Codigo : (row.codex || '')).toLowerCase()
+        const progDesc = ((row.programa && row.programa.Descripcion) ? row.programa.Descripcion : '').toLowerCase()
+
+        return codigo.indexOf(termino) !== -1
+            || descripcion.indexOf(termino) !== -1
+            || progCodigo.indexOf(termino) !== -1
+            || progDesc.indexOf(termino) !== -1
+    }
+    filtroFn.__proyectoListadoFiltro = true
+    $.fn.dataTable.ext.search.push(filtroFn)
+
+    $('.stats').on('click', '.stat', function () {
+        const etiqueta = $(this).find('.stat-label').text().trim()
+        const codigo = codigoEstadoDesdeEtiquetaProyecto(etiqueta)
+
+        if ($(this).hasClass('active')) {
+            sincronizarFiltroEstadoProyecto('')
+            return
+        }
+
+        sincronizarFiltroEstadoProyecto(codigo)
+    })
+
+    $('#buscarProyecto').on('input', function () {
+        proyectoFiltroTexto = $(this).val().trim()
+        aplicarFiltrosTablaProyecto()
+    })
+
+    $('#filtroEstadoProyecto').on('change', function () {
+        sincronizarFiltroEstadoProyecto($(this).val())
+    })
+
+    $('#filtroPrograma').on('change', function () {
+        proyectoFiltroIdPrograma = $(this).val() || ''
+        aplicarFiltrosTablaProyecto()
+    })
+}
+
+$(document).ready(function () {
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
+    let idProyecto = ID_EMPTY_GUID
+    const baseUrl = 'index.php?r=Planificacion/proyecto/'
+    const dtEvents = $('#tablaListaProyectos')
+    const $modalProyecto = $('#modalProyecto')
+
+    function reiniciarCampos() {
+        const validator = $('#formProyecto').data('validator')
+        if (validator) {
+            validator.resetForm()
+        }
         $('#formProyecto *').filter(':input').each(function () {
-            $(this).removeClass('is-invalid is-valid');
-        });
-        $('#formProyecto').trigger("reset");
-        proyecto_s2Programa.val(null).trigger('change')
-        idProyecto = '00000000-0000-0000-0000-000000000000'
+            $(this).removeClass('is-invalid is-valid')
+        })
+        if (typeof proyecto_s2Programa !== 'undefined') {
+            proyecto_s2Programa.val(null).trigger('change')
+        }
+        $('#formProyecto').trigger('reset')
+        idProyecto = ID_EMPTY_GUID
     }
 
     function mensajeAccion(accion) {
-        return `Los datos del proyecto se ${accion}ron correctamente.`;
+        return `Los datos del proyecto se ${accion}ron correctamente.`
     }
 
-    $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
-        ReiniciarCampos();
-        $("#divDatos").hide(500);
-        $("#divTabla").show(500);
-    });
+    function tituloModalProyecto(esEdicion) {
+        return esEdicion ? 'Edición de datos' : 'Ingreso de datos'
+    }
 
-    $("#btnGuardar").click(async function () {
-        const btn = $(this);
-        const btnCancel = $('#btnCancelar')
+    function abrirModalProyecto(esEdicion) {
+        $('#proyectoModalTitulo').text(tituloModalProyecto(esEdicion))
+        $modalProyecto.modal('show')
+    }
 
-        if (!$("#formProyecto").valid()) return;
+    function cerrarModalProyecto() {
+        reiniciarCampos()
+        $modalProyecto.modal('hide')
+    }
 
-        const hasCode =  idProyecto !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
+    async function guardarFormularioProyecto(opciones) {
+        const btn = opciones.spinnerBtn
+        const cerrarAlExito = !!opciones.cerrarAlExito
+        const continuar = !!opciones.continuar
 
-        const idPrograma = proyecto_s2Programa.select2('data')[0].id
-        const codigo = $("#codigo").val();
-        const descripcion = $("#descripcion").val();
+        if (!$('#formProyecto').valid()) {
+            return false
+        }
 
-        const datos = new FormData();
-        datos.append("idProyecto", idProyecto);
-        datos.append("idPrograma", idPrograma);
-        datos.append("codigo", codigo);
-        datos.append("descripcion", descripcion);
+        const datos = new FormData()
+        datos.append('idProyecto', idProyecto)
+        datos.append('idPrograma', $('#idPrograma').val())
+        datos.append('codigo', $('#codigo').val())
+        datos.append('descripcion', $('#descripcion').val())
+
+        const esEdicion = idProyecto !== ID_EMPTY_GUID
+        const accion = esEdicion ? 'actualizar' : 'guardar'
 
         try {
             await ajaxPromise({
                 url: baseUrl + accion,
                 data: datos,
                 spinnerBtn: btn,
-                cancelBtn: btnCancel,
+                cancelBtn: cerrarAlExito ? $('#btnCancelar') : null,
                 successMsg: mensajeAccion(accion),
-                reloadTable: dt_proyecto
-            });
+                reloadTable: typeof dt_proyecto !== 'undefined' ? dt_proyecto : null,
+                onSuccess: function () {
+                    if (typeof actualizarContadoresProyecto === 'function') {
+                        actualizarContadoresProyecto()
+                    }
+                    if (typeof popularFiltroProgramaProyecto === 'function') {
+                        popularFiltroProgramaProyecto()
+                    }
+                    if (continuar) {
+                        reiniciarCampos()
+                        $('#proyectoModalTitulo').text(tituloModalProyecto(false))
+                    }
+                }
+            })
+            return true
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+            return false
         }
-    });
+    }
 
-    $(document).on('click', '#refresh', function(){
-        dt_proyecto.ajax.reload();
+    $('#btnNuevoProyecto').on('click', function () {
+        reiniciarCampos()
+        abrirModalProyecto(false)
     })
 
-    /* =============================================
-     * CAMBIA EL ESTADO DEL REGISTRO
-     * =============================================
-     */
-    $(document).on('click', 'tbody #btnEstado', async function(){
-        let objectBtn = $(this);
-        const dt_row = dt_proyecto.row(objectBtn.closest('tr')).data()
-        let idProyecto = dt_row["IdProyecto"];
+    $('#btnReportePdf').on('click', function () {
+        window.open(baseUrl + 'reporte', '_blank')
+    })
 
-        const datos = new FormData();
-        datos.append("idProyecto", idProyecto);
+    $('#btnCancelar').on('click', function () {
+        cerrarModalProyecto()
+    })
+
+    $modalProyecto.on('hidden.bs.modal', function () {
+        reiniciarCampos()
+    })
+
+    $('#btnGuardar').on('click', function () {
+        guardarFormularioProyecto({
+            spinnerBtn: $(this),
+            cerrarAlExito: true,
+            continuar: false
+        })
+    })
+
+    $('#btnGuardarContinuar').on('click', function () {
+        guardarFormularioProyecto({
+            spinnerBtn: $(this),
+            cerrarAlExito: false,
+            continuar: true
+        })
+    })
+
+    dtEvents.on('click', '.estado-trigger', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        const wrap = $(this).closest('.estado-wrap')
+        const abierto = wrap.hasClass('open')
+        cerrarMenusEstadoProyecto()
+        wrap.toggleClass('open', !abierto)
+    })
+
+    dtEvents.on('click', '.estado-menu', function (e) {
+        e.stopPropagation()
+    })
+
+    dtEvents.on('click', '.estado-option', async function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const option = $(this)
+        const wrap = option.closest('.estado-wrap')
+        const tr = option.closest('tr')
+        const rowApi = dt_proyecto.row(tr)
+        const dt_row = rowApi.data()
+        const codigoNuevo = option.data('estado')
+
+        if (!dt_row || codigoNuevo === dt_row.CodigoEstado) {
+            wrap.removeClass('open')
+            return
+        }
+
+        const datos = new FormData()
+        datos.append('idProyecto', dt_row.IdProyecto)
+        datos.append('codigoEstado', codigoNuevo)
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "cambiar-estado",
+            const data = await ajaxPromise({
+                url: baseUrl + 'cambiar-estado',
                 data: datos,
-                spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
             })
+            dt_row.CodigoEstado = data.data
+            rowApi.data(dt_row).draw(false)
+            actualizarContadoresProyecto()
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+        } finally {
+            wrap.removeClass('open')
         }
-    });
+    })
 
-    /*=============================================
-    ELIMINA DE LA BD UN REGISTRO
-    =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
-        let objectBtn = $(this);
+    dtEvents.on('click', '.btn-action-new.delete', function () {
+        const objectBtn = $(this)
         const dt_row = dt_proyecto.row(objectBtn.closest('tr')).data()
-        let idProyecto = dt_row["IdProyecto"];
+        const id = dt_row.IdProyecto
 
-        const datos = new FormData();
-        datos.append("idProyecto", idProyecto);
-
+        const datos = new FormData()
+        datos.append('idProyecto', id)
 
         Swal.fire({
-            icon: "warning",
-            title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar el peoyecto seleccionado?",
+            icon: 'warning',
+            title: 'Confirmación eliminación',
+            text: '¿Está seguro de eliminar el proyecto seleccionado?',
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: '#3085d6',
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
@@ -110,110 +298,114 @@ $(document).ready(function () {
             if (resultado.value) {
                 try {
                     await ajaxPromise({
-                        url: baseUrl + "eliminar",
+                        url: baseUrl + 'eliminar',
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_proyecto
-                    });
+                    })
+                    dt_proyecto.ajax.reload(function () {
+                        actualizarContadoresProyecto()
+                        popularFiltroProgramaProyecto()
+                    }, false)
                 } catch (err) {
-                    console.error("Error al procesar:", err);
+                    console.error('Error al procesar:', err)
                 }
             }
-        });
-    });
+        })
+    })
 
-    /*=============================================
-    BUSCA EL REGISTRO SELECCIONADO EN LA BD
-    =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
-        let objectBtn = $(this);
+    dtEvents.on('click', '.btn-action-new.edit', async function () {
+        const objectBtn = $(this)
         const dt_row = dt_proyecto.row(objectBtn.closest('tr')).data()
-        idProyecto = dt_row["IdProyecto"];
+        idProyecto = dt_row.IdProyecto
 
-        const datos = new FormData();
-        datos.append("idProyecto", idProyecto);
+        const datos = new FormData()
+        datos.append('idProyecto', idProyecto)
 
         try {
             await ajaxPromise({
-                url: baseUrl + "buscar",
+                url: baseUrl + 'buscar',
                 data: datos,
                 spinnerBtn: objectBtn,
-            }).then((data) => {
-                let obj = data.data
-                proyecto_s2Programa.val(obj["IdPrograma"]).trigger('change')
-                $("#codigo").val(obj["Codigo"]);
-                $("#descripcion").val(obj["Descripcion"]);
-                $("#btnMostrarCrear").trigger('click');
-            });
+            }).then(function (data) {
+                const registro = data.data
+                if (typeof proyecto_s2Programa !== 'undefined') {
+                    proyecto_s2Programa.val(registro.IdPrograma).trigger('change.select2')
+                }
+                $('#codigo').val(registro.Codigo)
+                $('#descripcion').val(registro.Descripcion)
+                abrirModalProyecto(true)
+            })
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
         }
-    });
+    })
 
-    /**
-     * Validacion del form
-     */
-    $( "#formProyecto" ).validate( {
+    $('#formProyecto').validate({
+        ignore: [],
         rules: {
-            programas: {
-                required: true,
+            idPrograma: {
+                required: true
             },
             codigo: {
                 required: true,
                 minlength: 3,
-                require_from_group: [2, ".codigo_group"],
+                maxlength: 20,
+                require_from_group: [2, '.codigo_group'],
                 remote: {
-                    url: baseUrl + "verificar-codigo",
-                    type: "post",
-                    dataType: "json",
+                    url: baseUrl + 'verificar-codigo',
+                    type: 'post',
+                    dataType: 'json',
                     data: {
-                        codigo: function() {
-                            return $('#codigo').val(); // valor actual del campo
+                        codigo: function () {
+                            return $('#codigo').val()
                         },
-                        idPrograma: function (){
-                            let programa = $('#programas').select2('data')
-                            return programa[0].id
+                        idPrograma: function () {
+                            return $('#idPrograma').val()
                         },
-                        idProyecto: function (){
+                        idProyecto: function () {
                             return idProyecto
                         }
                     }
                 }
             },
-            descripcion:{
+            descripcion: {
                 required: true,
                 minlength: 2,
-                maxlength: 500,
+                maxlength: 500
             },
         },
         messages: {
-            programas: {
-                required: "Debe seleccionar una opcion de programa",
+            idPrograma: {
+                required: 'Debe seleccionar un programa'
             },
             codigo: {
-                required: "Debe ingresar un codigo de programa",
-                require_from_group: "Debe seleccionar un programa para evaluar el codigo de proyecto",
-                minlength: "El codigo debe debe ser de 3 digitos",
-                remote: "El codigo ingresado ya se encuentra en uso"
+                required: 'Debe ingresar un código de proyecto',
+                require_from_group: 'Debe seleccionar un programa para validar el código',
+                minlength: 'El código debe tener al menos 3 dígitos',
+                maxlength: 'El código debe tener máximo 20 dígitos',
+                remote: 'El código ingresado ya se encuentra en uso'
             },
             descripcion: {
-                required: "Debe ingresar la descripcion del programa",
-                minlength: "La descripcion del programa debe tener por lo menos 2 caracteres",
-                maxlength: "La descripcion del programa  debe tener maximo 500 caracteres",
-            },
+                required: 'Debe ingresar la descripción del proyecto',
+                minlength: 'La descripción debe tener por lo menos 2 caracteres',
+                maxlength: 'La descripción debe tener máximo 500 caracteres',
+            }
         },
-        errorElement: "div",
-
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
+        errorElement: 'div',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback')
+            if (element.hasClass('select2-hidden-accessible')) {
+                error.insertAfter(element.next('.select2'))
+            } else {
+                error.insertAfter(element)
+            }
         },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        highlight: function (element) {
+            $(element).addClass('is-invalid').removeClass('is-valid')
         },
         unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+            $(element).addClass('is-valid').removeClass('is-invalid')
         }
-    } );
-});
+    })
+})
