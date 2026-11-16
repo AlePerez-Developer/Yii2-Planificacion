@@ -1,0 +1,48 @@
+---
+description: Usar el CRUD de DA (Dirección Administrativa) como plantilla canónica para crear o modificar CRUDs en Planificacion
+alwaysApply: true
+---
+
+# CRUD base: Dirección Administrativa (DA)
+
+Al **crear o modificar** CRUDs en este proyecto, tomar como referencia el módulo DA y replicar su patrón (adaptando nombres/campos). No volver a patrones viejos (`divDatos`/`divTabla`, `btnMostrarCrear`, botones DataTables nativos, etc.) salvo pedido explícito.
+
+## Archivos de referencia
+
+- `frontend/modules/Planificacion/controllers/DaController.php`
+- `frontend/modules/Planificacion/services/DaService.php`
+- `frontend/modules/Planificacion/views/da/index.php`
+- `frontend/modules/Planificacion/views/da/reporte.php`
+- `frontend/modules/Planificacion/js/da/Da.js`
+- `frontend/modules/Planificacion/js/da/dt-declaration.js`
+
+## UI / listado (`index.php`)
+
+- Layout propio del listado (header, stats, toolbar, `col-headers`, cards en filas).
+- Estilos en `<style>` de la vista (misma línea visual: cards, badges estado, acciones).
+- DataTable sin UI nativa de info/paging (`layout.bottom: null`, `info: false`).
+- Paginación custom `.pagination` / `#…Pagination` sincronizada vía JS (`pageLength: 10`).
+- Alta/edición en **modal Bootstrap** (header + form body + footer).
+- Footer modal: **Cancelar**, **Guardar y continuar**, **Guardar**.
+- Botones: `#btnNuevo…`, `#btnReportePdf`, acciones de fila `.btn-action-new.edit` / `.delete` (sin agregar clases extra tipo `btn-edit`).
+
+## JS
+
+- `dt-declaration.js`: DataTable, render de filas/cards, contadores, paginación custom.
+- `Da.js` (o equivalente): filtros, modal, CRUD AJAX con `ajaxPromise`, estado dropdown, validación jQuery Validate.
+- Guardar cierra modal; Guardar y continuar guarda, recarga tabla y reinicia form sin cerrar.
+- Editar: `buscar` → rellenar form → abrir modal en modo edición.
+- PDF: `window.open(baseUrl + 'reporte', '_blank')`.
+
+## Backend
+
+- Controller + Service + FormModel; respuestas con `withTryCatch` / `ResponseHelper`.
+- Acciones: `listar-todo`, `guardar`, `actualizar`, `cambiar-estado`, `eliminar`, `buscar`, `verificar-codigo`, `reporte`.
+- `accionesSinValidacion = ['index', 'reporte']` para PDF/GET.
+- Reporte mPDF: encabezado reservado, cuerpo ejecutivo, pie con usuario / página / fecha impresión (como `actionReporte` de DA).
+
+## Al generar un CRUD nuevo
+
+1. Copiar/adaptar estructura DA (no inventar otro layout).
+2. Renombrar entidad, rutas, IDs y campos.
+3. Mantener modal, paginación custom, stats/filtros y reporte PDF si aplica.
