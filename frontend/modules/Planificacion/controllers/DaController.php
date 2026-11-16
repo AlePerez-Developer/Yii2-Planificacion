@@ -10,6 +10,8 @@ use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use Mpdf\MpdfException;
+use Mpdf\Mpdf;
 use Yii;
 
 /**
@@ -17,6 +19,8 @@ use Yii;
  */
 class DaController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index', 'reporte'];
+
     private DaService $service;
 
     public function __construct($id, $module, DaService $service, $config = [])
@@ -54,6 +58,7 @@ class DaController extends BaseController
                     'cambiar-estado' => ['post'],
                     'eliminar' => ['post'],
                     'buscar' => ['post'],
+                    'reporte' => ['get'],
                 ],
             ],
         ];
@@ -81,18 +86,64 @@ class DaController extends BaseController
     }
 
     /**
+     * Genera el PDF del listado de direcciones administrativas.
+     *
+     * @throws MpdfException
+     * @noinspection PhpUnused
+     */
+    public function actionReporte(): void
+    {
+        $listado = $this->service->listarTodo();
+        $registros = $listado['data'] ?? [];
+
+        $usuario = Yii::$app->user->identity;
+        $persona = $usuario->persona ?? null;
+        $nombreUsuario = trim(implode(' ', array_filter([
+            $persona->Nombres ?? '',
+            $persona->Paterno ?? '',
+            $persona->Materno ?? '',
+        ])));
+        if ($nombreUsuario === '') {
+            $nombreUsuario = (string)($usuario->CodigoUsuario ?? '');
+        }
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter',
+            'margin_top' => 32,
+            'margin_bottom' => 18,
+            'margin_left' => 12,
+            'margin_right' => 12,
+        ]);
+        $mpdf->SetMargins(12, 12, 32);
+        $mpdf->SetHTMLHeader('<div class="reporte-header"></div>');
+        $mpdf->SetHTMLFooter(
+            '<table class="reporte-footer" width="100%">'
+            . '<tr>'
+            . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
+            . ' (' . htmlspecialchars((string)($usuario->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
+            . '<td width="40%" align="right">Fecha y hora de impresión: '
+            . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
+            . '</tr></table>'
+        );
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('Direcciones-Administrativas.pdf', 'I');
+    }
+
+    /**
      * Acción para listar todos los registros del modelo.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      */
     public function actionListarTodo(): array
     {
-       // sleep(5);
         return $this->withTryCatch(fn() => $this->service->listarTodo());
     }
 
     /**
-     * accion para listar todos los registros del modelo para el llenado de Select2.
+     * Accion para listar todos los registros del modelo para el llenado de Select2.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -201,7 +252,7 @@ class DaController extends BaseController
     }
 
     /**
-     * accion para verificar un codigo ingresado
+     * Accion para verificar un codigo ingresado
      *
      * @return bool
      * @noinspection PhpUnused

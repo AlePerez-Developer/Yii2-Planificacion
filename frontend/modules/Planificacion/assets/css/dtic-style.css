@@ -480,7 +480,7 @@ table.dtic-table > tbody > tr:hover > td {
 /* ================= FOOTER ================= */
 
 .dt-container .row:last-child{
-    padding:10px 24px 24px;
+    padding:10px 0 0;
 }
 
 /* ================= PAGINACIÓN ================= */

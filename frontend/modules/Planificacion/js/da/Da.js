@@ -98,8 +98,13 @@ $(document).ready(function () {
     let idDa = '00000000-0000-0000-0000-000000000000';
     let baseUrl = "index.php?r=Planificacion/da/"
     let dtEvents = $('#tablaListaDas')
+    const $modalDa = $('#modalDa')
 
     function reiniciarCampos() {
+        const validator = $('#formDa').data('validator')
+        if (validator) {
+            validator.resetForm()
+        }
         $('#formDa *').filter(':input').each(function () {
             $(this).removeClass('is-invalid is-valid');
         });
@@ -111,40 +116,94 @@ $(document).ready(function () {
         return `Los datos de la Da Estratégica se ${accion}ron correctamente.`;
     }
 
-    $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
-        reiniciarCampos();
-        $("#divDatos").hide(500);
-        $("#divTabla").show(500);
-    });
+    function tituloModalDa(esEdicion) {
+        return esEdicion ? 'Edición de datos' : 'Ingreso de datos'
+    }
 
-    $("#btnGuardar").click(async function () {
-        const btn = $(this);
-        const btnCancel = $('#btnCancelar')
+    function abrirModalDa(esEdicion) {
+        $('#daModalTitulo').text(tituloModalDa(esEdicion))
+        $modalDa.modal('show')
+    }
 
-        if (!$("#formDa").valid()) return;
+    function cerrarModalDa() {
+        reiniciarCampos()
+        $modalDa.modal('hide')
+    }
 
-        const datos = new FormData();
+    async function guardarFormularioDa(opciones) {
+        const btn = opciones.spinnerBtn
+        const cerrarAlExito = !!opciones.cerrarAlExito
+        const continuar = !!opciones.continuar
+
+        if (!$('#formDa').valid()) {
+            return false
+        }
+
+        const datos = new FormData()
         datos.append('idDa', idDa)
-        datos.append("da", $("#da").val());
-        datos.append("descripcion", $("#descripcion").val());
+        datos.append('da', $('#da').val())
+        datos.append('descripcion', $('#descripcion').val())
 
-        const hasCode =  idDa !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
+        const esEdicion = idDa !== '00000000-0000-0000-0000-000000000000'
+        const accion = esEdicion ? 'actualizar' : 'guardar'
 
         try {
             await ajaxPromise({
                 url: baseUrl + accion,
                 data: datos,
                 spinnerBtn: btn,
-                cancelBtn: btnCancel,
+                cancelBtn: cerrarAlExito ? $('#btnCancelar') : null,
                 successMsg: mensajeAccion(accion),
-                reloadTable: dt_da
-            });
+                reloadTable: typeof dt_da !== 'undefined' ? dt_da : null,
+                onSuccess: function () {
+                    if (typeof actualizarContadoresDa === 'function') {
+                        actualizarContadoresDa()
+                    }
+                    if (continuar) {
+                        reiniciarCampos()
+                        $('#daModalTitulo').text(tituloModalDa(false))
+                    }
+                }
+            })
+            return true
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+            return false
         }
-    });
+    }
+
+    $('#btnNuevoDa').on('click', function () {
+        reiniciarCampos()
+        abrirModalDa(false)
+    })
+
+    $('#btnReportePdf').on('click', function () {
+        window.open(baseUrl + 'reporte', '_blank')
+    })
+
+    $('#btnCancelar').on('click', function () {
+        cerrarModalDa()
+    })
+
+    $modalDa.on('hidden.bs.modal', function () {
+        reiniciarCampos()
+    })
+
+    $('#btnGuardar').on('click', function () {
+        guardarFormularioDa({
+            spinnerBtn: $(this),
+            cerrarAlExito: true,
+            continuar: false
+        })
+    })
+
+    $('#btnGuardarContinuar').on('click', function () {
+        guardarFormularioDa({
+            spinnerBtn: $(this),
+            cerrarAlExito: false,
+            continuar: true
+        })
+    })
 
     $(document).on('click', '#refresh', function(){
         dt_da.ajax.reload();
@@ -202,7 +261,7 @@ $(document).ready(function () {
     /*=============================================
     ELIMINA DE LA BD UN REGISTRO
     =============================================*/
-    dtEvents.on('click', '.btn-delete', function(){
+    dtEvents.on('click', '.btn-action-new.delete', function(){
         let objectBtn = $(this)
         const dt_row = dt_da.row(objectBtn.closest('tr')).data()
         let idDa = dt_row["IdDa"];
@@ -241,7 +300,7 @@ $(document).ready(function () {
     /*=============================================
     BUSCA EL REGISTRO SELECCIONADO EN LA BD
     =============================================*/
-    dtEvents.on('click', '.btn-edit', async function(){
+    dtEvents.on('click', '.btn-action-new.edit', async function(){
         let objectBtn = $(this)
         const dt_row = dt_da.row(objectBtn.closest('tr')).data()
         idDa = dt_row["IdDa"];
@@ -255,10 +314,10 @@ $(document).ready(function () {
                 data: datos,
                 spinnerBtn: objectBtn,
             }).then((data) => {
-                let pei = data.data
-                $("#da").val(pei["Da"]);
-                $("#descripcion").val(pei["Descripcion"]);
-                $("#btnMostrarCrear").trigger('click');
+                const registro = data.data
+                $('#da').val(registro.Da)
+                $('#descripcion').val(registro.Descripcion)
+                abrirModalDa(true)
             });
         } catch (err) {
             console.error("Error al procesar:", err);

@@ -71,6 +71,80 @@ function cerrarMenusEstadoDa(excepto) {
     $('.estado-wrap').not(excepto).removeClass('open')
 }
 
+function rangoPaginasVisible(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionDa(api) {
+    const $paginacion = $('#daPagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisible(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> direcciones administrativas'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> direcciones administrativas'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
 function renderEstadoDropdownDa(codigoActual) {
     const actual = daEstadoMeta(codigoActual)
     const vigente = daEstadoMeta(ESTADO_VIGENTE)
@@ -107,26 +181,14 @@ $(document).ready(function () {
             topEnd: null,
             bottomStart: null,
             bottomEnd: null,
-            bottom: {
-                className: 'pagination',
-                features: ['info', 'paging']
-            }
+            bottom: null,
         },
-        pageLength: 15,
-        pagingType: 'simple_numbers',
+        pageLength: 10,
+        paging: true,
+        info: false,
         language: {
-            paginate: {
-                previous: '‹ Anterior',
-                next: 'Siguiente ›'
-            },
             emptyTable: 'No hay direcciones administrativas registradas',
             zeroRecords: 'No se encontraron coincidencias'
-        },
-        infoCallback: function (settings, start, end, max, total) {
-            if (total === 0) {
-                return 'Mostrando <strong>0</strong> de <strong>0</strong> direcciones administrativas'
-            }
-            return 'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> direcciones administrativas'
         },
         order: [[1, 'asc']],
         orderFixed: {
@@ -136,6 +198,7 @@ $(document).ready(function () {
             ocultarCargaTablaDa()
             actualizarContadoresDa()
             numerarFilasDa(this.api())
+            actualizarPaginacionDa(this.api())
             if (typeof initDaListadoFiltros === 'function') {
                 initDaListadoFiltros()
             }
@@ -143,6 +206,7 @@ $(document).ready(function () {
         drawCallback: function () {
             numerarFilasDa(this.api())
             actualizarContadoresDa()
+            actualizarPaginacionDa(this.api())
         },
 
         ajax: {
@@ -176,8 +240,8 @@ $(document).ready(function () {
                             </div>
                             <div>${renderEstadoDropdownDa(row['CodigoEstado'])}</div>
                             <div class="actions">
-                                <button type="button" class="btn-action-new edit ">✏ Editar</button>
-                                <button type="button" class="btn-action-new delete ">🗑 Eliminar</button>
+                                <button type="button" class="btn-action-new edit">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
                             </div>
                         </div>
                 `
