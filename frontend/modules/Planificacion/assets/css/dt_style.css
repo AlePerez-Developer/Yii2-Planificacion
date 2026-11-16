@@ -145,11 +145,15 @@ h1 { font-size: 24px; font-weight: 700; }
     opacity: .4; cursor: not-allowed; background: transparent; color: #64748b;
 }
 
-/* Modal CRUD (DA / UE / Programa / Proyecto) — anula height:100%/90% de Planificacion.css */
+/* Modal CRUD (DA / UE / Programa / Proyecto / Actividad / Llave / Área / Política) — anula height:100%/90% de Planificacion.css */
 #modalDa.modal .modal-dialog,
 #modalUe.modal .modal-dialog,
 #modalPrograma.modal .modal-dialog,
-#modalProyecto.modal .modal-dialog {
+#modalProyecto.modal .modal-dialog,
+#modalActividad.modal .modal-dialog,
+#modalLlavePresupuestaria.modal .modal-dialog ,
+#modalAreaEstrategica.modal .modal-dialog ,
+#modalPoliticaEstrategica.modal .modal-dialog {
     width: 100%;
     max-width: 480px;
     margin: 1.75rem auto;
@@ -163,7 +167,15 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalPrograma .modal-content,
 #modalPrograma .da-modal-content,
 #modalProyecto .modal-content,
-#modalProyecto .da-modal-content {
+#modalProyecto .da-modal-content,
+#modalActividad .modal-content,
+#modalActividad .da-modal-content,
+#modalLlavePresupuestaria .modal-content,
+#modalAreaEstrategica .modal-content,
+#modalPoliticaEstrategica .modal-content,
+#modalLlavePresupuestaria .da-modal-content ,
+#modalAreaEstrategica .da-modal-content ,
+#modalPoliticaEstrategica .da-modal-content {
     display: block;
     height: auto !important;
     max-height: none !important;
@@ -176,7 +188,11 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .modal-header,
 #modalUe .modal-header,
 #modalPrograma .modal-header,
-#modalProyecto .modal-header {
+#modalProyecto .modal-header,
+#modalActividad .modal-header,
+#modalLlavePresupuestaria .modal-header ,
+#modalAreaEstrategica .modal-header ,
+#modalPoliticaEstrategica .modal-header {
     border-bottom: 1px solid #e2e8f0;
     padding: 12px 16px;
     background: #f8fafc;
@@ -184,11 +200,19 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .modal-title,
 #modalUe .modal-title,
 #modalPrograma .modal-title,
-#modalProyecto .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; }
+#modalProyecto .modal-title,
+#modalActividad .modal-title,
+#modalLlavePresupuestaria .modal-title ,
+#modalAreaEstrategica .modal-title ,
+#modalPoliticaEstrategica .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; }
 #modalDa .modal-body,
 #modalUe .modal-body,
 #modalPrograma .modal-body,
-#modalProyecto .modal-body {
+#modalProyecto .modal-body,
+#modalActividad .modal-body,
+#modalLlavePresupuestaria .modal-body ,
+#modalAreaEstrategica .modal-body ,
+#modalPoliticaEstrategica .modal-body {
     padding: 14px 16px !important;
     height: auto !important;
     max-height: none !important;
@@ -198,15 +222,27 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .da-form-group,
 #modalUe .da-form-group,
 #modalPrograma .da-form-group,
-#modalProyecto .da-form-group { margin-bottom: 12px; }
+#modalProyecto .da-form-group,
+#modalActividad .da-form-group,
+#modalLlavePresupuestaria .da-form-group ,
+#modalAreaEstrategica .da-form-group ,
+#modalPoliticaEstrategica .da-form-group { margin-bottom: 12px; }
 #modalDa .da-form-group:last-child,
 #modalUe .da-form-group:last-child,
 #modalPrograma .da-form-group:last-child,
-#modalProyecto .da-form-group:last-child { margin-bottom: 0; }
+#modalProyecto .da-form-group:last-child,
+#modalActividad .da-form-group:last-child,
+#modalLlavePresupuestaria .da-form-group:last-child ,
+#modalAreaEstrategica .da-form-group:last-child ,
+#modalPoliticaEstrategica .da-form-group:last-child { margin-bottom: 0; }
 #modalDa .control-label,
 #modalUe .control-label,
 #modalPrograma .control-label,
-#modalProyecto .control-label {
+#modalProyecto .control-label,
+#modalActividad .control-label,
+#modalLlavePresupuestaria .control-label ,
+#modalAreaEstrategica .control-label ,
+#modalPoliticaEstrategica .control-label {
     display: block;
     font-size: 13px;
     font-weight: 600;
@@ -216,7 +252,11 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .form-control,
 #modalUe .form-control,
 #modalPrograma .form-control,
-#modalProyecto .form-control {
+#modalProyecto .form-control,
+#modalActividad .form-control,
+#modalLlavePresupuestaria .form-control ,
+#modalAreaEstrategica .form-control ,
+#modalPoliticaEstrategica .form-control {
     width: 100%;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
@@ -228,7 +268,11 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa textarea.form-control,
 #modalUe textarea.form-control,
 #modalPrograma textarea.form-control,
-#modalProyecto textarea.form-control {
+#modalProyecto textarea.form-control,
+#modalActividad textarea.form-control,
+#modalLlavePresupuestaria textarea.form-control ,
+#modalAreaEstrategica textarea.form-control ,
+#modalPoliticaEstrategica textarea.form-control {
     min-height: 56px;
     height: auto;
     resize: vertical;
@@ -236,7 +280,11 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .form-control:focus,
 #modalUe .form-control:focus,
 #modalPrograma .form-control:focus,
-#modalProyecto .form-control:focus { outline: 2px solid #7dd3fc; border-color: transparent; }
+#modalProyecto .form-control:focus,
+#modalActividad .form-control:focus,
+#modalLlavePresupuestaria .form-control:focus ,
+#modalAreaEstrategica .form-control:focus ,
+#modalPoliticaEstrategica .form-control:focus { outline: 2px solid #7dd3fc; border-color: transparent; }
 #modalDa .modal-footer,
 #modalDa .da-modal-footer,
 #modalUe .modal-footer,
@@ -244,7 +292,15 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalPrograma .modal-footer,
 #modalPrograma .da-modal-footer,
 #modalProyecto .modal-footer,
-#modalProyecto .da-modal-footer {
+#modalProyecto .da-modal-footer,
+#modalActividad .modal-footer,
+#modalActividad .da-modal-footer,
+#modalLlavePresupuestaria .modal-footer,
+#modalAreaEstrategica .modal-footer,
+#modalPoliticaEstrategica .modal-footer,
+#modalLlavePresupuestaria .da-modal-footer ,
+#modalAreaEstrategica .da-modal-footer ,
+#modalPoliticaEstrategica .da-modal-footer {
     border-top: 1px solid #e2e8f0;
     padding: 10px 16px;
     gap: 8px;
@@ -254,7 +310,11 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .btn-modal,
 #modalUe .btn-modal,
 #modalPrograma .btn-modal,
-#modalProyecto .btn-modal {
+#modalProyecto .btn-modal,
+#modalActividad .btn-modal,
+#modalLlavePresupuestaria .btn-modal ,
+#modalAreaEstrategica .btn-modal ,
+#modalPoliticaEstrategica .btn-modal {
     padding: 8px 14px;
     border-radius: 10px;
     font-size: 13px;
@@ -266,38 +326,88 @@ h1 { font-size: 24px; font-weight: 700; }
 #modalDa .btn-modal-cancel,
 #modalUe .btn-modal-cancel,
 #modalPrograma .btn-modal-cancel,
-#modalProyecto .btn-modal-cancel { background: #fff; border: 1px solid #e2e8f0; color: #64748b; }
+#modalProyecto .btn-modal-cancel,
+#modalActividad .btn-modal-cancel,
+#modalLlavePresupuestaria .btn-modal-cancel ,
+#modalAreaEstrategica .btn-modal-cancel ,
+#modalPoliticaEstrategica .btn-modal-cancel { background: #fff; border: 1px solid #e2e8f0; color: #64748b; }
 #modalDa .btn-modal-cancel:hover,
 #modalUe .btn-modal-cancel:hover,
 #modalPrograma .btn-modal-cancel:hover,
-#modalProyecto .btn-modal-cancel:hover { background: #f8fafc; color: #334155; }
+#modalProyecto .btn-modal-cancel:hover,
+#modalActividad .btn-modal-cancel:hover,
+#modalLlavePresupuestaria .btn-modal-cancel:hover ,
+#modalAreaEstrategica .btn-modal-cancel:hover ,
+#modalPoliticaEstrategica .btn-modal-cancel:hover { background: #f8fafc; color: #334155; }
 #modalDa .btn-modal-continue,
 #modalUe .btn-modal-continue,
 #modalPrograma .btn-modal-continue,
-#modalProyecto .btn-modal-continue { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+#modalProyecto .btn-modal-continue,
+#modalActividad .btn-modal-continue,
+#modalLlavePresupuestaria .btn-modal-continue ,
+#modalAreaEstrategica .btn-modal-continue ,
+#modalPoliticaEstrategica .btn-modal-continue { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
 #modalDa .btn-modal-continue:hover,
 #modalUe .btn-modal-continue:hover,
 #modalPrograma .btn-modal-continue:hover,
-#modalProyecto .btn-modal-continue:hover { background: #e0f2fe; }
+#modalProyecto .btn-modal-continue:hover,
+#modalActividad .btn-modal-continue:hover,
+#modalLlavePresupuestaria .btn-modal-continue:hover ,
+#modalAreaEstrategica .btn-modal-continue:hover ,
+#modalPoliticaEstrategica .btn-modal-continue:hover { background: #e0f2fe; }
 #modalDa .btn-modal-save,
 #modalUe .btn-modal-save,
 #modalPrograma .btn-modal-save,
-#modalProyecto .btn-modal-save { background: #0284c7; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+#modalProyecto .btn-modal-save,
+#modalActividad .btn-modal-save,
+#modalLlavePresupuestaria .btn-modal-save ,
+#modalAreaEstrategica .btn-modal-save ,
+#modalPoliticaEstrategica .btn-modal-save { background: #0284c7; color: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
 #modalDa .btn-modal-save:hover,
 #modalUe .btn-modal-save:hover,
 #modalPrograma .btn-modal-save:hover,
-#modalProyecto .btn-modal-save:hover { background: #0369a1; }
+#modalProyecto .btn-modal-save:hover,
+#modalActividad .btn-modal-save:hover,
+#modalLlavePresupuestaria .btn-modal-save:hover ,
+#modalAreaEstrategica .btn-modal-save:hover ,
+#modalPoliticaEstrategica .btn-modal-save:hover { background: #0369a1; }
 #modalDa .invalid-feedback,
 #modalUe .invalid-feedback,
 #modalPrograma .invalid-feedback,
-#modalProyecto .invalid-feedback { font-size: 12px; margin-top: 4px; color: #e11d48; }
+#modalProyecto .invalid-feedback,
+#modalActividad .invalid-feedback,
+#modalLlavePresupuestaria .invalid-feedback ,
+#modalAreaEstrategica .invalid-feedback ,
+#modalPoliticaEstrategica .invalid-feedback { font-size: 12px; margin-top: 4px; color: #e11d48; }
 #modalUe .select2-container,
-#modalProyecto .select2-container { width: 100% !important; }
+#modalProyecto .select2-container,
+#modalActividad .select2-container,
+#modalLlavePresupuestaria .select2-container ,
+#modalAreaEstrategica .select2-container ,
+#modalPoliticaEstrategica .select2-container { width: 100% !important; }
 #modalUe .select2-container--bootstrap4 .select2-selection,
-#modalProyecto .select2-container--bootstrap4 .select2-selection {
+#modalProyecto .select2-container--bootstrap4 .select2-selection,
+#modalActividad .select2-container--bootstrap4 .select2-selection,
+#modalLlavePresupuestaria .select2-container--bootstrap4 .select2-selection ,
+#modalAreaEstrategica .select2-container--bootstrap4 .select2-selection ,
+#modalPoliticaEstrategica .select2-container--bootstrap4 .select2-selection {
     min-height: 38px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
+}
+
+
+#modalLlavePresupuestaria.modal .modal-dialog {
+    max-width: 560px;
+}
+#modalLlavePresupuestaria .form-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 0;
+}
+#modalLlavePresupuestaria .form-switch .form-check-input {
+    margin: 0;
 }
 
 @media (max-width: 768px) {

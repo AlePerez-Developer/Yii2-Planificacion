@@ -4,89 +4,141 @@ use yii\web\JqueryAsset;
 
 app\modules\Planificacion\assets\PlanificacionAsset::register($this);
 
-$this->registerJsFile("@planificacionModule/js/Actividad/actividad.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/Actividad/dt-declaration.js", [
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
-$this->registerJsFile("@planificacionModule/js/Actividad/dt-declaration.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+$this->registerJsFile("@planificacionModule/js/Actividad/actividad.js", [
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
 $this->registerJsFile("@planificacionModule/js/Actividad/s2-declaration.js", [
-    'depends' => [
-        JqueryAsset::class
-    ]
+        'depends' => [
+                JqueryAsset::class
+        ]
 ]);
 
-$this->title = 'Planificacion';
-$this->params['breadcrumbs'] = [['label' => 'Actividades']];
+$this->title = 'Planificación Institucional';
+
+$this->params['subtitle'] = 'Administración de actividades';
+
+$this->params['icon'] = '';
+
+$this->params['iconColor'] = 'info';
+
+$this->params['actions'] =
+        '
+            <div class="gestion-badge">
+              <span class="dot"></span>
+              <span class="text">Gestión Activa: <strong>2026 - 2030</strong></span>
+            </div>
+        ';
+
+$this->params['breadcrumbs'][] = [
+        'label' => '/ Actividades',
+];
 ?>
 
-<div class="card ">
-    <div class="card-header">
-        <button id="btnMostrarCrear" class="btn btn-primary bg-gradient-primary">
-            <span class="icon closed">
-                <span class="circle">
-                    <span class="horizontal"></span>
-                    <span class="vertical"></span>
-                </span>
-                Agregar Actividad
-            </span>
-        </button>
-    </div>
-    <div id="divDatos" class="card-body" style="display: none">
-        <div class="col d-flex justify-content-center">
-            <div class="card " style="width: 50rem;">
-                <div class="card-header bg-gradient-primary">Ingreso Datos</div>
-                <div class="card-body">
-                    <form id="formActividad" action="" method="post">
-
-                        <div class="form-group">
-                            <label for="programas">Seleccione un programa</label>
-                            <select class="form-control codigo_group" id="programas" name="programas" >
-                                <option></option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="codigo" class="control-label">Codigo de actividad</label>
-                            <input type="text" id="codigo" name="codigo"  placeholder="Codigo" style="width: 120px" class="form-control num codigo_group" maxlength="3">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="descripcion">Descripcion de la actividad</label>
-                            <textarea class="form-control input-sm txt" rows="4" id="descripcion" name="descripcion" placeholder="Descripcion"></textarea>
-                        </div>
-
-                    </form>
+<div class="body">
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">📝</div>
+                <div>
+                    <h1>Listado de actividades</h1>
+                    <p id="actividadSubtitleTotal" class="subtitle">0 actividades registradas</p>
                 </div>
-                <div class="card-footer text-center">
-                    <button id="btnGuardar" name="btnGuardar" class='btn btn-primary bg-gradient-primary'><i class='fa fa-check-circle-o'>Guardar</i>
-                    </button>
-                    <button id="btnCancelar" name="btnCancelar" class='btn btn-danger'><i class='fa fa-warning'>Cancelar</i></button>
-                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btnReportePdf" class="btn-reporte">⬇ Exportar PDF</button>
+                <button type="button" id="btnNuevoActividad" class="btn-crear">＋ Nuevo registro</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-icon emerald">✅</div>
+                <div><p id="actividadCountVigentes" class="stat-count">0</p><p class="stat-label">Vigentes</p></div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon rose">✖</div>
+                <div><p id="actividadCountCaducos" class="stat-count">0</p><p class="stat-label">Caducos</p></div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <select id="filtroPrograma">
+                <option value="">Todos los programas</option>
+            </select>
+            <div class="search">
+                <input id="buscarActividad" type="text" placeholder="Buscar por código o descripción...">
+            </div>
+            <select id="filtroEstadoActividad">
+                <option value="">Todos los estados</option>
+                <option value="V">Vigente</option>
+                <option value="C">Caduco</option>
+            </select>
+            <button type="button" id="refreshTable" class="btn-refresh" title="Recargar listado">
+                <i class="fa fa-sync-alt fa-spin"></i>
+            </button>
+        </div>
+
+        <div class="col-headers">
+            <span>#</span><span>Actividad</span><span>Estado</span><span>Acciones</span>
+        </div>
+
+        <div id="dticTableLoading" class="p-4">
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+            <div class="table-loading"></div>
+        </div>
+
+        <div class="p-0" id="dticTableContainer" style="display:none;">
+            <table id="tablaListaActividades" class="w-100"></table>
+            <div class="pagination" id="actividadPagination">
+                <p class="pagination-info">Mostrando <strong>0</strong> de <strong>0</strong> actividades</p>
+                <div class="pagination-nav"></div>
             </div>
         </div>
     </div>
-    <div id="divTabla" name="divTabla" class="card-body">
-        <table id="tablaListaActividades" name="tablaListaActividades" class="table table-bordered table-striped dt-responsive"
-               style="width: 100%">
-            <thead>
-            <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Programa</th>
-            <th style="text-align: center; vertical-align: middle;">Codigo</th>
-            <th style="text-align: center; vertical-align: middle;">Descripcion</th>
-            <th style="text-align: center; vertical-align: middle;">Estado</th>
-            <th style="text-align: center; vertical-align: middle;">Acciones</th>
-            </thead>
-        </table>
-    </div>
-
 </div>
 
-
-
+<div class="modal fade" id="modalActividad" tabindex="-1" role="dialog" aria-labelledby="actividadModalTitulo" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content da-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actividadModalTitulo">Ingreso de datos</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formActividad" action="" method="post" autocomplete="off">
+                    <div class="form-group da-form-group">
+                        <label for="idPrograma" class="control-label">Programa</label>
+                        <select class="form-control input-sm codigo_group dtic-input" id="idPrograma" name="idPrograma"></select>
+                    </div>
+                    <div class="form-group da-form-group">
+                        <label for="codigo" class="control-label">Código de actividad</label>
+                        <input type="text" class="form-control input-sm dtic-input num codigo_group" id="codigo" name="codigo"
+                               pattern="\d{3}" maxlength="3" inputmode="numeric" placeholder="Ej: 023">
+                    </div>
+                    <div class="form-group da-form-group">
+                        <label for="descripcion" class="control-label">Descripción</label>
+                        <textarea class="form-control input-sm dtic-input txt" id="descripcion" name="descripcion" rows="2"
+                                  placeholder="Descripción de la actividad"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer da-modal-footer">
+                <button type="button" id="btnCancelar" class="btn btn-modal btn-modal-cancel">Cancelar</button>
+                <button type="button" id="btnGuardarContinuar" class="btn btn-modal btn-modal-continue">Guardar y continuar</button>
+                <button type="button" id="btnGuardar" class="btn btn-modal btn-modal-save">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

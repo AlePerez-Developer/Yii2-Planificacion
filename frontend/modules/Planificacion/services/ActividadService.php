@@ -120,25 +120,26 @@ class ActividadService
     }
 
     /**
-     * Busca una Actividad por su código y alterna su estado.
+     * Busca una Actividad por su código y alterna / fuerza su estado.
      *
      * @param string $id
+     * @param string|null $codigoEstado
      * @return array ['message' => string, 'data' => string]
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(string $id): array
+    public function cambiarEstado(string $id, ?string $codigoEstado = null): array
     {
         $modelo = $this->obtenerModeloValidado($id);
 
-        $modelo->cambiarEstado();
+        $modelo->cambiarEstado($codigoEstado);
 
         if (!$modelo->validate()) {
             throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'],$modelo->getErrors(),500);
         }
 
         if (!$modelo->save(false)) {
-            Yii::error("Error al guardar el cambio de estado del Programa $modelo->Codigo", __METHOD__);
+            Yii::error("Error al guardar el cambio de estado de la Actividad $modelo->Codigo", __METHOD__);
             throw new ValidationException(Yii::$app->params['ERROR_EJECUCION_SQL'],$modelo->getErrors(),500);
         }
 

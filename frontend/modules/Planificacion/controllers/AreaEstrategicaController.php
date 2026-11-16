@@ -9,6 +9,8 @@ use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use Mpdf\MpdfException;
+use Mpdf\Mpdf;
 use Yii;
 
 /**
@@ -16,6 +18,8 @@ use Yii;
  */
 class AreaEstrategicaController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index', 'reporte'];
+
     private AreaEstrategicaService $service;
 
     public function __construct($id, $module, AreaEstrategicaService $service, $config = [])
@@ -45,7 +49,16 @@ class AreaEstrategicaController extends BaseController
             ],
             'verbs' => [
                 'class' => VerbFilter::class,
-                'actions' => [],
+                'actions' => [
+                    'listar-todo' => ['get', 'post'],
+                    'listar-areas-s2' => ['post'],
+                    'guardar' => ['post'],
+                    'actualizar' => ['post'],
+                    'cambiar-estado' => ['post'],
+                    'eliminar' => ['post'],
+                    'buscar' => ['post'],
+                    'reporte' => ['get'],
+                ],
             ],
         ];
     }
@@ -55,7 +68,7 @@ class AreaEstrategicaController extends BaseController
      */
     public function beforeAction($action): bool
     {
-        if ($action->id == 'listar-todo') {
+        if ($action->id === 'listar-todo' || $action->id === 'listar-areas-s2') {
             $this->enableCsrfValidation = false;
         }
         return parent::beforeAction($action);
@@ -67,11 +80,52 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
+     * @throws MpdfException
      * @noinspection PhpUnused
-     *
+     */
+    public function actionReporte(): void
+    {
+        $listado = $this->service->listarTodo();
+        $registros = $listado['data'] ?? [];
+
+        $usuario = Yii::$app->user->identity;
+        $persona = $usuario->persona ?? null;
+        $nombreUsuario = trim(implode(' ', array_filter([
+            $persona->Nombres ?? '',
+            $persona->Paterno ?? '',
+            $persona->Materno ?? '',
+        ])));
+        if ($nombreUsuario === '') {
+            $nombreUsuario = (string)($usuario->CodigoUsuario ?? '');
+        }
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter',
+            'margin_top' => 32,
+            'margin_bottom' => 18,
+            'margin_left' => 12,
+            'margin_right' => 12,
+        ]);
+        $mpdf->SetMargins(12, 12, 32);
+        $mpdf->SetHTMLHeader('<div class="reporte-header"></div>');
+        $mpdf->SetHTMLFooter(
+            '<table class="reporte-footer" width="100%">'
+            . '<tr>'
+            . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
+            . ' (' . htmlspecialchars((string)($usuario->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
+            . '<td width="40%" align="right">Fecha y hora de impresión: '
+            . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
+            . '</tr></table>'
+        );
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('AreasEstrategicas.pdf', 'I');
+    }
+
+    /**
+     * @noinspection PhpUnused
      */
     public function actionListarTodo(): array
     {
@@ -79,23 +133,15 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para listar todos los registros del modelo para el llenado de Select2.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
-     *
      */
     public function actionListarAreasS2(): array
     {
-        $search = '%' . str_replace(" ","%", $_POST['q'] ?? '') . '%';
-        return $this->withTryCatch(fn() => $this->service->listarAreasS2($search)) ;
+        $search = '%' . str_replace(' ', '%', $_POST['q'] ?? '') . '%';
+        return $this->withTryCatch(fn() => $this->service->listarAreasS2($search));
     }
 
-
     /**
-     * accion para agregar un nuevo registro.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionGuardar(): array
@@ -114,9 +160,6 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para actualizar los valores de un registro existente.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionActualizar(): array
@@ -138,23 +181,18 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para alternar el estado de un registro V/C.
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionCambiarEstado(): array
     {
-        return $this->withTryCatch(function() {
+        return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->cambiarEstado($id);
+            $codigoEstado = Yii::$app->request->post('codigoEstado');
+            return $this->service->cambiarEstado($id, $codigoEstado ?: null);
         });
     }
 
     /**
-     * accion para soft delete de un registro
-     *
-     * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
      */
     public function actionEliminar(): array
@@ -166,9 +204,6 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para buscar un registro en especifico
-     *
-     * @return array
      * @noinspection PhpUnused
      */
     public function actionBuscar(): array
@@ -180,9 +215,6 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * obtiene y valida si se recibio el id por el request
-     *
-     * return string
      * @throws ValidationException
      */
     private function obtenerId(): string
@@ -195,8 +227,6 @@ class AreaEstrategicaController extends BaseController
     }
 
     /**
-     * accion para buscar un registro en especifico
-     *
      * @return bool
      * @noinspection PhpUnused
      */
@@ -212,6 +242,6 @@ class AreaEstrategicaController extends BaseController
             return false;
         }
 
-        return $this->service->verificarCodigo($id,$codigo);
+        return $this->service->verificarCodigo($id, $codigo);
     }
 }

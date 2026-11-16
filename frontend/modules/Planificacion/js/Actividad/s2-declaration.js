@@ -1,12 +1,11 @@
-let actividad_s2Programa = $('#programas')
+let actividad_s2Programa = $('#idPrograma')
 
-$(document).ready(function() {
+populateS2Programas(actividad_s2Programa)
 
-    populateS2Programas(actividad_s2Programa)
-
-    actividad_s2Programa.select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija un programa",
-        allowClear: true,
-    })
-});
+actividad_s2Programa.select2({
+    theme: 'bootstrap4',
+    placeholder: 'Seleccione un programa',
+    allowClear: true,
+    width: '100%',
+    dropdownParent: $('#modalActividad')
+})

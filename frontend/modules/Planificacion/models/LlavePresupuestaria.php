@@ -12,13 +12,10 @@ use yii\db\Expression;
  * This is the model class for table "LlavesPresupuestarias".
  *
  * @property string $IdLlavePresupuestaria
- * @property string $IdDa
- * @property string $IdUe
  * @property string $IdUnidadEjecutora
  * @property string $IdProyecto
  * @property string $IdActividad
  * @property string $Llave
- * @property string $Descripcion
  * @property int $esOrganizacional
  * @property string $FechaInicio
  * @property string|null $FechaFin
@@ -26,11 +23,9 @@ use yii\db\Expression;
  * @property string $FechaHoraRegistro
  * @property string $CodigoUsuario
  *
- * @property Da $idDa
- * @property Ue $idUe
  * @property UnidadEjecutora $unidadEjecutora
- * @property Proyecto $idProyecto
- * @property Actividad $idActividad
+ * @property Proyecto $proyecto
+ * @property Actividad $actividad
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
  * @property ProgramacionIndicadorGestion[] $programacionesIndicadoresGestiones
@@ -52,19 +47,15 @@ class LlavePresupuestaria extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['IdLlavePresupuestaria', 'IdUnidadEjecutora', 'IdDa', 'IdUe', 'IdProyecto', 'IdActividad'], 'string', 'max' => 36],
+            [['IdLlavePresupuestaria', 'IdUnidadEjecutora', 'IdProyecto', 'IdActividad'], 'string', 'max' => 36],
             [['IdUnidadEjecutora', 'IdProyecto', 'IdActividad', 'Llave', 'esOrganizacional', 'FechaInicio', 'CodigoEstado', 'CodigoUsuario'], 'required'],
             [['esOrganizacional'], 'integer'],
             [['FechaInicio', 'FechaFin', 'FechaHoraRegistro'], 'safe'],
             [['Llave'], 'string', 'max' => 200],
-            [['Descripcion'], 'string', 'max' => 500],
-            [['Descripcion'], 'default', 'value' => ''],
             [['CodigoEstado'], 'string', 'max' => 1],
             [['CodigoUsuario'], 'string', 'max' => 3],
             [['IdLlavePresupuestaria'], 'unique'],
             [['IdUnidadEjecutora'], 'exist', 'skipOnError' => true, 'targetClass' => UnidadEjecutora::class, 'targetAttribute' => ['IdUnidadEjecutora' => 'IdUnidadEjecutora']],
-            [['IdDa'], 'exist', 'skipOnError' => true, 'targetClass' => Da::class, 'targetAttribute' => ['IdDa' => 'IdDa']],
-            [['IdUe'], 'exist', 'skipOnError' => true, 'targetClass' => Ue::class, 'targetAttribute' => ['IdUe' => 'IdUe']],
             [['IdProyecto'], 'exist', 'skipOnError' => true, 'targetClass' => Proyecto::class, 'targetAttribute' => ['IdProyecto' => 'IdProyecto']],
             [['IdActividad'], 'exist', 'skipOnError' => true, 'targetClass' => Actividad::class, 'targetAttribute' => ['IdActividad' => 'IdActividad']],
             [['CodigoEstado'], 'exist', 'skipOnError' => true, 'targetClass' => Estado::class, 'targetAttribute' => ['CodigoEstado' => 'CodigoEstado']],
@@ -80,12 +71,9 @@ class LlavePresupuestaria extends ActiveRecord
         return [
             'IdLlavePresupuestaria' => 'Id Llave Presupuestaria',
             'IdUnidadEjecutora' => 'Id Unidad',
-            'IdDa' => 'Id Da',
-            'IdUe' => 'Id Ue',
             'IdProyecto' => 'Id Proyecto',
             'IdActividad' => 'Id Actividad',
             'Llave' => 'Llave',
-            'Descripcion' => 'Descripcion',
             'esOrganizacional' => 'Es Organizacional',
             'FechaInicio' => 'Fecha Inicio',
             'FechaFin' => 'Fecha Fin',
@@ -106,6 +94,10 @@ class LlavePresupuestaria extends ActiveRecord
                 'LP.FechaInicio',
                 'LP.FechaFin',
                 'Un.IdUnidadEjecutora',
+                'Un.Ue',
+                'Un.Descripcion as UnidadDescripcion',
+                'Da.Da',
+                new Expression("CONCAT(Da.Da, '-', Un.Ue) AS [[Compuesto]]"),
                 'Pr.IdPrograma',
                 'Py.IdProyecto',
                 'Ac.IdActividad',
@@ -118,9 +110,11 @@ class LlavePresupuestaria extends ActiveRecord
             ->joinWith('proyecto Py', true, 'INNER JOIN')
             ->joinWith('actividad Ac', true, 'INNER JOIN')
             ->where(['!=', 'LP.CodigoEstado', Estado::ESTADO_ELIMINADO])
+            ->andWhere(['!=', 'Un.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->orderBy([
                 'Da.Da' => SORT_ASC,
-                'Un.Ue' => SORT_ASC
+                'Un.Ue' => SORT_ASC,
+                'LP.Llave' => SORT_ASC,
             ]);
     }
 
@@ -154,7 +148,6 @@ class LlavePresupuestaria extends ActiveRecord
             ->select([
                 'lp.IdLlavePresupuestaria',
                 'lp.Llave',
-                'lp.Descripcion',
                 'Estado' => new Expression("
                     CASE 
                         WHEN pig.IdProgramacionIndicadorGestion IS NOT NULL 
@@ -179,12 +172,18 @@ class LlavePresupuestaria extends ActiveRecord
     }
 
     /**
-     * Alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C, o fuerza un estado si se envía.
      *
+     * @param string|null $codigoEstado
      * @return void
      */
-    public function cambiarEstado(): void
+    public function cambiarEstado(?string $codigoEstado = null): void
     {
+        if ($codigoEstado === Estado::ESTADO_VIGENTE || $codigoEstado === Estado::ESTADO_CADUCO) {
+            $this->CodigoEstado = $codigoEstado;
+            return;
+        }
+
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;
@@ -210,7 +209,6 @@ class LlavePresupuestaria extends ActiveRecord
         $this->FechaFin = date('d-m-Y H:i:s');
     }
 
-
     /**
      * Gets query for [[IdUnidad]].
      *
@@ -220,28 +218,6 @@ class LlavePresupuestaria extends ActiveRecord
     public function getUnidadEjecutora(): ActiveQuery
     {
         return $this->hasOne(UnidadEjecutora::class, ['IdUnidadEjecutora' => 'IdUnidadEjecutora']);
-    }
-
-    /**
-     * Gets query for [[IdDa]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     */
-    public function getDa(): ActiveQuery
-    {
-        return $this->hasOne(Da::class, ['IdDa' => 'IdDa']);
-    }
-
-    /**
-     * Gets query for [[IdDa]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     */
-    public function getUe(): ActiveQuery
-    {
-        return $this->hasOne(Ue::class, ['IdUe' => 'IdUe']);
     }
 
     /**

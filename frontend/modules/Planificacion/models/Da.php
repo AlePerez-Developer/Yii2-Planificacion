@@ -19,7 +19,6 @@ use common\models\Usuario;
  *
  * @property Estado $codigoEstado
  * @property Usuario $codigoUsuario
- * @property LlavePresupuestaria[] $llavesPresupuestarias
  */
 class Da extends ActiveRecord
 {
@@ -186,14 +185,4 @@ class Da extends ActiveRecord
         return $this->hasOne(Usuario::class, ['CodigoUsuario' => 'CodigoUsuario']);
     }
 
-    /**
-     * Gets query for [[LlavesPresupuestarias]].
-     *
-     * @return ActiveQuery
-     * @noinspection PhpUnused
-     */
-    public function getLlavesPresupuestarias(): ActiveQuery
-    {
-        return $this->hasMany(LlavePresupuestaria::class, ['IdDa' => 'IdDa']);
-    }
 }

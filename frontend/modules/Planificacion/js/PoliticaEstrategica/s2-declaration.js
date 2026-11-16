@@ -1,13 +1,11 @@
-let politicas_s2AreasEstrategicas = $('#areasEstrategicas')
+let politicas_s2AreasEstrategicas = $('#idAreaEstrategica')
 
-$(document).ready(function() {
+populateS2Areas(politicas_s2AreasEstrategicas)
 
-    populateS2Areas(politicas_s2AreasEstrategicas)
-
-    politicas_s2AreasEstrategicas.select2({
-        theme: 'bootstrap4',
-        placeholder: "Elija una area estrategica",
-        allowClear: true,
-    })
-
-});
+politicas_s2AreasEstrategicas.select2({
+    theme: 'bootstrap4',
+    placeholder: 'Elija un área estratégica',
+    allowClear: true,
+    width: '100%',
+    dropdownParent: $('#modalPoliticaEstrategica')
+})

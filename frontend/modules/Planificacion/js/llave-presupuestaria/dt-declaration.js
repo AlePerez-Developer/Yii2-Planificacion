@@ -1,133 +1,338 @@
-let dt_llavePresupuestaria;
-$(document).ready(function () {
-    dt_llavePresupuestaria = $("#tablaListaLlavesPresupuestarias").DataTable({
-        initComplete: function () {
-            $("div.dt-search").append(`
-            <button id="refreshTable" class="btn-refresh">
-                <i class="fas fa-sync-alt fa-spin"></i>
-            </button>`
-            );
+let dt_llavePresupuestaria
 
-            $("#dticTableLoading").hide();
-            $("#dticTableContainer").fadeIn(250);
+function llaveEsVigente(codigo) {
+    return codigo === ESTADO_VIGENTE
+}
+
+function llaveEstadoMeta(codigo) {
+    const vigente = llaveEsVigente(codigo)
+    return {
+        codigo: vigente ? ESTADO_VIGENTE : ESTADO_CADUCO,
+        clase: vigente ? 'vigente' : 'cancelada',
+        texto: vigente ? 'Vigente' : 'Caduco',
+        colorAvatar: vigente ? '#10b981' : '#f43f5e'
+    }
+}
+
+function llaveDatosUnidad(row) {
+    const unidad = row.unidadEjecutora || {}
+    const da = unidad.das || {}
+    const codigoDa = da.Da || row.Da || ''
+    const codigoUe = unidad.Ue || row.Ue || ''
+    const compuesto = row.Compuesto || ((codigoDa && codigoUe) ? (codigoDa + '-' + codigoUe) : '')
+    const descripcion = unidad.Descripcion || row.UnidadDescripcion || ''
+    return {
+        id: unidad.IdUnidadEjecutora || row.IdUnidadEjecutora || '',
+        da: codigoDa,
+        ue: codigoUe,
+        compuesto: compuesto,
+        descripcion: descripcion
+    }
+}
+
+function numerarFilasLlave(api) {
+    if (!api) {
+        return
+    }
+    const start = parseInt(api.page.info().start, 10) || 0
+    api.column(0, {page: 'current', search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
+        $(cell).find('.row-num').text(start + i + 1)
+    })
+}
+
+function actualizarContadoresLlave() {
+    if (typeof dt_llavePresupuestaria === 'undefined' || !dt_llavePresupuestaria) {
+        return
+    }
+
+    let total = 0
+    let vigentes = 0
+    let caducos = 0
+
+    dt_llavePresupuestaria.rows({search: 'none'}).data().each(function (row) {
+        total++
+        if (llaveEsVigente(row.CodigoEstado)) {
+            vigentes++
+        } else if (row.CodigoEstado === ESTADO_CADUCO) {
+            caducos++
+        }
+    })
+
+    $('#llaveSubtitleTotal').text(total + ' llaves registradas')
+    $('#llaveCountVigentes').text(vigentes)
+    $('#llaveCountCaducos').text(caducos)
+}
+
+function mostrarCargaTablaLlave() {
+    $('#dticTableContainer').hide()
+    $('#dticTableLoading').show()
+}
+
+function ocultarCargaTablaLlave() {
+    $('#dticTableLoading').hide()
+    $('#dticTableContainer').fadeIn(250)
+}
+
+function llaveIniciales(texto) {
+    if (!texto) {
+        return 'LP'
+    }
+    const palabras = texto.trim().split(/\s+/).slice(0, 2)
+    return palabras.map(function (p) {
+        return p.charAt(0)
+    }).join('').toUpperCase()
+}
+
+function cerrarMenusEstadoLlave(excepto) {
+    $('.estado-wrap').not(excepto).removeClass('open')
+}
+
+function rangoPaginasVisibleLlave(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionLlave(api) {
+    const $paginacion = $('#llavePagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisibleLlave(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> llaves'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> llaves'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
+function popularFiltroUnidadEjecutoraLlave() {
+    const $filtro = $('#filtroUnidadEjecutora')
+    if (!$filtro.length || typeof dt_llavePresupuestaria === 'undefined' || !dt_llavePresupuestaria) {
+        return
+    }
+
+    const valorActual = $filtro.val() || ''
+    const opciones = {}
+
+    dt_llavePresupuestaria.rows({search: 'none'}).data().each(function (row) {
+        const ue = llaveDatosUnidad(row)
+        if (!ue.id) {
+            return
+        }
+        opciones[ue.id] = {
+            id: ue.id,
+            texto: (ue.compuesto ? ue.compuesto + ' — ' : '') + ue.descripcion,
+            compuesto: ue.compuesto,
+            da: ue.da,
+            ue: ue.ue,
+            descripcion: ue.descripcion
+        }
+    })
+
+    $filtro.empty().append('<option value="">Todas las unidades ejecutoras</option>')
+
+    Object.keys(opciones).sort(function (a, b) {
+        return (opciones[a].texto || '').localeCompare(opciones[b].texto || '')
+    }).forEach(function (id) {
+        const item = opciones[id]
+        $filtro.append($('<option>', {
+            value: item.id,
+            text: item.texto,
+            'data-compuesto': item.compuesto,
+            'data-da': item.da,
+            'data-ue': item.ue,
+            'data-descripcion': item.descripcion
+        }))
+    })
+
+    if (valorActual && $filtro.find('option[value="' + valorActual + '"]').length) {
+        $filtro.val(valorActual)
+    } else {
+        $filtro.val('')
+    }
+}
+
+function renderEstadoDropdownLlave(codigoActual) {
+    const actual = llaveEstadoMeta(codigoActual)
+    const vigente = llaveEstadoMeta(ESTADO_VIGENTE)
+    const caduco = llaveEstadoMeta(ESTADO_CADUCO)
+
+    function opcion(meta) {
+        const activo = meta.codigo === actual.codigo
+        return `
+            <button type="button" class="estado-option ${meta.clase}${activo ? ' selected' : ''}" data-estado="${meta.codigo}">
+                <span class="dot"></span>
+                <span>${meta.texto}</span>
+                ${activo ? '<span class="check">✓</span>' : ''}
+            </button>
+        `
+    }
+
+    return `
+        <div class="estado-wrap">
+            <button type="button" class="estado ${actual.clase} estado-trigger" data-estado="${actual.codigo}">
+                <span class="dot"></span>${actual.texto}<span class="chevron">▾</span>
+            </button>
+            <div class="estado-menu">
+                ${opcion(vigente)}
+                ${opcion(caduco)}
+            </div>
+        </div>
+    `
+}
+
+$(document).ready(function () {
+    dt_llavePresupuestaria = $('#tablaListaLlavesPresupuestarias').DataTable({
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: null,
+            bottomEnd: null,
+            bottom: null,
+        },
+        pageLength: 10,
+        paging: true,
+        info: false,
+        language: {
+            emptyTable: 'No hay llaves presupuestarias registradas',
+            zeroRecords: 'No se encontraron coincidencias'
+        },
+        order: [[1, 'asc']],
+        initComplete: function () {
+            ocultarCargaTablaLlave()
+            actualizarContadoresLlave()
+            numerarFilasLlave(this.api())
+            actualizarPaginacionLlave(this.api())
+            popularFiltroUnidadEjecutoraLlave()
+            if (typeof initLlaveListadoFiltros === 'function') {
+                initLlaveListadoFiltros()
+            }
+        },
+        drawCallback: function () {
+            numerarFilasLlave(this.api())
+            actualizarContadoresLlave()
+            actualizarPaginacionLlave(this.api())
         },
         ajax: {
-            method: "POST",
+            method: 'POST',
             dataType: 'json',
             url: 'index.php?r=Planificacion/llave-presupuestaria/listar-todo',
-            dataSrc: 'data',
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_llavePresupuestaria.processing(false);
-            }
+            dataSrc: 'data'
         },
         columns: [
             {
-                data: "CodigoUsuario",
-                className: "text-center",
-                width: "60px",
+                data: null,
                 orderable: false,
                 searchable: false,
-                render: function (data) {
-                    return `<div class="badge-codigo">${data}</div>`;
-                }
-            },
-            {
-                data: null,
                 render: function (data, type, row) {
-
-                    if (type !== "display") {
-                        return row["Llave"];
+                    const ue = llaveDatosUnidad(row)
+                    if (type !== 'display') {
+                        return ue.compuesto + ' ' + ue.descripcion
                     }
 
-                    const unidad = row["unidadEjecutora"] || {};
-                    const da = unidad["das"] || {};
-                    const programa = (row["proyecto"] && row["proyecto"]["programa"]) || {};
-                    const proyecto = row["proyecto"] || {};
-                    const actividad = row["actividad"] || {};
+                    const estado = llaveEstadoMeta(row.CodigoEstado)
+                    const programa = (row.proyecto && row.proyecto.programa) || {}
+                    const proyecto = row.proyecto || {}
+                    const actividad = row.actividad || {}
+                    const organizacional = (row.esOrganizacional === 1 || row.esOrganizacional === '1') ? 'Sí' : 'No'
 
                     return `
-                    <div class="dtic-code-container">
-                        <span class="dtic-code-text">Unidad ejecutora</span>
-                        <div class="dtic-code-badge">
-                            ${da["Da"] || ''}-${unidad["Ue"] || ''}
+                        <div class="card-row">
+                            <span class="row-num"></span>
+                            <div class="patient">
+                                <div class="avatar" style="background:${estado.colorAvatar}">${llaveIniciales(ue.descripcion || ue.compuesto)}</div>
+                                <div>
+                                    <p class="patient-name">${ue.descripcion || 'Sin descripción'} <span class="code-badge">${ue.compuesto || '—'}</span></p>
+                                    <p class="patient-meta">Llave: ${row.Llave || ''}</p>
+                                    <p class="patient-meta">Programa: ${programa.Codigo || ''}${programa.Descripcion ? ' — ' + programa.Descripcion : ''}</p>
+                                    <p class="patient-meta">Proyecto: ${proyecto.Codigo || ''} · Actividad: ${actividad.Codigo || ''} · Org: ${organizacional}</p>
+                                </div>
+                            </div>
+                            <div>${renderEstadoDropdownLlave(row.CodigoEstado)}</div>
+                            <div class="actions">
+                                <button type="button" class="btn-action-new edit">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="dtic-item-main">
-                        ${unidad["Descripcion"] || ''}
-                    </div>
-                    
-                    <div class="dtic-item-sub">
-                        <b>Programa:</b> ${programa["Codigo"] || ''} - ${programa["Descripcion"] || ''}
-                    </div>
-                    <div class="dtic-item-sub">
-                        <b>Proyecto:</b> ${proyecto["Codigo"] || ''} - ${proyecto["Descripcion"] || ''}
-                    </div>
-                    <div class="dtic-item-sub">
-                        <b>Actividad:</b> ${actividad["Codigo"] || ''} - ${actividad["Descripcion"] || ''}
-                    </div>
-                    <div class="dtic-item-sub">
-                        <b>Llave:</b> ${row["Llave"]}
-                    </div>
-                    <div class="dtic-item-sub2">
-                        Organizacional: ${(row["esOrganizacional"] === '1' || row["esOrganizacional"] === 1) ? 'Si' : 'No'}
-                    </div>
-                `;
+                    `
                 }
             },
-            {
-                data: 'Llave', visible: false
-            },
-            {
-                data: "CodigoEstado",
-                className: "text-center",
-                width: "90px",
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    return ((type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button type="button" class="estado-on btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-check-circle"></i></span>' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button type="button" class="estado-off btn-toggle-estado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_ico"><i class="fas fa-times-circle"></i></span>' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>';
-                },
-            },
-            {
-                data: "IdLlavePresupuestaria",
-                className: "text-center",
-                width: "140px",
-                orderable: false,
-                searchable: false,
-                render: function () {
+            {data: 'Llave', visible: false},
+            {data: 'IdUnidadEjecutora', visible: false, searchable: false},
+            {data: 'CodigoEstado', visible: false},
+            {data: 'IdLlavePresupuestaria', visible: false, searchable: false}
+        ]
+    })
 
-                    return `
-                    <button class="btn-action btn-edit ">
-                        <i class="fa fa-pen"></i>
-                    </button>
+    $(document).on('click', '#refreshTable', function () {
+        const btn = $(this)
+        btn.prop('disabled', true)
+        mostrarCargaTablaLlave()
+        dt_llavePresupuestaria.ajax.reload(function () {
+            actualizarContadoresLlave()
+            popularFiltroUnidadEjecutoraLlave()
+            ocultarCargaTablaLlave()
+            btn.prop('disabled', false)
+        }, false)
+    })
 
-                    <button class="btn-action btn-delete ">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                `;
-                }
-            },
-        ],
-    });
-
-    $(document).on("click", "#refreshTable", function () {
-        dt_llavePresupuestaria.ajax.reload();
-    });
-
-    dt_llavePresupuestaria.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_llavePresupuestaria.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
-            this.data(i++);
-        });
-    }).draw();
+    $(document).on('click', function () {
+        cerrarMenusEstadoLlave()
+    })
 })

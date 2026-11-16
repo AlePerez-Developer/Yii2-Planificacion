@@ -125,11 +125,12 @@ class Actividad extends ActiveRecord
                 'A.CodigoEstado',
                 'A.CodigoUsuario',
                 'Prg.IdPrograma',
+                'Prg.Codigo as codex',
             ])
             ->joinWith('programa Prg', true, 'INNER JOIN')
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'A.Descripcion', $search, false])
-            ->andWhere(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+            ->andWhere(['!=', 'Prg.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 
     /**
@@ -149,12 +150,13 @@ class Actividad extends ActiveRecord
                 'A.CodigoEstado',
                 'A.CodigoUsuario',
                 'Prg.IdPrograma',
+                'Prg.Codigo as codex',
             ])
             ->joinWith('programa Prg', true, 'INNER JOIN')
             ->where(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO])
             ->andwhere(['like', 'A.Descripcion', $search, false])
             ->andwhere(['A.IdPrograma' => $idPrograma])
-            ->andWhere(['!=', 'A.CodigoEstado', Estado::ESTADO_ELIMINADO]);
+            ->andWhere(['!=', 'Prg.CodigoEstado', Estado::ESTADO_ELIMINADO]);
     }
 
     /**
@@ -186,12 +188,18 @@ class Actividad extends ActiveRecord
 
 
     /**
-     * Alterna el estado del modelo V/C.
+     * Alterna el estado del modelo V/C, o fuerza un estado si se envía.
      *
+     * @param string|null $codigoEstado
      * @return void
      */
-    public function cambiarEstado(): void
+    public function cambiarEstado(?string $codigoEstado = null): void
     {
+        if ($codigoEstado === Estado::ESTADO_VIGENTE || $codigoEstado === Estado::ESTADO_CADUCO) {
+            $this->CodigoEstado = $codigoEstado;
+            return;
+        }
+
         $this->CodigoEstado = $this->CodigoEstado == Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;

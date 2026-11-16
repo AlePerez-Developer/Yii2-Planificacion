@@ -1,103 +1,296 @@
+let politicaFiltroTexto = ''
+let politicaFiltroCodigoEstado = ''
+let politicaFiltroIdArea = ''
+
+function codigoEstadoDesdeEtiquetaPolitica(etiqueta) {
+    const texto = (etiqueta || '').trim().toLowerCase()
+    if (!texto || texto.indexOf('todos') === 0) {
+        return ''
+    }
+    if (texto.indexOf('vigent') !== -1) {
+        return ESTADO_VIGENTE
+    }
+    if (texto.indexOf('cancel') !== -1 || texto.indexOf('caduc') !== -1) {
+        return ESTADO_CADUCO
+    }
+    return ''
+}
+
+function aplicarFiltrosTablaPolitica() {
+    if (typeof dt_politica === 'undefined' || !dt_politica) {
+        return
+    }
+    dt_politica.draw()
+}
+
+function sincronizarFiltroEstadoPolitica(codigoEstado) {
+    politicaFiltroCodigoEstado = codigoEstado || ''
+    $('#filtroEstadoPolitica').val(politicaFiltroCodigoEstado)
+    $('.stats .stat').removeClass('active')
+    if (politicaFiltroCodigoEstado) {
+        $('.stats .stat').each(function () {
+            const statEtiqueta = $(this).find('.stat-label').text().trim()
+            if (codigoEstadoDesdeEtiquetaPolitica(statEtiqueta) === politicaFiltroCodigoEstado) {
+                $(this).addClass('active')
+            }
+        })
+    }
+    aplicarFiltrosTablaPolitica()
+}
+
+function initPoliticaListadoFiltros() {
+    if ($.fn.dataTable.ext.search.some(function (fn) {
+        return fn && fn.__politicaListadoFiltro === true
+    })) {
+        aplicarFiltrosTablaPolitica()
+        return
+    }
+
+    const filtroFn = function (settings, data, dataIndex) {
+        if (settings.nTable.id !== 'tablaListaPoliticas') {
+            return true
+        }
+
+        const row = dt_politica.row(dataIndex).data()
+        if (!row) {
+            return true
+        }
+
+        if (politicaFiltroIdArea && row.IdAreaEstrategica !== politicaFiltroIdArea) {
+            return false
+        }
+
+        if (politicaFiltroCodigoEstado && row.CodigoEstado !== politicaFiltroCodigoEstado) {
+            return false
+        }
+
+        if (!politicaFiltroTexto) {
+            return true
+        }
+
+        const termino = politicaFiltroTexto.toLowerCase()
+        const codigo = String(row.Codigo || '').toLowerCase()
+        const descripcion = (row.Descripcion || '').toLowerCase()
+        const areaCodigo = String((row.areaEstrategica && row.areaEstrategica.Codigo) ? row.areaEstrategica.Codigo : '').toLowerCase()
+        const areaDesc = ((row.areaEstrategica && row.areaEstrategica.Descripcion) ? row.areaEstrategica.Descripcion : '').toLowerCase()
+
+        return codigo.indexOf(termino) !== -1
+            || descripcion.indexOf(termino) !== -1
+            || areaCodigo.indexOf(termino) !== -1
+            || areaDesc.indexOf(termino) !== -1
+    }
+    filtroFn.__politicaListadoFiltro = true
+    $.fn.dataTable.ext.search.push(filtroFn)
+
+    $('.stats').on('click', '.stat', function () {
+        const etiqueta = $(this).find('.stat-label').text().trim()
+        const codigo = codigoEstadoDesdeEtiquetaPolitica(etiqueta)
+
+        if ($(this).hasClass('active')) {
+            sincronizarFiltroEstadoPolitica('')
+            return
+        }
+
+        sincronizarFiltroEstadoPolitica(codigo)
+    })
+
+    $('#buscarPolitica').on('input', function () {
+        politicaFiltroTexto = $(this).val().trim()
+        aplicarFiltrosTablaPolitica()
+    })
+
+    $('#filtroEstadoPolitica').on('change', function () {
+        sincronizarFiltroEstadoPolitica($(this).val())
+    })
+
+    $('#filtroArea').on('change', function () {
+        politicaFiltroIdArea = $(this).val() || ''
+        aplicarFiltrosTablaPolitica()
+    })
+}
+
 $(document).ready(function () {
-    let idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
-    let baseUrl = "index.php?r=Planificacion/politica-estrategica/"
+    const ID_EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
+    let idPoliticaEstrategica = ID_EMPTY_GUID
+    const baseUrl = 'index.php?r=Planificacion/politica-estrategica/'
+    const dtEvents = $('#tablaListaPoliticas')
+    const $modalPolitica = $('#modalPoliticaEstrategica')
 
     function reiniciarCampos() {
+        const validator = $('#formPoliticaEstrategica').data('validator')
+        if (validator) {
+            validator.resetForm()
+        }
         $('#formPoliticaEstrategica *').filter(':input').each(function () {
-            $(this).removeClass('is-invalid is-valid');
-        });
-        $('#formPoliticaEstrategica').trigger("reset");
-        politicas_s2AreasEstrategicas.val(null).trigger('change')
-        idPoliticaEstrategica = '00000000-0000-0000-0000-000000000000';
+            $(this).removeClass('is-invalid is-valid')
+        })
+        if (typeof politicas_s2AreasEstrategicas !== 'undefined') {
+            politicas_s2AreasEstrategicas.val(null).trigger('change')
+        }
+        $('#formPoliticaEstrategica').trigger('reset')
+        idPoliticaEstrategica = ID_EMPTY_GUID
     }
 
     function mensajeAccion(accion) {
-        return `Los datos de la Política Estratégica se ${accion}ron correctamente.`;
+        return `Los datos de la política estratégica se ${accion}ron correctamente.`
     }
 
-    $("#btnCancelar").click(function () {
-        $('.icon').toggleClass('opened');
-        reiniciarCampos();
-        $("#divDatos").hide(500);
-        $("#divTabla").show(500);
-    });
+    function tituloModalPolitica(esEdicion) {
+        return esEdicion ? 'Edición de datos' : 'Ingreso de datos'
+    }
 
-    $("#btnGuardar").click(async function () {
-        const btn = $(this);
-        const btnCancel = $('#btnCancelar')
+    function abrirModalPolitica(esEdicion) {
+        $('#politicaModalTitulo').text(tituloModalPolitica(esEdicion))
+        $modalPolitica.modal('show')
+    }
 
-        if (!$("#formPoliticaEstrategica").valid()) return;
+    function cerrarModalPolitica() {
+        reiniciarCampos()
+        $modalPolitica.modal('hide')
+    }
 
-        const idAreaEstrategica = $('#areasEstrategicas').select2('data')[0].id;
-        const datos = new FormData();
-        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
-        datos.append("idAreaEstrategica", idAreaEstrategica);
-        datos.append("codigo", $("#codigo").val());
-        datos.append("descripcion", $("#descripcion").val());
+    async function guardarFormularioPolitica(opciones) {
+        const btn = opciones.spinnerBtn
+        const cerrarAlExito = !!opciones.cerrarAlExito
+        const continuar = !!opciones.continuar
 
-        const hasCode =  idPoliticaEstrategica !== '00000000-0000-0000-0000-000000000000';
-        let accion = hasCode ? 'actualizar' : 'guardar'
+        if (!$('#formPoliticaEstrategica').valid()) {
+            return false
+        }
+
+        const datos = new FormData()
+        datos.append('idPoliticaEstrategica', idPoliticaEstrategica)
+        datos.append('idAreaEstrategica', $('#idAreaEstrategica').val())
+        datos.append('codigo', $('#codigo').val())
+        datos.append('descripcion', $('#descripcion').val())
+
+        const esEdicion = idPoliticaEstrategica !== ID_EMPTY_GUID
+        const accion = esEdicion ? 'actualizar' : 'guardar'
 
         try {
             await ajaxPromise({
                 url: baseUrl + accion,
                 data: datos,
                 spinnerBtn: btn,
-                cancelBtn: btnCancel,
+                cancelBtn: cerrarAlExito ? $('#btnCancelar') : null,
                 successMsg: mensajeAccion(accion),
-                reloadTable: dt_politica
-            });
+                reloadTable: typeof dt_politica !== 'undefined' ? dt_politica : null,
+                onSuccess: function () {
+                    if (typeof actualizarContadoresPolitica === 'function') {
+                        actualizarContadoresPolitica()
+                    }
+                    if (typeof popularFiltroAreaPolitica === 'function') {
+                        popularFiltroAreaPolitica()
+                    }
+                    if (continuar) {
+                        reiniciarCampos()
+                        $('#politicaModalTitulo').text(tituloModalPolitica(false))
+                    }
+                }
+            })
+            return true
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+            return false
         }
-    });
+    }
 
-    $(document).on('click', '#refresh', function(){
-        dt_politica.ajax.reload();
+    $('#btnNuevoPolitica').on('click', function () {
+        reiniciarCampos()
+        abrirModalPolitica(false)
     })
 
-    /* =============================================
-          CAMBIA EL ESTADO DEL REGISTRO
-    ===============================================*/
-    $(document).on('click', 'tbody #btnEstado', async function(){
-        let objectBtn = $(this);
-        const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        let idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
+    $('#btnReportePdf').on('click', function () {
+        window.open(baseUrl + 'reporte', '_blank')
+    })
 
-        const datos = new FormData();
-        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+    $('#btnCancelar').on('click', function () {
+        cerrarModalPolitica()
+    })
+
+    $modalPolitica.on('hidden.bs.modal', function () {
+        reiniciarCampos()
+    })
+
+    $('#btnGuardar').on('click', function () {
+        guardarFormularioPolitica({
+            spinnerBtn: $(this),
+            cerrarAlExito: true,
+            continuar: false
+        })
+    })
+
+    $('#btnGuardarContinuar').on('click', function () {
+        guardarFormularioPolitica({
+            spinnerBtn: $(this),
+            cerrarAlExito: false,
+            continuar: true
+        })
+    })
+
+    dtEvents.on('click', '.estado-trigger', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        const wrap = $(this).closest('.estado-wrap')
+        const abierto = wrap.hasClass('open')
+        cerrarMenusEstadoPolitica()
+        wrap.toggleClass('open', !abierto)
+    })
+
+    dtEvents.on('click', '.estado-menu', function (e) {
+        e.stopPropagation()
+    })
+
+    dtEvents.on('click', '.estado-option', async function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const option = $(this)
+        const wrap = option.closest('.estado-wrap')
+        const tr = option.closest('tr')
+        const rowApi = dt_politica.row(tr)
+        const dt_row = rowApi.data()
+        const codigoNuevo = option.data('estado')
+
+        if (!dt_row || codigoNuevo === dt_row.CodigoEstado) {
+            wrap.removeClass('open')
+            return
+        }
+
+        const datos = new FormData()
+        datos.append('idPoliticaEstrategica', dt_row.IdPoliticaEstrategica)
+        datos.append('codigoEstado', codigoNuevo)
 
         try {
-            await ajaxPromise({
-                url: baseUrl + "cambiar-estado",
+            const data = await ajaxPromise({
+                url: baseUrl + 'cambiar-estado',
                 data: datos,
-                spinnerBtn: objectBtn,
                 successMsg: 'Estado actualizado correctamente.',
-            }).then((data) => {
-                cambiarEstadoBtn(objectBtn, data.data);
             })
+            dt_row.CodigoEstado = data.data
+            rowApi.data(dt_row).draw(false)
+            actualizarContadoresPolitica()
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
+        } finally {
+            wrap.removeClass('open')
         }
-    });
+    })
 
-    /*=============================================
-    ELIMINA DE LA BD UN REGISTRO
-    =============================================*/
-    $(document).on('click', 'tbody #btnEliminar', function(){
-        let objectBtn = $(this)
+    dtEvents.on('click', '.btn-action-new.delete', function () {
+        const objectBtn = $(this)
         const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        let idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
+        const id = dt_row.IdPoliticaEstrategica
 
-        const datos = new FormData();
-        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+        const datos = new FormData()
+        datos.append('idPoliticaEstrategica', id)
 
         Swal.fire({
-            icon: "warning",
-            title: "Confirmación eliminación",
-            text: "¿Está seguro de eliminar la politica estrategica seleccionada?",
+            icon: 'warning',
+            title: 'Confirmación eliminación',
+            text: '¿Está seguro de eliminar la política estratégica seleccionada?',
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: '#3085d6',
             confirmButtonText: 'Borrar',
             cancelButtonColor: '#d33',
             cancelButtonText: 'Cancelar'
@@ -105,73 +298,72 @@ $(document).ready(function () {
             if (resultado.value) {
                 try {
                     await ajaxPromise({
-                        url: baseUrl + "eliminar",
+                        url: baseUrl + 'eliminar',
                         data: datos,
                         spinnerBtn: objectBtn,
                         successMsg: mensajeAccion('eliminar'),
-                        reloadTable: dt_politica
-                    });
+                    })
+                    dt_politica.ajax.reload(function () {
+                        actualizarContadoresPolitica()
+                        popularFiltroAreaPolitica()
+                    }, false)
                 } catch (err) {
-                    console.error("Error al procesar:", err);
+                    console.error('Error al procesar:', err)
                 }
             }
-        });
-    });
+        })
+    })
 
-    /*=============================================
-    BUSCA EL REGISTRO SELECCIONADO EN LA BD
-    =============================================*/
-    $(document).on('click', 'tbody #btnEditar', async function(){
-        let objectBtn = $(this)
+    dtEvents.on('click', '.btn-action-new.edit', async function () {
+        const objectBtn = $(this)
         const dt_row = dt_politica.row(objectBtn.closest('tr')).data()
-        idPoliticaEstrategica = dt_row["IdPoliticaEstrategica"];
+        idPoliticaEstrategica = dt_row.IdPoliticaEstrategica
 
-        const datos = new FormData();
-        datos.append("idPoliticaEstrategica", idPoliticaEstrategica);
+        const datos = new FormData()
+        datos.append('idPoliticaEstrategica', idPoliticaEstrategica)
 
         try {
             await ajaxPromise({
-                url: baseUrl + "buscar",
+                url: baseUrl + 'buscar',
                 data: datos,
                 spinnerBtn: objectBtn,
-            }).then((data) => {
-                let politica = data.data
-                politicas_s2AreasEstrategicas.val(politica['IdAreaEstrategica']).trigger('change');
-                $("#codigo").val(politica["Codigo"]);
-                $("#descripcion").val(politica["Descripcion"]);
-                $("#btnMostrarCrear").trigger('click');
-            });
+            }).then(function (data) {
+                const registro = data.data
+                if (typeof politicas_s2AreasEstrategicas !== 'undefined') {
+                    politicas_s2AreasEstrategicas.val(registro.IdAreaEstrategica).trigger('change.select2')
+                }
+                $('#codigo').val(registro.Codigo)
+                $('#descripcion').val(registro.Descripcion)
+                abrirModalPolitica(true)
+            })
         } catch (err) {
-            console.error("Error al procesar:", err);
+            console.error('Error al procesar:', err)
         }
-    });
+    })
 
-    /**
-    * Validacion del form
-    */
-    $( "#formPoliticaEstrategica" ).validate( {
+    $('#formPoliticaEstrategica').validate({
+        ignore: [],
         rules: {
-            areasEstrategicas: {
-                required: true,
+            idAreaEstrategica: {
+                required: true
             },
             codigo: {
                 required: true,
                 digits: true,
                 range: [1, 9],
-                require_from_group: [2, ".codigo_group"],
+                require_from_group: [2, '.codigo_group'],
                 remote: {
-                    url: "index.php?r=Planificacion/politica-estrategica/verificar-codigo",
-                    type: "post",
-                    dataType: "json",
+                    url: baseUrl + 'verificar-codigo',
+                    type: 'post',
+                    dataType: 'json',
                     data: {
-                        codigo: function() {
-                            return $('#codigo').val(); // valor actual del campo
+                        codigo: function () {
+                            return $('#codigo').val()
                         },
-                        idAreaEstrategica: function (){
-                            let area = $('#areasEstrategicas').select2('data')
-                            return area[0].id
+                        idAreaEstrategica: function () {
+                            return $('#idAreaEstrategica').val()
                         },
-                        idPoliticaEstrategica: function (){
+                        idPoliticaEstrategica: function () {
                             return idPoliticaEstrategica
                         }
                     }
@@ -181,36 +373,39 @@ $(document).ready(function () {
                 required: true,
                 minlength: 2,
                 maxlength: 500
-            },
-        },
-        messages: {
-            areasEstrategicas: {
-                required: "Debe seleccionar una area estrategica",
-            },
-            codigo: {
-                required: "Debe ingresar un codigo de politica estrategica jeje",
-                digits: "El codigo solo debe ser numerico",
-                range: "El codigo debe estar comprendido entre 1 y 9",
-                require_from_group: "Debe seleccionar un area estrategica antes de validar el codigo de politica",
-                remote: "El codigo ingresado ya se encuentra en uso con el area estrategica seleccionada"
-            },
-            descripcion: {
-                required: "Debe ingresar una descripcion del area estrategica",
-                minlength: "La descripcion debe tener almenos 2 letras",
-                maxlength: "La descripcion debe tener maximo 500 letras"
             }
         },
-        errorElement: "div",
-
-        errorPlacement: function ( error, element ) {
-            error.addClass( "invalid-feedback" );
-            error.insertAfter(element);
+        messages: {
+            idAreaEstrategica: {
+                required: 'Debe seleccionar un área estratégica'
+            },
+            codigo: {
+                required: 'Debe ingresar un código de política estratégica',
+                digits: 'El código solo debe ser numérico',
+                range: 'El código debe estar comprendido entre 1 y 9',
+                require_from_group: 'Debe seleccionar un área estratégica para validar el código',
+                remote: 'El código ingresado ya se encuentra en uso con el área seleccionada'
+            },
+            descripcion: {
+                required: 'Debe ingresar una descripción de la política estratégica',
+                minlength: 'La descripción debe tener al menos 2 caracteres',
+                maxlength: 'La descripción debe tener máximo 500 caracteres'
+            }
         },
-        highlight: function ( element  ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
+        errorElement: 'div',
+        errorPlacement: function (error, element) {
+            error.addClass('invalid-feedback')
+            if (element.hasClass('select2-hidden-accessible')) {
+                error.insertAfter(element.next('.select2'))
+            } else {
+                error.insertAfter(element)
+            }
+        },
+        highlight: function (element) {
+            $(element).addClass('is-invalid').removeClass('is-valid')
         },
         unhighlight: function (element) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
+            $(element).addClass('is-valid').removeClass('is-invalid')
         }
-    });
-});
+    })
+})

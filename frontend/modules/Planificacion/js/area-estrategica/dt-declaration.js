@@ -1,183 +1,266 @@
 let dt_area
-$(document).ready(function () {
-    function format(d) {
-        return (
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="titulosmall">Plan estrategico institucional</div>' +
-            '   </div>' +
-            '</div>' +
-            '<div class="row">' +
-            '   <div class="col-5">' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Desc: </div>' +
-            '           </div>' +
-            '           <div class="col-8">' +
-            '               <div class="little">' + d["Descripcion"] + '</div>' +
-            '           </div>' +
-            '       </div>' +
-            '       <div class="row">' +
-            '           <div class="col-2">' +
-            '               <div class="subsmall">Fechas PEI</div>' +
-            '           </div>' +
-            '           <div class="col-4">' +
-            '               <div class="little">' +
-            '                   Vigencia: ' + d["GestionInicio"] +  ' - ' + d["GestionFin"] + '<br>' +
-            '                   Aprobacion: ' + d["FechaAprobacion"] +
-            '               </div>' +
-            '           </div>' +
-            '       </div>' +
-            '   </div>' +
-            '</div>'
-        );
 
-        return (
-            '<table id="subDetail" class="subDetail">' +
-            '<colgroup>\n' +
-            '<col style="width: 126px">\n' +
-            '<col style="width: 125px">\n' +
-            '<col style="width: 144px">\n' +
-            '<col style="width: 214px">\n' +
-            '</colgroup>\n' +
-            '<thead>\n' +
-            '  <tr>\n' +
-            '    <th class="tg-1wig" colspan="4">Objetivo Estrategico</th>\n' +
-            '  </tr></thead>\n' +
-            '<tbody>\n' +
-            '  <tr>\n' +
-            '    <td class="subDetail_Title">Codigo</td>\n' +
-            '    <td class="subDetail_Codigo" colspan="3">'+ d["Compuesto"]+'</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="subDetail_Title">Objetivo</td>\n' +
-            '    <td class="subDetail_Title">Producto</td>\n' +
-            '    <td class="subDetail_Title">Descripcion</td>\n' +
-            '    <td class="subDetail_Title">Formula</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Objetivo"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Producto"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Descripcion"]+'</td>\n' +
-            '    <td class="tg-buh4">'+d["objetivosEstrategicos"]["Indicador_Formula"]+'</td>\n' +
-            '  </tr>\n' +
-            '  <tr>\n' +
-            '    <td class="tg-amwm" colspan="2"><b>Area Estrategicas:</b> -' + d["objetivosEstrategicos"]["areaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["areaEstrategica"]["Descripcion"] + ' </td>\n' +
-            '    <td class="tg-amwm" colspan="2"><b>Politica Estrategicas:</b> -' + d["objetivosEstrategicos"]["politicaEstrategica"]["Codigo"] + ' - ' + d["objetivosEstrategicos"]["politicaEstrategica"]["Descripcion"] + ' </td>\n' +
-            '  </tr>\n' +
-            '</tbody>\n' +
-            '</table>');
+function areaEsVigente(codigo) {
+    return codigo === ESTADO_VIGENTE
+}
 
+function areaEstadoMeta(codigo) {
+    const vigente = areaEsVigente(codigo)
+    return {
+        codigo: vigente ? ESTADO_VIGENTE : ESTADO_CADUCO,
+        clase: vigente ? 'vigente' : 'cancelada',
+        texto: vigente ? 'Vigente' : 'Caduco',
+        colorAvatar: vigente ? '#10b981' : '#f43f5e'
     }
-    dt_area = $("#tablaListaAreas").DataTable({
+}
+
+function numerarFilasArea(api) {
+    if (!api) {
+        return
+    }
+    const start = parseInt(api.page.info().start, 10) || 0
+    api.column(0, {page: 'current', search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
+        $(cell).find('.row-num').text(start + i + 1)
+    })
+}
+
+function actualizarContadoresArea() {
+    if (typeof dt_area === 'undefined' || !dt_area) {
+        return
+    }
+
+    let total = 0
+    let vigentes = 0
+    let caducos = 0
+
+    dt_area.rows({search: 'none'}).data().each(function (row) {
+        total++
+        if (areaEsVigente(row.CodigoEstado)) {
+            vigentes++
+        } else if (row.CodigoEstado === ESTADO_CADUCO) {
+            caducos++
+        }
+    })
+
+    $('#areaSubtitleTotal').text(total + ' áreas registradas')
+    $('#areaCountVigentes').text(vigentes)
+    $('#areaCountCaducos').text(caducos)
+}
+
+function mostrarCargaTablaArea() {
+    $('#dticTableContainer').hide()
+    $('#dticTableLoading').show()
+}
+
+function ocultarCargaTablaArea() {
+    $('#dticTableLoading').hide()
+    $('#dticTableContainer').fadeIn(250)
+}
+
+function areaIniciales(descripcion) {
+    if (!descripcion) {
+        return 'AE'
+    }
+    const palabras = descripcion.trim().split(/\s+/).slice(0, 2)
+    return palabras.map(function (p) {
+        return p.charAt(0)
+    }).join('').toUpperCase()
+}
+
+function cerrarMenusEstadoArea(excepto) {
+    $('.estado-wrap').not(excepto).removeClass('open')
+}
+
+function rangoPaginasVisibleArea(paginaActual, totalPaginas, ventana) {
+    const size = ventana || 5
+    if (totalPaginas <= 0) {
+        return {desde: 0, hasta: -1}
+    }
+    if (totalPaginas <= size) {
+        return {desde: 0, hasta: totalPaginas - 1}
+    }
+    const hasta = Math.min(totalPaginas - 1, Math.max(paginaActual, size - 1))
+    const desde = Math.max(0, hasta - size + 1)
+    return {desde: desde, hasta: hasta}
+}
+
+function actualizarPaginacionArea(api) {
+    const $paginacion = $('#areaPagination')
+    if (!$paginacion.length || !api) {
+        return
+    }
+
+    const info = api.page.info()
+    const total = info.recordsDisplay
+    const start = total === 0 ? 0 : info.start + 1
+    const end = info.end
+    const paginaActual = info.page
+    const totalPaginas = info.pages
+    const rango = rangoPaginasVisibleArea(paginaActual, totalPaginas, 5)
+
+    if (total === 0) {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>0</strong> de <strong>0</strong> áreas'
+        )
+    } else {
+        $paginacion.find('.pagination-info').html(
+            'Mostrando <strong>' + start + '–' + end + '</strong> de <strong>' + total + '</strong> áreas'
+        )
+    }
+
+    const $nav = $paginacion.find('.pagination-nav').empty()
+
+    const $btnAnterior = $('<button type="button" class="page-btn">‹ Anterior</button>')
+    if (paginaActual <= 0 || totalPaginas === 0) {
+        $btnAnterior.prop('disabled', true)
+    } else {
+        $btnAnterior.on('click', function () {
+            api.page('previous').draw('page')
+        })
+    }
+    $nav.append($btnAnterior)
+
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+        const $btnPagina = $('<button type="button" class="page-btn"></button>').text(i + 1)
+        if (i === paginaActual) {
+            $btnPagina.addClass('current')
+        } else {
+            $btnPagina.on('click', (function (pageIndex) {
+                return function () {
+                    api.page(pageIndex).draw('page')
+                }
+            })(i))
+        }
+        $nav.append($btnPagina)
+    }
+
+    const $btnSiguiente = $('<button type="button" class="page-btn">Siguiente ›</button>')
+    if (paginaActual >= totalPaginas - 1 || totalPaginas === 0) {
+        $btnSiguiente.prop('disabled', true)
+    } else {
+        $btnSiguiente.on('click', function () {
+            api.page('next').draw('page')
+        })
+    }
+    $nav.append($btnSiguiente)
+}
+
+function renderEstadoDropdownArea(codigoActual) {
+    const actual = areaEstadoMeta(codigoActual)
+    const vigente = areaEstadoMeta(ESTADO_VIGENTE)
+    const caduco = areaEstadoMeta(ESTADO_CADUCO)
+
+    function opcion(meta) {
+        const activo = meta.codigo === actual.codigo
+        return `
+            <button type="button" class="estado-option ${meta.clase}${activo ? ' selected' : ''}" data-estado="${meta.codigo}">
+                <span class="dot"></span>
+                <span>${meta.texto}</span>
+                ${activo ? '<span class="check">✓</span>' : ''}
+            </button>
+        `
+    }
+
+    return `
+        <div class="estado-wrap">
+            <button type="button" class="estado ${actual.clase} estado-trigger" data-estado="${actual.codigo}">
+                <span class="dot"></span>${actual.texto}<span class="chevron">▾</span>
+            </button>
+            <div class="estado-menu">
+                ${opcion(vigente)}
+                ${opcion(caduco)}
+            </div>
+        </div>
+    `
+}
+
+$(document).ready(function () {
+    dt_area = $('#tablaListaAreas').DataTable({
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: null,
+            bottomEnd: null,
+            bottom: null,
+        },
+        pageLength: 10,
+        paging: true,
+        info: false,
+        language: {
+            emptyTable: 'No hay áreas estratégicas registradas',
+            zeroRecords: 'No se encontraron coincidencias'
+        },
+        order: [[1, 'asc']],
         initComplete: function () {
-            $("div.dt-search").append('<button type="button" id="refresh" class="btn btn-outline-primary ml-2" data-toggle="tooltip" title="Click! recarga la tabla" ><i class="fa fa-recycle fa-spin"></i></button>');
+            ocultarCargaTablaArea()
+            actualizarContadoresArea()
+            numerarFilasArea(this.api())
+            actualizarPaginacionArea(this.api())
+            if (typeof initAreaListadoFiltros === 'function') {
+                initAreaListadoFiltros()
+            }
+        },
+        drawCallback: function () {
+            numerarFilasArea(this.api())
+            actualizarContadoresArea()
+            actualizarPaginacionArea(this.api())
         },
         ajax: {
-            method: "POST",
+            method: 'POST',
             dataType: 'json',
-            cache: false,
-            contentType: false,
-            processData: false,
             url: 'index.php?r=Planificacion/area-estrategica/listar-todo',
-            dataSrc: 'data',
-            error: function (xhr) {
-                const data = JSON.parse(xhr.responseText)
-                MostrarMensaje('error', GenerarMensajeError(data["mensaje"]), data["errors"])
-                dt_area.processing(false);
-            }
+            dataSrc: 'data'
         },
         columns: [
             {
-                className: 'dt-small dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'CodigoUsuario',
-                width: 30
-            },
-            {
-                className: 'dt-small details-control dt-center',
-                orderable: false,
-                searchable: false,
                 data: null,
-                defaultContent: '',
-                "render": function () {
-                    return '<i class="fa fa-circle-notch fa-spin"></i>';
-                },
-                width: 30
-            },
-            {
-                className: 'dt-small dt-center',
-                orderable: false,
-                data: 'Codigo',
-                width: 100
-            },
-            {
-                className: 'dt-small dt-left',
-                data: 'Descripcion'
-            },
-            {
-                className: 'dt-small dt-estado dt-center',
                 orderable: false,
                 searchable: false,
-                data: 'CodigoEstado',
                 render: function (data, type, row) {
-                    return ( (type === 'display') && (row["CodigoEstado"] === ESTADO_VIGENTE))
-                        ? '<button id="btnEstado" type="button" class="btn btn-outline-success btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_text">Vigente</span>' +
-                        '  </button>'
-                        : '<button id="btnEstado" type="button" class="btn btn-outline-danger btn-sm btnEstado" data-toggle="tooltip" title="Click! para cambiar el estado del registro">' +
-                        '    <span class="btn_text">Caducado</span>' +
-                        '  </button>' ;
-                },
-                visible: true
+                    if (type !== 'display') {
+                        return row.Descripcion
+                    }
+
+                    const estado = areaEstadoMeta(row.CodigoEstado)
+
+                    return `
+                        <div class="card-row">
+                            <span class="row-num"></span>
+                            <div class="patient">
+                                <div class="avatar" style="background:${estado.colorAvatar}">${areaIniciales(row.Descripcion)}</div>
+                                <div>
+                                    <p class="patient-name">${row.Descripcion} <span class="code-badge">${row.Codigo}</span></p>
+                                    <p class="patient-meta">Área estratégica</p>
+                                </div>
+                            </div>
+                            <div>${renderEstadoDropdownArea(row.CodigoEstado)}</div>
+                            <div class="actions">
+                                <button type="button" class="btn-action-new edit">✏ Editar</button>
+                                <button type="button" class="btn-action-new delete">🗑 Eliminar</button>
+                            </div>
+                        </div>
+                    `
+                }
             },
-            {
-                className: 'dt-small dt-acciones dt-center',
-                orderable: false,
-                searchable: false,
-                data: 'IdAreaEstrategica',
-                render: function (data, type) {
-                    return type === 'display'
-                        ? '<div class="btn-group" role="group" aria-label="Basic example">' +
-                        '<button id="btnEditar" type="button" class="btn btn-outline-warning btn-sm btnEditar" data-toggle="tooltip" title="Click! para editar el registro">' +
-                        '    <i class="fa fa-pen-fancy"></i>' +
-                        '</button>' +
-                        '<button id="btnEliminar" type="button" class="btn btn-outline-danger btn-sm btnEliminar" data-toggle="tooltip" title="Click! para eliminar el registro">' +
-                        '    <i class="fa fa-trash-alt"></i>' +
-                        '</button>' +
-                        '</div>'
-                        : data;
-                },
-            },
-        ],
-    });
+            {data: 'Codigo', visible: false},
+            {data: 'Descripcion', visible: false},
+            {data: 'CodigoEstado', visible: false},
+            {data: 'IdAreaEstrategica', visible: false, searchable: false}
+        ]
+    })
 
-    // Add event listener for opening and closing details
-    $('#tablaListaAreas tbody').on('click', 'td.details-control', function () {
-        let tr = $(this).closest('tr');
-        let row = dt_area.row(tr);
+    $(document).on('click', '#refreshTable', function () {
+        const btn = $(this)
+        btn.prop('disabled', true)
+        mostrarCargaTablaArea()
+        dt_area.ajax.reload(function () {
+            actualizarContadoresArea()
+            ocultarCargaTablaArea()
+            btn.prop('disabled', false)
+        }, false)
+    })
 
-        if (row["child"].isShown()) {
-            row["child"].hide();
-            tr.removeClass('shown');
-        }
-        else {
-            row["child"](format(row.data())).show();
-            tr.addClass('shown');
-        }
-    });
-
-    dt_area.on("user-select", function (e, dt, type, cell, originalEvent) {
-        if ($(cell.node()).hasClass("details-control")) {
-            e.preventDefault();
-        }
-    });
-
-    dt_area.on('order.dt search.dt', function () {
-        let i = 1;
-        dt_area.cells(null, 0, { search: 'applied', order: 'applied' }).every(function () {
-            this.data(i++);
-        });
-    }).draw();
+    $(document).on('click', function () {
+        cerrarMenusEstadoArea()
+    })
 })

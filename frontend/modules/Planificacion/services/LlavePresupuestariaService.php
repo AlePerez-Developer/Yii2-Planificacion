@@ -7,7 +7,6 @@ use app\modules\Planificacion\formModels\LlavePresupuestariaForm;
 use app\modules\Planificacion\common\helpers\ResponseHelper;
 use app\modules\Planificacion\dao\LlavePresupuestariaDao;
 use app\modules\Planificacion\models\LlavePresupuestaria;
-use app\modules\Planificacion\models\Ue;
 use app\modules\Planificacion\models\UnidadEjecutora;
 use yii\db\StaleObjectException;
 use common\models\Estado;
@@ -60,7 +59,7 @@ class LlavePresupuestariaService
         $form->fechaInicio = $this->validarFecha($form->fechaInicio);
         $form->llave = $this->generarLlave($unidad, $form);
 
-        return $this->guardar($form, $unidad);
+        return $this->guardar($form);
     }
 
     /**
@@ -76,22 +75,19 @@ class LlavePresupuestariaService
         $form->fechaInicio = $this->validarFecha($form->fechaInicio);
         $form->llave = $this->generarLlave($unidad, $form);
 
-        return $this->actualizar($id, $form, $unidad);
+        return $this->actualizar($id, $form);
     }
 
     /**
      * @throws Exception|ValidationException
      */
-    public function guardar(LlavePresupuestariaForm $form, UnidadEjecutora $unidad): array
+    public function guardar(LlavePresupuestariaForm $form): array
     {
         $modelo = new LlavePresupuestaria([
             'IdUnidadEjecutora' => $form->idUnidadEjecutora,
-            'IdDa' => $unidad->IdDa,
-            'IdUe' => $this->obtenerIdUeCatalogo($unidad),
             'IdProyecto' => $form->idProyecto,
             'IdActividad' => $form->idActividad,
             'Llave' => $form->llave,
-            'Descripcion' => '',
             'esOrganizacional' => $form->esOrganizacional,
             'FechaInicio' => $form->fechaInicio,
             'CodigoEstado' => Estado::ESTADO_VIGENTE,
@@ -107,17 +103,14 @@ class LlavePresupuestariaService
      * @throws ValidationException
      * @throws StaleObjectException
      */
-    public function actualizar(string $id, LlavePresupuestariaForm $form, UnidadEjecutora $unidad): array
+    public function actualizar(string $id, LlavePresupuestariaForm $form): array
     {
         $modelo = $this->obtenerModeloValidado($id);
 
         $modelo->IdUnidadEjecutora = $form->idUnidadEjecutora;
-        $modelo->IdDa = $unidad->IdDa;
-        $modelo->IdUe = $this->obtenerIdUeCatalogo($unidad);
         $modelo->IdProyecto = $form->idProyecto;
         $modelo->IdActividad = $form->idActividad;
         $modelo->Llave = $form->llave;
-        $modelo->Descripcion = '';
         $modelo->esOrganizacional = $form->esOrganizacional;
         $modelo->FechaInicio = $form->fechaInicio;
 
@@ -128,10 +121,10 @@ class LlavePresupuestariaService
      * @throws Exception
      * @throws ValidationException
      */
-    public function cambiarEstado(string $id): array
+    public function cambiarEstado(string $id, ?string $codigoEstado = null): array
     {
         $modelo = $this->obtenerModeloValidado($id);
-        $modelo->cambiarEstado();
+        $modelo->cambiarEstado($codigoEstado);
 
         if (!$modelo->validate()) {
             throw new ValidationException(Yii::$app->params['ERROR_VALIDACION_MODELO'], $modelo->getErrors(), 500);
@@ -250,16 +243,6 @@ class LlavePresupuestariaService
         }
 
         return $unidad;
-    }
-
-    private function obtenerIdUeCatalogo(UnidadEjecutora $unidad): string
-    {
-        $ue = Ue::find()
-            ->where(['Ue' => $unidad->Ue])
-            ->andWhere(['<>', 'CodigoEstado', Estado::ESTADO_ELIMINADO])
-            ->one();
-
-        return (string)($ue?->IdUe ?? '');
     }
 
     /**
