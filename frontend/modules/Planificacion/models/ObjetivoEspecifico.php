@@ -110,6 +110,7 @@ class ObjetivoEspecifico extends ActiveRecord
             ->joinWith('objetivosInstitucionales.objetivosEstrategicos Oes', true, 'INNER JOIN')
             ->joinWith('objetivosInstitucionales.objetivosEstrategicos.areaEstrategica a', true, 'INNER JOIN')
             ->joinWith('objetivosInstitucionales.objetivosEstrategicos.politicaEstrategica p', true, 'INNER JOIN')
+            ->joinWith('peiGestion g', true, 'INNER JOIN')
             ->where([
                 'Oe.IdDa' => $idDa,
                 'Oe.IdGestion' => $idGestion,
@@ -133,8 +134,13 @@ class ObjetivoEspecifico extends ActiveRecord
         return (string)($unidad?->IdDa ?? '');
     }
 
-    public function cambiarEstado(): void
+    public function cambiarEstado(?string $codigoEstado = null): void
     {
+        if ($codigoEstado === Estado::ESTADO_VIGENTE || $codigoEstado === Estado::ESTADO_CADUCO) {
+            $this->CodigoEstado = $codigoEstado;
+            return;
+        }
+
         $this->CodigoEstado = $this->CodigoEstado === Estado::ESTADO_VIGENTE
             ? Estado::ESTADO_CADUCO
             : Estado::ESTADO_VIGENTE;

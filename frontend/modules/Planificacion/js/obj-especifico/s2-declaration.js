@@ -1,50 +1,83 @@
-let objEspecifico_s2ObjInstitucional = $('#idObjInstitucional');
+let objEspecifico_s2ObjInstitucional
 
-$(document).ready(function () {
-    objEspecifico_s2ObjInstitucional.select2({
+function opcionesSelectOes($select, placeholder) {
+    return {
         theme: 'bootstrap4',
-        placeholder: 'Seleccione un objetivo institucional',
+        placeholder: placeholder,
         allowClear: true,
         width: '100%',
-        templateResult: select2ObjHtmlFormat,
-        templateSelection: select2ObjHtmlFormat,
-        matcher: select2ObjMatchSearch
-    });
+        dropdownAutoWidth: false,
+        dropdownParent: $select.closest('.da-form-group'),
+        templateResult: select2ObjHtmlFormatOes,
+        templateSelection: select2ObjHtmlFormatOes,
+        matcher: select2ObjMatchSearchOes
+    }
+}
+
+function select2ObjHtmlFormatOes(repo) {
+    if (repo.loading || repo.id === '') {
+        return repo.text
+    }
+
+    return $(
+        `<div class="mi-render-select2">
+            <div class="titulo-producto">Código: ${repo.compuesto || ''}</div>
+            <div class="titulo-producto">${repo.text || ''}</div>
+            <div class="subtitulo-producto">${repo.producto || ''}</div>
+        </div>`
+    )
+}
+
+function select2ObjMatchSearchOes(params, data) {
+    if (typeof data.text === 'undefined') {
+        return null
+    }
+
+    if ($.trim(params.term) === '') {
+        return data
+    }
+
+    const busqueda = params.term.toLowerCase()
+    const texto = (data.text || '').toLowerCase()
+    const compuesto = (data.compuesto || '').toLowerCase()
+    const producto = (data.producto || '').toLowerCase()
+
+    return texto.includes(busqueda)
+        || compuesto.includes(busqueda)
+        || producto.includes(busqueda)
+        ? data
+        : null
+}
+
+function ajustarAnchoSelectsOes() {
+    $('#modalObjEspecifico select').each(function () {
+        const $select = $(this)
+        const $grupo = $select.closest('.da-form-group')
+        const ancho = $grupo.innerWidth()
+        if (!ancho) {
+            return
+        }
+        $select.next('.select2-container').css({
+            width: '100%',
+            maxWidth: '100%'
+        })
+        const select2 = $select.data('select2')
+        if (select2 && select2.$dropdown) {
+            select2.$dropdown.css('width', ancho + 'px')
+        }
+    })
+}
+
+$(document).ready(function () {
+    objEspecifico_s2ObjInstitucional = $('#idObjInstitucional')
 
     populateS2ObjInstitucional(objEspecifico_s2ObjInstitucional)
 
-    function select2ObjHtmlFormat(repo) {
-        if (repo.loading || repo.id === '') {
-            return repo.text;
-        }
+    objEspecifico_s2ObjInstitucional.select2(
+        opcionesSelectOes(objEspecifico_s2ObjInstitucional, 'Seleccione un objetivo institucional')
+    )
 
-        return $(
-            `<div class="mi-render-select2">
-                <div class="titulo-producto">Código: ${repo.compuesto || ''}</div>
-                <div class="titulo-producto">${repo.text || ''}</div>
-                <div class="subtitulo-producto">${repo.producto || ''}</div>
-            </div>`
-        );
-    }
-
-    function select2ObjMatchSearch(params, data) {
-        if (typeof data.text === 'undefined') {
-            return null;
-        }
-
-        if ($.trim(params.term) === '') {
-            return data;
-        }
-
-        const busqueda = params.term.toLowerCase();
-        const texto = (data.text || '').toLowerCase();
-        const compuesto = (data.compuesto || '').toLowerCase();
-        const producto = (data.producto || '').toLowerCase();
-
-        return texto.includes(busqueda)
-        || compuesto.includes(busqueda)
-        || producto.includes(busqueda)
-            ? data
-            : null;
-    }
-});
+    $('#modalObjEspecifico')
+        .on('shown.bs.modal', ajustarAnchoSelectsOes)
+        .on('select2:open', 'select', ajustarAnchoSelectsOes)
+})

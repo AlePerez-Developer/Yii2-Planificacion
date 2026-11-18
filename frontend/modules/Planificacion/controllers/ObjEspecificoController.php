@@ -7,6 +7,8 @@ use app\modules\Planificacion\common\exceptions\ValidationException;
 use app\modules\Planificacion\formModels\ObjetivoEspecificoForm;
 use app\modules\Planificacion\services\ObjetivoEspecificoService;
 use app\modules\Planificacion\common\traits\ControlaEdicionPoa;
+use Mpdf\Mpdf;
+use Mpdf\MpdfException;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -15,6 +17,9 @@ use yii\web\Request;
 class ObjEspecificoController extends BaseController
 {
     use ControlaEdicionPoa;
+
+    protected array $accionesSinValidacion = ['index', 'reporte'];
+
     public function __construct(
         $id,
         $module,
@@ -33,7 +38,7 @@ class ObjEspecificoController extends BaseController
                     'actions' => [
                         'index', 'listar-todo', 'listar-obj-especificos-s2',
                         'guardar', 'actualizar', 'buscar', 'eliminar',
-                        'cambiar-estado', 'verificar-codigo',
+                        'cambiar-estado', 'verificar-codigo', 'reporte',
                     ],
                     'allow' => true,
                     'roles' => ['@'],
@@ -43,13 +48,14 @@ class ObjEspecificoController extends BaseController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'listar-todo' => ['POST'],
-                    'listar-objetivos-especificos-s2' => ['POST'],
+                    'listar-obj-especificos-s2' => ['POST'],
                     'guardar' => ['POST'],
                     'actualizar' => ['POST'],
                     'buscar' => ['POST'],
                     'eliminar' => ['POST'],
                     'cambiar-estado' => ['POST'],
                     'verificar-codigo' => ['POST'],
+                    'reporte' => ['GET'],
                 ],
             ],
         ];
@@ -69,9 +75,8 @@ class ObjEspecificoController extends BaseController
     public function actionListarObjEspecificosS2(): array
     {
         $request = Yii::$app->request;
-
         $q = $this->getSearchParam($request);
-        return $this->withTryCatch(fn() => $this->service->listarObjEspecificosS2($q)) ;
+        return $this->withTryCatch(fn() => $this->service->listarObjEspecificosS2($q));
     }
 
     public function actionGuardar(): array
@@ -110,11 +115,13 @@ class ObjEspecificoController extends BaseController
     public function actionCambiarEstado(): array
     {
         [$idDa, $idGestion] = $this->obtenerContextoActivo();
+        $codigoEstado = Yii::$app->request->post('codigoEstado');
         return $this->withTryCatch(
             fn() => $this->service->cambiarEstado(
                 $this->obtenerId(),
                 $idDa,
-                $idGestion
+                $idGestion,
+                $codigoEstado ?: null
             )
         );
     }
@@ -143,6 +150,55 @@ class ObjEspecificoController extends BaseController
             $idGestion,
             (string)$request->post('codigo', '')
         );
+    }
+
+    /**
+     * Genera el PDF del listado de objetivos específicos.
+     *
+     * @throws MpdfException
+     * @noinspection PhpUnused
+     */
+    public function actionReporte(): void
+    {
+        $this->obtenerContextoActivo();
+
+        $listado = $this->service->listarTodo();
+        $registros = $listado['data'] ?? [];
+
+        $usuario = Yii::$app->user->identity;
+        $persona = $usuario?->persona ?? null;
+        $nombreUsuario = trim(implode(' ', array_filter([
+            $persona->Nombres ?? '',
+            $persona->Paterno ?? '',
+            $persona->Materno ?? '',
+        ])));
+        if ($nombreUsuario === '') {
+            $nombreUsuario = (string)($usuario?->CodigoUsuario ?? '');
+        }
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter-L',
+            'margin_top' => 32,
+            'margin_bottom' => 18,
+            'margin_left' => 8,
+            'margin_right' => 8,
+        ]);
+        $mpdf->SetMargins(8, 8, 32);
+        $mpdf->SetHTMLHeader('<div class="reporte-header"></div>');
+        $mpdf->SetHTMLFooter(
+            '<table class="reporte-footer" width="100%">'
+            . '<tr>'
+            . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
+            . ' (' . htmlspecialchars((string)($usuario?->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
+            . '<td width="40%" align="right">Fecha y hora de impresión: '
+            . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
+            . '</tr></table>'
+        );
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('Objetivos-Especificos.pdf', 'I');
     }
 
     private function cargarFormulario(): ObjetivoEspecificoForm

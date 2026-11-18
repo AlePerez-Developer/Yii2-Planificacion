@@ -9,7 +9,9 @@ use yii\web\BadRequestHttpException;
 use app\controllers\BaseController;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use Mpdf\MpdfException;
 use yii\web\Request;
+use Mpdf\Mpdf;
 use Yii;
 
 /**
@@ -17,6 +19,8 @@ use Yii;
  */
 class ObjInstitucionalController extends BaseController
 {
+    protected array $accionesSinValidacion = ['index', 'reporte'];
+
     private ObjetivoInstitucionalService $service;
 
     public function __construct(
@@ -39,7 +43,7 @@ class ObjInstitucionalController extends BaseController
                     [
                         'actions' => [
                             'index', 'listar-todo', 'listar-obj-institucionales-s2', 'verificar-codigo', 'guardar',
-                            'actualizar', 'eliminar', 'cambiar-estado', 'buscar',
+                            'actualizar', 'eliminar', 'cambiar-estado', 'buscar', 'reporte',
                         ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -60,6 +64,7 @@ class ObjInstitucionalController extends BaseController
                     'eliminar' => ['POST'],
                     'cambiar-estado' => ['POST'],
                     'buscar' => ['POST'],
+                    'reporte' => ['GET'],
                 ],
             ],
         ];
@@ -97,7 +102,6 @@ class ObjInstitucionalController extends BaseController
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
-     *
      */
     public function actionListarObjInstitucionalesS2(): array
     {
@@ -105,9 +109,8 @@ class ObjInstitucionalController extends BaseController
 
         $q = $this->getSearchParam($request);
 
-        return $this->withTryCatch(fn() => $this->service->listarObjInstitucionalesS2($q)) ;
+        return $this->withTryCatch(fn() => $this->service->listarObjInstitucionalesS2($q));
     }
-
 
     /**
      * Accion para agregar un nuevo registro.
@@ -159,7 +162,7 @@ class ObjInstitucionalController extends BaseController
     }
 
     /**
-     * Accion para alternar el estado de un registro V/C.
+     * Accion para alternar / asignar el estado de un registro V/C.
      *
      * @return array ['success' => bool, 'mensaje' => string, 'data' => string, 'errors' => array|null]
      * @noinspection PhpUnused
@@ -168,7 +171,8 @@ class ObjInstitucionalController extends BaseController
     {
         return $this->withTryCatch(function () {
             $id = $this->obtenerId();
-            return $this->service->cambiarEstado($id);
+            $codigoEstado = Yii::$app->request->post('codigoEstado');
+            return $this->service->cambiarEstado($id, $codigoEstado ?: null);
         });
     }
 
@@ -199,7 +203,6 @@ class ObjInstitucionalController extends BaseController
             return $this->service->obtenerModelo($id);
         });
     }
-
 
     /**
      * Obtiene y válida si se recibio el codigo por el request
@@ -240,6 +243,56 @@ class ObjInstitucionalController extends BaseController
         }
 
         return $this->service->verificarCodigo($id, $idObjEstrategico, $codigo);
+    }
+
+    /**
+     * Genera el PDF del listado de objetivos institucionales.
+     *
+     * @throws MpdfException
+     * @noinspection PhpUnused
+     */
+    public function actionReporte(): void
+    {
+        $registros = [];
+        if (Yii::$app->contexto->getPei() !== '') {
+            $listado = $this->service->listarTodo();
+            $registros = $listado['data'] ?? [];
+        }
+
+        $usuario = Yii::$app->user->identity;
+        $persona = $usuario?->persona ?? null;
+        $nombreUsuario = trim(implode(' ', array_filter([
+            $persona->Nombres ?? '',
+            $persona->Paterno ?? '',
+            $persona->Materno ?? '',
+        ])));
+        if ($nombreUsuario === '') {
+            $nombreUsuario = (string)($usuario?->CodigoUsuario ?? '');
+        }
+
+        $mpdf = new Mpdf([
+            'format' => 'Letter-L',
+            'margin_top' => 32,
+            'margin_bottom' => 18,
+            'margin_left' => 8,
+            'margin_right' => 8,
+        ]);
+        $mpdf->SetMargins(8, 8, 32);
+        $mpdf->SetHTMLHeader('<div class="reporte-header"></div>');
+        $mpdf->SetHTMLFooter(
+            '<table class="reporte-footer" width="100%">'
+            . '<tr>'
+            . '<td width="40%">Usuario: ' . htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8')
+            . ' (' . htmlspecialchars((string)($usuario?->CodigoUsuario ?? ''), ENT_QUOTES, 'UTF-8') . ')</td>'
+            . '<td width="20%" align="center">Página {PAGENO} de {nbpg}</td>'
+            . '<td width="40%" align="right">Fecha y hora de impresión: '
+            . htmlspecialchars(date('d/m/Y H:i:s'), ENT_QUOTES, 'UTF-8') . '</td>'
+            . '</tr></table>'
+        );
+        $mpdf->WriteHTML($this->renderPartial('reporte', [
+            'registros' => $registros,
+        ]));
+        $mpdf->Output('Objetivos-Institucionales.pdf', 'I');
     }
 
     /**

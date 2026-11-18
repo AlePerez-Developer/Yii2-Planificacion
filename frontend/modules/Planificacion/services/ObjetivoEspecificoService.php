@@ -72,10 +72,14 @@ class ObjetivoEspecificoService
         return $this->procesar($modelo);
     }
 
-    public function cambiarEstado(string $id, string $idDa, string $idGestion): array
-    {
+    public function cambiarEstado(
+        string $id,
+        string $idDa,
+        string $idGestion,
+        ?string $codigoEstado = null
+    ): array {
         $modelo = $this->obtenerModeloValidado($id, $idDa, $idGestion);
-        $modelo->cambiarEstado();
+        $modelo->cambiarEstado($codigoEstado);
         $this->guardarModelo($modelo);
 
         return ['message' => Yii::$app->params['PROCESO_CORRECTO'], 'data' => $modelo->CodigoEstado];
